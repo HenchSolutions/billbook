@@ -190,6 +190,42 @@ export interface OtpRequestResponse {
   expiresIn: number;
 }
 
+/** POST /auth/password/request-otp */
+export interface PasswordResetOtpRequest {
+  email: string;
+  organizationCode: string;
+}
+
+/** Response is always success to avoid user enumeration */
+export interface PasswordResetOtpResponse {
+  success: boolean;
+  message?: string;
+}
+
+/** POST /auth/password/verify-otp */
+export interface PasswordResetVerifyRequest {
+  email: string;
+  organizationCode: string;
+  otp: string;
+}
+
+export interface PasswordResetVerifyResponse {
+  success: boolean;
+  resetToken: string;
+  /** TTL in milliseconds (e.g. 600000). Some envs may return seconds; handle defensively in UI. */
+  expiresIn: number;
+}
+
+/** POST /auth/password/reset */
+export interface PasswordResetRequest {
+  resetToken: string;
+  newPassword: string;
+}
+
+export interface PasswordResetResponse {
+  success: boolean;
+}
+
 export interface SessionUser {
   id: number;
   email: string;
