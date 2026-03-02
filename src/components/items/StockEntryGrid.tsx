@@ -125,26 +125,30 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="data-table-container">
-        <table className="w-full min-w-[840px] text-sm" role="table" aria-label="Add stock entries">
+      <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
+        <table
+          className="w-full min-w-[580px] text-sm sm:min-w-[700px] lg:min-w-[840px]"
+          role="table"
+          aria-label="Add stock entries"
+        >
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="min-w-[200px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="min-w-[140px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:min-w-[180px] sm:px-4">
                 Item *
               </th>
-              <th className="min-w-[200px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="min-w-[120px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:min-w-[200px]">
                 Vendor *
               </th>
-              <th className="min-w-[130px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="min-w-[100px] px-2 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:min-w-[130px] sm:px-3">
                 Purchase Date *
               </th>
-              <th className="min-w-[120px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="min-w-[72px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:min-w-[100px] sm:px-3">
                 Qty *
               </th>
-              <th className="min-w-[100px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="min-w-[88px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:min-w-[100px] sm:px-3">
                 Selling price *
               </th>
-              <th className="min-w-[100px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <th className="hidden min-w-[88px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:table-cell lg:min-w-[100px]">
                 Purchase price
               </th>
               <th className="w-12 min-w-[48px] px-2 py-3" aria-label="Remove row" />
@@ -153,7 +157,7 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
           <tbody className="divide-y divide-border">
             {rows.map((row) => (
               <tr key={row.id} className="transition-colors hover:bg-muted/20">
-                <td className="px-4 py-2.5 align-middle">
+                <td className="px-3 py-2.5 align-middle sm:px-4">
                   <ItemAutocomplete
                     value={row.item}
                     onValueChange={(item) => updateRow(row.id, { item })}
@@ -163,7 +167,7 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
                     placeholder="Type to search item..."
                   />
                 </td>
-                <td className="px-4 py-2.5 align-middle">
+                <td className="px-3 py-2.5 align-middle lg:px-4">
                   <VendorAutocomplete
                     value={
                       row.supplierId != null
@@ -254,7 +258,7 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
                     className={`${inputClass} text-right tabular-nums`}
                   />
                 </td>
-                <td className="px-3 py-2.5 text-right align-middle">
+                <td className="hidden px-2 py-2.5 text-right align-middle lg:table-cell lg:px-3">
                   <Input
                     type="number"
                     min="0"

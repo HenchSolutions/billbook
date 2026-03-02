@@ -19,8 +19,13 @@ const thRight = thClass + " text-right";
 const tdClass = "px-4 py-3 align-middle";
 const tdRight = tdClass + " text-right tabular-nums";
 
+function qtyDisplay(value: string | null): string {
+  return value != null && value !== "" ? formatQuantity(value) : "—";
+}
+
 export function StockReportTable({ rows, items, onAdjust }: StockReportTableProps) {
-  const isService = (itemId: number) => items?.find((i) => i.id === itemId)?.type === "SERVICE";
+  const isService = (row: StockListItem) =>
+    row.itemType === "SERVICE" || items?.find((i) => i.id === row.itemId)?.type === "SERVICE";
   if (rows.length === 0) {
     return (
       <Card className="border-dashed">
@@ -39,21 +44,21 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
 
   return (
     <Card>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm" role="table" aria-label="Stock by item">
+      <div className="-mx-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
+        <table className="w-full min-w-[320px] text-sm" role="table" aria-label="Stock by item">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className={cn(thClass, "text-left")}>Item</th>
-              <th className={cn(thClass, "text-left")}>Unit</th>
-              <th className={cn(thRight)}>Purchased</th>
-              <th className={cn(thRight)}>Adjusted</th>
-              <th className={cn(thRight)}>Sold</th>
-              <th className={cn(thRight)}>Current</th>
-              <th className={cn(thRight)}>Value (sell)</th>
-              <th className={cn(thRight)}>Value (cost)</th>
-              <th className={cn(thClass, "text-center")}>Status</th>
+              <th className={cn(thClass, "pl-3 text-left sm:pl-4")}>Item</th>
+              <th className={cn(thClass, "hidden text-left sm:table-cell")}>Unit</th>
+              <th className={cn(thRight, "hidden md:table-cell")}>Purchased</th>
+              <th className={cn(thRight, "hidden md:table-cell")}>Adjusted</th>
+              <th className={cn(thRight, "hidden md:table-cell")}>Sold</th>
+              <th className={cn(thRight, "min-w-[72px]")}>Current</th>
+              <th className={cn(thRight, "hidden sm:table-cell")}>Value (sell)</th>
+              <th className={cn(thRight, "hidden lg:table-cell")}>Value (cost)</th>
+              <th className={cn(thClass, "hidden text-center md:table-cell")}>Status</th>
               {onAdjust && (
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-2 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:px-4">
                   Actions
                 </th>
               )}
@@ -61,7 +66,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
           </thead>
           <tbody>
             {rows.map((row, i) => {
-              const service = isService(row.itemId);
+              const service = isService(row);
               return (
                 <tr
                   key={row.itemId}
@@ -70,7 +75,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                     i % 2 === 1 && "bg-muted/10",
                   )}
                 >
-                  <td className={cn(tdClass, "text-left")}>
+                  <td className={cn(tdClass, "pl-3 text-left sm:pl-4")}>
                     <Link
                       to={`/items/${row.itemId}`}
                       className="font-medium text-foreground hover:underline"
@@ -79,36 +84,39 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                       {row.itemName}
                     </Link>
                   </td>
-                  <td className={cn(tdClass, "text-left text-muted-foreground")}>
+                  <td
+                    className={cn(tdClass, "hidden text-left text-muted-foreground sm:table-cell")}
+                  >
                     {row.unit || "—"}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
-                    {formatQuantity(row.quantityPurchased)}
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
+                    {qtyDisplay(row.quantityPurchased)}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
-                    {formatQuantity(row.quantityAdjusted)}
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
+                    {qtyDisplay(row.quantityAdjusted)}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
-                    {formatQuantity(row.quantitySold)}
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
+                    {qtyDisplay(row.quantitySold)}
                   </td>
-                  <td className={cn(tdRight, "font-semibold")}>
-                    {formatQuantity(row.actualQuantity)}
+                  <td className={cn(tdRight, "font-semibold")}>{qtyDisplay(row.actualQuantity)}</td>
+                  <td className={cn(tdRight, "hidden text-muted-foreground sm:table-cell")}>
+                    {service && row.defaultRate != null
+                      ? formatCurrency(row.defaultRate)
+                      : row.stockValue != null
+                        ? formatCurrency(row.stockValue)
+                        : "—"}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
-                    {/* Value (sell): show when API returns stockValue; for SERVICE, backend should return total at selling rate */}
-                    {row.stockValue != null ? formatCurrency(row.stockValue) : "—"}
-                  </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
+                  <td className={cn(tdRight, "hidden text-muted-foreground lg:table-cell")}>
                     {service
                       ? "—"
                       : row.purchasedValue != null
                         ? formatCurrency(row.purchasedValue)
                         : "—"}
                   </td>
-                  <td className={cn(tdClass, "text-center")}>
+                  <td className={cn(tdClass, "hidden text-center md:table-cell")}>
                     {service ? (
                       <span className="text-xs text-muted-foreground">Service</span>
-                    ) : row.isLowStock ? (
+                    ) : row.isLowStock === true ? (
                       <Badge variant="destructive" className="text-xs font-medium">
                         Low stock
                       </Badge>
@@ -117,7 +125,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                     )}
                   </td>
                   {onAdjust && (
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-2 py-3 text-center sm:px-4">
                       {!service && (
                         <Button
                           variant="ghost"

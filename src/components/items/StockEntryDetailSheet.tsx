@@ -38,7 +38,9 @@ export function StockEntryDetailSheet({
     isPending,
     error,
   } = useStockEntry(open ? (entryId ?? undefined) : undefined);
-  const isService = entry ? items.find((i) => i.id === entry.itemId)?.type === "SERVICE" : false;
+  const isService = entry
+    ? entry.itemType === "SERVICE" || items.find((i) => i.id === entry.itemId)?.type === "SERVICE"
+    : false;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

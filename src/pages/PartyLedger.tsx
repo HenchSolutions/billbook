@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
   useParties,
@@ -35,8 +35,13 @@ type AdvanceFormData = z.infer<typeof advanceSchema>;
 
 export default function PartyLedger() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { partyId } = useParams<{ partyId: string }>();
   const numPartyId = partyId ? parseInt(partyId, 10) : undefined;
+
+  const fromVendors = (location.state as { from?: string } | null)?.from === "vendors";
+  const backTo = fromVendors ? "/vendors" : "/parties";
+  const backLabel = fromVendors ? "Back to Vendors" : "Back to Parties";
 
   const [tab, setTab] = useState("ledger");
   const [startDate, setStartDate] = useState("");
@@ -160,9 +165,9 @@ export default function PartyLedger() {
         title={`Party Ledger - ${party.name}`}
         description={`Accounting details for ${party.name}`}
         action={
-          <Button variant="ghost" onClick={() => navigate("/parties")} className="mr-4">
+          <Button variant="ghost" onClick={() => navigate(backTo)} className="mr-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Parties
+            {backLabel}
           </Button>
         }
       />

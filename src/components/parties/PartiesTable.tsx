@@ -24,8 +24,8 @@ export function PartiesTable({
   const isSimpleMode = useIsSimpleMode();
 
   return (
-    <div className="data-table-container">
-      <table className="w-full text-sm" role="table" aria-label="Parties list">
+    <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
+      <table className="w-full min-w-[320px] text-sm" role="table" aria-label="Parties list">
         <thead>
           <tr className="border-b bg-muted/30">
             <th

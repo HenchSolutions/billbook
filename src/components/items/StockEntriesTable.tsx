@@ -58,20 +58,20 @@ export function StockEntriesTable({
   return (
     <Card>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" role="table" aria-label="Stock by batch">
+        <table className="w-full min-w-[320px] text-sm" role="table" aria-label="Stock by batch">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className={cn(thClass, "min-w-[160px] text-left")}>Item</th>
+              <th className={cn(thClass, "min-w-[120px] px-3 text-left sm:px-4")}>Item</th>
               <th className={cn(thClass, "hidden min-w-[100px] text-left lg:table-cell")}>
                 Category
               </th>
-              <th className={cn(thClass, "min-w-[100px] text-left")}>Date</th>
-              <th className={cn(thRight, "min-w-[72px]")}>Purchased</th>
-              <th className={cn(thRight, "min-w-[72px]")}>Adjusted</th>
-              <th className={cn(thRight, "min-w-[72px]")}>Sold</th>
-              <th className={cn(thRight, "min-w-[80px]")}>Actual</th>
-              <th className={cn(thRight, "min-w-[88px]")}>Selling</th>
-              <th className={cn(thRight, "min-w-[88px]")}>Purchase</th>
+              <th className={cn(thClass, "min-w-[88px] text-left")}>Date</th>
+              <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Purchased</th>
+              <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Adjusted</th>
+              <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Sold</th>
+              <th className={cn(thRight, "min-w-[72px]")}>Actual</th>
+              <th className={cn(thRight, "min-w-[80px]")}>Selling</th>
+              <th className={cn(thRight, "hidden min-w-[88px] sm:table-cell")}>Purchase</th>
               <th className={cn(thClass, "hidden min-w-[120px] text-left md:table-cell")}>
                 Supplier
               </th>
@@ -85,7 +85,7 @@ export function StockEntriesTable({
               const itemName = getItemName(entry, items);
               const unit = entry.unit ?? null;
               const item = items.find((it) => it.id === entry.itemId);
-              const isService = item?.type === "SERVICE";
+              const isService = entry.itemType === "SERVICE" || item?.type === "SERVICE";
               const purchased =
                 entry.quantityPurchased ??
                 (typeof entry.quantity === "string" ? entry.quantity : String(entry.quantity));
@@ -105,7 +105,7 @@ export function StockEntriesTable({
                   onClick={() => onView(entry.id)}
                   onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onView(entry.id)}
                 >
-                  <td className={cn(tdClass, "text-left font-medium")}>
+                  <td className={cn(tdClass, "px-3 text-left font-medium sm:px-4")}>
                     {itemName}
                     {unit && (
                       <span className="ml-1.5 font-normal text-muted-foreground">({unit})</span>
@@ -119,13 +119,13 @@ export function StockEntriesTable({
                   <td className={cn(tdClass, "text-left text-muted-foreground")}>
                     {isService ? "—" : formatDate(entry.purchaseDate)}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
                     {isService ? "—" : formatQuantity(purchased)}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
                     {isService ? "—" : formatQuantity(adjusted)}
                   </td>
-                  <td className={cn(tdRight, "text-muted-foreground")}>
+                  <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
                     {isService ? "—" : formatQuantity(sold)}
                   </td>
                   <td className={cn(tdRight, "font-semibold")}>
@@ -136,7 +136,7 @@ export function StockEntriesTable({
                       ? formatCurrency(entry.sellingPrice)
                       : "—"}
                   </td>
-                  <td className={tdRight}>
+                  <td className={cn(tdRight, "hidden sm:table-cell")}>
                     {isService
                       ? "—"
                       : entry.purchasePrice != null && entry.purchasePrice !== ""
