@@ -94,12 +94,14 @@ export function useItems(params?: {
   search?: string;
   limit?: number;
   offset?: number;
+  includeInactive?: boolean;
 }) {
   const qs = new URLSearchParams();
   if (params?.categoryId != null) qs.set("categoryId", String(params.categoryId));
   if (params?.search) qs.set("search", params.search);
   if (params?.limit != null) qs.set("limit", String(params.limit));
   if (params?.offset != null) qs.set("offset", String(params.offset));
+  if (params?.includeInactive) qs.set("includeInactive", "true");
   const query = qs.toString();
 
   return useQuery({
@@ -145,6 +147,60 @@ export function useUpdateItem(id: number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["items"] });
       qc.invalidateQueries({ queryKey: ["items", "item", id] });
+    },
+  });
+}
+
+export function useSetItemActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { id: number; isActive: boolean }) => {
+      const res = await api.put<Item>(`${ITEMS_BASE}/${data.id}`, { isActive: data.isActive });
+      return res.data;
+    },
+    onMutate: async (vars) => {
+      await Promise.all([
+        qc.cancelQueries({ queryKey: ["items", "list"] }),
+        qc.cancelQueries({ queryKey: ["items", "item", vars.id] }),
+      ]);
+
+      // Snapshot current caches for rollback
+      const prevLists = qc.getQueriesData<ItemListResponse>({ queryKey: ["items", "list"] });
+      const prevItem = qc.getQueryData<ItemDetail>(["items", "item", vars.id]);
+
+      // Optimistically update list caches
+      qc.setQueriesData<ItemListResponse>({ queryKey: ["items", "list"] }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          items: (old.items ?? []).map((it) =>
+            it.id === vars.id ? { ...it, isActive: vars.isActive } : it,
+          ),
+        };
+      });
+
+      // Optimistically update detail cache (if present)
+      qc.setQueryData<ItemDetail>(["items", "item", vars.id], (old) =>
+        old ? { ...old, isActive: vars.isActive } : old,
+      );
+
+      return { prevLists, prevItem };
+    },
+    onError: (_err, vars, ctx) => {
+      // Roll back list caches
+      if (ctx?.prevLists) {
+        for (const [key, data] of ctx.prevLists) {
+          qc.setQueryData(key, data);
+        }
+      }
+      // Roll back detail cache
+      if (ctx?.prevItem) {
+        qc.setQueryData(["items", "item", vars.id], ctx.prevItem);
+      }
+    },
+    onSuccess: (_item, vars) => {
+      qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: ["items", "item", vars.id] });
     },
   });
 }

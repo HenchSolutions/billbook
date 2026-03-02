@@ -53,7 +53,7 @@ export default function Stock() {
   const { data: partiesData } = useParties();
   const createStockEntry = useCreateStockEntry();
 
-  const items = (itemsData?.items ?? []).filter((i) => !i.deletedAt);
+  const items = (itemsData?.items ?? []).filter((i) => i.isActive);
   const suppliers = (partiesData?.parties ?? []).filter(
     (p) => !p.deletedAt && p.type === "SUPPLIER",
   );

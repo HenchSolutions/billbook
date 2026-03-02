@@ -73,9 +73,10 @@ export interface Item {
   otherTaxName?: string | null;
   otherTaxRate?: string | null;
   minStockThreshold?: string | null;
+  /** true = active, false = inactive */
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
 }
 
 export interface ItemDetail extends Item {
@@ -98,6 +99,8 @@ export interface CreateItemRequest {
   otherTaxName?: string | null;
   otherTaxRate?: string | null;
   minStockThreshold?: string | null;
+  /** Optional on update/create; backend defaults to true */
+  isActive?: boolean;
 }
 
 export interface StockEntry {

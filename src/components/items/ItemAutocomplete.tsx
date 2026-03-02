@@ -53,7 +53,7 @@ export function ItemAutocomplete({
       items
         .filter((item) => {
           if (stockOnly && item.type !== "STOCK") return false;
-          if (item.deletedAt) return false;
+          if (!item.isActive) return false;
           const q = inputValue.trim().toLowerCase();
           if (!q) return true;
           return (

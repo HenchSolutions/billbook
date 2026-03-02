@@ -51,6 +51,7 @@ const schema = z
   .object({
     name: z.string().trim().min(1, "Name is required"),
     type: z.enum(["STOCK", "SERVICE"]),
+    isActive: z.boolean(),
     hsnCode,
     sacCode,
     unit: z.string().min(1, "Unit is required"),
@@ -143,6 +144,7 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
     resolver: zodResolver(schema),
     defaultValues: {
       type: "STOCK",
+      isActive: true,
       unit: "nos",
       minStockThreshold: "",
       isTaxable: true,
@@ -170,6 +172,7 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
         reset({
           name: item.name,
           type: item.type,
+          isActive: item.isActive ?? true,
           hsnCode: item.hsnCode ?? "",
           sacCode: item.sacCode ?? "",
           unit: item.unit ?? "nos",
@@ -199,6 +202,7 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
         reset({
           name: "",
           type: "STOCK",
+          isActive: true,
           unit: "nos",
           hsnCode: "",
           sacCode: "",
@@ -251,6 +255,7 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
       description: data.description || null,
       minStockThreshold:
         data.type === "STOCK" ? (data.minStockThreshold ?? "").trim() || null : null,
+      isActive: data.isActive,
       isTaxable: data.isTaxable,
       taxType: data.taxType,
       cgstRate: data.cgstRate || "0",
@@ -342,6 +347,24 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                         <SelectItem value="SERVICE">Service</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Active</p>
+                    <p className="text-xs text-muted-foreground">
+                      Inactive items are hidden by default from lists and selections.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {watch("isActive") ? "Active" : "Inactive"}
+                    </span>
+                    <Switch
+                      id="isActive"
+                      checked={watch("isActive")}
+                      onCheckedChange={(v) => setValue("isActive", !!v)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">

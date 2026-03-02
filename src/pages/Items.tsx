@@ -20,12 +20,14 @@ import { ItemDetailView } from "@/components/items/ItemDetailView";
 import { useItems, useCategories } from "@/hooks/use-items";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Item } from "@/types/item";
+import { Switch } from "@/components/ui/switch";
 
 export default function Items() {
   const { itemId } = useParams();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | undefined>();
+  const [includeInactive, setIncludeInactive] = useState(true);
   const debouncedSearch = useDebounce(search, 300);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<Item | undefined>();
@@ -38,12 +40,12 @@ export default function Items() {
     search: debouncedSearch || undefined,
     categoryId,
     limit: 500,
+    includeInactive,
   });
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
-  const items = itemsData?.items ?? [];
-  const filteredItems = items.filter((i) => !i.deletedAt);
+  const filteredItems = itemsData?.items ?? [];
 
   const openCreate = useCallback(() => {
     setEditItem(undefined);
@@ -80,6 +82,14 @@ export default function Items() {
           placeholder="Search items..."
           className="w-full sm:max-w-xs"
         />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-1.5">
+          <Switch
+            checked={includeInactive}
+            onCheckedChange={setIncludeInactive}
+            aria-label="Show inactive items"
+          />
+          <span className="text-sm text-muted-foreground">Show inactive</span>
+        </div>
         <Select
           value={categoryId != null ? String(categoryId) : "all"}
           onValueChange={(v) => setCategoryId(v === "all" ? undefined : Number(v))}
