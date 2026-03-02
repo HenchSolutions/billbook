@@ -55,7 +55,9 @@ export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void 
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Current Stock
                 </p>
-                <p className="mt-2 text-xl font-semibold tabular-nums">{item.currentStock ?? 0}</p>
+                <p className="mt-2 text-xl font-semibold tabular-nums">
+                  {formatQuantity(item.currentStock ?? 0)}
+                </p>
               </CardContent>
             </Card>
             <Card>

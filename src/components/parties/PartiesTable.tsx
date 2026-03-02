@@ -76,41 +76,43 @@ export function PartiesTable({
               <td className="px-3 py-3 text-right font-medium">
                 {formatCurrency(party.openingBalance ?? "0")}
               </td>
-              <div className="flex items-center justify-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(party)}
-                  title="Edit"
-                  aria-label={`Edit ${party.name}`}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                {!isSimpleMode && (
+              <td className="px-3 py-3">
+                <div className="flex items-center justify-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onLedger(party.id)}
-                    title="Account History"
-                    aria-label={`View account history for ${party.name}`}
+                    onClick={() => onEdit(party)}
+                    title="Edit"
+                    aria-label={`Edit ${party.name}`}
                   >
-                    <History className="h-3.5 w-3.5" />
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                )}
-                {isOwner && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => onDelete(party)}
-                    disabled={deletePending}
-                    title="Delete"
-                    aria-label={`Delete ${party.name}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                )}
-              </div>
+                  {!isSimpleMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onLedger(party.id)}
+                      title="Account History"
+                      aria-label={`View account history for ${party.name}`}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  {isOwner && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => onDelete(party)}
+                      disabled={deletePending}
+                      title="Delete"
+                      aria-label={`Delete ${party.name}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

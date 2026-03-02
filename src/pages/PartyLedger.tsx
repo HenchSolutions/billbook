@@ -33,13 +33,19 @@ const advanceSchema = z.object({
 
 type AdvanceFormData = z.infer<typeof advanceSchema>;
 
+/** State passed when navigating to ledger from Parties or Vendors list */
+interface PartyLedgerLocationState {
+  from?: "parties" | "vendors";
+}
+
 export default function PartyLedger() {
   const navigate = useNavigate();
   const location = useLocation();
   const { partyId } = useParams<{ partyId: string }>();
   const numPartyId = partyId ? parseInt(partyId, 10) : undefined;
 
-  const fromVendors = (location.state as { from?: string } | null)?.from === "vendors";
+  const state = location.state as PartyLedgerLocationState | null;
+  const fromVendors = state?.from === "vendors";
   const backTo = fromVendors ? "/vendors" : "/parties";
   const backLabel = fromVendors ? "Back to Vendors" : "Back to Parties";
 
@@ -172,7 +178,10 @@ export default function PartyLedger() {
         }
       />
 
-      <ErrorBanner error={ledgerQuery.error} fallbackMessage="Failed to load ledger" />
+      <ErrorBanner
+        error={ledgerQuery.error ?? balanceQuery.error}
+        fallbackMessage="Failed to load ledger"
+      />
 
       <BalanceSummaryCards summary={balanceSummary} />
 

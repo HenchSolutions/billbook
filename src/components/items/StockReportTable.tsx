@@ -90,15 +90,17 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                     {row.unit || "—"}
                   </td>
                   <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
-                    {qtyDisplay(row.quantityPurchased)}
+                    {service ? "—" : qtyDisplay(row.quantityPurchased)}
                   </td>
                   <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
-                    {qtyDisplay(row.quantityAdjusted)}
+                    {service ? "—" : qtyDisplay(row.quantityAdjusted)}
                   </td>
                   <td className={cn(tdRight, "hidden text-muted-foreground md:table-cell")}>
-                    {qtyDisplay(row.quantitySold)}
+                    {service ? "—" : qtyDisplay(row.quantitySold)}
                   </td>
-                  <td className={cn(tdRight, "font-semibold")}>{qtyDisplay(row.actualQuantity)}</td>
+                  <td className={cn(tdRight, "font-semibold")}>
+                    {service ? "—" : qtyDisplay(row.actualQuantity)}
+                  </td>
                   <td className={cn(tdRight, "hidden text-muted-foreground sm:table-cell")}>
                     {service && row.defaultRate != null
                       ? formatCurrency(row.defaultRate)

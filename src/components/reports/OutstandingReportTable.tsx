@@ -12,14 +12,28 @@ export function OutstandingReportTable({ rows }: { rows: OutstandingRow[] }) {
       <table className="w-full min-w-[320px] text-sm">
         <thead>
           <tr className="border-b bg-muted/30">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-6">Party</th>
-            <th className="hidden px-3 py-3 text-right font-medium text-muted-foreground md:table-cell">
+            <th
+              scope="col"
+              className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-6"
+            >
+              Party
+            </th>
+            <th
+              scope="col"
+              className="hidden px-3 py-3 text-right font-medium text-muted-foreground md:table-cell"
+            >
               Invoiced
             </th>
-            <th className="hidden px-3 py-3 text-right font-medium text-muted-foreground md:table-cell">
+            <th
+              scope="col"
+              className="hidden px-3 py-3 text-right font-medium text-muted-foreground md:table-cell"
+            >
               Paid
             </th>
-            <th className="px-4 py-3 text-right font-medium text-muted-foreground sm:px-6">
+            <th
+              scope="col"
+              className="px-4 py-3 text-right font-medium text-muted-foreground sm:px-6"
+            >
               Outstanding
             </th>
           </tr>

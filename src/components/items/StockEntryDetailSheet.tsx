@@ -204,7 +204,7 @@ export function StockEntryDetailSheet({
                 </CardContent>
               </Card>
 
-              {(entry.supplierId != null || supplierName) && (
+              {!isService && (entry.supplierId != null || supplierName) && (
                 <Card>
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2 border-b border-border/60 pb-3">

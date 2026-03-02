@@ -103,7 +103,13 @@ export function StockEntriesTable({
                   role="button"
                   tabIndex={0}
                   onClick={() => onView(entry.id)}
-                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onView(entry.id)}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onView(entry.id);
+                    }
+                  }}
                 >
                   <td className={cn(tdClass, "px-3 text-left font-medium sm:px-4")}>
                     {itemName}

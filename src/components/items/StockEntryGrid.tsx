@@ -66,10 +66,16 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
 
   const isRowComplete = useCallback((r: StockEntryRow) => {
     if (!r.item || !r.quantity.trim()) return false;
+    const q = parseFloat(r.quantity.trim());
+    if (!Number.isFinite(q) || q <= 0) return false;
+    const selling = parseFloat(String(r.sellingPrice ?? "").trim());
+    if (!Number.isFinite(selling) || selling < 0) return false;
     if (r.item.type === "SERVICE") {
-      return !!r.sellingPrice;
+      return true;
     }
-    return !!(r.purchaseDate && r.supplierId != null && r.sellingPrice);
+    if (!r.purchaseDate || r.supplierId == null) return false;
+    const purchase = parseFloat(String(r.purchasePrice ?? "").trim());
+    return Number.isFinite(purchase) && purchase >= 0;
   }, []);
 
   const hasRowAnyData = useCallback((r: StockEntryRow) => {
@@ -92,21 +98,33 @@ export function StockEntryGrid({ items, suppliers, onSubmit, isSubmitting }: Sto
       .filter((r) => isRowComplete(r))
       .map((r) => {
         const isService = r.item!.type === "SERVICE";
-        return isService
-          ? {
-              itemId: r.item!.id,
-              quantity: String(Number(r.quantity.trim())),
-              sellingPrice: String(r.sellingPrice || "0"),
-              supplierId: r.supplierId ?? undefined,
-            }
-          : {
-              itemId: r.item!.id,
-              purchaseDate: r.purchaseDate,
-              quantity: String(Number(r.quantity.trim())),
-              sellingPrice: String(r.sellingPrice || "0"),
-              purchasePrice: String(r.purchasePrice || "0"),
-              supplierId: r.supplierId ?? undefined,
-            };
+        const qty = parseFloat(r.quantity.trim());
+        const selling = parseFloat(String(r.sellingPrice ?? "").trim());
+        if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(selling) || selling < 0) {
+          throw new Error("Invalid quantity or selling price");
+        }
+        const quantityStr = String(qty);
+        const sellingStr = String(selling);
+        if (isService) {
+          return {
+            itemId: r.item!.id,
+            quantity: quantityStr,
+            sellingPrice: sellingStr,
+            supplierId: r.supplierId ?? undefined,
+          };
+        }
+        const purchase = parseFloat(String(r.purchasePrice ?? "").trim());
+        if (!Number.isFinite(purchase) || purchase < 0) {
+          throw new Error("Invalid purchase price");
+        }
+        return {
+          itemId: r.item!.id,
+          purchaseDate: r.purchaseDate,
+          quantity: quantityStr,
+          sellingPrice: sellingStr,
+          purchasePrice: String(purchase),
+          supplierId: r.supplierId ?? undefined,
+        };
       });
     if (payloads.length === 0) return;
     try {
