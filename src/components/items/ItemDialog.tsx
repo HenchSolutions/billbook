@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,22 +43,75 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 import { capitaliseWords } from "@/lib/utils";
 import type { Item, Category, CreateItemRequest, Unit } from "@/types/item";
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  type: z.enum(["STOCK", "SERVICE"]),
-  hsnCode,
-  sacCode,
-  unit: optionalString,
-  description: optionalString,
-  minStockThreshold: optionalString,
-  isTaxable: z.boolean(),
-  taxType: z.enum(["GST", "OTHER"]),
-  cgstRate: percentString,
-  sgstRate: percentString,
-  igstRate: percentString,
-  otherTaxName,
-  otherTaxRate: percentString,
-});
+function defaultUnitForType(type: "STOCK" | "SERVICE"): string {
+  return type === "SERVICE" ? "hr" : "nos";
+}
+
+const schema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required"),
+    type: z.enum(["STOCK", "SERVICE"]),
+    hsnCode,
+    sacCode,
+    unit: z.string().min(1, "Unit is required"),
+    description: optionalString,
+    minStockThreshold: optionalString,
+    isTaxable: z.boolean(),
+    taxType: z.enum(["GST", "OTHER"]),
+    cgstRate: percentString,
+    sgstRate: percentString,
+    igstRate: percentString,
+    otherTaxName,
+    otherTaxRate: percentString,
+  })
+  .superRefine((data, ctx) => {
+    // For STOCK items, min stock threshold is required
+    if (data.type === "STOCK" && !(data.minStockThreshold ?? "").trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["minStockThreshold"],
+        message: "Min stock alert is required for stock items",
+      });
+    }
+
+    // If taxable is true, validate tax fields
+    if (data.isTaxable) {
+      if (!data.taxType) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["taxType"],
+          message: "Tax type is required when item is taxable",
+        });
+      }
+
+      if (data.taxType === "GST") {
+        // For GST, at least one rate must be provided
+        if (!data.cgstRate && !data.sgstRate && !data.igstRate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["cgstRate"],
+            message: "At least one GST rate is required",
+          });
+        }
+      } else if (data.taxType === "OTHER") {
+        // For OTHER tax, name and rate are required
+        if (!data.otherTaxName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["otherTaxName"],
+            message: "Tax name is required",
+          });
+        }
+        if (!data.otherTaxRate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["otherTaxRate"],
+            message: "Tax rate is required",
+          });
+        }
+      }
+    }
+  });
 
 type FormData = z.infer<typeof schema>;
 
@@ -85,7 +138,6 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
     reset,
     setValue,
     watch,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -108,80 +160,64 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
   const units = useMemo(() => (Array.isArray(unitsData) ? unitsData : []), [unitsData]);
   const createUnitMutation = useCreateUnit();
   const [category, setCategory] = useState<Category | null>(null);
+  const [showCategoryError, setShowCategoryError] = useState(false);
 
-  // Only reset form when dialog opens or edited item changes — not when categories refetch
-  // (e.g. after adding a category), so user's filled data and selected category are preserved.
-  // Intentionally omit `categories` from deps to avoid resetting the form on category refetch.
+  // Reset form when dialog opens or edited item changes. Omit `categories` from deps so that
+  // adding a category (which refetches categories) does not reset the form or clear selection.
   useEffect(() => {
-    if (!open) return;
-    if (item) {
-      reset({
-        name: item.name,
-        type: item.type,
-        hsnCode: item.hsnCode ?? "",
-        sacCode: item.sacCode ?? "",
-        unit: item.unit ?? "nos",
-        description: item.description ?? "",
-        minStockThreshold: item.minStockThreshold ?? "",
-        isTaxable: item.isTaxable ?? true,
-        taxType: (item.taxType ?? "GST") as "GST" | "OTHER",
-        cgstRate: item.cgstRate ?? "",
-        sgstRate: item.sgstRate ?? "",
-        igstRate: item.igstRate ?? "",
-        otherTaxName: item.otherTaxName ?? "",
-        otherTaxRate: item.otherTaxRate ?? "",
-      });
-      const cat =
-        item.categoryId && categories.length
-          ? (categories.find((c) => c.id === item.categoryId) ?? null)
-          : item.categoryName
-            ? { id: item.categoryId ?? 0, name: item.categoryName, businessId: item.businessId }
-            : typeof item.category === "string"
-              ? { id: 0, name: item.category, businessId: item.businessId }
-              : item.category && typeof item.category === "object"
-                ? { id: item.category.id, name: item.category.name, businessId: item.businessId }
-                : null;
-      setCategory(cat);
-    } else {
-      reset({
-        name: "",
-        type: "STOCK",
-        unit: "nos",
-        hsnCode: "",
-        sacCode: "",
-        description: "",
-        minStockThreshold: "",
-        isTaxable: true,
-        taxType: "GST",
-        cgstRate: "",
-        sgstRate: "",
-        igstRate: "",
-        otherTaxName: "",
-        otherTaxRate: "",
-      });
-      setCategory(null);
+    if (open) {
+      if (item) {
+        reset({
+          name: item.name,
+          type: item.type,
+          hsnCode: item.hsnCode ?? "",
+          sacCode: item.sacCode ?? "",
+          unit: item.unit ?? "nos",
+          description: item.description ?? "",
+          minStockThreshold: item.minStockThreshold ?? "",
+          isTaxable: item.isTaxable ?? true,
+          taxType: (item.taxType ?? "GST") as "GST" | "OTHER",
+          cgstRate: item.cgstRate ?? "",
+          sgstRate: item.sgstRate ?? "",
+          igstRate: item.igstRate ?? "",
+          otherTaxName: item.otherTaxName ?? "",
+          otherTaxRate: item.otherTaxRate ?? "",
+        });
+        const cat =
+          item.categoryId && categories.length
+            ? (categories.find((c) => c.id === item.categoryId) ?? null)
+            : item.categoryName
+              ? { id: item.categoryId ?? 0, name: item.categoryName, businessId: item.businessId }
+              : typeof item.category === "string"
+                ? { id: 0, name: item.category, businessId: item.businessId }
+                : item.category && typeof item.category === "object"
+                  ? { id: item.category.id, name: item.category.name, businessId: item.businessId }
+                  : null;
+        setCategory(cat);
+        setShowCategoryError(false);
+      } else {
+        reset({
+          name: "",
+          type: "STOCK",
+          unit: "nos",
+          hsnCode: "",
+          sacCode: "",
+          description: "",
+          minStockThreshold: "",
+          isTaxable: true,
+          taxType: "GST",
+          cgstRate: "",
+          sgstRate: "",
+          igstRate: "",
+          otherTaxName: "",
+          otherTaxRate: "",
+        });
+        setCategory(null);
+        setShowCategoryError(false);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- categories omitted so refetch after add doesn't reset form
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- omit categories so adding a category does not reset form
   }, [open, item, reset]);
-
-  // When type changes, if current unit is not in the new type's list, set default unit for that type.
-  const defaultUnitForType = useCallback(
-    (t: "STOCK" | "SERVICE"): string => {
-      const preferred = t === "STOCK" ? "nos" : "hr";
-      const found = units.find((u) => u.value === preferred);
-      return found ? found.value : (units[0]?.value ?? preferred);
-    },
-    [units],
-  );
-
-  useEffect(() => {
-    if (!open || units.length === 0) return;
-    const currentUnit = getValues("unit") || "nos";
-    const inList = units.some((u) => u.value === currentUnit);
-    if (!inList) {
-      setValue("unit", defaultUnitForType(productType));
-    }
-  }, [open, productType, units, getValues, setValue, defaultUnitForType]);
 
   const handleCreateCategory = async (name: string): Promise<Category | null> => {
     try {
@@ -196,16 +232,25 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
   };
 
   const onSubmit = async (data: FormData) => {
+    // Validate category is selected
+    if (!category || !category.id || category.id <= 0) {
+      setShowCategoryError(true);
+      showErrorToast(null, "Category is required");
+      return;
+    }
+
+    setShowCategoryError(false);
+
     const payload: CreateItemRequest = {
       name: capitaliseWords(data.name),
       type: data.type,
       hsnCode: data.hsnCode || null,
       sacCode: data.sacCode || null,
-      categoryId: category?.id && category.id > 0 ? category.id : null,
-      unit: data.unit || "nos",
+      categoryId: category.id,
+      unit: data.unit,
       description: data.description || null,
       minStockThreshold:
-        data.type === "STOCK" && data.minStockThreshold ? data.minStockThreshold : null,
+        data.type === "STOCK" ? (data.minStockThreshold ?? "").trim() || null : null,
       isTaxable: data.isTaxable,
       taxType: data.taxType,
       cgstRate: data.cgstRate || "0",
@@ -248,13 +293,19 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const onInvalidSubmit = () => {
+    if (!category?.id || category.id <= 0) {
+      setShowCategoryError(true);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-2xl">
         <DialogHeader className="shrink-0 border-b px-6 py-4">
           <DialogTitle>{isEdit ? "Edit Item" : "New Item"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-col">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex min-h-0 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
             <div className="space-y-6">
               {/* Details */}
@@ -263,7 +314,11 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Name *</Label>
-                    <Input {...register("name")} placeholder="Item or service name" />
+                    <Input
+                      className="placeholder:opacity-80"
+                      {...register("name")}
+                      placeholder="Item or service name"
+                    />
                     {errors.name && (
                       <p className="text-xs text-destructive">{errors.name.message}</p>
                     )}
@@ -290,43 +345,68 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label>Category *</Label>
                   <CategoryCombobox
                     value={category}
-                    onValueChange={setCategory}
+                    onValueChange={(nextCategory) => {
+                      setCategory(nextCategory);
+                      if (nextCategory?.id && nextCategory.id > 0) {
+                        setShowCategoryError(false);
+                      }
+                    }}
                     categories={categories}
                     categoriesLoading={categoriesLoading}
                     onCreateCategory={handleCreateCategory}
                     placeholder="Search or add category..."
                   />
+                  {showCategoryError && (!category?.id || category.id <= 0) ? (
+                    <p className="text-xs text-destructive">Category is required</p>
+                  ) : null}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Unit</Label>
+                    <Label>Unit *</Label>
                     <UnitCombobox
-                      value={watch("unit") || "nos"}
-                      onValueChange={(v) => setValue("unit", v)}
+                      type={productType}
+                      value={watch("unit") || defaultUnitForType(productType)}
+                      onValueChange={(v) => setValue("unit", v ?? defaultUnitForType(productType))}
                       units={units}
                       unitsLoading={unitsLoading}
-                      type={productType}
-                      onCreateUnit={handleCreateUnit}
-                      placeholder="Search or add unit..."
+                      onCreateUnit={(value, label) => handleCreateUnit(value, label, productType)}
+                      placeholder="Select unit"
                     />
+                    {errors.unit && (
+                      <p className="text-xs text-destructive">{errors.unit.message}</p>
+                    )}
                   </div>
                   {productType === "STOCK" && (
                     <div className="space-y-2">
-                      <Label>Min stock alert</Label>
-                      <Input {...register("minStockThreshold")} placeholder="e.g. 10" />
+                      <Label>Min stock alert *</Label>
+                      <Input
+                        className="placeholder:opacity-80"
+                        {...register("minStockThreshold")}
+                        placeholder="e.g. 10"
+                      />
+                      {errors.minStockThreshold && (
+                        <p className="text-xs text-destructive">
+                          {errors.minStockThreshold.message}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">
-                        You’ll be notified when quantity drops below this value. Leave empty for no
-                        alerts.
+                        You'll be notified when quantity drops below this value. Required for stock
+                        items.
                       </p>
                     </div>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label>Description</Label>
-                  <Textarea rows={2} {...register("description")} placeholder="Optional" />
+                  <Textarea
+                    className="placeholder:opacity-80"
+                    rows={2}
+                    {...register("description")}
+                    placeholder="Optional"
+                  />
                 </div>
               </section>
 
@@ -336,11 +416,21 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>HSN Code</Label>
-                    <Input maxLength={8} {...register("hsnCode")} placeholder="e.g. 998314" />
+                    <Input
+                      className="placeholder:opacity-80"
+                      maxLength={8}
+                      {...register("hsnCode")}
+                      placeholder="e.g. 998314"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>SAC Code</Label>
-                    <Input maxLength={6} {...register("sacCode")} placeholder="e.g. 998313" />
+                    <Input
+                      className="placeholder:opacity-80"
+                      maxLength={6}
+                      {...register("sacCode")}
+                      placeholder="e.g. 998313"
+                    />
                   </div>
                 </div>
               </section>
@@ -361,7 +451,7 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                 {watch("isTaxable") && (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Tax type</Label>
+                      <Label>Tax type *</Label>
                       <Select
                         value={watch("taxType")}
                         onValueChange={(v) => setValue("taxType", v as "GST" | "OTHER")}
@@ -374,26 +464,41 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                           <SelectItem value="OTHER">Other</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors.taxType && (
+                        <p className="text-xs text-destructive">{errors.taxType.message}</p>
+                      )}
                     </div>
                     {watch("taxType") === "GST" ? (
                       <div className="grid grid-cols-3 gap-3">
                         <div className="space-y-2">
-                          <Label className="text-xs">CGST %</Label>
-                          <Input placeholder="9" {...register("cgstRate")} />
+                          <Label className="text-xs">CGST % *</Label>
+                          <Input
+                            placeholder="e.g. 9"
+                            className="placeholder:opacity-80"
+                            {...register("cgstRate")}
+                          />
                           {errors.cgstRate && (
                             <p className="text-xs text-destructive">{errors.cgstRate.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">SGST %</Label>
-                          <Input placeholder="9" {...register("sgstRate")} />
+                          <Label className="text-xs">SGST % *</Label>
+                          <Input
+                            placeholder="e.g. 9"
+                            className="placeholder:opacity-80"
+                            {...register("sgstRate")}
+                          />
                           {errors.sgstRate && (
                             <p className="text-xs text-destructive">{errors.sgstRate.message}</p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">IGST %</Label>
-                          <Input placeholder="18" {...register("igstRate")} />
+                          <Label className="text-xs">IGST % *</Label>
+                          <Input
+                            placeholder="e.g. 18"
+                            className="placeholder:opacity-80"
+                            {...register("igstRate")}
+                          />
                           {errors.igstRate && (
                             <p className="text-xs text-destructive">{errors.igstRate.message}</p>
                           )}
@@ -402,8 +507,9 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                     ) : (
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2">
-                          <Label className="text-xs">Other tax name</Label>
+                          <Label className="text-xs">Other tax name *</Label>
                           <Input
+                            className="placeholder:opacity-80"
                             maxLength={100}
                             placeholder="e.g. VAT"
                             {...register("otherTaxName")}
@@ -415,8 +521,12 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">Rate %</Label>
-                          <Input placeholder="0" {...register("otherTaxRate")} />
+                          <Label className="text-xs">Rate % *</Label>
+                          <Input
+                            placeholder="0"
+                            className="placeholder:opacity-80"
+                            {...register("otherTaxRate")}
+                          />
                           {errors.otherTaxRate && (
                             <p className="text-xs text-destructive">
                               {errors.otherTaxRate.message}
