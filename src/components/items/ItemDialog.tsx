@@ -53,7 +53,7 @@ const schema = z
   })
   .superRefine((data, ctx) => {
     // For STOCK items, min stock threshold is required
-    if (data.type === "STOCK" && !data.minStockThreshold) {
+    if (data.type === "STOCK" && !(data.minStockThreshold ?? "").trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["minStockThreshold"],
@@ -243,7 +243,8 @@ export default function ItemDialog({ open, onOpenChange, item }: ItemDialogProps
       categoryId: category.id,
       unit: data.unit,
       description: data.description || null,
-      minStockThreshold: data.minStockThreshold || null,
+      minStockThreshold:
+        data.type === "STOCK" ? (data.minStockThreshold ?? "").trim() || null : null,
       isTaxable: data.isTaxable,
       taxType: data.taxType,
       cgstRate: data.cgstRate || "0",
