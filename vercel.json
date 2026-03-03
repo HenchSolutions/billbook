@@ -1,8 +1,4 @@
 {
-  "rewrites": [
-    {
-      "destination": "/index.html",
-      "source": "/(.*)"
-    }
-  ]
+  "framework": "nextjs",
+  "outputDirectory": ".next"
 }

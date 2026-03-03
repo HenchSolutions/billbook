@@ -1,11 +1,19 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  VITE_API_BASE_URL: z.string().url("VITE_API_BASE_URL must be a valid URL"),
+  NEXT_PUBLIC_API_BASE_URL: z.string().url("NEXT_PUBLIC_API_BASE_URL must be a valid URL"),
 });
 
+type Env = z.infer<typeof envSchema>;
+
+let cachedEnv: Env | null = null;
+
 function validateEnv() {
-  const parsed = envSchema.safeParse(import.meta.env);
+  if (cachedEnv) return cachedEnv;
+
+  const parsed = envSchema.safeParse({
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  });
 
   if (!parsed.success) {
     const errors = parsed.error.flatten().fieldErrors;
@@ -16,7 +24,16 @@ function validateEnv() {
     throw new Error(`❌ Invalid environment variables:\n${message}`);
   }
 
-  return parsed.data;
+  cachedEnv = parsed.data;
+  return cachedEnv;
 }
 
-export const env = validateEnv();
+export const env = new Proxy({} as Env, {
+  get(_target, prop) {
+    return validateEnv()[prop as keyof Env];
+  },
+});
+
+export function getEnv(): Env {
+  return validateEnv();
+}
