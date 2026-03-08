@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { differenceInMonths } from "date-fns";
+import { parseISODateString, toISODateString } from "@/lib/date";
 
 interface UseDateRangeOptions {
   defaultStartDate?: string;
@@ -21,10 +22,8 @@ interface UseDateRangeReturn {
 }
 
 export function useDateRange({
-  defaultStartDate = toISODateStringLocal(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-  ),
-  defaultEndDate = toISODateStringLocal(new Date()),
+  defaultStartDate = toISODateString(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+  defaultEndDate = toISODateString(new Date()),
   maxMonths = 12,
 }: UseDateRangeOptions = {}): UseDateRangeReturn {
   const [startDate, setStartDate] = useState(defaultStartDate);
@@ -32,8 +31,8 @@ export function useDateRange({
 
   const error = useMemo(() => {
     if (!startDate || !endDate) return null;
-    const start = parseISODateStringLocal(startDate);
-    const end = parseISODateStringLocal(endDate);
+    const start = parseISODateString(startDate);
+    const end = parseISODateString(endDate);
     if (!start || !end) return "Invalid date range.";
     if (start > end) return "Start date must be before end date.";
     if (differenceInMonths(end, start) > maxMonths)
@@ -53,19 +52,4 @@ export function useDateRange({
     validStartDate: isValid ? startDate : "",
     validEndDate: isValid ? endDate : "",
   };
-}
-
-function parseISODateStringLocal(value: string): Date | null {
-  if (!value) return null;
-  const [y, m, d] = value.split("-").map((p) => parseInt(p, 10));
-  if (!y || !m || !d) return null;
-  const dt = new Date(y, m - 1, d);
-  return Number.isNaN(dt.getTime()) ? null : dt;
-}
-
-function toISODateStringLocal(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
