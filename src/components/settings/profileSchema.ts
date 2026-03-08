@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { gstinString, panString } from "@/lib/validation-schemas";
 
 const extraDetailSchema = z.object({
   key: z.string().trim().min(1, "Key is required"),
@@ -18,8 +19,8 @@ export const profileSchema = z.object({
   city: z.string().trim().max(100).optional().or(z.literal("")),
   state: z.string().trim().max(100).optional().or(z.literal("")),
   pincode: z.string().trim().max(10).optional().or(z.literal("")),
-  gstin: z.string().trim().length(15, "GSTIN must be 15 characters").optional().or(z.literal("")),
-  pan: z.string().trim().length(10, "PAN must be 10 characters").optional().or(z.literal("")),
+  gstin: gstinString,
+  pan: panString,
   financialYearStart: z.coerce.number().min(1).max(12).default(4),
   extraDetails: z.array(extraDetailSchema).optional().default([]),
   taxType: z.enum(["GST", "NON_GST"]).default("GST"),
