@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Layers } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 type ListViewMode = "item" | "stock";
 
 export default function Stock() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [listViewMode, setListViewMode] = useState<ListViewMode>("item");
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
@@ -46,7 +48,7 @@ export default function Stock() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data: itemsData, isPending: itemsPending, error: itemsError } = useItems({ limit: 500 });
+  const { data: itemsData, isPending: itemsPending, error: itemsError } = useItems({ limit: 100 });
   // Unfiltered fetch for overview cards so they always show overall totals
   const { data: stockDataForCards, isPending: stockCardsPending } = useStockList({ limit: 1 });
   const {
@@ -65,6 +67,17 @@ export default function Stock() {
   const updateStockEntry = useUpdateStockEntry();
 
   const items = (itemsData?.items ?? []).filter((i) => i.isActive);
+  const prefillItemId = Number(searchParams.get("addItemId") ?? "");
+  const prefillItem =
+    Number.isFinite(prefillItemId) && prefillItemId > 0
+      ? (items.find((item) => item.id === prefillItemId) ?? null)
+      : null;
+
+  useEffect(() => {
+    if (prefillItemId > 0) {
+      setActiveTab("add");
+    }
+  }, [prefillItemId]);
   const stockEntries = useMemo(
     (): StockEntry[] => stockEntriesData?.entries ?? [],
     [stockEntriesData],
@@ -345,6 +358,7 @@ export default function Stock() {
             <StockEntryGrid
               items={items}
               suppliers={activeSuppliers}
+              prefillItem={prefillItem}
               onSubmit={handleStockSubmit}
               onEditSessionEntry={handleEditStockEntry}
               isSubmitting={createStockEntry.isPending}

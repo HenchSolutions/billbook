@@ -1,4 +1,3 @@
-import { Filter } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,12 +7,14 @@ import {
 } from "@/components/ui/select";
 import SearchInput from "@/components/SearchInput";
 import DateRangePicker from "@/components/DateRangePicker";
+import type { Party } from "@/types/party";
 
 interface InvoiceFiltersProps {
   search: string;
   onSearchChange: (value: string) => void;
-  status: string;
-  onStatusChange: (value: string) => void;
+  parties?: Party[];
+  partyId?: number;
+  onPartyChange?: (partyId?: number) => void;
   startDate: string;
   endDate: string;
   onStartDateChange: (date: string) => void;
@@ -23,15 +24,16 @@ interface InvoiceFiltersProps {
 export function InvoiceFilters({
   search,
   onSearchChange,
-  status,
-  onStatusChange,
+  parties = [],
+  partyId,
+  onPartyChange,
   startDate,
   endDate,
   onStartDateChange,
   onEndDateChange,
 }: InvoiceFiltersProps) {
   return (
-    <div className="mb-4 grid grid-cols-[minmax(0,1fr)_minmax(0,160px)] items-end gap-3 lg:grid-cols-[minmax(0,1fr)_160px_auto]">
+    <div className="mb-4 grid grid-cols-[minmax(0,1fr)_minmax(0,200px)] items-end gap-3 lg:grid-cols-[minmax(0,1fr)_200px_auto]">
       <SearchInput
         value={search}
         onChange={onSearchChange}
@@ -39,16 +41,21 @@ export function InvoiceFilters({
         className="col-span-1 w-full"
       />
       <div className="col-span-1 w-full">
-        <Select value={status} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[160px]">
-            <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-            <SelectValue placeholder="Status" />
+        <Select
+          value={partyId != null ? String(partyId) : "ALL"}
+          onValueChange={(v) => onPartyChange?.(v === "ALL" ? undefined : Number(v))}
+          disabled={!onPartyChange}
+        >
+          <SelectTrigger className="w-full lg:w-[200px]">
+            <SelectValue placeholder="Party" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All</SelectItem>
-            <SelectItem value="DRAFT">Draft</SelectItem>
-            <SelectItem value="FINAL">Final</SelectItem>
-            <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            <SelectItem value="ALL">All Parties</SelectItem>
+            {parties.map((party) => (
+              <SelectItem key={party.id} value={String(party.id)}>
+                {party.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

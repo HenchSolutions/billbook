@@ -1,4 +1,18 @@
 export type ItemType = "STOCK" | "SERVICE";
+export type ApiItemType = ItemType | "STOCK_ITEM" | "SERVICE_ITEM";
+
+export function normalizeItemType(type: string | null | undefined): ItemType {
+  if (type === "SERVICE" || type === "SERVICE_ITEM") return "SERVICE";
+  return "STOCK";
+}
+
+export function isServiceType(type: string | null | undefined): boolean {
+  return normalizeItemType(type) === "SERVICE";
+}
+
+export function isStockType(type: string | null | undefined): boolean {
+  return normalizeItemType(type) === "STOCK";
+}
 
 export function getItemCategoryDisplay(item: Item): string {
   if (item.categoryName) return item.categoryName;
@@ -117,7 +131,15 @@ export interface StockEntry {
   supplierIsActive?: boolean | null;
   createdAt: string;
   updatedAt: string;
-  item?: { id: number; name: string };
+  item?:
+    | {
+        id: number;
+        name: string;
+      }
+    | (Partial<Item> & {
+        id: number;
+        name: string;
+      });
   /** From GET /items/stock-entries list only */
   itemName?: string;
   unit?: string;

@@ -1,0 +1,92 @@
+import type { StockEntry } from "@/types/item";
+import type { InvoiceLineDraft } from "@/types/invoice-create";
+
+export function createLine(): InvoiceLineDraft {
+  return {
+    id: crypto.randomUUID(),
+    item: null,
+    stockEntryId: null,
+    quantity: "1",
+    unitPrice: "",
+    discountPercent: "",
+    cgstRate: "0",
+    sgstRate: "0",
+    igstRate: "0",
+  };
+}
+
+export function toNum(v: string | null | undefined): number {
+  const n = Number(v ?? "0");
+  return Number.isFinite(n) ? n : 0;
+}
+
+export function formatQty(v: number): string {
+  return Number.isInteger(v) ? String(v) : String(Number(v.toFixed(3)));
+}
+
+export function getEntryTotalQty(entry: StockEntry): number {
+  const raw = entry.actualQuantity ?? entry.quantity;
+  return Math.max(0, toNum(typeof raw === "string" ? raw : String(raw)));
+}
+
+export function getEntryDateIso(entry: StockEntry): string {
+  if (entry.purchaseDate) return entry.purchaseDate.slice(0, 10);
+  return (entry.createdAt || "").slice(0, 10);
+}
+
+export function getLineAmounts(line: InvoiceLineDraft) {
+  const qty = Math.max(0, toNum(line.quantity));
+  const unitPrice = Math.max(0, toNum(line.unitPrice));
+  const discPercent = Math.min(100, Math.max(0, toNum(line.discountPercent)));
+  const taxRate = Math.max(0, toNum(line.cgstRate) + toNum(line.sgstRate) + toNum(line.igstRate));
+
+  const gross = qty * unitPrice;
+  const lineDiscount = (gross * discPercent) / 100;
+  const taxable = Math.max(0, gross - lineDiscount);
+  const tax = (taxable * taxRate) / 100;
+  const total = taxable + tax;
+
+  return { gross, lineDiscount, taxable, tax, total };
+}
+
+function getLineEntry(line: InvoiceLineDraft, entries: StockEntry[]): StockEntry | undefined {
+  if (line.stockEntryId == null) return undefined;
+  return entries.find((entry) => entry.id === line.stockEntryId);
+}
+
+export function getMaxAllowedDiscountPercent(
+  line: InvoiceLineDraft,
+  entries: StockEntry[],
+): number {
+  const entry = getLineEntry(line, entries);
+  if (!entry) return 100;
+
+  const sellingPrice = Math.max(0, toNum(line.unitPrice || entry.sellingPrice));
+  const costPrice = Math.max(0, toNum(entry.purchasePrice ?? "0"));
+
+  if (sellingPrice <= 0) return 0;
+  if (costPrice <= 0) return 100;
+  if (costPrice >= sellingPrice) return 0;
+
+  return ((sellingPrice - costPrice) / sellingPrice) * 100;
+}
+
+export function getCostFloorViolation(
+  line: InvoiceLineDraft,
+  entries: StockEntry[],
+): { netUnitPrice: number; costPrice: number } | null {
+  const entry = getLineEntry(line, entries);
+  if (!entry) return null;
+
+  const sellingPrice = Math.max(0, toNum(line.unitPrice || entry.sellingPrice));
+  const costPrice = Math.max(0, toNum(entry.purchasePrice ?? "0"));
+  if (sellingPrice <= 0 || costPrice <= 0) return null;
+
+  const discountPercent = Math.min(100, Math.max(0, toNum(line.discountPercent)));
+  const netUnitPrice = sellingPrice * (1 - discountPercent / 100);
+
+  if (netUnitPrice < costPrice) {
+    return { netUnitPrice, costPrice };
+  }
+  return null;
+}

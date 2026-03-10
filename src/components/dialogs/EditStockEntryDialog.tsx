@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { isStockType } from "@/types/item";
 import type { ItemType, StockEntry, UpdateStockEntryRequest } from "@/types/item";
 import type { Party } from "@/types/party";
 
@@ -71,7 +72,7 @@ export default function EditStockEntryDialog({
     setError(null);
   }, [open, entry]);
 
-  const isStockItem = entry?.itemType === "STOCK";
+  const isStockItem = isStockType(entry?.itemType);
 
   const supplierValue = useMemo(() => {
     if (supplierId == null) return NONE_SUPPLIER;

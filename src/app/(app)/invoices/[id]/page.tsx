@@ -27,9 +27,10 @@ import {
   useMarkInvoiceReminder,
   useInvoiceCommunications,
 } from "@/hooks/use-invoices";
+import { useStockEntriesByIds } from "@/hooks/use-items";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useResourceAuditLogs } from "@/hooks/use-audit-logs";
-import { formatDate } from "@/lib/utils";
+import { getInvoiceBalanceDue, INVOICE_TYPE_OPTIONS } from "@/lib/invoice";
 import { showSuccessToast, showErrorToast } from "@/lib/toast-helpers";
 import { ApiClientError } from "@/api/error";
 
@@ -45,6 +46,8 @@ export default function InvoiceDetail() {
   const [cancelConfirm, setCancelConfirm] = useState(false);
 
   const { data: invoice, isPending, error } = useInvoice(invoiceId);
+  const stockEntryIds = invoice?.items.map((item) => item.stockEntryId) ?? [];
+  const stockEntriesQuery = useStockEntriesByIds(stockEntryIds);
   const { data: pdfData } = useInvoicePdf(invoice?.status === "FINAL" ? invoiceId : undefined);
   const { data: auditData } = useResourceAuditLogs("INVOICE", invoiceId);
   const communicationsQuery = useInvoiceCommunications(invoiceId);
@@ -117,25 +120,25 @@ export default function InvoiceDetail() {
     return <InvoiceDetailSkeleton />;
   }
 
-  // Calculate balance due
-  const balanceDue = invoice
-    ? (invoice.dueAmount ??
-      String(
-        parseFloat((invoice.totalAmount ?? "0").replace(/,/g, "")) -
-          parseFloat((invoice.paidAmount ?? "0").replace(/,/g, "")),
-      ))
-    : "0";
-  const balanceDueValue = parseFloat(balanceDue.replace(/,/g, "")) || 0;
+  // Calculate balance due with fallback for inconsistent dueAmount from API.
+  const balanceDueValue = invoice ? getInvoiceBalanceDue(invoice) : 0;
+  const balanceDue = String(balanceDueValue);
+  const typeMeta = invoice
+    ? INVOICE_TYPE_OPTIONS.find((o) => o.type === invoice.invoiceType)
+    : null;
+  const purchaseDateByStockEntryId = Object.fromEntries(
+    Object.values(stockEntriesQuery.data ?? {}).map((entry) => [entry.id, entry.purchaseDate]),
+  );
 
   return (
     <div className="page-container animate-fade-in">
       <div className="mb-4">
         <Link
-          href="/invoices"
+          href={typeMeta?.path ?? "/invoices"}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Invoices
+          Back to {typeMeta?.label ?? "Invoices"}
         </Link>
       </div>
 
@@ -147,7 +150,11 @@ export default function InvoiceDetail() {
         <>
           <PageHeader
             title={`Invoice ${invoice.invoiceNumber}`}
-            description={`Created ${formatDate(invoice.createdAt)}`}
+            description={
+              invoice.partyName
+                ? `${typeMeta?.label ?? invoice.invoiceType} · ${invoice.partyName}`
+                : (typeMeta?.label ?? invoice.invoiceType)
+            }
             action={
               <InvoiceHeaderActions
                 invoice={invoice}
@@ -173,7 +180,10 @@ export default function InvoiceDetail() {
 
           <InvoiceSummaryCards invoice={invoice} balanceDue={balanceDue} />
           <InvoiceDetailsCards invoice={invoice} />
-          <InvoiceLineItemsTable items={invoice.items} />
+          <InvoiceLineItemsTable
+            items={invoice.items}
+            purchaseDateByStockEntryId={purchaseDateByStockEntryId}
+          />
           <InvoicePaymentsTable payments={invoice.payments} />
           {auditData?.logs && <InvoiceAuditHistory logs={auditData.logs} />}
 
@@ -186,7 +196,7 @@ export default function InvoiceDetail() {
               open={paymentOpen}
               onOpenChange={setPaymentOpen}
               invoiceId={invoiceId}
-              balanceDue={invoice.dueAmount ?? balanceDue}
+              balanceDue={balanceDue}
             />
           )}
 

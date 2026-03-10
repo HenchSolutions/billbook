@@ -1,4 +1,5 @@
 export type InvoiceStatus = "DRAFT" | "FINAL" | "CANCELLED";
+export type InvoiceType = "SALE_INVOICE" | "SALE_RETURN" | "PURCHASE_INVOICE" | "PURCHASE_RETURN";
 
 export type PaymentMethod = "CASH" | "CHEQUE" | "UPI" | "BANK_TRANSFER" | "CARD";
 
@@ -8,12 +9,14 @@ export interface Invoice {
   invoiceNumber: string;
   financialYear: string | null;
   status: InvoiceStatus;
+  invoiceType: InvoiceType;
   partyId: number;
   invoiceDate: string;
   dueDate: string | null;
   subTotal: string;
   discountAmount: string | null;
   discountPercent: string | null;
+  roundOffAmount?: string | null;
   cgstAmount: string | null;
   sgstAmount: string | null;
   igstAmount: string | null;
@@ -35,6 +38,10 @@ export interface Invoice {
 export interface InvoiceItem {
   id: number;
   itemId: number;
+  stockEntryId: number;
+  itemName?: string;
+  hsnCode?: string | null;
+  sacCode?: string | null;
   quantity: string;
   unitPrice: string;
   discountPercent: string | null;
@@ -47,7 +54,6 @@ export interface InvoiceItem {
   sgstAmount: string | null;
   igstAmount: string | null;
   createdAt: string;
-  itemName?: string;
 }
 
 export interface InvoiceDetail extends Invoice {
@@ -95,29 +101,33 @@ export interface InvoiceCommunicationsSummary {
 }
 
 export interface InvoiceItemInput {
-  itemId: number;
+  stockEntryId: number;
   quantity: string;
-  unitPrice: string;
+  unitPrice?: string;
   discountPercent?: string;
 }
 
 export interface CreateInvoiceRequest {
   partyId: number;
+  invoiceType: InvoiceType;
   invoiceDate: string;
   dueDate?: string;
   notes?: string;
   discountAmount?: string;
   discountPercent?: string;
+  roundOffAmount?: string;
   items: InvoiceItemInput[];
 }
 
 export interface UpdateInvoiceRequest {
   partyId?: number;
+  invoiceType?: InvoiceType;
   invoiceDate?: string;
   dueDate?: string;
   notes?: string;
   discountAmount?: string;
   discountPercent?: string;
+  roundOffAmount?: string;
 }
 
 export interface Payment {
