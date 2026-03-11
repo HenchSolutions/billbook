@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SlidersHorizontal, Package } from "lucide-react";
 import type { StockListItem } from "@/types/item";
 import type { Item } from "@/types/item";
+import { isServiceType } from "@/types/item";
 import { formatQuantity, formatCurrency, cn } from "@/lib/utils";
 
 interface StockReportTableProps {
@@ -32,7 +33,7 @@ function adjustedQtyDisplay(value: string | null): string {
 
 export function StockReportTable({ rows, items, onAdjust }: StockReportTableProps) {
   const isService = (row: StockListItem) =>
-    row.itemType === "SERVICE" || items?.find((i) => i.id === row.itemId)?.type === "SERVICE";
+    isServiceType(row.itemType) || isServiceType(items?.find((i) => i.id === row.itemId)?.type);
   if (rows.length === 0) {
     return (
       <Card className="border-dashed">

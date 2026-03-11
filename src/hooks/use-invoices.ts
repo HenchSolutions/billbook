@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, generateIdempotencyKey } from "@/api";
+import { invalidateQueryKeys } from "@/lib/query";
 import { buildQueryString } from "@/lib/utils";
 import type {
   Invoice,
@@ -7,6 +8,7 @@ import type {
   InvoiceListResponse,
   CreateInvoiceRequest,
   UpdateInvoiceRequest,
+  InvoiceType,
   RecordPaymentRequest,
   InvoicePdfResponse,
   FinalizeInvoiceResponse,
@@ -21,20 +23,37 @@ export function useInvoices(params: {
   page?: number;
   pageSize?: number;
   status?: string;
+  invoiceType?: InvoiceType;
+  partyId?: number;
   startDate?: string;
   endDate?: string;
 }) {
-  const { page = 1, pageSize = 20, status, startDate, endDate } = params;
+  const { page = 1, pageSize = 20, status, invoiceType, partyId, startDate, endDate } = params;
+  const hasDateRange = Boolean(startDate && endDate);
+  const queryStartDate = hasDateRange ? startDate : undefined;
+  const queryEndDate = hasDateRange ? endDate : undefined;
+
   const qs = buildQueryString({
     page,
     pageSize,
     status: status !== "ALL" ? status : undefined,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    invoiceType,
+    partyId,
+    startDate: queryStartDate,
+    endDate: queryEndDate,
   });
 
   return useQuery({
-    queryKey: ["invoices", page, pageSize, status, startDate, endDate],
+    queryKey: [
+      "invoices",
+      page,
+      pageSize,
+      status,
+      invoiceType,
+      partyId,
+      queryStartDate,
+      queryEndDate,
+    ],
     queryFn: async () => {
       const res = await api.get<InvoiceListResponse>(`/invoices?${qs}`);
       return res.data;
@@ -60,7 +79,7 @@ export function useCreateInvoice() {
       const res = await api.post<Invoice>("/invoices", data, generateIdempotencyKey());
       return res.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
+    onSuccess: () => invalidateQueryKeys(qc, [["invoices"]]),
   });
 }
 
@@ -72,8 +91,7 @@ export function useUpdateInvoice(id: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["invoices"] });
-      qc.invalidateQueries({ queryKey: ["invoice", id] });
+      invalidateQueryKeys(qc, [["invoices"], ["invoice", id]]);
     },
   });
 }
@@ -90,8 +108,7 @@ export function useFinalizeInvoice() {
       return res.data;
     },
     onSuccess: (_, id) => {
-      qc.invalidateQueries({ queryKey: ["invoices"] });
-      qc.invalidateQueries({ queryKey: ["invoice", id] });
+      invalidateQueryKeys(qc, [["invoices"], ["invoice", id]]);
     },
   });
 }
@@ -102,7 +119,7 @@ export function useCancelInvoice() {
     mutationFn: async (id: number) => {
       await api.delete(`/invoices/${id}`);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
+    onSuccess: () => invalidateQueryKeys(qc, [["invoices"]]),
   });
 }
 
@@ -114,8 +131,7 @@ export function useRecordPayment(invoiceId: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-      qc.invalidateQueries({ queryKey: ["invoices"] });
+      invalidateQueryKeys(qc, [["invoice", invoiceId], ["invoices"]]);
     },
   });
 }
@@ -198,9 +214,11 @@ export function useMarkInvoiceSent(invoiceId: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-      qc.invalidateQueries({ queryKey: ["invoices"] });
-      qc.invalidateQueries({ queryKey: ["invoice-communications", invoiceId] });
+      invalidateQueryKeys(qc, [
+        ["invoice", invoiceId],
+        ["invoices"],
+        ["invoice-communications", invoiceId],
+      ]);
     },
   });
 }
@@ -217,9 +235,11 @@ export function useMarkInvoiceReminder(invoiceId: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-      qc.invalidateQueries({ queryKey: ["invoices"] });
-      qc.invalidateQueries({ queryKey: ["invoice-communications", invoiceId] });
+      invalidateQueryKeys(qc, [
+        ["invoice", invoiceId],
+        ["invoices"],
+        ["invoice-communications", invoiceId],
+      ]);
     },
   });
 }

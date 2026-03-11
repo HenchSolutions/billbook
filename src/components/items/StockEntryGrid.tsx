@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Plus, Trash2, Loader2, CalendarIcon, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import ItemDialog from "@/components/dialogs/ItemDialog";
 import { cn } from "@/lib/utils";
 import { parseISODateString, toISODateString, formatISODateDisplay } from "@/lib/date";
 import { showErrorToast } from "@/lib/toast-helpers";
+import { isServiceType } from "@/types/item";
 import type { Item } from "@/types/item";
 import type { CreateStockEntryRequest, StockEntry, UpdateStockEntryRequest } from "@/types/item";
 import type { Party } from "@/types/party";
@@ -47,6 +48,7 @@ const defaultRow = (): StockEntryRow => ({
 interface StockEntryGridProps {
   items: Item[];
   suppliers: Party[];
+  prefillItem?: Item | null;
   onSubmit: (entries: CreateStockEntryRequest[]) => Promise<StockEntry[]>;
   onEditSessionEntry?: (
     entryId: number,
@@ -78,6 +80,7 @@ function formatNumeric(value: string): string {
 export function StockEntryGrid({
   items,
   suppliers,
+  prefillItem,
   onSubmit,
   onEditSessionEntry,
   isSubmitting,
@@ -107,7 +110,7 @@ export function StockEntryGrid({
     if (!r.item) return false;
     const selling = parseFloat(String(r.sellingPrice ?? "").trim());
     if (!Number.isFinite(selling) || selling < 0) return false;
-    if (r.item.type === "SERVICE") {
+    if (isServiceType(r.item.type)) {
       return true;
     }
 
@@ -130,7 +133,7 @@ export function StockEntryGrid({
     }
 
     try {
-      const isService = currentRow.item!.type === "SERVICE";
+      const isService = isServiceType(currentRow.item!.type);
       const qty = isService ? 1 : parseFloat(currentRow.quantity.trim());
       const selling = parseFloat(String(currentRow.sellingPrice ?? "").trim());
       if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(selling) || selling < 0) {
@@ -214,8 +217,9 @@ export function StockEntryGrid({
             ...row,
             supplierId: data.supplierId ?? null,
             vendorName: supplierName,
-            purchaseDate:
-              row.itemType === "SERVICE" ? "—" : (data.purchaseDate ?? row.purchaseDate),
+            purchaseDate: isServiceType(row.itemType)
+              ? "—"
+              : (data.purchaseDate ?? row.purchaseDate),
             quantity:
               updated?.quantity != null
                 ? typeof updated.quantity === "string"
@@ -223,10 +227,9 @@ export function StockEntryGrid({
                   : String(updated.quantity)
                 : row.quantity,
             sellingPrice: updated?.sellingPrice ?? data.sellingPrice,
-            purchasePrice:
-              row.itemType === "SERVICE"
-                ? "—"
-                : (updated?.purchasePrice ?? data.purchasePrice ?? row.purchasePrice),
+            purchasePrice: isServiceType(row.itemType)
+              ? "—"
+              : (updated?.purchasePrice ?? data.purchasePrice ?? row.purchasePrice),
           };
         }),
       );
@@ -235,6 +238,22 @@ export function StockEntryGrid({
   );
 
   const inputClass = "h-9 text-sm";
+
+  useEffect(() => {
+    if (!prefillItem) return;
+    setRows((prev) => {
+      const first = prev[0];
+      if (!first || first.item) return prev;
+      return [
+        {
+          ...first,
+          item: prefillItem,
+          quantity: isServiceType(prefillItem.type) ? "1" : first.quantity,
+        },
+        ...prev.slice(1),
+      ];
+    });
+  }, [prefillItem]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -276,7 +295,7 @@ export function StockEntryGrid({
                     onValueChange={(item) =>
                       updateRow(row.id, {
                         item,
-                        quantity: item?.type === "SERVICE" ? "1" : row.quantity,
+                        quantity: isServiceType(item?.type) ? "1" : row.quantity,
                       })
                     }
                     items={items}
@@ -313,7 +332,7 @@ export function StockEntryGrid({
                   />
                 </td>
                 <td className="px-3 py-2.5 align-middle">
-                  {row.item?.type === "SERVICE" ? (
+                  {isServiceType(row.item?.type) ? (
                     <div className="flex h-9 items-center justify-center rounded-md border border-dashed text-muted-foreground">
                       —
                     </div>
@@ -357,8 +376,8 @@ export function StockEntryGrid({
                       min="0"
                       step="any"
                       placeholder="0"
-                      value={row.item?.type === "SERVICE" ? "1" : row.quantity}
-                      disabled={row.item?.type === "SERVICE"}
+                      value={isServiceType(row.item?.type) ? "1" : row.quantity}
+                      disabled={isServiceType(row.item?.type)}
                       onChange={(e) => updateRow(row.id, { quantity: e.target.value })}
                       className={`${inputClass} w-20 shrink-0 text-right tabular-nums`}
                     />
@@ -391,7 +410,7 @@ export function StockEntryGrid({
                   />
                 </td>
                 <td className="hidden px-2 py-2.5 text-right align-middle lg:table-cell lg:px-3">
-                  {row.item?.type === "SERVICE" ? (
+                  {isServiceType(row.item?.type) ? (
                     <div className="flex h-9 items-center justify-center rounded-md border border-dashed text-muted-foreground">
                       —
                     </div>
@@ -494,7 +513,7 @@ export function StockEntryGrid({
                     </td>
                     <td className="px-3 py-2.5 lg:px-4">{row.vendorName}</td>
                     <td className="px-3 py-2.5">
-                      {row.itemType === "SERVICE"
+                      {isServiceType(row.itemType)
                         ? "—"
                         : formatISODateDisplay(row.purchaseDate) || "—"}
                     </td>
@@ -600,7 +619,7 @@ export function StockEntryGrid({
           if (rowId) {
             updateRow(rowId, {
               item,
-              quantity: item.type === "SERVICE" ? "1" : "",
+              quantity: isServiceType(item.type) ? "1" : "",
             });
           }
           pendingItemCreatedRef.current?.(item);

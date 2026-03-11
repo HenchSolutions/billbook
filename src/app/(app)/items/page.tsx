@@ -42,7 +42,7 @@ export default function Items() {
   } = useItems({
     search: debouncedSearch || undefined,
     categoryId,
-    limit: 500,
+    limit: 100,
     includeInactive,
   });
   const { data: categoriesData } = useCategories();

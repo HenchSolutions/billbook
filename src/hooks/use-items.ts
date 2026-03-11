@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api";
+import { invalidateQueryKeys } from "@/lib/query";
+import { normalizeItemType } from "@/types/item";
 import type {
   Category,
   Item,
@@ -18,6 +20,20 @@ import type {
 } from "@/types/item";
 
 const ITEMS_BASE = "/items";
+
+function normalizeItem(item: Item): Item {
+  return {
+    ...item,
+    type: normalizeItemType(item.type),
+  };
+}
+
+function normalizeStockEntry(entry: StockEntry): StockEntry {
+  return {
+    ...entry,
+    itemType: entry.itemType ? normalizeItemType(entry.itemType) : entry.itemType,
+  };
+}
 
 export function useCategories() {
   return useQuery({
@@ -47,7 +63,7 @@ export function useCreateCategory() {
       const res = await api.post<Category>(`${ITEMS_BASE}/categories`, data);
       return res.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["items", "categories"] }),
+    onSuccess: () => invalidateQueryKeys(qc, [["items", "categories"]]),
   });
 }
 
@@ -86,7 +102,7 @@ export function useCreateUnit() {
           : (body as Unit);
       return unit;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["items", "units"] }),
+    onSuccess: () => invalidateQueryKeys(qc, [["items", "units"]]),
   });
 }
 
@@ -109,7 +125,10 @@ export function useItems(params?: {
     queryKey: ["items", "list", params],
     queryFn: async () => {
       const res = await api.get<ItemListResponse>(`${ITEMS_BASE}${query ? `?${query}` : ""}`);
-      return res.data;
+      return {
+        ...res.data,
+        items: (res.data.items ?? []).map(normalizeItem),
+      };
     },
   });
 }
@@ -119,7 +138,7 @@ export function useItem(id: number | undefined) {
     queryKey: ["items", "item", id],
     queryFn: async () => {
       const res = await api.get<ItemDetail>(`${ITEMS_BASE}/${id}`);
-      return res.data;
+      return normalizeItem(res.data) as ItemDetail;
     },
     enabled: !!id,
   });
@@ -130,10 +149,10 @@ export function useCreateItem() {
   return useMutation({
     mutationFn: async (data: CreateItemRequest) => {
       const res = await api.post<Item>(ITEMS_BASE, data);
-      return res.data;
+      return normalizeItem(res.data);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["items"] });
+      invalidateQueryKeys(qc, [["items"]]);
     },
   });
 }
@@ -143,11 +162,10 @@ export function useUpdateItem(id: number) {
   return useMutation({
     mutationFn: async (data: Partial<CreateItemRequest>) => {
       const res = await api.put<Item>(`${ITEMS_BASE}/${id}`, data);
-      return res.data;
+      return normalizeItem(res.data);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["items"] });
-      qc.invalidateQueries({ queryKey: ["items", "item", id] });
+      invalidateQueryKeys(qc, [["items"], ["items", "item", id]]);
     },
   });
 }
@@ -157,7 +175,7 @@ export function useSetItemActive() {
   return useMutation({
     mutationFn: async (data: { id: number; isActive: boolean }) => {
       const res = await api.put<Item>(`${ITEMS_BASE}/${data.id}`, { isActive: data.isActive });
-      return res.data;
+      return normalizeItem(res.data);
     },
     onMutate: async (vars) => {
       await Promise.all([
@@ -200,8 +218,7 @@ export function useSetItemActive() {
       }
     },
     onSuccess: (_item, vars) => {
-      qc.invalidateQueries({ queryKey: ["items"] });
-      qc.invalidateQueries({ queryKey: ["items", "item", vars.id] });
+      invalidateQueryKeys(qc, [["items"], ["items", "item", vars.id]]);
     },
   });
 }
@@ -231,7 +248,10 @@ export function useStockEntries(params?: {
     queryKey: ["items", "stock-entries", itemId ?? params],
     queryFn: async () => {
       const res = await api.get<StockEntryListResponse>(url);
-      return res.data;
+      return {
+        ...res.data,
+        entries: (res.data.entries ?? []).map(normalizeStockEntry),
+      };
     },
   });
 }
@@ -241,10 +261,35 @@ export function useStockEntry(entryId: number | undefined) {
     queryKey: ["items", "stock-entry", entryId],
     queryFn: async () => {
       const res = await api.get<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`);
-      return res.data;
+      return normalizeStockEntry(res.data);
     },
     enabled: !!entryId,
   });
+}
+
+export function useStockEntriesByIds(entryIds: number[]) {
+  const uniqueEntryIds = Array.from(
+    new Set(entryIds.filter((entryId) => Number.isFinite(entryId))),
+  );
+
+  return useQuery({
+    queryKey: ["items", "stock-entry-map", uniqueEntryIds],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        uniqueEntryIds.map((entryId) => getStockEntryById(entryId)),
+      );
+      return entries.reduce<Record<number, StockEntry>>((accumulator, entry) => {
+        accumulator[entry.id] = entry;
+        return accumulator;
+      }, {});
+    },
+    enabled: uniqueEntryIds.length > 0,
+  });
+}
+
+export async function getStockEntryById(entryId: number): Promise<StockEntry> {
+  const res = await api.get<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`);
+  return normalizeStockEntry(res.data);
 }
 
 export function useCreateStockEntry() {
@@ -252,12 +297,10 @@ export function useCreateStockEntry() {
   return useMutation({
     mutationFn: async (data: CreateStockEntryRequest) => {
       const res = await api.post<StockEntry>(`${ITEMS_BASE}/stock-entries`, data);
-      return res.data;
+      return normalizeStockEntry(res.data);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["items", "stock-entries"] });
-      qc.invalidateQueries({ queryKey: ["items", "stock"] });
-      qc.invalidateQueries({ queryKey: ["items"] });
+      invalidateQueryKeys(qc, [["items", "stock-entries"], ["items", "stock"], ["items"]]);
     },
   });
 }
@@ -267,12 +310,10 @@ export function useUpdateStockEntry() {
   return useMutation({
     mutationFn: async ({ entryId, data }: { entryId: number; data: UpdateStockEntryRequest }) => {
       const res = await api.put<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`, data);
-      return res.data;
+      return normalizeStockEntry(res.data);
     },
     onSuccess: (_entry) => {
-      qc.invalidateQueries({ queryKey: ["items", "stock-entries"] });
-      qc.invalidateQueries({ queryKey: ["items", "stock"] });
-      qc.invalidateQueries({ queryKey: ["items"] });
+      invalidateQueryKeys(qc, [["items", "stock-entries"], ["items", "stock"], ["items"]]);
     },
   });
 }
@@ -296,7 +337,13 @@ export function useStockList(params?: {
       const res = await api.get<StockListResponse>(
         `${ITEMS_BASE}/stock${query ? `?${query}` : ""}`,
       );
-      return res.data;
+      return {
+        ...res.data,
+        stock: (res.data.stock ?? []).map((row) => ({
+          ...row,
+          itemType: normalizeItemType(row.itemType),
+        })),
+      };
     },
   });
 }
@@ -308,11 +355,13 @@ export function useAdjustStock(itemId: number) {
       await api.post(`${ITEMS_BASE}/${itemId}/adjust-stock`, data);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["items"] });
-      qc.invalidateQueries({ queryKey: ["items", "item", itemId] });
-      qc.invalidateQueries({ queryKey: ["items", "stock"] });
-      qc.invalidateQueries({ queryKey: ["items", "stock-entries"] });
-      qc.invalidateQueries({ queryKey: ["items", "ledger", itemId] });
+      invalidateQueryKeys(qc, [
+        ["items"],
+        ["items", "item", itemId],
+        ["items", "stock"],
+        ["items", "stock-entries"],
+        ["items", "ledger", itemId],
+      ]);
     },
   });
 }

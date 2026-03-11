@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, generateIdempotencyKey } from "@/api";
+import { invalidateQueryKeys } from "@/lib/query";
 import { buildQueryString } from "@/lib/utils";
 import type {
   Party,
@@ -47,7 +48,7 @@ export function useCreateParty() {
       const res = await api.post<Party>("/parties", data);
       return res.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["parties"] }),
+    onSuccess: () => invalidateQueryKeys(qc, [["parties"]]),
   });
 }
 
@@ -59,8 +60,7 @@ export function useUpdateParty(id: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["parties"] });
-      qc.invalidateQueries({ queryKey: ["party", id] });
+      invalidateQueryKeys(qc, [["parties"], ["party", id]]);
     },
   });
 }
@@ -121,9 +121,7 @@ export function useRecordPartyAdvancePayment(partyId: number) {
       return res.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["party-ledger", partyId] });
-      qc.invalidateQueries({ queryKey: ["party-balance", partyId] });
-      qc.invalidateQueries({ queryKey: ["parties"] });
+      invalidateQueryKeys(qc, [["party-ledger", partyId], ["party-balance", partyId], ["parties"]]);
     },
   });
 }

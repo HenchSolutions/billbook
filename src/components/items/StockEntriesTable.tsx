@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatQuantity, cn } from "@/lib/utils";
 import type { StockEntry } from "@/types/item";
 import type { Item } from "@/types/item";
+import { isServiceType } from "@/types/item";
 
 interface StockEntriesTableProps {
   entries: StockEntry[];
@@ -104,7 +105,7 @@ export function StockEntriesTable({
               const itemName = getItemName(entry, items);
               const unit = entry.unit ?? null;
               const item = items.find((it) => it.id === entry.itemId);
-              const isService = entry.itemType === "SERVICE" || item?.type === "SERVICE";
+              const isService = isServiceType(entry.itemType) || isServiceType(item?.type);
               const purchased =
                 entry.quantityPurchased ??
                 (typeof entry.quantity === "string" ? entry.quantity : String(entry.quantity));

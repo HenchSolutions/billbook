@@ -5,6 +5,7 @@ import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import {
   LayoutDashboard,
   FileText,
+  ChevronDown,
   Package,
   Users,
   Truck,
@@ -85,6 +86,13 @@ interface AppSidebarProps {
   onNavigate?: () => void;
 }
 
+const invoiceNavItems = [
+  { label: "Sales Invoice", path: "/invoices/sales" },
+  { label: "Purchase Invoice", path: "/invoices/purchases" },
+  { label: "Sales Return", path: "/invoices/sales-return" },
+  { label: "Purchase Return", path: "/invoices/purchase-return" },
+];
+
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -110,6 +118,23 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
     if (path === "/dashboard") return safePathname === "/dashboard";
     return safePathname.startsWith(path);
   };
+
+  const isInvoiceTypeActive = (path: string) => {
+    if (safePathname.startsWith(path)) return true;
+    if (safePathname !== "/invoices/new") return false;
+
+    const type = searchParams.get("type");
+    const typeToPath: Record<string, string> = {
+      SALE_INVOICE: "/invoices/sales",
+      PURCHASE_INVOICE: "/invoices/purchases",
+      SALE_RETURN: "/invoices/sales-return",
+      PURCHASE_RETURN: "/invoices/purchase-return",
+    };
+
+    return typeToPath[type ?? ""] === path;
+  };
+
+  const invoicesExpanded = safePathname.startsWith("/invoices");
 
   const getVisibleSections = (): NavSection[] => {
     return navSections
@@ -160,23 +185,66 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
             )}
             {/* Section Items */}
             <div className="space-y-0.5">
-              {section.items.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={onNavigate}
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                    isActive(item.path)
-                      ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
-                </Link>
-              ))}
+              {section.items.map((item) =>
+                item.path === "/invoices" && !collapsed ? (
+                  <div key={item.path} className="space-y-0.5">
+                    <Link
+                      href={item.path}
+                      onClick={onNavigate}
+                      className={cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive(item.path)
+                          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      <span>Invoices</span>
+                      <ChevronDown
+                        className={cn(
+                          "ml-auto h-3.5 w-3.5 transition-transform",
+                          invoicesExpanded && "rotate-180",
+                        )}
+                      />
+                    </Link>
+                    {invoicesExpanded && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {invoiceNavItems.map((invoiceItem) => (
+                          <Link
+                            key={invoiceItem.path}
+                            href={invoiceItem.path}
+                            onClick={onNavigate}
+                            className={cn(
+                              "block rounded-md px-3 py-2 text-sm transition-colors",
+                              isInvoiceTypeActive(invoiceItem.path)
+                                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                            )}
+                          >
+                            {invoiceItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    onClick={onNavigate}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      isActive(item.path)
+                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                    )}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>{item.label}</span>}
+                  </Link>
+                ),
+              )}
             </div>
           </div>
         ))}

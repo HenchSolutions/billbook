@@ -11,6 +11,7 @@ import { formatCurrency, formatQuantity, formatDate, cn } from "@/lib/utils";
 import { useStockEntry } from "@/hooks/use-items";
 import { Package, Calendar, Scale, DollarSign, Building2, Layers, Wrench } from "lucide-react";
 import Link from "next/link";
+import { isServiceType } from "@/types/item";
 import type { Item } from "@/types/item";
 
 interface StockEntryDetailSheetProps {
@@ -38,7 +39,7 @@ export function StockEntryDetailSheet({
     error,
   } = useStockEntry(open ? (entryId ?? undefined) : undefined);
   const isService = entry
-    ? entry.itemType === "SERVICE" || items.find((i) => i.id === entry.itemId)?.type === "SERVICE"
+    ? isServiceType(entry.itemType) || isServiceType(items.find((i) => i.id === entry.itemId)?.type)
     : false;
 
   return (

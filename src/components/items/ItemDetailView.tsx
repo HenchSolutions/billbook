@@ -6,14 +6,14 @@ import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { useItem, useItemLedger } from "@/hooks/use-items";
 import { formatDate, formatQuantity } from "@/lib/utils";
-import { getItemCategoryDisplay, getItemTaxDisplay } from "@/types/item";
+import { getItemCategoryDisplay, getItemTaxDisplay, isServiceType } from "@/types/item";
 
 export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void }) {
   const { data: item, isPending: itemPending } = useItem(id);
   const { data: ledger, isPending: ledgerPending } = useItemLedger(
-    item == null || item.type === "SERVICE" ? undefined : id,
+    item == null || isServiceType(item.type) ? undefined : id,
   );
-  const isPending = itemPending || (item && item.type !== "SERVICE" && ledgerPending);
+  const isPending = itemPending || (item && !isServiceType(item.type) && ledgerPending);
 
   return (
     <div className="page-container animate-fade-in">
@@ -110,7 +110,7 @@ export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void 
             </Card>
           </div>
 
-          {item.type !== "SERVICE" && (
+          {!isServiceType(item.type) && (
             <Card>
               <CardHeader className="border-b border-border pb-3">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
