@@ -1,7 +1,7 @@
 import { History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useIsSimpleMode } from "@/hooks/use-simple-mode";
+import { getAuditActivityTitle, getAuditChangeHighlights } from "@/lib/audit-log";
 import { formatDate } from "@/lib/utils";
 import type { AuditLog } from "@/types/audit-log";
 
@@ -9,43 +9,84 @@ interface InvoiceAuditHistoryProps {
   logs: AuditLog[];
 }
 
+/** Collapse consecutive UPDATE events on the same day into one entry. */
+function deduplicateLogs(logs: AuditLog[]): Array<AuditLog & { collapsedCount?: number }> {
+  const result: Array<AuditLog & { collapsedCount?: number }> = [];
+
+  for (const log of logs) {
+    const last = result[result.length - 1];
+    const sameDay =
+      last &&
+      last.action === "UPDATE" &&
+      log.action === "UPDATE" &&
+      last.resourceType === log.resourceType &&
+      formatDate(last.createdAt) === formatDate(log.createdAt);
+
+    if (sameDay) {
+      last.collapsedCount = (last.collapsedCount ?? 1) + 1;
+    } else {
+      result.push({ ...log });
+    }
+  }
+
+  return result;
+}
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 export function InvoiceAuditHistory({ logs }: InvoiceAuditHistoryProps) {
   const isSimpleMode = useIsSimpleMode();
 
-  // Hide in simple mode
   if (isSimpleMode) return null;
-
   if (!logs.length) return null;
+
+  const entries = deduplicateLogs(logs);
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <History className="h-4 w-4" />
-          Audit History
+          Activity
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {logs.map((log) => (
-            <div
-              key={log.id}
-              className="flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0"
-            >
-              <Badge
-                variant={log.action === "DELETE" ? "destructive" : "default"}
-                className="mt-0.5 whitespace-nowrap text-xs"
-              >
-                {log.action}
-              </Badge>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{formatDate(log.createdAt)}</p>
-                {log.actorRole && (
-                  <p className="text-xs text-muted-foreground">By {log.actorRole}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+      <CardContent className="pb-4">
+        <ol className="space-y-0 divide-y divide-border">
+          {entries.map((log) => {
+            const title = getAuditActivityTitle(log);
+            const highlight = getAuditChangeHighlights(log.changes);
+            const date = formatDate(log.createdAt);
+            const time = formatTime(log.createdAt);
+
+            return (
+              <li key={log.id} className="py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-sm leading-snug text-foreground">{title}</p>
+
+                  {log.collapsedCount && log.collapsedCount > 1 && (
+                    <p className="text-xs text-muted-foreground">
+                      +{log.collapsedCount - 1} more edit{log.collapsedCount - 1 !== 1 ? "s" : ""}{" "}
+                      on this day
+                    </p>
+                  )}
+
+                  {!log.collapsedCount && highlight && (
+                    <p className="text-xs text-muted-foreground">{highlight}</p>
+                  )}
+
+                  <p className="text-xs text-muted-foreground/70">
+                    {date}
+                    {time && <span className="ml-1">{time}</span>}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </CardContent>
     </Card>
   );

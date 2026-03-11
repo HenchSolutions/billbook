@@ -7,9 +7,10 @@ import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { AuditLogFilters, AuditLogsTable } from "@/components/audit-logs/AuditLogSections";
 import { useAuditLogs } from "@/hooks/use-audit-logs";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function AuditLogs() {
-  const [page, setPage] = useState(1);
+  const { page, setPage, resetPage } = usePagination();
   const [actionFilter, setActionFilter] = useState<string>("");
   const pageSize = 20;
 
@@ -31,7 +32,7 @@ export default function AuditLogs() {
         actionFilter={actionFilter}
         onActionFilterChange={(v) => {
           setActionFilter(v === "ALL" ? "" : v);
-          setPage(1);
+          resetPage();
         }}
       />
 

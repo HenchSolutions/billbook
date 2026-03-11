@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Item } from "@/types/item";
-import { getItemCategoryDisplay } from "@/types/item";
+import { getItemCategoryDisplay, isStockType } from "@/types/item";
 
 interface ItemAutocompleteProps {
   value: Item | null;
@@ -57,7 +57,7 @@ export function ItemAutocomplete({
     () =>
       items
         .filter((item) => {
-          if (stockOnly && item.type !== "STOCK") return false;
+          if (stockOnly && !isStockType(item.type)) return false;
           if (!item.isActive) return false;
           const q = inputValue.trim().toLowerCase();
           if (!q) return true;
@@ -75,7 +75,7 @@ export function ItemAutocomplete({
       Boolean(
         normalizedInput &&
         items.some((item) => {
-          if (stockOnly && item.type !== "STOCK") return false;
+          if (stockOnly && !isStockType(item.type)) return false;
           if (!item.isActive) return false;
           return item.name.trim().toLowerCase() === normalizedInput;
         }),

@@ -24,16 +24,19 @@ import { Loader2 } from "lucide-react";
 import { useUpdateInvoice } from "@/hooks/use-invoices";
 import { useParties } from "@/hooks/use-parties";
 import type { InvoiceDetail } from "@/types/invoice";
+import { INVOICE_TYPE_OPTIONS } from "@/lib/invoice";
 import { dateString, optionalString, priceString, percentString } from "@/lib/validation-schemas";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 
 const schema = z.object({
   partyId: z.coerce.number().min(1, "Select a party"),
+  invoiceType: z.enum(["SALE_INVOICE", "SALE_RETURN", "PURCHASE_INVOICE", "PURCHASE_RETURN"]),
   invoiceDate: dateString,
   dueDate: optionalString,
   notes: optionalString,
   discountAmount: priceString,
   discountPercent: percentString,
+  roundOffAmount: priceString,
 });
 
 type FormData = z.infer<typeof schema>;
@@ -60,11 +63,13 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
     resolver: zodResolver(schema),
     defaultValues: {
       partyId: invoice.partyId,
+      invoiceType: invoice.invoiceType,
       invoiceDate: invoice.invoiceDate.slice(0, 10),
       dueDate: invoice.dueDate?.slice(0, 10) ?? "",
       notes: invoice.notes ?? "",
       discountAmount: invoice.discountAmount ?? "",
       discountPercent: invoice.discountPercent ?? "",
+      roundOffAmount: invoice.roundOffAmount ?? "0",
     },
   });
 
@@ -72,11 +77,13 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
     if (open) {
       reset({
         partyId: invoice.partyId,
+        invoiceType: invoice.invoiceType,
         invoiceDate: invoice.invoiceDate.slice(0, 10),
         dueDate: invoice.dueDate?.slice(0, 10) ?? "",
         notes: invoice.notes ?? "",
         discountAmount: invoice.discountAmount ?? "",
         discountPercent: invoice.discountPercent ?? "",
+        roundOffAmount: invoice.roundOffAmount ?? "0",
       });
     }
   }, [open, invoice, reset]);
@@ -85,11 +92,13 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
     try {
       await updateMutation.mutateAsync({
         partyId: data.partyId,
+        invoiceType: data.invoiceType,
         invoiceDate: data.invoiceDate,
         dueDate: data.dueDate || undefined,
         notes: data.notes || undefined,
         discountAmount: data.discountAmount || undefined,
         discountPercent: data.discountPercent || undefined,
+        roundOffAmount: data.roundOffAmount || undefined,
       });
       showSuccessToast("Invoice updated");
       onOpenChange(false);
@@ -133,7 +142,25 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
             {errors.partyId && <p className="text-xs text-destructive">{errors.partyId.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label>Invoice Type</Label>
+              <Select
+                value={watch("invoiceType")}
+                onValueChange={(v) => setValue("invoiceType", v as FormData["invoiceType"])}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select invoice type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INVOICE_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.type} value={option.type}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Invoice Date</Label>
               <Input type="date" {...register("invoiceDate")} />
@@ -144,7 +171,7 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Discount Amount</Label>
               <Input placeholder="0.00" {...register("discountAmount")} />
@@ -152,6 +179,10 @@ export default function InvoiceEditDialog({ open, onOpenChange, invoice }: Props
             <div className="space-y-2">
               <Label>Discount %</Label>
               <Input placeholder="0.00" {...register("discountPercent")} />
+            </div>
+            <div className="space-y-2">
+              <Label>Round Off</Label>
+              <Input placeholder="0.00" {...register("roundOffAmount")} />
             </div>
           </div>
 
