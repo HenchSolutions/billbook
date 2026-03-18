@@ -174,3 +174,9 @@ export interface InvoiceListResponse {
   /** Total number of invoices (for pagination) */
   count: number;
 }
+
+/** Response data for GET /invoices/next-number (and /invoices/next). */
+export interface NextInvoiceNumberData {
+  nextNumber: string;
+  financialYear: string;
+}
