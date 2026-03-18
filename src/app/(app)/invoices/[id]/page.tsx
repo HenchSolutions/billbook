@@ -39,7 +39,9 @@ export default function InvoiceDetail() {
   const params = useParams<{ id?: string | string[] }>();
   const router = useRouter();
   const idParam = Array.isArray(params?.id) ? params.id[0] : params?.id;
-  const invoiceId = idParam ? Number(idParam) : undefined;
+  const idParamStr = idParam != null ? String(idParam).trim() : "";
+  const invoiceId = idParamStr && /^\d+$/.test(idParamStr) ? Number(idParamStr) : undefined;
+  const invalidInvoiceId = Boolean(idParamStr) && invoiceId === undefined;
   const { isOwner } = usePermissions();
 
   const [editOpen, setEditOpen] = useState(false);
@@ -117,6 +119,23 @@ export default function InvoiceDetail() {
       setCancelConfirm(false);
     }
   };
+
+  if (invalidInvoiceId) {
+    return (
+      <div className="page-container animate-fade-in">
+        <Link
+          href="/invoices"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Invoices
+        </Link>
+        <div className="mt-6 rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+          This URL doesn&apos;t look like a valid invoice ID (use a numeric id).
+        </div>
+      </div>
+    );
+  }
 
   if (isPending) {
     return <InvoiceDetailSkeleton />;
