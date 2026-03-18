@@ -29,8 +29,8 @@ export type UseNextInvoiceNumberOptions = {
 };
 
 /**
- * Preview next invoice number (FY-scoped). GET /invoices/next-number — query params per API:
- * `financialYear`, `invoiceDate` only.
+ * Preview next invoice number (FY-scoped). GET …/invoices/next-number (alias …/invoices/next).
+ * Response: `{ data: { nextNumber, financialYear } }` — unchanged.
  */
 export function useNextInvoiceNumber(options?: UseNextInvoiceNumberOptions) {
   const invoiceDate = options?.invoiceDate?.trim() || undefined;
