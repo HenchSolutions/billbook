@@ -10,6 +10,7 @@ import {
   getEntryTotalQty,
   getLineAmounts,
   getMaxAllowedDiscountPercent,
+  itemFromStockEntry,
   toNum,
 } from "@/lib/invoice-create";
 import type { InvoiceLineDraft, StockChoice, StockLineIssue } from "@/types/invoice-create";
@@ -56,36 +57,83 @@ export function useInvoiceCreateState(initialType: InvoiceType, sourceInvoiceId?
   const [focusedIssueLineId, setFocusedIssueLineId] = useState<string | null>(null);
 
   const debouncedStockSearch = useDebounce(stockSearchText, 300);
+  const stockSearchQuery = debouncedStockSearch.trim();
   const partyType: "CUSTOMER" | "SUPPLIER" = isSalesFamily(invoiceType) ? "CUSTOMER" : "SUPPLIER";
   const pageMeta =
     INVOICE_TYPE_OPTIONS.find((o) => o.type === invoiceType) ?? INVOICE_TYPE_OPTIONS[0];
 
   const { data: partiesData } = useParties({ type: partyType, includeInactive: false });
-  const { data: itemsData } = useItems({
-    includeInactive: false,
-    search: debouncedStockSearch || undefined,
-    limit: 100,
-  });
-  const { data: stockEntriesData, error: stockEntriesError } = useStockEntries({
-    search: debouncedStockSearch || undefined,
-    limit: 100,
-  });
+  /** Only while the batch popover is open; avoids /items + /stock-entries on every keystroke site-wide. */
+  const { data: itemsData } = useItems(
+    {
+      includeInactive: false,
+      search: stockSearchQuery || undefined,
+      limit: 100,
+    },
+    {
+      enabled: stockSearchOpen && stockSearchQuery.length > 0,
+      staleTime: 30_000,
+    },
+  );
+  const { data: stockEntriesData, error: stockEntriesError } = useStockEntries(
+    {
+      search: stockSearchQuery || undefined,
+      limit: 100,
+    },
+    { enabled: stockSearchOpen, staleTime: 30_000 },
+  );
   const { data: sourceInvoice } = useInvoice(sourceInvoiceId);
-  const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } =
-    useNextInvoiceNumber(invoiceType);
+  const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } = useNextInvoiceNumber(
+    invoiceType,
+    { invoiceDate },
+  );
   const sourceEntryIds = useMemo(
     () => sourceInvoice?.items.map((line) => line.stockEntryId) ?? [],
     [sourceInvoice?.items],
   );
-  const sourceStockEntryMapQuery = useStockEntriesByIds(sourceEntryIds);
+  const neededStockEntryIds = useMemo(() => {
+    const s = new Set<number>();
+    for (const id of sourceEntryIds) {
+      if (Number.isFinite(id)) s.add(id);
+    }
+    for (const line of lines) {
+      if (line.stockEntryId != null && Number.isFinite(line.stockEntryId)) {
+        s.add(line.stockEntryId);
+      }
+    }
+    return Array.from(s);
+  }, [sourceEntryIds, lines]);
+  const stockEntryByIdQuery = useStockEntriesByIds(neededStockEntryIds);
 
   const parties = useMemo(
     () => (partiesData?.parties ?? []).filter((p) => p.isActive),
     [partiesData],
   );
   const items = useMemo(() => (itemsData?.items ?? []).filter((i) => i.isActive), [itemsData]);
-  const stockEntries = useMemo(() => stockEntriesData?.entries ?? [], [stockEntriesData]);
-  const itemMap = useMemo(() => new Map(items.map((item) => [item.id, item])), [items]);
+  const stockEntries = useMemo(() => {
+    const byId = new Map<number, StockEntry>();
+    if (stockEntryByIdQuery.data) {
+      for (const e of Object.values(stockEntryByIdQuery.data)) {
+        byId.set(e.id, e);
+      }
+    }
+    for (const e of stockEntriesData?.entries ?? []) {
+      byId.set(e.id, e);
+    }
+    return [...byId.values()];
+  }, [stockEntryByIdQuery.data, stockEntriesData?.entries]);
+  const itemMap = useMemo(() => {
+    const map = new Map<number, Item>();
+    for (const item of items) {
+      map.set(item.id, item);
+    }
+    for (const entry of stockEntries) {
+      if (!map.has(entry.itemId)) {
+        map.set(entry.itemId, itemFromStockEntry(entry));
+      }
+    }
+    return map;
+  }, [items, stockEntries]);
 
   const draftLine = lines[0] ?? createLine();
   const addedLines = lines.slice(1);
@@ -259,7 +307,7 @@ export function useInvoiceCreateState(initialType: InvoiceType, sourceInvoiceId?
     if (hasHydratedSourceInvoice.current) return;
     if (!sourceInvoice) return;
     if (sourceInvoice.invoiceType !== sourceConfig.sourceType) return;
-    if (!sourceStockEntryMapQuery.data) return;
+    if (!stockEntryByIdQuery.data) return;
 
     const partyFromList = parties.find((p) => p.id === sourceInvoice.partyId);
     const fallbackParty: Party = {
@@ -286,7 +334,7 @@ export function useInvoiceCreateState(initialType: InvoiceType, sourceInvoiceId?
     const prefilledLines: InvoiceLineDraft[] = [];
 
     for (const invoiceItem of sourceInvoice.items) {
-      const entry = sourceStockEntryMapQuery.data?.[invoiceItem.stockEntryId];
+      const entry = stockEntryByIdQuery.data?.[invoiceItem.stockEntryId];
       if (!entry) continue;
 
       const catalogItem = itemMap.get(entry.itemId);
@@ -363,7 +411,7 @@ export function useInvoiceCreateState(initialType: InvoiceType, sourceInvoiceId?
     invoiceType,
     sourceInvoiceId,
     sourceInvoice,
-    sourceStockEntryMapQuery.data,
+    stockEntryByIdQuery.data,
     parties,
     itemMap,
     notes,

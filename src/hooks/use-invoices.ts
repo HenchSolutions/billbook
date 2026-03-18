@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, generateIdempotencyKey } from "@/api";
+import { ApiClientError } from "@/api/error";
 import { invalidateQueryKeys } from "@/lib/query";
 import { buildQueryString } from "@/lib/utils";
 import type {
@@ -17,53 +18,40 @@ import type {
   InvoiceCommunicationRequest,
   InvoiceCommunicationResponse,
   InvoiceCommunicationsSummary,
+  NextInvoiceNumberData,
 } from "@/types/invoice";
 
-function incrementInvoiceNumber(value: string): string | null {
-  const match = value.match(/^(.*?)(\d+)([^\d]*)$/);
-  if (!match) return null;
+export type UseNextInvoiceNumberOptions = {
+  /** YYYY-MM-DD or ISO; used to pick FY when financialYear is omitted */
+  invoiceDate?: string;
+  /** e.g. 2025-2026 (must match ^\\d{4}-\\d{4}$ if sent) */
+  financialYear?: string;
+};
 
-  const [, prefix, numericPart, suffix] = match;
-  const incremented = String(Number(numericPart) + 1).padStart(numericPart.length, "0");
-  return `${prefix}${incremented}${suffix}`;
-}
+/**
+ * Preview next invoice number (same FY / sequence logic as create).
+ * Calls GET /invoices/next-number (Bearer + business scope).
+ */
+export function useNextInvoiceNumber(
+  invoiceType: InvoiceType,
+  options?: UseNextInvoiceNumberOptions,
+) {
+  const invoiceDate = options?.invoiceDate?.trim() || undefined;
+  const financialYear = options?.financialYear?.trim() || undefined;
 
-function extractNextInvoiceNumber(payload: unknown): string | null {
-  if (typeof payload === "string" && payload.trim()) return payload;
-  if (!payload || typeof payload !== "object") return null;
-
-  const obj = payload as Record<string, unknown>;
-  const candidates = [obj.invoiceNumber, obj.nextInvoiceNumber, obj.number, obj.nextNumber];
-  const first = candidates.find((x) => typeof x === "string" && x.trim());
-  return typeof first === "string" ? first : null;
-}
-
-export function useNextInvoiceNumber(invoiceType: InvoiceType) {
   return useQuery({
-    queryKey: ["invoice-next-number", invoiceType],
+    queryKey: ["invoice-next-number", invoiceType, invoiceDate ?? "", financialYear ?? ""],
     queryFn: async () => {
-      const endpoints = ["/invoices/next-number", "/invoices/next"];
-
-      for (const endpoint of endpoints) {
-        try {
-          const res = await api.get<unknown>(endpoint);
-          const nextFromEndpoint = extractNextInvoiceNumber(res.data);
-          if (nextFromEndpoint) return nextFromEndpoint;
-        } catch {
-          // Fall back to deriving from the latest invoice number.
-        }
-      }
-
-      const qs = buildQueryString({ page: 1, pageSize: 1 });
-      const listRes = await api.get<InvoiceListResponse>(`/invoices?${qs}`);
-      const latestNumber = listRes.data.invoices?.[0]?.invoiceNumber;
-      if (latestNumber) {
-        const derivedNext = incrementInvoiceNumber(latestNumber);
-        if (derivedNext) return derivedNext;
-      }
-
-      // Brand-new account with zero invoices: use the conventional first number.
-      return "INV-000001";
+      const qs = buildQueryString({
+        invoiceType,
+        invoiceDate,
+        financialYear,
+      });
+      const path = qs ? `/invoices/next-number?${qs}` : "/invoices/next-number";
+      const res = await api.get<NextInvoiceNumberData>(path);
+      const next = res.data?.nextNumber;
+      if (typeof next === "string" && next.trim()) return next.trim();
+      throw new ApiClientError("Next invoice number not returned", 500);
     },
   });
 }
