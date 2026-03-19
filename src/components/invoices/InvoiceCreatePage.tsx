@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import ItemDialog from "@/components/dialogs/ItemDialog";
@@ -40,16 +43,10 @@ export function InvoiceCreatePage({ initialType }: InvoiceCreatePageProps) {
         onPartyChange={state.setParty}
         parties={state.parties}
         onAddParty={state.handleOpenAddParty}
-        discountAmount={state.discountAmount}
-        onDiscountAmountChange={state.setDiscountAmount}
-        discountPercent={state.discountPercent}
-        onDiscountPercentChange={state.setDiscountPercent}
         invoiceDate={state.invoiceDate}
         onInvoiceDateChange={state.setInvoiceDate}
         dueDate={state.dueDate}
         onDueDateChange={state.setDueDate}
-        notes={state.notes}
-        onNotesChange={state.setNotes}
       />
 
       <LineEditorSection
@@ -69,6 +66,7 @@ export function InvoiceCreatePage({ initialType }: InvoiceCreatePageProps) {
         onAddNewItem={state.handleAddItemClick}
         updateLine={state.updateLine}
         onLineDiscountChange={state.handleLineDiscountChange}
+        onLineDiscountAmountChange={state.handleLineDiscountAmountChange}
         addCurrentLine={state.addCurrentLine}
         removeAddedLine={state.removeAddedLine}
         applySuggestedQtyForLine={state.applySuggestedQtyForLine}
@@ -77,18 +75,45 @@ export function InvoiceCreatePage({ initialType }: InvoiceCreatePageProps) {
         qtyAutoAdjusted={state.qtyAutoAdjusted}
       />
 
-      <InvoiceTotalsSummary
-        summaryTitle={copy.summaryTitle}
-        summary={state.summary}
-        autoRoundOff={state.autoRoundOff}
-        onAutoRoundOffChange={state.setAutoRoundOff}
-        roundOffInputValue={state.roundOffInputValue}
-        onRoundOffAmountChange={state.setRoundOffAmount}
-        canSubmit={state.canSubmit}
-        isPending={state.createInvoice.isPending}
-        onCreate={state.handleCreate}
-        shortLabel={state.pageMeta.shortLabel}
-      />
+      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Notes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-xs">
+                Notes (optional)
+              </Label>
+              <Textarea
+                id="notes"
+                value={state.notes}
+                onChange={(e) => state.setNotes(e.target.value)}
+                rows={8}
+                className="resize-none"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <InvoiceTotalsSummary
+          summaryTitle={copy.summaryTitle}
+          summary={state.summary}
+          autoRoundOff={state.autoRoundOff}
+          onAutoRoundOffChange={(checked) => {
+            state.setAutoRoundOff(checked);
+            if (!checked && state.roundOffAmount.trim() === "0") {
+              state.setRoundOffAmount("");
+            }
+          }}
+          roundOffInputValue={state.roundOffInputValue}
+          onRoundOffAmountChange={state.setRoundOffAmount}
+          canSubmit={state.canSubmit}
+          isPending={state.createInvoice.isPending}
+          onCreate={state.handleCreate}
+          shortLabel={state.pageMeta.shortLabel}
+        />
+      </div>
 
       <PartyDialog
         open={state.addPartyDialogOpen}

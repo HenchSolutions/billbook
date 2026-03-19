@@ -9,6 +9,7 @@ import {
   getEntryDateIso,
   getEntryTotalQty,
   getLineAmounts,
+  getMaxAllowedDiscountAmount,
   getMaxAllowedDiscountPercent,
   toNum,
 } from "@/lib/invoice-create";
@@ -36,7 +37,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
   const [discountAmount, setDiscountAmount] = useState("");
   const [discountPercent, setDiscountPercent] = useState("");
   const [roundOffAmount, setRoundOffAmount] = useState("0");
-  const [autoRoundOff, setAutoRoundOff] = useState(false);
+  const [autoRoundOff, setAutoRoundOff] = useState(true);
   const [lines, setLines] = useState<InvoiceLineDraft[]>(() => [createLine()]);
 
   const [addPartyDialogOpen, setAddPartyDialogOpen] = useState(false);
@@ -195,7 +196,9 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
       : (subTotal * Math.max(0, toNum(discountPercent))) / 100;
 
     const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
-    const roundOff = autoRoundOff ? Math.round(baseTotal) - baseTotal : toNum(roundOffAmount);
+    const roundOff = autoRoundOff
+      ? Math.round(baseTotal) - baseTotal
+      : -Math.max(0, toNum(roundOffAmount));
     const grandTotal = Math.max(0, baseTotal + roundOff);
 
     return {
@@ -218,7 +221,9 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
   }, []);
 
   const canSubmit = party != null && addedLines.length > 0;
-  const roundOffInputValue = autoRoundOff ? summary.roundOff.toFixed(2) : roundOffAmount;
+  const roundOffInputValue = autoRoundOff
+    ? Math.abs(summary.roundOff).toFixed(2)
+    : roundOffAmount.replace(/^\s*-/, "");
 
   const updateLine = useCallback((lineId: string, patch: Partial<InvoiceLineDraft>) => {
     setLines((prev) => prev.map((line) => (line.id === lineId ? { ...line, ...patch } : line)));
@@ -239,6 +244,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
         unitPrice: choice.entry.sellingPrice ?? "",
         quantity: "1",
         discountPercent: "",
+        discountAmount: "",
         cgstRate: choice.item.cgstRate ?? "0",
         sgstRate: choice.item.sgstRate ?? "0",
         igstRate: choice.item.igstRate ?? "0",
@@ -263,7 +269,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
       if (!line) return;
 
       if (value.trim() === "") {
-        updateLine(lineId, { discountPercent: "" });
+        updateLine(lineId, { discountPercent: "", discountAmount: "" });
         return;
       }
 
@@ -272,7 +278,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
       const maxAllowed = getMaxAllowedDiscountPercent(line, stockEntries);
 
       if (safePercent > maxAllowed) {
-        updateLine(lineId, { discountPercent: maxAllowed.toFixed(2) });
+        updateLine(lineId, { discountPercent: maxAllowed.toFixed(2), discountAmount: "" });
         showErrorToast(
           null,
           "Discount cannot reduce selling price below cost price for this stock batch",
@@ -280,7 +286,47 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
         return;
       }
 
-      updateLine(lineId, { discountPercent: value });
+      // Auto-compute discount amount from percentage
+      const qty = Math.max(0, toNum(line.quantity));
+      const unitPrice = Math.max(0, toNum(line.unitPrice));
+      const gross = qty * unitPrice;
+      const computedAmount = (gross * safePercent) / 100;
+
+      updateLine(lineId, { discountPercent: value, discountAmount: computedAmount.toFixed(2) });
+    },
+    [lines, stockEntries, updateLine],
+  );
+
+  const handleLineDiscountAmountChange = useCallback(
+    (lineId: string, value: string) => {
+      const line = lines.find((x) => x.id === lineId);
+      if (!line) return;
+
+      if (value.trim() === "") {
+        updateLine(lineId, { discountAmount: "", discountPercent: "" });
+        return;
+      }
+
+      const parsed = Math.max(0, toNum(value));
+      const qty = Math.max(0, toNum(line.quantity));
+      const unitPrice = Math.max(0, toNum(line.unitPrice));
+      const gross = qty * unitPrice;
+      const maxForCost = getMaxAllowedDiscountAmount(line, stockEntries);
+      const safeAmount = Math.min(gross, parsed);
+
+      if (safeAmount > maxForCost) {
+        updateLine(lineId, { discountAmount: maxForCost.toFixed(2), discountPercent: "" });
+        showErrorToast(
+          null,
+          "Discount cannot reduce selling price below cost price for this stock batch",
+        );
+        return;
+      }
+
+      // Auto-compute discount percentage from amount
+      const computedPercent = gross > 0 ? (safeAmount / gross) * 100 : 0;
+
+      updateLine(lineId, { discountAmount: value, discountPercent: computedPercent.toFixed(2) });
     },
     [lines, stockEntries, updateLine],
   );
@@ -339,6 +385,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
       const normalizedCurrent = {
         ...current,
         discountPercent: current.discountPercent.trim() === "" ? "0" : current.discountPercent,
+        discountAmount: current.discountAmount.trim() === "" ? "0" : current.discountAmount,
       };
       return [createLine(), normalizedCurrent, ...prev.slice(1)];
     });
@@ -481,6 +528,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
           quantity: line.quantity,
           unitPrice: line.unitPrice || undefined,
           discountPercent: line.discountPercent.trim() === "" ? "0" : line.discountPercent,
+          discountAmount: line.discountAmount.trim() === "" ? "0" : line.discountAmount,
         })),
       });
 
@@ -598,6 +646,7 @@ export function useInvoiceCreateState(initialType: InvoiceType) {
     handleStockChoiceSelect,
     handleAddStockForItem,
     handleLineDiscountChange,
+    handleLineDiscountAmountChange,
     addCurrentLine,
     removeAddedLine,
     applySuggestedQtyForLine,

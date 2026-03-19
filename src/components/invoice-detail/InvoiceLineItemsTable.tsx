@@ -73,7 +73,9 @@ export function InvoiceLineItemsTable({
                       <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell">
                         {item.discountPercent && item.discountPercent !== "0"
                           ? `${item.discountPercent}%`
-                          : "—"}
+                          : item.discountAmount && item.discountAmount !== "0"
+                            ? formatCurrency(item.discountAmount)
+                            : "—"}
                       </td>
                       <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell">
                         {tax > 0 ? formatCurrency(tax) : "—"}

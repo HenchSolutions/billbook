@@ -106,6 +106,7 @@ export interface InvoiceItemInput {
   quantity: string;
   unitPrice?: string;
   discountPercent?: string;
+  discountAmount?: string;
 }
 
 export interface CreateInvoiceRequest {

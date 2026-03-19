@@ -9,6 +9,7 @@ export function createLine(): InvoiceLineDraft {
     quantity: "1",
     unitPrice: "",
     discountPercent: "",
+    discountAmount: "",
     cgstRate: "0",
     sgstRate: "0",
     igstRate: "0",
@@ -37,11 +38,17 @@ export function getEntryDateIso(entry: StockEntry): string {
 export function getLineAmounts(line: InvoiceLineDraft) {
   const qty = Math.max(0, toNum(line.quantity));
   const unitPrice = Math.max(0, toNum(line.unitPrice));
+  const gross = qty * unitPrice;
+
+  const discountAmountInput = Math.max(0, toNum(line.discountAmount));
   const discPercent = Math.min(100, Math.max(0, toNum(line.discountPercent)));
   const taxRate = Math.max(0, toNum(line.cgstRate) + toNum(line.sgstRate) + toNum(line.igstRate));
 
-  const gross = qty * unitPrice;
-  const lineDiscount = (gross * discPercent) / 100;
+  const percentDiscount = (gross * discPercent) / 100;
+  const lineDiscount = Math.min(
+    gross,
+    line.discountAmount.trim() ? discountAmountInput : percentDiscount,
+  );
   const taxable = Math.max(0, gross - lineDiscount);
   const tax = (taxable * taxRate) / 100;
   const total = taxable + tax;
@@ -71,6 +78,21 @@ export function getMaxAllowedDiscountPercent(
   return ((sellingPrice - costPrice) / sellingPrice) * 100;
 }
 
+export function getMaxAllowedDiscountAmount(line: InvoiceLineDraft, entries: StockEntry[]): number {
+  const entry = getLineEntry(line, entries);
+  if (!entry) return Number.POSITIVE_INFINITY;
+
+  const qty = Math.max(0, toNum(line.quantity));
+  const sellingPrice = Math.max(0, toNum(line.unitPrice || entry.sellingPrice));
+  const costPrice = Math.max(0, toNum(entry.purchasePrice ?? "0"));
+
+  if (qty <= 0 || sellingPrice <= 0) return 0;
+  if (costPrice <= 0) return qty * sellingPrice;
+  if (costPrice >= sellingPrice) return 0;
+
+  return qty * (sellingPrice - costPrice);
+}
+
 export function getCostFloorViolation(
   line: InvoiceLineDraft,
   entries: StockEntry[],
@@ -80,10 +102,17 @@ export function getCostFloorViolation(
 
   const sellingPrice = Math.max(0, toNum(line.unitPrice || entry.sellingPrice));
   const costPrice = Math.max(0, toNum(entry.purchasePrice ?? "0"));
-  if (sellingPrice <= 0 || costPrice <= 0) return null;
+  const qty = Math.max(0, toNum(line.quantity));
+  if (sellingPrice <= 0 || costPrice <= 0 || qty <= 0) return null;
 
+  const gross = qty * sellingPrice;
   const discountPercent = Math.min(100, Math.max(0, toNum(line.discountPercent)));
-  const netUnitPrice = sellingPrice * (1 - discountPercent / 100);
+  const discountAmountInput = Math.max(0, toNum(line.discountAmount));
+  const lineDiscount = Math.min(
+    gross,
+    line.discountAmount.trim() ? discountAmountInput : (gross * discountPercent) / 100,
+  );
+  const netUnitPrice = Math.max(0, (gross - lineDiscount) / qty);
 
   if (netUnitPrice < costPrice) {
     return { netUnitPrice, costPrice };

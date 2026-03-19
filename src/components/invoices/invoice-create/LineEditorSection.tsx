@@ -31,6 +31,7 @@ interface LineEditorSectionProps {
   onAddNewItem: () => void;
   updateLine: (lineId: string, patch: Partial<InvoiceLineDraft>) => void;
   onLineDiscountChange: (lineId: string, value: string) => void;
+  onLineDiscountAmountChange: (lineId: string, value: string) => void;
   addCurrentLine: () => Promise<void>;
   removeAddedLine: (lineId: string) => void;
   applySuggestedQtyForLine: (lineId: string) => void;
@@ -56,6 +57,7 @@ export function LineEditorSection({
   onAddNewItem,
   updateLine,
   onLineDiscountChange,
+  onLineDiscountAmountChange,
   addCurrentLine,
   removeAddedLine,
   applySuggestedQtyForLine,
@@ -87,7 +89,7 @@ export function LineEditorSection({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="grid gap-3 rounded-lg border p-3 xl:grid-cols-[2.2fr_.7fr_1fr_.9fr_1fr_1fr_1fr_.8fr] xl:items-end">
+        <div className="grid gap-3 rounded-lg border p-3 xl:grid-cols-[2.2fr_.7fr_1fr_.9fr_.9fr_1fr_1fr_1fr_.8fr] xl:items-end">
           <div>
             <Label className="mb-1.5 block text-xs">{copy.batchLabel} *</Label>
             <StockSearchPopover
@@ -136,6 +138,16 @@ export function LineEditorSection({
           </div>
 
           <div>
+            <Label className="mb-1.5 block text-xs">Item Discount ₹</Label>
+            <Input
+              value={draftLine.discountAmount}
+              onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
+              placeholder="0"
+              className="text-right tabular-nums"
+            />
+          </div>
+
+          <div>
             <Label className="mb-1.5 block text-xs">Taxable Amount</Label>
             <Input
               value={formatCurrency(getLineAmounts(draftLine).taxable)}
@@ -172,7 +184,7 @@ export function LineEditorSection({
 
         {addedLines.length > 0 && (
           <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
-            <table className="w-full min-w-[960px] text-sm" aria-label="Added invoice items">
+            <table className="w-full min-w-[1080px] text-sm" aria-label="Added invoice items">
               <thead>
                 <tr className="border-b bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="px-3 py-2 text-left">Item</th>
@@ -181,6 +193,7 @@ export function LineEditorSection({
                   <th className="px-3 py-2 text-right">Qty</th>
                   <th className="px-3 py-2 text-right">Unit Price</th>
                   <th className="px-3 py-2 text-right">Item Discount %</th>
+                  <th className="px-3 py-2 text-right">Item Discount ₹</th>
                   <th className="px-3 py-2 text-right">Taxable Amount</th>
                   <th className="px-3 py-2 text-right">Tax Amount</th>
                   <th className="px-3 py-2 text-right">Net Amount</th>
@@ -227,6 +240,11 @@ export function LineEditorSection({
                         {line.discountPercent.trim() === "" ? "0" : line.discountPercent}
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums">
+                        {formatCurrency(
+                          line.discountAmount.trim() === "" ? "0" : line.discountAmount,
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums">
                         {formatCurrency(totals.taxable)}
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums">
@@ -263,6 +281,29 @@ export function LineEditorSection({
                   );
                 })}
               </tbody>
+              <tfoot>
+                <tr className="border-t bg-muted/40 font-semibold text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-2.5 text-right">
+                    Totals
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    {formatCurrency(
+                      addedLines.reduce((sum, line) => sum + getLineAmounts(line).taxable, 0),
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    {formatCurrency(
+                      addedLines.reduce((sum, line) => sum + getLineAmounts(line).tax, 0),
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    {formatCurrency(
+                      addedLines.reduce((sum, line) => sum + getLineAmounts(line).total, 0),
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5" />
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}

@@ -55,16 +55,8 @@ export function InvoiceTotalsSummary({
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>{formatCurrency(summary.subTotal)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Item Discount</span>
-              <span>- {formatCurrency(summary.lineDiscountTotal)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Bill Discount</span>
-              <span>- {formatCurrency(summary.invoiceDiscount)}</span>
+              <span className="text-muted-foreground">Taxable Amount</span>
+              <span>{formatCurrency(summary.subTotal - summary.lineDiscountTotal)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Tax ({summary.taxPercent.toFixed(2)}%)</span>
@@ -82,18 +74,21 @@ export function InvoiceTotalsSummary({
                 </Label>
               </div>
               <div className="grid grid-cols-[1fr_120px] items-center gap-2">
-                <span className="text-muted-foreground">Round Off</span>
-                <Input
-                  value={roundOffInputValue}
-                  disabled={autoRoundOff}
-                  onChange={(e) => onRoundOffAmountChange(e.target.value)}
-                  className="h-8 text-right tabular-nums"
-                />
+                <span className="text-muted-foreground">Round Off / Discount</span>
+                <div className="flex items-center justify-end gap-1.5">
+                  <span className="text-muted-foreground">−</span>
+                  <Input
+                    value={roundOffInputValue}
+                    disabled={autoRoundOff}
+                    onChange={(e) => onRoundOffAmountChange(e.target.value.replace(/^\s*[-+]/, ""))}
+                    className="h-8 text-right tabular-nums"
+                  />
+                </div>
               </div>
             </div>
             <div className="my-2 border-t" />
             <div className="flex items-center justify-between text-base font-semibold">
-              <span>Total Amount</span>
+              <span>Payable Amount</span>
               <span>{formatCurrency(summary.grandTotal)}</span>
             </div>
             <Button className="mt-3 w-full" disabled={!canSubmit || isPending} onClick={onCreate}>
