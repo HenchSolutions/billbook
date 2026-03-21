@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, generateIdempotencyKey } from "@/api";
 import { invalidateQueryKeys } from "@/lib/query";
+import { queryKeys } from "@/lib/query-keys";
 import { buildQueryString } from "@/lib/utils";
 import type {
   Party,
@@ -11,12 +12,13 @@ import type {
   PartyStatementResponse,
   PartyStatementPdfResponse,
   PartyAdvancePaymentRequest,
-  AdvancePayment,
+  PartyAdvanceReceiptResult,
+  PartyType,
 } from "@/types/party";
 
 export function useParties(
   params: {
-    type?: string;
+    type?: PartyType;
     includeInactive?: boolean;
     /** Search name, email, phone, gstin, address, city, state */
     search?: string;
@@ -24,11 +26,13 @@ export function useParties(
     limit?: number;
     offset?: number;
   } = {},
+  options?: { enabled?: boolean; keepPreviousData?: boolean },
 ) {
   const { type, includeInactive, search, limit, offset } = params;
+  const enabled = options?.enabled ?? true;
 
   return useQuery({
-    queryKey: ["parties", type, includeInactive, search, limit, offset],
+    queryKey: queryKeys.parties.list({ type, includeInactive, search, limit, offset }),
     queryFn: async () => {
       const qs = buildQueryString({
         type,
@@ -40,12 +44,16 @@ export function useParties(
       const res = await api.get<PartyListResponse>(`/parties${qs ? `?${qs}` : ""}`);
       return res.data;
     },
+    enabled,
+    placeholderData: options?.keepPreviousData
+      ? (previousData: PartyListResponse | undefined) => previousData
+      : undefined,
   });
 }
 
 export function useParty(id: number | undefined) {
   return useQuery({
-    queryKey: ["party", id],
+    queryKey: queryKeys.parties.detail(id),
     queryFn: async () => {
       const res = await api.get<Party>(`/parties/${id}`);
       return res.data;
@@ -61,7 +69,7 @@ export function useCreateParty() {
       const res = await api.post<Party>("/parties", data);
       return res.data;
     },
-    onSuccess: () => invalidateQueryKeys(qc, [["parties"]]),
+    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.parties.root()]),
   });
 }
 
@@ -73,14 +81,14 @@ export function useUpdateParty(id: number) {
       return res.data;
     },
     onSuccess: () => {
-      invalidateQueryKeys(qc, [["parties"], ["party", id]]);
+      invalidateQueryKeys(qc, [queryKeys.parties.root(), queryKeys.parties.detail(id)]);
     },
   });
 }
 
 export function usePartyLedger(partyId: number | undefined) {
   return useQuery({
-    queryKey: ["party-ledger", partyId],
+    queryKey: queryKeys.parties.ledger(partyId),
     queryFn: async () => {
       const res = await api.get<PartyLedgerResponse>(`/parties/${partyId}/ledger`);
       return res.data;
@@ -91,7 +99,7 @@ export function usePartyLedger(partyId: number | undefined) {
 
 export function usePartyBalance(partyId: number | undefined) {
   return useQuery({
-    queryKey: ["party-balance", partyId],
+    queryKey: queryKeys.parties.balance(partyId),
     queryFn: async () => {
       const res = await api.get<PartyBalanceResponse>(`/parties/${partyId}/balance`);
       return res.data;
@@ -111,7 +119,7 @@ export function usePartyStatement(params: {
   const qs = buildQueryString({ format, startDate, endDate });
 
   return useQuery({
-    queryKey: ["party-statement", partyId, format, startDate, endDate],
+    queryKey: queryKeys.parties.statement(partyId, format, startDate, endDate),
     queryFn: async () => {
       const res = await api.get<PartyStatementResponse | PartyStatementPdfResponse>(
         `/parties/${partyId}/statement?${qs}`,
@@ -126,7 +134,7 @@ export function useRecordPartyAdvancePayment(partyId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: PartyAdvancePaymentRequest) => {
-      const res = await api.post<AdvancePayment>(
+      const res = await api.post<PartyAdvanceReceiptResult>(
         `/parties/${partyId}/payments`,
         data,
         generateIdempotencyKey(),
@@ -134,7 +142,12 @@ export function useRecordPartyAdvancePayment(partyId: number) {
       return res.data;
     },
     onSuccess: () => {
-      invalidateQueryKeys(qc, [["party-ledger", partyId], ["party-balance", partyId], ["parties"]]);
+      invalidateQueryKeys(qc, [
+        queryKeys.parties.ledger(partyId),
+        queryKeys.parties.balance(partyId),
+        queryKeys.parties.root(),
+        queryKeys.receipts.root(),
+      ]);
     },
   });
 }
