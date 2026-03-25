@@ -46,6 +46,12 @@ function monthName(m: number): string {
 type FormState = {
   invoicePrefix: string;
   invoiceSequenceStart: string;
+  saleReturnPrefix: string;
+  saleReturnSequenceStart: string;
+  purchaseInvoicePrefix: string;
+  purchaseInvoiceSequenceStart: string;
+  purchaseReturnPrefix: string;
+  purchaseReturnSequenceStart: string;
   receiptPrefix: string;
   receiptSequenceStart: string;
   paymentPrefix: string;
@@ -58,6 +64,12 @@ function toFormState(d: BusinessSettingsData): FormState {
   return {
     invoicePrefix: d.invoicePrefix,
     invoiceSequenceStart: String(d.invoiceSequenceStart),
+    saleReturnPrefix: d.saleReturnPrefix,
+    saleReturnSequenceStart: String(d.saleReturnSequenceStart),
+    purchaseInvoicePrefix: d.purchaseInvoicePrefix,
+    purchaseInvoiceSequenceStart: String(d.purchaseInvoiceSequenceStart),
+    purchaseReturnPrefix: d.purchaseReturnPrefix,
+    purchaseReturnSequenceStart: String(d.purchaseReturnSequenceStart),
     receiptPrefix: d.receiptPrefix,
     receiptSequenceStart: String(d.receiptSequenceStart),
     paymentPrefix: d.paymentPrefix,
@@ -73,6 +85,12 @@ function toFormState(d: BusinessSettingsData): FormState {
 const FORM_KEYS: (keyof FormState)[] = [
   "invoicePrefix",
   "invoiceSequenceStart",
+  "saleReturnPrefix",
+  "saleReturnSequenceStart",
+  "purchaseInvoicePrefix",
+  "purchaseInvoiceSequenceStart",
+  "purchaseReturnPrefix",
+  "purchaseReturnSequenceStart",
   "receiptPrefix",
   "receiptSequenceStart",
   "paymentPrefix",
@@ -104,6 +122,12 @@ function buildPayload(f: FormState): UpdateBusinessSettingsRequest {
   return {
     invoicePrefix: trimOrNull(f.invoicePrefix),
     invoiceSequenceStart: seq(f.invoiceSequenceStart),
+    saleReturnPrefix: trimOrNull(f.saleReturnPrefix),
+    saleReturnSequenceStart: seq(f.saleReturnSequenceStart),
+    purchaseInvoicePrefix: trimOrNull(f.purchaseInvoicePrefix),
+    purchaseInvoiceSequenceStart: seq(f.purchaseInvoiceSequenceStart),
+    purchaseReturnPrefix: trimOrNull(f.purchaseReturnPrefix),
+    purchaseReturnSequenceStart: seq(f.purchaseReturnSequenceStart),
     receiptPrefix: trimOrNull(f.receiptPrefix),
     receiptSequenceStart: seq(f.receiptSequenceStart),
     paymentPrefix: trimOrNull(f.paymentPrefix),
@@ -147,7 +171,8 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
     <div className="mb-6">
       <h3 className="text-base font-semibold tracking-tight">Document numbering</h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Invoice, receipt, and outbound voucher prefixes, sequences, and invoice defaults. Synced via{" "}
+        Sale and purchase document prefixes, receipt and payment voucher sequences, and invoice
+        defaults. Synced via{" "}
         <code className="rounded bg-muted px-1 py-0.5 text-xs">GET/PUT /business/settings</code>.
       </p>
     </div>
@@ -233,7 +258,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
       </Alert>
 
       <div>
-        <h4 className="mb-3 text-sm font-semibold">Invoices</h4>
+        <h4 className="mb-3 text-sm font-semibold">Sale invoices</h4>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Prefix</Label>
@@ -255,6 +280,102 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
               min={1}
               value={form.invoiceSequenceStart}
               onChange={(e) => setField("invoiceSequenceStart", e.target.value)}
+              disabled={readOnly}
+            />
+            <p className="text-xs text-muted-foreground">Clear to use 1.</p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h4 className="mb-3 text-sm font-semibold">Sale returns</h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Prefix</Label>
+            <Input
+              className={fieldClass}
+              maxLength={20}
+              value={form.saleReturnPrefix}
+              onChange={(e) => setField("saleReturnPrefix", e.target.value)}
+              disabled={readOnly}
+              placeholder="SR"
+            />
+            <p className="text-xs text-muted-foreground">Empty uses server default.</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Sequence start (new FY)</Label>
+            <Input
+              className={fieldClass}
+              type="number"
+              min={1}
+              value={form.saleReturnSequenceStart}
+              onChange={(e) => setField("saleReturnSequenceStart", e.target.value)}
+              disabled={readOnly}
+            />
+            <p className="text-xs text-muted-foreground">Clear to use 1.</p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h4 className="mb-3 text-sm font-semibold">Purchase invoices</h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Prefix</Label>
+            <Input
+              className={fieldClass}
+              maxLength={20}
+              value={form.purchaseInvoicePrefix}
+              onChange={(e) => setField("purchaseInvoicePrefix", e.target.value)}
+              disabled={readOnly}
+              placeholder="PINV"
+            />
+            <p className="text-xs text-muted-foreground">Empty uses server default.</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Sequence start (new FY)</Label>
+            <Input
+              className={fieldClass}
+              type="number"
+              min={1}
+              value={form.purchaseInvoiceSequenceStart}
+              onChange={(e) => setField("purchaseInvoiceSequenceStart", e.target.value)}
+              disabled={readOnly}
+            />
+            <p className="text-xs text-muted-foreground">Clear to use 1.</p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h4 className="mb-3 text-sm font-semibold">Purchase returns</h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Prefix</Label>
+            <Input
+              className={fieldClass}
+              maxLength={20}
+              value={form.purchaseReturnPrefix}
+              onChange={(e) => setField("purchaseReturnPrefix", e.target.value)}
+              disabled={readOnly}
+              placeholder="PR"
+            />
+            <p className="text-xs text-muted-foreground">Empty uses server default.</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Sequence start (new FY)</Label>
+            <Input
+              className={fieldClass}
+              type="number"
+              min={1}
+              value={form.purchaseReturnSequenceStart}
+              onChange={(e) => setField("purchaseReturnSequenceStart", e.target.value)}
               disabled={readOnly}
             />
             <p className="text-xs text-muted-foreground">Clear to use 1.</p>

@@ -3,6 +3,12 @@ export type FinancialYearStartMonthSource = "business_settings" | "business_prof
 export interface BusinessSettingsData {
   invoicePrefix: string;
   invoiceSequenceStart: number;
+  saleReturnPrefix: string;
+  saleReturnSequenceStart: number;
+  purchaseInvoicePrefix: string;
+  purchaseInvoiceSequenceStart: number;
+  purchaseReturnPrefix: string;
+  purchaseReturnSequenceStart: number;
   receiptPrefix: string;
   receiptSequenceStart: number;
   paymentPrefix: string;
@@ -16,6 +22,12 @@ export interface BusinessSettingsData {
 export interface UpdateBusinessSettingsRequest {
   invoicePrefix?: string | null;
   invoiceSequenceStart?: number | null;
+  saleReturnPrefix?: string | null;
+  saleReturnSequenceStart?: number | null;
+  purchaseInvoicePrefix?: string | null;
+  purchaseInvoiceSequenceStart?: number | null;
+  purchaseReturnPrefix?: string | null;
+  purchaseReturnSequenceStart?: number | null;
   receiptPrefix?: string | null;
   receiptSequenceStart?: number | null;
   paymentPrefix?: string | null;

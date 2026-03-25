@@ -163,6 +163,7 @@ export function useInvoiceCreateState(
   const { data: editingDraftInvoice } = useInvoice(editInvoiceId);
   const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } = useNextInvoiceNumber({
     invoiceDate,
+    invoiceType,
     enabled: !editInvoiceId,
   });
   const stockAnchorInvoice = editInvoiceId ? editingDraftInvoice : sourceInvoice;

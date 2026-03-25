@@ -35,8 +35,8 @@ export const queryKeys = {
       ] as const,
     detail: (id: number | undefined) => ["invoice", id] as const,
     nextNumberRoot: () => ["invoice-next-number"] as const,
-    nextNumber: (invoiceDate: string, financialYear: string) =>
-      ["invoice-next-number", invoiceDate, financialYear] as const,
+    nextNumber: (invoiceDate: string, financialYear: string, invoiceType: InvoiceType) =>
+      ["invoice-next-number", invoiceDate, financialYear, invoiceType] as const,
     pdf: (id: number | undefined) => ["invoice-pdf", id] as const,
     communications: (invoiceId: number | undefined) =>
       ["invoice-communications", invoiceId] as const,

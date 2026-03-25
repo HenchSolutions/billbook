@@ -16,20 +16,24 @@ import { normalizeCommunicationsSummary } from "./invoice-helpers";
 export type UseNextInvoiceNumberOptions = {
   invoiceDate?: string;
   financialYear?: string;
+  /** Preview numbering for this document type; omitted on the API defaults to SALE_INVOICE. */
+  invoiceType?: InvoiceType;
   enabled?: boolean;
 };
 
 export function useNextInvoiceNumber(options?: UseNextInvoiceNumberOptions) {
   const invoiceDate = options?.invoiceDate?.trim() || undefined;
   const financialYear = options?.financialYear?.trim() || undefined;
+  const invoiceType = options?.invoiceType ?? "SALE_INVOICE";
 
   return useQuery({
     enabled: options?.enabled !== false,
-    queryKey: queryKeys.invoices.nextNumber(invoiceDate ?? "", financialYear ?? ""),
+    queryKey: queryKeys.invoices.nextNumber(invoiceDate ?? "", financialYear ?? "", invoiceType),
     queryFn: async () => {
       const qs = buildQueryString({
         invoiceDate,
         financialYear,
+        invoiceType,
       });
       const path = qs ? `/invoices/next-number?${qs}` : "/invoices/next-number";
       const res = await api.get<NextInvoiceNumberData>(path);

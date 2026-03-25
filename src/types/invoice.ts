@@ -247,4 +247,6 @@ export interface InvoiceListResponse {
 export interface NextInvoiceNumberData {
   nextNumber: string;
   financialYear: string;
+  /** Type used for the preview (resolved default if query param omitted). */
+  invoiceType: InvoiceType;
 }
