@@ -142,13 +142,20 @@ export const queryKeys = {
   },
 
   reports: {
-    sales: (startDate: string, endDate: string) =>
-      ["reports", "sales", startDate, endDate] as const,
-    partyOutstanding: () => ["reports", "party-outstanding"] as const,
-    itemSales: (startDate: string, endDate: string) =>
-      ["reports", "item-sales", startDate, endDate] as const,
-    salesExport: (startDate: string, endDate: string) =>
-      ["reports", "sales-export", startDate, endDate] as const,
+    dashboard: (startDate: string, endDate: string) =>
+      ["reports", "dashboard", startDate, endDate] as const,
+    receiptRegister: (startDate: string, endDate: string, limit: number) =>
+      ["reports", "receipt-register", startDate, endDate, limit] as const,
+    invoiceRegister: (startDate: string, endDate: string, limit: number) =>
+      ["reports", "invoice-register", startDate, endDate, limit] as const,
+    debtRegister: (limit: number) => ["reports", "debt-register", limit] as const,
+    payablesRegister: (limit: number) => ["reports", "payables-register", limit] as const,
+    receivablesAging: (asOf: string, limit: number) =>
+      ["reports", "receivables-aging", asOf, limit] as const,
+    creditNoteRegister: (startDate: string, endDate: string, limit: number) =>
+      ["reports", "credit-note-register", startDate, endDate, limit] as const,
+    payoutRegister: (startDate: string, endDate: string, limit: number) =>
+      ["reports", "payout-register", startDate, endDate, limit] as const,
   },
 
   tax: {

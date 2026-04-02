@@ -183,8 +183,78 @@ async function refreshAccessToken(): Promise<string> {
   return refreshPromise;
 }
 
+function buildAuthorizedHeaders(accept: string): Record<string, string> {
+  const outboundRequestId = crypto.randomUUID();
+  const requestHeaders: Record<string, string> = {
+    Accept: accept,
+    "X-Request-Id": outboundRequestId,
+  };
+  const token = getAccessToken();
+  if (token) {
+    requestHeaders.Authorization = `Bearer ${token}`;
+  }
+  return requestHeaders;
+}
+
+/**
+ * Authenticated GET that returns a binary body (e.g. CSV reports). Handles refresh on 401.
+ */
+async function requestBlob(
+  path: string,
+): Promise<{ blob: Blob; contentDisposition: string | null }> {
+  const isRefreshRequest = path.includes(REFRESH_PATH);
+
+  let response = await fetch(toAbsoluteUrl(path), {
+    method: "GET",
+    credentials: "include",
+    headers: buildAuthorizedHeaders("text/csv, */*"),
+  });
+
+  if (response.status === 401 && !isRefreshRequest && getRefreshToken()) {
+    try {
+      await refreshAccessToken();
+      response = await fetch(toAbsoluteUrl(path), {
+        method: "GET",
+        credentials: "include",
+        headers: buildAuthorizedHeaders("text/csv, */*"),
+      });
+    } catch {
+      clearSessionAndNotify();
+      throw new ApiClientError("Session expired. Please log in again.", 401);
+    }
+  }
+
+  const headerRequestId = response.headers.get("x-request-id")?.trim() || undefined;
+
+  if (!response.ok) {
+    const payload = await parseBody(response);
+    const errorData = payload as { error?: string } | null;
+    const requestId =
+      extractRequestIdFromPayload(payload) ?? headerRequestId ?? crypto.randomUUID();
+
+    if (response.status === 401 && !isRefreshRequest) {
+      clearSessionAndNotify();
+    }
+
+    throw new ApiClientError(
+      errorData?.error || `Request failed (${response.status})`,
+      response.status,
+      undefined,
+      requestId,
+    );
+  }
+
+  const blob = await response.blob();
+  return {
+    blob,
+    contentDisposition: response.headers.get("content-disposition"),
+  };
+}
+
 export const api = {
   get: <T>(path: string) => request<T>("GET", path),
+
+  getBlob: (path: string) => requestBlob(path),
 
   post: <T>(path: string, body?: unknown, idempotencyKey?: string) =>
     request<T>("POST", path, {

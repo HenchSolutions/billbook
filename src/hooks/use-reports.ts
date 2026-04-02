@@ -1,83 +1,108 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api";
 import { queryKeys } from "@/lib/query-keys";
+import { buildQueryString } from "@/lib/utils";
 import type {
-  SalesReportData,
-  PartyOutstandingData,
-  ItemSalesData,
-  ItemSalesRow,
-  ExportData,
+  ReportsDashboardData,
+  ReceiptRegisterData,
+  InvoiceRegisterData,
+  DebtRegisterData,
+  PayablesRegisterData,
+  ReceivablesAgingData,
+  CreditNoteRegisterData,
+  PayoutRegisterData,
 } from "@/types/report";
 
-export function useSalesReport(startDate: string, endDate: string) {
+export function useReportsDashboard(startDate: string, endDate: string) {
   return useQuery({
-    queryKey: queryKeys.reports.sales(startDate, endDate),
+    queryKey: queryKeys.reports.dashboard(startDate, endDate),
     queryFn: async () => {
-      const res = await api.get<SalesReportData>(
-        `/reports/sales?startDate=${startDate}&endDate=${endDate}`,
-      );
+      const qs = buildQueryString({ startDate, endDate });
+      const res = await api.get<ReportsDashboardData>(`/reports/dashboard?${qs}`);
       return res.data;
     },
     enabled: !!startDate && !!endDate,
   });
 }
 
-export function usePartyOutstandingReport() {
+export function useReceiptRegister(startDate: string, endDate: string, limit: number) {
   return useQuery({
-    queryKey: queryKeys.reports.partyOutstanding(),
+    queryKey: queryKeys.reports.receiptRegister(startDate, endDate, limit),
     queryFn: async () => {
-      const res = await api.get<PartyOutstandingData>("/reports/party-outstanding");
+      const qs = buildQueryString({ startDate, endDate, limit });
+      const res = await api.get<ReceiptRegisterData>(`/reports/receipt-register?${qs}`);
       return res.data;
-    },
-  });
-}
-
-type ItemSalesRaw = ItemSalesData & {
-  products?: Array<{
-    productId?: number;
-    itemId?: number;
-    productName?: string;
-    itemName?: string;
-    unit?: string;
-    totalQuantity?: string;
-    totalAmount?: string;
-    avgPrice?: string;
-  }>;
-};
-
-export function useItemSalesReport(startDate: string, endDate: string) {
-  return useQuery({
-    queryKey: queryKeys.reports.itemSales(startDate, endDate),
-    queryFn: async () => {
-      const res = await api.get<ItemSalesRaw>(
-        `/reports/item-sales?startDate=${startDate}&endDate=${endDate}`,
-      );
-      const data = res.data;
-      const rawItems = Array.isArray(data.items) ? data.items : (data.products ?? []);
-      const items: ItemSalesRow[] = rawItems.map((r) => ({
-        itemId: (r as ItemSalesRow).itemId ?? (r as { productId?: number }).productId ?? 0,
-        itemName: (r as ItemSalesRow).itemName ?? (r as { productName?: string }).productName ?? "",
-        unit: (r as ItemSalesRow).unit ?? "",
-        totalQuantity: (r as ItemSalesRow).totalQuantity ?? "",
-        totalAmount: (r as ItemSalesRow).totalAmount ?? "",
-        avgPrice: (r as ItemSalesRow).avgPrice ?? "",
-      }));
-      const summary = data.summary ?? { totalItems: 0, totalQuantity: "0", totalAmount: "0" };
-      return { period: data.period, items, summary } as ItemSalesData;
     },
     enabled: !!startDate && !!endDate,
   });
 }
 
-export function useSalesExport(startDate: string, endDate: string, enabled = false) {
+export function useInvoiceRegister(startDate: string, endDate: string, limit: number) {
   return useQuery({
-    queryKey: queryKeys.reports.salesExport(startDate, endDate),
+    queryKey: queryKeys.reports.invoiceRegister(startDate, endDate, limit),
     queryFn: async () => {
-      const res = await api.get<ExportData>(
-        `/reports/sales/export?startDate=${startDate}&endDate=${endDate}`,
-      );
+      const qs = buildQueryString({ startDate, endDate, limit });
+      const res = await api.get<InvoiceRegisterData>(`/reports/invoice-register?${qs}`);
       return res.data;
     },
-    enabled,
+    enabled: !!startDate && !!endDate,
+  });
+}
+
+export function useDebtRegister(limit: number) {
+  return useQuery({
+    queryKey: queryKeys.reports.debtRegister(limit),
+    queryFn: async () => {
+      const qs = buildQueryString({ limit });
+      const res = await api.get<DebtRegisterData>(`/reports/debt-register?${qs}`);
+      return res.data;
+    },
+  });
+}
+
+export function usePayablesRegister(limit: number) {
+  return useQuery({
+    queryKey: queryKeys.reports.payablesRegister(limit),
+    queryFn: async () => {
+      const qs = buildQueryString({ limit });
+      const res = await api.get<PayablesRegisterData>(`/reports/payables-register?${qs}`);
+      return res.data;
+    },
+  });
+}
+
+export function useReceivablesAging(asOf: string, limit: number) {
+  return useQuery({
+    queryKey: queryKeys.reports.receivablesAging(asOf, limit),
+    queryFn: async () => {
+      const qs = buildQueryString({ asOf, limit });
+      const res = await api.get<ReceivablesAgingData>(`/reports/receivables-aging?${qs}`);
+      return res.data;
+    },
+    enabled: !!asOf,
+  });
+}
+
+export function useCreditNoteRegister(startDate: string, endDate: string, limit: number) {
+  return useQuery({
+    queryKey: queryKeys.reports.creditNoteRegister(startDate, endDate, limit),
+    queryFn: async () => {
+      const qs = buildQueryString({ startDate, endDate, limit });
+      const res = await api.get<CreditNoteRegisterData>(`/reports/credit-note-register?${qs}`);
+      return res.data;
+    },
+    enabled: !!startDate && !!endDate,
+  });
+}
+
+export function usePayoutRegister(startDate: string, endDate: string, limit: number) {
+  return useQuery({
+    queryKey: queryKeys.reports.payoutRegister(startDate, endDate, limit),
+    queryFn: async () => {
+      const qs = buildQueryString({ startDate, endDate, limit });
+      const res = await api.get<PayoutRegisterData>(`/reports/payout-register?${qs}`);
+      return res.data;
+    },
+    enabled: !!startDate && !!endDate,
   });
 }

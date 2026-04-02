@@ -1,28 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Download, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import DateRangePicker from "@/components/DateRangePicker";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
-import {
-  OutstandingReportTable,
-  ItemSalesTable,
-  SalesReportCard,
-} from "@/components/reports/ReportSections";
-import {
-  useSalesReport,
-  usePartyOutstandingReport,
-  useItemSalesReport,
-  useSalesExport,
-} from "@/hooks/use-reports";
+import { ReportsDashboardSection } from "@/components/reports/ReportsDashboardSection";
+import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
+import { useReportsDashboard } from "@/hooks/use-reports";
 import { useDateRange } from "@/hooks/use-date-range";
-import { generateSalesReportHTML, downloadHTML } from "@/lib/report-html";
+import { MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
 
-export default function Reports() {
+export default function ReportsPage() {
   const {
     startDate,
     endDate,
@@ -31,73 +18,20 @@ export default function Reports() {
     error: dateRangeError,
     validStartDate,
     validEndDate,
-  } = useDateRange();
+  } = useDateRange({ maxMonths: MAX_REPORT_DATE_RANGE_MONTHS });
 
-  const [exportRequested, setExportRequested] = useState(false);
-
-  const {
-    data: salesData,
-    isPending: salesPending,
-    error: salesError,
-  } = useSalesReport(validStartDate, validEndDate);
-  const {
-    data: outstandingData,
-    isPending: outstandingPending,
-    error: outstandingError,
-  } = usePartyOutstandingReport();
-  const {
-    data: itemSalesData,
-    isPending: itemSalesPending,
-    error: itemSalesError,
-  } = useItemSalesReport(validStartDate, validEndDate);
-  const { data: exportData, isFetching: exportFetching } = useSalesExport(
-    validStartDate,
-    validEndDate,
-    exportRequested,
-  );
-
-  // Handle export download when data arrives
-  useEffect(() => {
-    if (exportData && exportRequested) {
-      const htmlContent = generateSalesReportHTML(exportData);
-      downloadHTML(htmlContent, `sales-report-${startDate}-${endDate}.html`);
-      setExportRequested(false);
-    }
-  }, [exportData, exportRequested, startDate, endDate]);
-
-  const handleExport = () => {
-    if (!validStartDate || !validEndDate) return;
-    setExportRequested(true);
-  };
+  const { data, isPending, error } = useReportsDashboard(validStartDate, validEndDate);
 
   return (
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Reports"
-        description="Sales, outstanding, and item reports"
-        action={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-            disabled={!validStartDate || !validEndDate || exportFetching}
-          >
-            {exportFetching ? (
-              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Download className="mr-2 h-3.5 w-3.5" />
-            )}
-            Export
-          </Button>
-        }
+        description="Set a range for activity totals, then open a register to review or export."
       />
 
-      <ErrorBanner
-        error={salesError ?? outstandingError ?? itemSalesError}
-        fallbackMessage="Failed to load reports"
-      />
+      <ErrorBanner error={error} fallbackMessage="Failed to load dashboard" />
 
-      <div className="mb-6">
+      <div className="mb-8 space-y-2">
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
@@ -105,49 +39,22 @@ export default function Reports() {
           onEndDateChange={setEndDate}
           error={dateRangeError}
         />
+        <p className="text-xs text-muted-foreground">
+          Range is limited to {MAX_REPORT_DATE_RANGE_MONTHS} months. Change dates anytime — the
+          dashboard refreshes automatically.
+        </p>
       </div>
 
-      <Tabs defaultValue="sales">
-        <TabsList className="mb-4 w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
-          <TabsTrigger value="sales">Sales</TabsTrigger>
-          <TabsTrigger value="outstanding">Party Outstanding</TabsTrigger>
-          <TabsTrigger value="item-sales">Item Sales</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="sales">
-          {salesPending ? (
-            <ReportTabSkeleton height="h-80" />
-          ) : salesData ? (
-            <SalesReportCard summary={salesData.summary} rows={salesData.sales ?? []} />
-          ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Select a valid date range to view sales data.
-            </p>
-          )}
-        </TabsContent>
-
-        <TabsContent value="outstanding">
-          {outstandingPending ? (
-            <ReportTabSkeleton height="h-60" />
-          ) : outstandingData && (outstandingData.parties ?? []).length > 0 ? (
-            <OutstandingReportTable rows={outstandingData.parties ?? []} />
-          ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">No outstanding data.</p>
-          )}
-        </TabsContent>
-
-        <TabsContent value="item-sales">
-          {itemSalesPending ? (
-            <ReportTabSkeleton height="h-60" />
-          ) : itemSalesData && (itemSalesData.items ?? []).length > 0 ? (
-            <ItemSalesTable rows={itemSalesData.items ?? []} />
-          ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No item sales data for this period.
-            </p>
-          )}
-        </TabsContent>
-      </Tabs>
+      {isPending ? (
+        <ReportTabSkeleton height="h-96" />
+      ) : data ? (
+        <ReportsDashboardSection data={data} />
+      ) : (
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          Select a valid date range (max {MAX_REPORT_DATE_RANGE_MONTHS} months) to load the
+          dashboard.
+        </p>
+      )}
     </div>
   );
 }

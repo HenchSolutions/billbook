@@ -97,6 +97,11 @@ const invoiceNavItems = [
   { label: "Purchase Return", path: "/invoices/purchase-return" },
 ];
 
+const reportNavItems = [
+  { label: "Credit note register", path: "/reports/credit-note-register" },
+  { label: "Receivables aging", path: "/reports/receivables-aging" },
+];
+
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -139,6 +144,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   };
 
   const invoicesExpanded = safePathname.startsWith("/invoices");
+  const reportsExpanded = safePathname.startsWith("/reports");
 
   const getVisibleSections = (): NavSection[] => {
     return navSections
@@ -226,6 +232,47 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                             )}
                           >
                             {invoiceItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : item.path === "/reports" && !collapsed ? (
+                  <div key={item.path} className="space-y-0.5">
+                    <Link
+                      href={item.path}
+                      onClick={onNavigate}
+                      className={cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive(item.path)
+                          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      <span>Reports</span>
+                      <ChevronDown
+                        className={cn(
+                          "ml-auto h-3.5 w-3.5 transition-transform",
+                          reportsExpanded && "rotate-180",
+                        )}
+                      />
+                    </Link>
+                    {reportsExpanded && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {reportNavItems.map((reportItem) => (
+                          <Link
+                            key={reportItem.path}
+                            href={reportItem.path}
+                            onClick={onNavigate}
+                            className={cn(
+                              "block rounded-md px-3 py-2 text-sm transition-colors",
+                              isActive(reportItem.path)
+                                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                            )}
+                          >
+                            {reportItem.label}
                           </Link>
                         ))}
                       </div>

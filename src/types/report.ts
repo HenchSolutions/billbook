@@ -1,86 +1,169 @@
-import type { InvoiceStatus } from "./invoice";
+import type { InvoiceStatus, InvoiceType } from "./invoice";
 
-export interface SalesReportData {
-  period: { startDate: string; endDate: string };
-  sales: SalesReportRow[];
-  summary: {
-    totalInvoices: number;
-    totalAmount: string;
-    totalTax: string;
-    totalPaid: string;
-    totalOutstanding: string;
-  };
+export interface ReportPeriod {
+  startDate: string;
+  endDate: string;
 }
 
-export interface SalesReportRow {
-  date: string;
-  invoiceNumber: string;
-  partyName: string;
+/** GET /reports/dashboard */
+export interface ReportsDashboardData {
+  period: ReportPeriod;
+  receipts: { count: number; totalAmount: string };
+  invoices: { count: number; totalAmount: string };
+  payouts: { count: number; totalAmount: string };
+  debt: { totalReceivable: string; debtorCount: number };
+  payables: { totalPayable: string; creditorCount: number };
+}
+
+export interface ReceiptRegisterRowDto {
+  id: number;
+  receiptNumber: string;
+  partyId?: number;
+  partyName?: string;
   totalAmount: string;
-  totalTax: string;
-  paidAmount: string;
-  outstanding: string;
+  allocatedAmount?: string;
+  unallocatedAmount: string;
+  paymentMethod: string;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  receivedAt: string;
+  createdAt: string;
+}
+
+export interface ReceiptRegisterData {
+  period: ReportPeriod;
+  limit: number;
+  receipts: ReceiptRegisterRowDto[];
+}
+
+export interface InvoiceRegisterRowDto {
+  id: number;
+  invoiceNumber: string;
+  invoiceType: InvoiceType;
   status: InvoiceStatus;
+  partyId: number;
+  partyName?: string;
+  invoiceDate: string;
+  dueDate?: string | null;
+  totalAmount: string;
+  paidAmount?: string | null;
+  dueAmount?: string;
+  consigneeName?: string | null;
+  consigneeCity?: string | null;
+  consigneeState?: string | null;
 }
 
-export interface PartyOutstandingData {
-  parties: PartyOutstandingRow[];
-  summary: {
-    totalParties: number;
-    totalInvoiced: string;
-    totalPaid: string;
-    totalOutstanding: string;
-  };
+export interface InvoiceRegisterData {
+  period: ReportPeriod;
+  limit: number;
+  invoices: InvoiceRegisterRowDto[];
 }
 
-export interface PartyOutstandingRow {
+export interface DebtRegisterPartyRow {
   partyId: number;
   partyName: string;
   type: string;
+  openingBalance: string;
   totalInvoiced: string;
   totalPaid: string;
+  totalCredited: string;
   outstanding: string;
 }
 
-export interface ItemSalesData {
-  period: { startDate: string; endDate: string };
-  items: ItemSalesRow[];
-  summary: {
-    totalItems: number;
-    totalQuantity: string;
-    totalAmount: string;
-  };
+export interface DebtRegisterData {
+  limit: number;
+  parties: DebtRegisterPartyRow[];
+  summary: { debtorCount: number; totalReceivable: string };
 }
 
-export interface ItemSalesRow {
-  itemId: number;
-  itemName: string;
-  unit: string;
-  totalQuantity: string;
+export interface PayablesRegisterPartyRow {
+  partyId: number;
+  partyName: string;
+  type: string;
+  openingBalance: string;
+  totalInvoiced: string;
+  totalPaid: string;
+  totalCredited: string;
+  payableAmount: string;
+}
+
+export interface PayablesRegisterData {
+  limit: number;
+  parties: PayablesRegisterPartyRow[];
+  summary: { creditorCount: number; totalPayable: string };
+}
+
+export type ReceivablesAgingBucket =
+  | "CURRENT"
+  | "DAYS_1_30"
+  | "DAYS_31_60"
+  | "DAYS_61_90"
+  | "DAYS_91_PLUS";
+
+export interface ReceivablesAgingLine {
+  invoiceId: number;
+  invoiceNumber: string;
+  invoiceType: InvoiceType;
+  partyId: number;
+  partyCode?: string | null;
+  partyName: string;
+  invoiceDate: string;
+  dueDate: string | null;
   totalAmount: string;
-  avgPrice: string;
+  paidAmount: string;
+  dueAmount: string;
+  daysPastDue: number;
+  agingBucket: ReceivablesAgingBucket;
 }
 
-export interface ExportData {
-  format: string;
-  exportedAt: string;
-  period: { startDate: string; endDate: string };
-  recordCount: number;
-  data: Array<{
-    date: string;
-    invoiceNumber: string;
-    partyName: string;
-    totalAmount: string;
-    totalTax: string;
-    paidAmount: string;
-    outstanding: string;
-    status: string;
-  }>;
+export interface ReceivablesAgingData {
+  asOf: string;
+  limit: number;
+  lines: ReceivablesAgingLine[];
   summary: {
-    totalInvoices: number;
-    totalAmount: string;
-    totalTax: string;
-    totalPaid: string;
-    totalOutstanding: string;
+    current: string;
+    days1to30: string;
+    days31to60: string;
+    days61to90: string;
+    days91plus: string;
+    totalDue: string;
   };
+}
+
+export interface CreditNoteRegisterRowDto {
+  id: number;
+  creditNoteNumber: string;
+  status: string;
+  invoiceId?: number | null;
+  invoiceNumber?: string | null;
+  partyId?: number | null;
+  partyName?: string | null;
+  totalAmount: string;
+  affectsInventory?: boolean;
+  createdAt: string;
+}
+
+export interface CreditNoteRegisterData {
+  period: ReportPeriod;
+  limit: number;
+  creditNotes: CreditNoteRegisterRowDto[];
+}
+
+export interface PayoutRegisterRowDto {
+  id: number;
+  payoutNumber?: string;
+  category: string;
+  partyId?: number | null;
+  partyName?: string | null;
+  amount: string;
+  paymentMethod?: string;
+  referenceNumber?: string | null;
+  paidAt?: string | null;
+  createdAt: string;
+}
+
+export interface PayoutRegisterData {
+  period: ReportPeriod;
+  limit: number;
+  payouts: PayoutRegisterRowDto[];
 }
