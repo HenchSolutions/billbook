@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Calendar, FileText, Landmark, List, User, Wallet } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ErrorBanner from "@/components/ErrorBanner";
-import SettingsSkeleton from "@/components/skeletons/SettingsSkeleton";
+import ReceiptDetailSkeleton from "@/components/skeletons/ReceiptDetailSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +47,7 @@ export default function ReceiptDetailPage() {
     );
   }
 
-  if (isPending) return <SettingsSkeleton />;
+  if (isPending) return <ReceiptDetailSkeleton />;
 
   if (!receipt) {
     return (

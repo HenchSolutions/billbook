@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PageHeader from "@/components/PageHeader";
-import TableSkeleton from "@/components/skeletons/TableSkeleton";
+import ItemDetailSkeleton from "@/components/skeletons/ItemDetailSkeleton";
 import { useItem, useItemLedger } from "@/hooks/use-items";
 import { cn, formatDate, formatQuantity } from "@/lib/utils";
 import {
@@ -63,7 +63,7 @@ export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void 
       </div>
 
       {isPending ? (
-        <TableSkeleton rows={4} />
+        <ItemDetailSkeleton />
       ) : !item ? (
         <div className="flex flex-col items-center justify-center py-16">
           <Package className="mb-3 h-12 w-12 text-muted-foreground/50" />

@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from "@/components/PageHeader";
 import ErrorBanner from "@/components/ErrorBanner";
-import SettingsSkeleton from "@/components/skeletons/SettingsSkeleton";
+import PartyLedgerSkeleton from "@/components/skeletons/PartyLedgerSkeleton";
 import { BalanceSummaryCards } from "@/components/party-ledger/BalanceSummaryCards";
 import { LedgerEntriesTable } from "@/components/party-ledger/LedgerEntriesTable";
 import { StatementPanel } from "@/components/party-ledger/StatementPanel";
@@ -150,7 +150,7 @@ export default function PartyLedgerPage() {
   };
 
   if (partyQuery.isPending) {
-    return <SettingsSkeleton />;
+    return <PartyLedgerSkeleton />;
   }
 
   if (!party) {

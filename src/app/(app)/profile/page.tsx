@@ -133,7 +133,7 @@ export default function Profile() {
   };
 
   if (isPending) {
-    return <SettingsSkeleton />;
+    return <SettingsSkeleton variant="profile" />;
   }
 
   return (

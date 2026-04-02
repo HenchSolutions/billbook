@@ -4,7 +4,7 @@ import DateRangePicker from "@/components/DateRangePicker";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import { ReportsDashboardSection } from "@/components/reports/ReportsDashboardSection";
-import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
+import { ReportsDashboardSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { useReportsDashboard } from "@/hooks/use-reports";
 import { useDateRange } from "@/hooks/use-date-range";
 import { MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
@@ -46,7 +46,7 @@ export default function ReportsPage() {
       </div>
 
       {isPending ? (
-        <ReportTabSkeleton height="h-96" />
+        <ReportsDashboardSkeleton />
       ) : data ? (
         <ReportsDashboardSection data={data} />
       ) : (

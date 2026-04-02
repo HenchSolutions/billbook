@@ -4,6 +4,7 @@ interface TableSkeletonProps {
   rows?: number;
 }
 
+/** Placeholder rows for list/table body while data loads (toolbar stays real on list pages). */
 export default function TableSkeleton({ rows = 5 }: TableSkeletonProps) {
   return (
     <div className="space-y-2">
