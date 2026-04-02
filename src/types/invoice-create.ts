@@ -4,6 +4,11 @@ export interface InvoiceLineDraft {
   id: string;
   item: Item | null;
   stockEntryId: number | null;
+  /** Free text from vendor bill (PURCHASE_INVOICE without batch); optional override when batch linked. */
+  itemName: string;
+  /** Optional HSN/SAC override or vendor-line codes (purchase). */
+  hsnCode: string;
+  sacCode: string;
   quantity: string;
   unitPrice: string;
   discountPercent: string;

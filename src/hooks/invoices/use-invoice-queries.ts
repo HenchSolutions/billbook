@@ -11,7 +11,7 @@ import type {
   InvoiceCommunicationsSummary,
   NextInvoiceNumberData,
 } from "@/types/invoice";
-import { normalizeCommunicationsSummary } from "./invoice-helpers";
+import { normalizeCommunicationsSummary } from "@/lib/invoice-api-helpers";
 
 export type UseNextInvoiceNumberOptions = {
   invoiceDate?: string;

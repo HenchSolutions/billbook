@@ -1,5 +1,5 @@
-export type { RecordPaymentResult } from "./invoice-helpers";
-export { parseRecordPaymentResponse } from "./invoice-helpers";
+export type { RecordPaymentResult } from "@/lib/invoice-api-helpers";
+export { parseRecordPaymentResponse } from "@/lib/invoice-api-helpers";
 export type { UseNextInvoiceNumberOptions } from "./use-invoice-queries";
 export {
   useNextInvoiceNumber,
@@ -18,3 +18,5 @@ export {
   useMarkInvoiceSent,
   useMarkInvoiceReminder,
 } from "./use-invoice-mutations";
+export { useInvoiceCreateState } from "./useInvoiceCreateState";
+export { useInvoicesListFilters } from "./use-invoices-list-filters";

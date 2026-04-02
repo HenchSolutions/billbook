@@ -51,16 +51,22 @@ export function InvoiceLineItemsTable({
               <tbody>
                 {items.map((item) => {
                   const hsn = item.hsnCode || item.sacCode;
+                  const sid = item.stockEntryId;
                   const purchaseDate =
-                    purchaseDateByStockEntryId[item.stockEntryId] ?? item.createdAt;
+                    sid != null && Number.isFinite(sid)
+                      ? (purchaseDateByStockEntryId[sid] ?? item.createdAt)
+                      : null;
+                  const displayName =
+                    item.itemName?.trim() ||
+                    (item.itemId != null ? `Item #${item.itemId}` : "Item");
                   return (
                     <tr key={item.id} className="border-b last:border-0 hover:bg-muted/20">
                       <td className="px-4 py-3">
-                        <div className="font-medium">{item.itemName ?? `Item #${item.itemId}`}</div>
+                        <div className="font-medium">{displayName}</div>
                       </td>
                       <td className="px-3 py-3 tabular-nums text-muted-foreground">{hsn || "—"}</td>
                       <td className="px-3 py-3 text-muted-foreground">
-                        {formatDate(purchaseDate)}
+                        {purchaseDate ? formatDate(purchaseDate) : "—"}
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums">
                         {formatQuantity(item.quantity)}

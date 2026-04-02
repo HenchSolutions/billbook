@@ -11,7 +11,7 @@ import type {
   InvoiceCommunicationRequest,
   InvoiceCommunicationResponse,
 } from "@/types/invoice";
-import { parseRecordPaymentResponse } from "./invoice-helpers";
+import { parseRecordPaymentResponse } from "@/lib/invoice-api-helpers";
 
 export function useCreateInvoice() {
   const qc = useQueryClient();

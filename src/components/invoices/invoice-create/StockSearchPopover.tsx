@@ -22,6 +22,8 @@ interface StockSearchPopoverProps {
   searchText: string;
   onSearchChange: (value: string) => void;
   triggerLabel: React.ReactNode;
+  /** Narrower trigger (e.g. purchase line layout). */
+  triggerClassName?: string;
   draftLineStockEntryId: number | null;
   filteredStockChoices: StockChoice[];
   itemsWithoutStockOptions: Item[];
@@ -38,6 +40,7 @@ export function StockSearchPopover({
   searchText,
   onSearchChange,
   triggerLabel,
+  triggerClassName,
   draftLineStockEntryId,
   filteredStockChoices,
   itemsWithoutStockOptions,
@@ -53,7 +56,7 @@ export function StockSearchPopover({
         <Button
           type="button"
           variant="outline"
-          className="h-10 w-full justify-start text-left font-normal"
+          className={cn("h-10 w-full justify-start text-left font-normal", triggerClassName)}
         >
           {triggerLabel}
         </Button>

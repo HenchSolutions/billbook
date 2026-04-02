@@ -58,11 +58,14 @@ export interface Invoice {
 
 export interface InvoiceItem {
   id: number;
-  itemId: number;
-  stockEntryId: number;
+  /** Null for vendor-only purchase lines not linked to catalog. */
+  itemId: number | null;
+  /** Null when the line is not linked to a stock batch. */
+  stockEntryId: number | null;
   itemName?: string;
   hsnCode?: string | null;
   sacCode?: string | null;
+  isTaxable?: boolean | null;
   quantity: string;
   unitPrice: string;
   discountPercent: string | null;
@@ -122,13 +125,25 @@ export interface InvoiceCommunicationsSummary {
   };
 }
 
-/** Create/update an invoice row (product/service): identified by stockEntryId only (do not send itemId). All numeric fields are strings. */
+/**
+ * Create/update invoice line — one shape for all invoice types; validation depends on `invoiceType`.
+ * Do not send `itemId`. Purchase documents must not send `stockEntryId` (use `itemName` + `unitPrice` + `quantity` + optional tax/HSN/SAC).
+ */
 export interface InvoiceItemInput {
-  stockEntryId: number;
+  /** Sale-side documents only (`SALE_INVOICE`, `SALE_RETURN`). Omit for purchase flows. */
+  stockEntryId?: number;
   quantity: string;
   unitPrice?: string;
   discountPercent?: string;
   discountAmount?: string;
+  /** Required for purchase flows (`PURCHASE_INVOICE`, `PURCHASE_RETURN`). */
+  itemName?: string;
+  hsnCode?: string;
+  sacCode?: string;
+  isTaxable?: boolean;
+  cgstRate?: string;
+  sgstRate?: string;
+  igstRate?: string;
 }
 
 export interface CreateInvoiceRequest {

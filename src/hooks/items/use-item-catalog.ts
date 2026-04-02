@@ -2,16 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api";
 import { invalidateQueryKeys } from "@/lib/query";
 import { queryKeys } from "@/lib/query-keys";
+import { ITEMS_API_BASE } from "@/lib/item-api";
 import type { Category, ItemType, Unit } from "@/types/item";
-
-const ITEMS_BASE = "/items";
 
 export function useCategories() {
   return useQuery({
     queryKey: queryKeys.items.categories(),
     queryFn: async () => {
       const res = await api.get<Category[] | { categories?: Category[] }>(
-        `${ITEMS_BASE}/categories`,
+        `${ITEMS_API_BASE}/categories`,
       );
       const data = res.data;
       if (Array.isArray(data)) return data;
@@ -31,7 +30,7 @@ export function useCreateCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: { name: string }) => {
-      const res = await api.post<Category>(`${ITEMS_BASE}/categories`, data);
+      const res = await api.post<Category>(`${ITEMS_API_BASE}/categories`, data);
       return res.data;
     },
     onSuccess: () => invalidateQueryKeys(qc, [queryKeys.items.categories()]),
@@ -49,7 +48,7 @@ export function useUnits(type?: ItemType) {
     queryKey: queryKeys.items.units(type),
     queryFn: async () => {
       const res = await api.get<UnitsResponse | { data?: UnitsResponse }>(
-        `${ITEMS_BASE}/units${query}`,
+        `${ITEMS_API_BASE}/units${query}`,
       );
       const body = res.data;
       const data =
@@ -65,7 +64,7 @@ export function useCreateUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: { value: string; label: string; type: ItemType }) => {
-      const res = await api.post<{ data?: Unit } | Unit>(`${ITEMS_BASE}/units`, data);
+      const res = await api.post<{ data?: Unit } | Unit>(`${ITEMS_API_BASE}/units`, data);
       const body = res.data;
       const unit =
         body && typeof body === "object" && body !== null && "data" in body

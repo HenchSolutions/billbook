@@ -121,7 +121,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     batchLabel: "Item / Batch",
     batchPlaceholder: "Search items or add new item",
     itemSectionHelper:
-      "Add everything from your vendor bill. Items don't need to be in stock yet; you can add stock afterwards.",
+      "Pick a batch to prefill the row — then edit any field (name, price, tax, HSN/SAC) before adding. Line totals update from your edits.",
     summaryTitle: "Purchase summary",
     loadErrorMessage: "Failed to load items. Check connection and try again.",
   },
@@ -153,7 +153,8 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     itemSectionTitle: "Items returned",
     batchLabel: "Item / Batch",
     batchPlaceholder: "Search stock batches",
-    itemSectionHelper: null,
+    itemSectionHelper:
+      "Prefill from a batch, then adjust name, qty, price, or GST% as needed for this return.",
     summaryTitle: "Return summary",
     loadErrorMessage: "Failed to load stock entries. Check connection and try again.",
   },

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getInvoiceTypeCreateCopy } from "@/lib/invoice";
+import { getInvoiceTypeCreateCopy, isSalesFamily } from "@/lib/invoice";
 import { getEntryDateIso, getLineAmounts } from "@/lib/invoice-create";
 import { formatISODateDisplay } from "@/lib/date";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -44,6 +44,8 @@ interface LineEditorSectionProps {
   onLineQuantityChange: (lineId: string, quantity: string) => void;
   onLineDiscountChange: (lineId: string, value: string) => void;
   onLineDiscountAmountChange: (lineId: string, value: string) => void;
+  /** Patch any field on a line (draft or added). */
+  updateLine: (lineId: string, patch: Partial<InvoiceLineDraft>) => void;
   addCurrentLine: () => Promise<void>;
   removeAddedLine: (lineId: string) => void;
   applySuggestedQtyForLine: (lineId: string) => void;
@@ -70,6 +72,7 @@ export function LineEditorSection({
   onLineQuantityChange,
   onLineDiscountChange,
   onLineDiscountAmountChange,
+  updateLine,
   addCurrentLine,
   removeAddedLine,
   applySuggestedQtyForLine,
@@ -78,7 +81,9 @@ export function LineEditorSection({
   qtyAutoAdjusted,
 }: LineEditorSectionProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
-
+  const purchaseFamilyForm = !isSalesFamily(invoiceType);
+  const batchRequired = isSalesFamily(invoiceType);
+  const unitPriceEditable = purchaseFamilyForm;
   const addedLinesTotals = useMemo(() => {
     return addedLines.reduce(
       (acc, line) => {
@@ -103,6 +108,10 @@ export function LineEditorSection({
         ),
       ) || "No date"}
     </span>
+  ) : purchaseFamilyForm ? (
+    <span className="truncate text-left text-muted-foreground">
+      Optional batch — prefill from stock
+    </span>
   ) : (
     <span className="text-muted-foreground">{copy.batchPlaceholder}</span>
   );
@@ -118,100 +127,266 @@ export function LineEditorSection({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="grid gap-3 rounded-lg border p-3 xl:grid-cols-[2.2fr_.7fr_1fr_.9fr_.9fr_1fr_1fr_1fr_.8fr] xl:items-end">
-          <div>
-            <Label className={draftLabelClass}>
-              {copy.batchLabel} <span className="text-destructive">*</span>
-            </Label>
-            <StockSearchPopover
-              open={stockSearchOpen}
-              onOpenChange={setStockSearchOpen}
-              searchText={stockSearchText}
-              onSearchChange={setStockSearchText}
-              triggerLabel={triggerLabel}
-              draftLineStockEntryId={draftLine.stockEntryId}
-              filteredStockChoices={filteredStockChoices}
-              itemsWithoutStockOptions={itemsWithoutStockOptions}
-              showAddItemOption={showAddItemOption}
-              onSelectChoice={onSelectChoice}
-              onAddStockForItem={onAddStockForItem}
-              onAddNewItem={onAddNewItem}
-              draftLineId={draftLine.id}
-            />
+        {purchaseFamilyForm ? (
+          <div className="overflow-x-auto rounded-lg border bg-card">
+            <p className="sr-only">
+              New line fields scroll horizontally when they do not fit on screen.
+            </p>
+            <div className="grid w-max min-w-full items-end gap-3 p-3 [grid-template-columns:minmax(9.5rem,1.15fr)_minmax(8.5rem,1.05fr)_minmax(3.75rem,0.36fr)_minmax(3.75rem,0.36fr)_minmax(3rem,0.32fr)_minmax(5rem,0.52fr)_minmax(3.75rem,0.42fr)_minmax(4.25rem,0.46fr)_minmax(2.85rem,0.3fr)_minmax(2.85rem,0.3fr)_minmax(2.85rem,0.3fr)_minmax(4.5rem,0.5fr)_minmax(4.5rem,0.5fr)_minmax(4.5rem,0.5fr)_auto]">
+              <div className="min-w-0">
+                <Label className={draftLabelClass}>
+                  {copy.batchLabel}{" "}
+                  {batchRequired ? <span className="text-destructive">*</span> : null}
+                </Label>
+                <StockSearchPopover
+                  open={stockSearchOpen}
+                  onOpenChange={setStockSearchOpen}
+                  searchText={stockSearchText}
+                  onSearchChange={setStockSearchText}
+                  triggerLabel={triggerLabel}
+                  triggerClassName="h-9 text-sm"
+                  draftLineStockEntryId={draftLine.stockEntryId}
+                  filteredStockChoices={filteredStockChoices}
+                  itemsWithoutStockOptions={itemsWithoutStockOptions}
+                  showAddItemOption={showAddItemOption}
+                  onSelectChoice={onSelectChoice}
+                  onAddStockForItem={onAddStockForItem}
+                  onAddNewItem={onAddNewItem}
+                  draftLineId={draftLine.id}
+                />
+              </div>
+              <div className="min-w-0">
+                <Label className={draftLabelClass}>
+                  Item
+                  {draftLine.itemName.trim() === "" && !draftLine.item?.name?.trim() ? (
+                    <span className="text-destructive"> *</span>
+                  ) : null}
+                </Label>
+                <Input
+                  value={draftLine.itemName}
+                  onChange={(e) => updateLine(draftLine.id, { itemName: e.target.value })}
+                  placeholder={
+                    draftLine.stockEntryId ? "Override catalog name if needed" : "As on vendor bill"
+                  }
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>HSN</Label>
+                <Input
+                  value={draftLine.hsnCode}
+                  onChange={(e) => updateLine(draftLine.id, { hsnCode: e.target.value })}
+                  placeholder="—"
+                  className="h-9 text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>SAC</Label>
+                <Input
+                  value={draftLine.sacCode}
+                  onChange={(e) => updateLine(draftLine.id, { sacCode: e.target.value })}
+                  placeholder="—"
+                  className="h-9 text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Qty</Label>
+                <Input
+                  value={draftLine.quantity}
+                  onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
+                  className={cn(
+                    "h-9 text-right text-sm tabular-nums transition-colors",
+                    qtyAutoAdjusted &&
+                      "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
+                  )}
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>
+                  Unit <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  value={draftLine.unitPrice}
+                  onChange={(e) => updateLine(draftLine.id, { unitPrice: e.target.value })}
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Disc %</Label>
+                <Input
+                  value={draftLine.discountPercent}
+                  onChange={(e) => onLineDiscountChange(draftLine.id, e.target.value)}
+                  placeholder="0"
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Disc ₹</Label>
+                <Input
+                  value={draftLine.discountAmount}
+                  onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
+                  placeholder="0"
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>CGST %</Label>
+                <Input
+                  value={draftLine.cgstRate}
+                  onChange={(e) => updateLine(draftLine.id, { cgstRate: e.target.value })}
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>SGST %</Label>
+                <Input
+                  value={draftLine.sgstRate}
+                  onChange={(e) => updateLine(draftLine.id, { sgstRate: e.target.value })}
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>IGST %</Label>
+                <Input
+                  value={draftLine.igstRate}
+                  onChange={(e) => updateLine(draftLine.id, { igstRate: e.target.value })}
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Taxable</Label>
+                <Input
+                  value={formatCurrency(getLineAmounts(draftLine).taxable)}
+                  disabled
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Tax</Label>
+                <Input
+                  value={formatCurrency(getLineAmounts(draftLine).tax)}
+                  disabled
+                  className="h-9 text-right text-sm tabular-nums"
+                />
+              </div>
+              <div>
+                <Label className={draftLabelClass}>Net</Label>
+                <Input
+                  value={formatCurrency(getLineAmounts(draftLine).total)}
+                  disabled
+                  className="h-9 text-right text-sm font-medium tabular-nums"
+                />
+              </div>
+              <div className="flex items-end justify-end pb-0.5">
+                <Button type="button" onClick={addCurrentLine} size="sm" className="h-9 shrink-0">
+                  <Plus className="mr-1 h-3.5 w-3.5" />
+                  Add
+                </Button>
+              </div>
+            </div>
           </div>
+        ) : (
+          <div className="grid gap-3 rounded-lg border p-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.95fr)_minmax(0,.85fr)_minmax(0,.85fr)_minmax(0,.95fr)_minmax(0,.95fr)_minmax(0,.95fr)_auto] xl:items-end">
+            <div>
+              <Label className={draftLabelClass}>
+                {copy.batchLabel}{" "}
+                {batchRequired ? <span className="text-destructive">*</span> : null}
+              </Label>
+              <StockSearchPopover
+                open={stockSearchOpen}
+                onOpenChange={setStockSearchOpen}
+                searchText={stockSearchText}
+                onSearchChange={setStockSearchText}
+                triggerLabel={triggerLabel}
+                draftLineStockEntryId={draftLine.stockEntryId}
+                filteredStockChoices={filteredStockChoices}
+                itemsWithoutStockOptions={itemsWithoutStockOptions}
+                showAddItemOption={showAddItemOption}
+                onSelectChoice={onSelectChoice}
+                onAddStockForItem={onAddStockForItem}
+                onAddNewItem={onAddNewItem}
+                draftLineId={draftLine.id}
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Quantity</Label>
-            <Input
-              value={draftLine.quantity}
-              onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
-              className={cn(
-                "text-right tabular-nums transition-colors",
-                qtyAutoAdjusted &&
-                  "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
-              )}
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Quantity</Label>
+              <Input
+                value={draftLine.quantity}
+                onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
+                className={cn(
+                  "text-right tabular-nums transition-colors",
+                  qtyAutoAdjusted &&
+                    "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
+                )}
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Unit price</Label>
-            <Input value={draftLine.unitPrice} disabled className="text-right tabular-nums" />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Unit price</Label>
+              <Input
+                value={draftLine.unitPrice}
+                disabled={!unitPriceEditable}
+                onChange={(e) => updateLine(draftLine.id, { unitPrice: e.target.value })}
+                className="text-right tabular-nums"
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Discount (%)</Label>
-            <Input
-              value={draftLine.discountPercent}
-              onChange={(e) => onLineDiscountChange(draftLine.id, e.target.value)}
-              placeholder="0"
-              className="text-right tabular-nums"
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Discount (%)</Label>
+              <Input
+                value={draftLine.discountPercent}
+                onChange={(e) => onLineDiscountChange(draftLine.id, e.target.value)}
+                placeholder="0"
+                className="text-right tabular-nums"
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Discount (₹)</Label>
-            <Input
-              value={draftLine.discountAmount}
-              onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
-              placeholder="0"
-              className="text-right tabular-nums"
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Discount (₹)</Label>
+              <Input
+                value={draftLine.discountAmount}
+                onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
+                placeholder="0"
+                className="text-right tabular-nums"
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Taxable amount</Label>
-            <Input
-              value={formatCurrency(getLineAmounts(draftLine).taxable)}
-              disabled
-              className="text-right"
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Taxable</Label>
+              <Input
+                value={formatCurrency(getLineAmounts(draftLine).taxable)}
+                disabled
+                className="text-right"
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Tax amount</Label>
-            <Input
-              value={formatCurrency(getLineAmounts(draftLine).tax)}
-              disabled
-              className="text-right"
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Tax</Label>
+              <Input
+                value={formatCurrency(getLineAmounts(draftLine).tax)}
+                disabled
+                className="text-right"
+              />
+            </div>
 
-          <div>
-            <Label className={draftLabelClass}>Net amount</Label>
-            <Input
-              value={formatCurrency(getLineAmounts(draftLine).total)}
-              disabled
-              className="text-right"
-            />
-          </div>
+            <div>
+              <Label className={draftLabelClass}>Net</Label>
+              <Input
+                value={formatCurrency(getLineAmounts(draftLine).total)}
+                disabled
+                className="text-right"
+              />
+            </div>
 
-          <div className="flex items-end justify-end">
-            <Button type="button" onClick={addCurrentLine} className="w-full xl:w-auto">
-              <Plus className="mr-1 h-3.5 w-3.5" />
-              Add
-            </Button>
+            <div className="flex items-end justify-end">
+              <Button type="button" onClick={addCurrentLine} className="w-full xl:w-auto">
+                <Plus className="mr-1 h-3.5 w-3.5" />
+                Add
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {addedLines.length > 0 && (
           <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
@@ -270,7 +445,7 @@ export function LineEditorSection({
                       )}
                     >
                       <td className="px-3 py-2.5 pl-4">
-                        <div>{line.item?.name ?? "-"}</div>
+                        <div>{line.itemName.trim() || line.item?.name?.trim() || "—"}</div>
                         {lineIssue && (
                           <div className="mt-1 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">
                             {lineIssue.message}
@@ -278,11 +453,15 @@ export function LineEditorSection({
                         )}
                       </td>
                       <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                        {line.item?.hsnCode?.trim()
-                          ? line.item.hsnCode
-                          : line.item?.sacCode?.trim()
-                            ? line.item.sacCode
-                            : "—"}
+                        {line.hsnCode.trim()
+                          ? line.hsnCode
+                          : line.sacCode.trim()
+                            ? line.sacCode
+                            : line.item?.hsnCode?.trim()
+                              ? line.item.hsnCode
+                              : line.item?.sacCode?.trim()
+                                ? line.item.sacCode
+                                : "—"}
                       </td>
                       <td className="px-3 py-2.5">
                         {lineEntry

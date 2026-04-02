@@ -8,7 +8,7 @@ import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import ItemDialog from "@/components/dialogs/ItemDialog";
 import PartyDialog from "@/components/dialogs/PartyDialog";
-import { useInvoiceCreateState } from "@/hooks/invoices/useInvoiceCreateState";
+import { useInvoiceCreateState } from "@/hooks/invoices";
 import { PartyAndDatesCards } from "@/components/invoices/invoice-create/PartyAndDatesCards";
 import { LineEditorSection } from "@/components/invoices/invoice-create/LineEditorSection";
 import { InvoiceTotalsSummary } from "@/components/invoices/invoice-create/InvoiceTotalsSummary";
@@ -120,6 +120,7 @@ export function InvoiceCreatePage({
         onLineQuantityChange={state.handleLineQuantityChange}
         onLineDiscountChange={state.handleLineDiscountChange}
         onLineDiscountAmountChange={state.handleLineDiscountAmountChange}
+        updateLine={state.updateLine}
         addCurrentLine={state.addCurrentLine}
         removeAddedLine={state.removeAddedLine}
         applySuggestedQtyForLine={state.applySuggestedQtyForLine}

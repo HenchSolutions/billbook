@@ -5,8 +5,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { useItem, useItemLedger } from "@/hooks/use-items";
-import { formatDate, formatQuantity } from "@/lib/utils";
-import { getItemCategoryDisplay, getItemTaxDisplay, isServiceType } from "@/types/item";
+import { cn, formatDate, formatQuantity } from "@/lib/utils";
+import {
+  type LedgerMovementType,
+  getItemCategoryDisplay,
+  getItemTaxDisplay,
+  isServiceType,
+} from "@/types/item";
+
+function stockMovementLabel(type: LedgerMovementType): string {
+  switch (type) {
+    case "PURCHASE":
+      return "Purchase";
+    case "SALE":
+      return "Sale";
+    case "ADJUSTMENT":
+      return "Adjustment";
+    default:
+      return type;
+  }
+}
+
+function stockMovementBadgeVariant(
+  type: LedgerMovementType,
+): "default" | "secondary" | "destructive" | "outline" {
+  switch (type) {
+    case "PURCHASE":
+      return "default";
+    case "SALE":
+      return "secondary";
+    case "ADJUSTMENT":
+      return "outline";
+    default:
+      return "secondary";
+  }
+}
 
 export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void }) {
   const { data: item, isPending: itemPending } = useItem(id);
@@ -65,11 +98,11 @@ export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void 
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Type
                 </p>
-                <p className="mt-2">
+                <div className="mt-2">
                   <Badge variant="secondary" className="font-medium">
                     {item.type}
                   </Badge>
-                </p>
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -118,51 +151,78 @@ export function ItemDetailView({ id, onBack }: { id: number; onBack: () => void 
                   Stock Ledger
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="p-0">
                 {!ledger || ledger.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12">
+                  <div className="flex flex-col items-center justify-center px-6 py-12">
                     <History className="mb-2 h-10 w-10 text-muted-foreground/40" />
                     <p className="text-sm font-medium text-foreground">No stock movements yet</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-center text-sm text-muted-foreground">
                       Add stock or adjust quantity to see ledger entries.
                     </p>
                   </div>
                 ) : (
-                  <div className="data-table-container">
-                    <table className="w-full text-sm" role="table" aria-label="Stock ledger">
-                      <thead>
-                        <tr className="border-b border-border bg-muted/40">
-                          <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="overflow-x-auto border-t border-border">
+                    <table
+                      className="w-full min-w-[480px] text-sm"
+                      role="table"
+                      aria-label="Stock ledger"
+                    >
+                      <thead className="bg-muted/40 text-muted-foreground">
+                        <tr className="border-b border-border">
+                          <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                             Date
                           </th>
-                          <th className="min-w-[90px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                             Type
                           </th>
-                          <th className="min-w-[70px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <th className="whitespace-nowrap py-3 pl-3 pr-8 text-right text-xs font-semibold uppercase tracking-wider">
                             Qty
                           </th>
-                          <th className="min-w-[120px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <th className="min-w-[140px] py-3 pl-6 pr-4 text-left text-xs font-semibold uppercase tracking-wider">
                             Notes
                           </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {ledger.map((m) => (
-                          <tr key={m.id} className="transition-colors hover:bg-muted/30">
-                            <td className="px-4 py-3 text-muted-foreground">
-                              {formatDate(m.createdAt)}
-                            </td>
-                            <td className="px-3 py-3">
-                              <Badge variant="secondary" className="text-xs font-medium">
-                                {m.movementType}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-3 text-right font-medium tabular-nums">
-                              {formatQuantity(m.quantity)}
-                            </td>
-                            <td className="px-3 py-3 text-muted-foreground">{m.notes ?? "—"}</td>
-                          </tr>
-                        ))}
+                        {[...ledger]
+                          .sort(
+                            (a, b) =>
+                              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+                          )
+                          .map((m) => (
+                            <tr key={m.id} className="transition-colors hover:bg-muted/30">
+                              <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                {formatDate(m.createdAt)}
+                              </td>
+                              <td className="px-3 py-3">
+                                <Badge
+                                  variant={stockMovementBadgeVariant(m.movementType)}
+                                  className="text-xs font-medium"
+                                >
+                                  {stockMovementLabel(m.movementType)}
+                                </Badge>
+                              </td>
+                              <td
+                                className={cn(
+                                  "whitespace-nowrap py-3 pl-3 pr-8 text-right font-medium tabular-nums",
+                                  m.quantity > 0 && "text-emerald-600 dark:text-emerald-400",
+                                  m.quantity < 0 && "text-destructive",
+                                )}
+                              >
+                                {m.quantity > 0
+                                  ? `+${formatQuantity(m.quantity)}`
+                                  : formatQuantity(m.quantity)}
+                              </td>
+                              <td
+                                className="max-w-[220px] py-3 pl-6 pr-4 text-muted-foreground sm:max-w-[280px]"
+                                title={m.notes?.trim() || undefined}
+                              >
+                                <span className="line-clamp-2 break-words">
+                                  {m.notes?.trim() ? m.notes : "—"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </div>

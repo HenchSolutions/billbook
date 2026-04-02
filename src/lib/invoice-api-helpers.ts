@@ -1,3 +1,7 @@
+/**
+ * Pure functions that normalize invoice-related API responses.
+ * Lives under `lib/` (not `hooks/`) because these are not React hooks.
+ */
 import type {
   InvoiceCommunicationChannel,
   InvoiceCommunicationsSummary,

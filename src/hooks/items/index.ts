@@ -16,10 +16,10 @@ export {
   useStockEntries,
   useStockEntry,
   useStockEntriesByIds,
-  getStockEntryById,
   useCreateStockEntry,
   useUpdateStockEntry,
   useStockList,
   useAdjustStock,
   useItemLedger,
 } from "./use-stock";
+export { getStockEntryById, normalizeItem, normalizeStockEntry } from "@/lib/item-api";

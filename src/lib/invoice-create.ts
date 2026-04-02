@@ -1,3 +1,4 @@
+import type { InvoiceItemInput } from "@/types/invoice";
 import type { Item, StockEntry } from "@/types/item";
 import { isServiceType, normalizeItemType } from "@/types/item";
 import type { InvoiceLineDraft } from "@/types/invoice-create";
@@ -36,6 +37,9 @@ export function createLine(): InvoiceLineDraft {
     id: crypto.randomUUID(),
     item: null,
     stockEntryId: null,
+    itemName: "",
+    hsnCode: "",
+    sacCode: "",
     quantity: "1",
     unitPrice: "",
     discountPercent: "",
@@ -70,6 +74,33 @@ export function getEntryDateIso(entry: StockEntry): string {
   return (entry.createdAt || "").slice(0, 10);
 }
 
+/** Sum of CGST+SGST+IGST %: draft line fields win; if blank, use linked catalog `item` (purchase batch / item master). */
+export function lineGstTotalPercent(line: InvoiceLineDraft): number {
+  const pick = (draft: string, itemVal: string | null | undefined) =>
+    draft.trim() !== "" ? toNum(draft) : toNum(itemVal?.trim() ?? "0");
+  const cgst = pick(line.cgstRate, line.item?.cgstRate);
+  const sgst = pick(line.sgstRate, line.item?.sgstRate);
+  const igst = pick(line.igstRate, line.item?.igstRate);
+  return Math.max(0, cgst + sgst + igst);
+}
+
+/** Purchase API `items[]` GST fields: same rules as {@link lineGstTotalPercent}. */
+export function effectivePurchaseLineGstPayload(
+  line: InvoiceLineDraft,
+): Pick<InvoiceItemInput, "cgstRate" | "sgstRate" | "igstRate"> {
+  const pickStr = (draft: string, itemVal: string | null | undefined): string => {
+    if (draft.trim() !== "") return draft.trim();
+    const i = itemVal?.trim();
+    if (i !== undefined && i !== "") return i;
+    return "0";
+  };
+  return {
+    cgstRate: pickStr(line.cgstRate, line.item?.cgstRate),
+    sgstRate: pickStr(line.sgstRate, line.item?.sgstRate),
+    igstRate: pickStr(line.igstRate, line.item?.igstRate),
+  };
+}
+
 export function getLineAmounts(line: InvoiceLineDraft) {
   const qty = Math.max(0, toNum(line.quantity));
   const unitPrice = Math.max(0, toNum(line.unitPrice));
@@ -77,7 +108,7 @@ export function getLineAmounts(line: InvoiceLineDraft) {
 
   const discountAmountInput = Math.max(0, toNum(line.discountAmount));
   const discPercent = Math.min(100, Math.max(0, toNum(line.discountPercent)));
-  const taxRate = Math.max(0, toNum(line.cgstRate) + toNum(line.sgstRate) + toNum(line.igstRate));
+  const taxRate = lineGstTotalPercent(line);
 
   const percentDiscount = (gross * discPercent) / 100;
   /** Prefer % when set so line discount scales with qty × rate; else fixed ₹ amount. */

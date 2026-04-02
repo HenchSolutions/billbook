@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api";
 import { invalidateQueryKeys } from "@/lib/query";
 import { queryKeys } from "@/lib/query-keys";
+import { getStockEntryById, ITEMS_API_BASE, normalizeStockEntry } from "@/lib/item-api";
 import { normalizeItemType } from "@/types/item";
 import type {
   StockEntry,
@@ -12,9 +13,6 @@ import type {
   ItemLedgerResponse,
   AdjustStockRequest,
 } from "@/types/item";
-import { normalizeStockEntry } from "./normalize";
-
-const ITEMS_BASE = "/items";
 
 /** GET /items/stock-entries (and GET /items/:itemId/stock-entries) include SERVICE entries. */
 export function useStockEntries(
@@ -29,7 +27,9 @@ export function useStockEntries(
 ) {
   const itemId = params?.itemId;
   const path =
-    itemId != null ? `${ITEMS_BASE}/${itemId}/stock-entries` : `${ITEMS_BASE}/stock-entries`;
+    itemId != null
+      ? `${ITEMS_API_BASE}/${itemId}/stock-entries`
+      : `${ITEMS_API_BASE}/stock-entries`;
   const qs = itemId == null && params ? new URLSearchParams() : null;
   if (qs) {
     if (params?.categoryId != null) qs.set("categoryId", String(params.categoryId));
@@ -68,7 +68,7 @@ export function useStockEntry(entryId: number | undefined) {
   return useQuery({
     queryKey: queryKeys.items.stockEntry(entryId),
     queryFn: async () => {
-      const res = await api.get<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`);
+      const res = await api.get<StockEntry>(`${ITEMS_API_BASE}/stock-entries/${entryId}`);
       return normalizeStockEntry(res.data);
     },
     enabled: !!entryId,
@@ -95,16 +95,11 @@ export function useStockEntriesByIds(entryIds: number[]) {
   });
 }
 
-export async function getStockEntryById(entryId: number): Promise<StockEntry> {
-  const res = await api.get<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`);
-  return normalizeStockEntry(res.data);
-}
-
 export function useCreateStockEntry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreateStockEntryRequest) => {
-      const res = await api.post<StockEntry>(`${ITEMS_BASE}/stock-entries`, data);
+      const res = await api.post<StockEntry>(`${ITEMS_API_BASE}/stock-entries`, data);
       return normalizeStockEntry(res.data);
     },
     onSuccess: () => {
@@ -121,7 +116,7 @@ export function useUpdateStockEntry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ entryId, data }: { entryId: number; data: UpdateStockEntryRequest }) => {
-      const res = await api.put<StockEntry>(`${ITEMS_BASE}/stock-entries/${entryId}`, data);
+      const res = await api.put<StockEntry>(`${ITEMS_API_BASE}/stock-entries/${entryId}`, data);
       return normalizeStockEntry(res.data);
     },
     onSuccess: () => {
@@ -151,7 +146,7 @@ export function useStockList(params?: {
     queryKey: queryKeys.items.stockList(params ?? {}),
     queryFn: async () => {
       const res = await api.get<StockListResponse>(
-        `${ITEMS_BASE}/stock${query ? `?${query}` : ""}`,
+        `${ITEMS_API_BASE}/stock${query ? `?${query}` : ""}`,
       );
       return {
         ...res.data,
@@ -168,7 +163,7 @@ export function useAdjustStock(itemId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: AdjustStockRequest) => {
-      await api.post(`${ITEMS_BASE}/${itemId}/adjust-stock`, data);
+      await api.post(`${ITEMS_API_BASE}/${itemId}/adjust-stock`, data);
     },
     onSuccess: () => {
       invalidateQueryKeys(qc, [
@@ -186,7 +181,7 @@ export function useItemLedger(itemId: number | undefined) {
   return useQuery({
     queryKey: queryKeys.items.ledger(itemId),
     queryFn: async () => {
-      const res = await api.get<ItemLedgerResponse>(`${ITEMS_BASE}/${itemId}/ledger`);
+      const res = await api.get<ItemLedgerResponse>(`${ITEMS_API_BASE}/${itemId}/ledger`);
       return res.data.ledger ?? [];
     },
     enabled: !!itemId,

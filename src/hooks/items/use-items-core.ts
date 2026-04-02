@@ -3,9 +3,7 @@ import { api } from "@/api";
 import { invalidateQueryKeys } from "@/lib/query";
 import { queryKeys } from "@/lib/query-keys";
 import type { Item, ItemDetail, ItemListResponse, CreateItemRequest } from "@/types/item";
-import { normalizeItem } from "./normalize";
-
-const ITEMS_BASE = "/items";
+import { ITEMS_API_BASE, normalizeItem } from "@/lib/item-api";
 
 export function useItems(
   params?: {
@@ -36,7 +34,7 @@ export function useItems(
   return useQuery({
     queryKey: listKey,
     queryFn: async () => {
-      const res = await api.get<ItemListResponse>(`${ITEMS_BASE}${query ? `?${query}` : ""}`);
+      const res = await api.get<ItemListResponse>(`${ITEMS_API_BASE}${query ? `?${query}` : ""}`);
       return {
         ...res.data,
         items: (res.data.items ?? []).map(normalizeItem),
@@ -51,7 +49,7 @@ export function useItem(id: number | undefined) {
   return useQuery({
     queryKey: queryKeys.items.detail(id),
     queryFn: async () => {
-      const res = await api.get<ItemDetail>(`${ITEMS_BASE}/${id}`);
+      const res = await api.get<ItemDetail>(`${ITEMS_API_BASE}/${id}`);
       return normalizeItem(res.data) as ItemDetail;
     },
     enabled: !!id,
@@ -62,7 +60,7 @@ export function useCreateItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreateItemRequest) => {
-      const res = await api.post<Item>(ITEMS_BASE, data);
+      const res = await api.post<Item>(ITEMS_API_BASE, data);
       return normalizeItem(res.data);
     },
     onSuccess: () => {
@@ -75,7 +73,7 @@ export function useUpdateItem(id: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<CreateItemRequest>) => {
-      const res = await api.put<Item>(`${ITEMS_BASE}/${id}`, data);
+      const res = await api.put<Item>(`${ITEMS_API_BASE}/${id}`, data);
       return normalizeItem(res.data);
     },
     onSuccess: () => {
@@ -88,7 +86,7 @@ export function useSetItemActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: { id: number; isActive: boolean }) => {
-      const res = await api.put<Item>(`${ITEMS_BASE}/${data.id}`, { isActive: data.isActive });
+      const res = await api.put<Item>(`${ITEMS_API_BASE}/${data.id}`, { isActive: data.isActive });
       return normalizeItem(res.data);
     },
     onMutate: async (vars) => {

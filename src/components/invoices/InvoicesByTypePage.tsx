@@ -14,7 +14,7 @@ import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { InvoiceFilters, InvoicesTable } from "@/components/invoices/InvoiceSections";
 import { useInvoices } from "@/hooks/use-invoices";
-import { useInvoicesListFilters } from "@/hooks/invoices/use-invoices-list-filters";
+import { useInvoicesListFilters } from "@/hooks/invoices";
 import { useParties } from "@/hooks/use-parties";
 import { useBusinessProfile } from "@/hooks/use-business";
 import { getInvoiceBalanceDue, isSalesFamily } from "@/lib/invoice";

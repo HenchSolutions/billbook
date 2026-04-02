@@ -48,7 +48,10 @@ export default function InvoiceDetail() {
 
   const { data: invoice, isPending, error } = useInvoice(invoiceId);
   const { data: businessProfile } = useBusinessProfile();
-  const stockEntryIds = invoice?.items.map((item) => item.stockEntryId) ?? [];
+  const stockEntryIds =
+    invoice?.items
+      .map((item) => item.stockEntryId)
+      .filter((id): id is number => id != null && Number.isFinite(id)) ?? [];
   const stockEntriesQuery = useStockEntriesByIds(stockEntryIds);
   const { data: pdfData } = useInvoicePdf(invoice?.status === "FINAL" ? invoiceId : undefined);
   const { data: auditData } = useResourceAuditLogs("INVOICE", invoiceId);

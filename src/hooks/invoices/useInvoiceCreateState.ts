@@ -22,7 +22,8 @@ import {
   useNextInvoiceNumber,
   useUpdateInvoiceById,
 } from "@/hooks/use-invoices";
-import type { UpdateInvoiceRequest } from "@/types/invoice";
+import { useBusinessSettings } from "@/hooks/use-business-settings";
+import type { InvoiceItemInput, UpdateInvoiceRequest } from "@/types/invoice";
 import {
   getStockEntryById,
   useItems,
@@ -31,69 +32,22 @@ import {
 } from "@/hooks/use-items";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useParties, usePartyConsignees } from "@/hooks/use-parties";
+import {
+  buildInvoiceItemInput,
+  computeBasePaiseFromAddedLines,
+  effectiveLineItemName,
+  mergeItemFromInvoiceLine,
+  moneyToPaise,
+  paiseToMoney,
+  pickInvoiceTaxRate,
+} from "@/lib/invoice-create-mapping";
+import { addCalendarDaysToIsoDate } from "@/lib/date";
 import { getInvoiceTypeCreateCopy, INVOICE_TYPE_OPTIONS, isSalesFamily } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/utils";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 import { isServiceType, type Item, type StockEntry } from "@/types/item";
 import type { Party, PartyConsignee } from "@/types/party";
-import type { InvoiceItem, InvoiceType } from "@/types/invoice";
-
-/** Whole paise — avoids float drift on invoice totals and round-off sign bugs. */
-function moneyToPaise(rupees: number): number {
-  return Math.round((Number.isFinite(rupees) ? rupees : 0) * 100);
-}
-
-function paiseToMoney(pa: number): number {
-  return pa / 100;
-}
-
-/** Same base as bill summary (taxable + tax − invoice discount), in paise. */
-function computeBasePaiseFromAddedLines(
-  lineDrafts: InvoiceLineDraft[],
-  discountAmountStr: string,
-  discountPercentStr: string,
-): number {
-  const lineBreakup = lineDrafts.map((l) => getLineAmounts(l));
-  const subTotal = lineBreakup.reduce((s, x) => s + x.gross, 0);
-  const invoiceDiscount = discountAmountStr.trim()
-    ? Math.max(0, toNum(discountAmountStr))
-    : (subTotal * Math.max(0, toNum(discountPercentStr))) / 100;
-  const taxableTotal = lineBreakup.reduce((s, x) => s + x.taxable, 0);
-  const taxTotal = lineBreakup.reduce((s, x) => s + x.tax, 0);
-  const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
-  return moneyToPaise(baseTotal);
-}
-
-/**
- * GST % on the saved invoice line wins over master item / stock embed (catalog often has 0% while
- * the line was invoiced at e.g. 4% IGST) — required for correct bill summary on edit.
- */
-function pickInvoiceTaxRate(
-  invoiceVal: string | null | undefined,
-  itemVal: string | null | undefined,
-): string {
-  const v = invoiceVal?.trim();
-  if (v !== undefined && v !== "") return v;
-  const i = itemVal?.trim();
-  if (i !== undefined && i !== "") return i;
-  return "0";
-}
-
-/** Prefer invoice API line display fields over stock-entry fallbacks (e.g. "Item #47"). */
-function mergeItemFromInvoiceLine(item: Item, invLine: InvoiceItem): Item {
-  const name = invLine.itemName?.trim();
-  const hsn = invLine.hsnCode?.trim();
-  const sac = invLine.sacCode?.trim();
-  return {
-    ...item,
-    name: name || item.name,
-    hsnCode: hsn ? invLine.hsnCode! : item.hsnCode,
-    sacCode: sac ? invLine.sacCode! : item.sacCode,
-    cgstRate: pickInvoiceTaxRate(invLine.cgstRate, item.cgstRate),
-    sgstRate: pickInvoiceTaxRate(invLine.sgstRate, item.sgstRate),
-    igstRate: pickInvoiceTaxRate(invLine.igstRate, item.igstRate),
-  };
-}
+import type { InvoiceType } from "@/types/invoice";
 
 export function useInvoiceCreateState(
   initialType: InvoiceType,
@@ -107,6 +61,8 @@ export function useInvoiceCreateState(
   const invoiceType = initialType;
   const hasHydratedSourceInvoice = useRef(false);
   const hasHydratedEditInvoice = useRef(false);
+  /** Last due date we set from business defaultDueDays + invoiceDate; used to keep syncing invoice date until user edits due. */
+  const expectedAutoDueRef = useRef<string | null>(null);
 
   const [party, setParty] = useState<Party | null>(null);
   const [selectedConsigneeId, setSelectedConsigneeId] = useState<number | null>(null);
@@ -169,6 +125,7 @@ export function useInvoiceCreateState(
   );
   const { data: sourceInvoice } = useInvoice(sourceInvoiceId);
   const { data: editingDraftInvoice } = useInvoice(editInvoiceId);
+  const { data: businessSettings } = useBusinessSettings();
   const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } = useNextInvoiceNumber({
     invoiceDate,
     invoiceType,
@@ -176,7 +133,10 @@ export function useInvoiceCreateState(
   });
   const stockAnchorInvoice = editInvoiceId ? editingDraftInvoice : sourceInvoice;
   const sourceEntryIds = useMemo(
-    () => stockAnchorInvoice?.items.map((line) => line.stockEntryId) ?? [],
+    () =>
+      (stockAnchorInvoice?.items ?? [])
+        .map((line) => line.stockEntryId)
+        .filter((id): id is number => id != null && Number.isFinite(id)),
     [stockAnchorInvoice?.items],
   );
   const neededStockEntryIds = useMemo(() => {
@@ -192,6 +152,8 @@ export function useInvoiceCreateState(
     return Array.from(s);
   }, [sourceEntryIds, lines]);
   const stockEntryByIdQuery = useStockEntriesByIds(neededStockEntryIds);
+  const needsStockEntryFetch = neededStockEntryIds.length > 0;
+  const stockEntryMapReady = !needsStockEntryFetch || stockEntryByIdQuery.data != null;
 
   const items = useMemo(() => (itemsData?.items ?? []).filter((i) => i.isActive), [itemsData]);
   const stockEntries = useMemo(() => {
@@ -361,17 +323,40 @@ export function useInvoiceCreateState(
     };
   }, [addedLines, discountAmount, discountPercent, roundOffAmount, autoRoundOff]);
 
-  const isLineValid = useCallback((line: InvoiceLineDraft) => {
-    if (!line.item) return false;
-    if (line.stockEntryId == null) return false;
-    const qty = toNum(line.quantity);
-    return Number.isFinite(qty) && qty > 0;
-  }, []);
+  const isLineValid = useCallback(
+    (line: InvoiceLineDraft) => {
+      const qty = toNum(line.quantity);
+      if (!Number.isFinite(qty) || qty <= 0) return false;
+
+      if (isSalesFamily(invoiceType)) {
+        return Boolean(line.item && line.stockEntryId != null);
+      }
+      return effectiveLineItemName(line) !== "" && line.unitPrice.trim() !== "";
+    },
+    [invoiceType],
+  );
 
   const canSubmit = party != null && addedLines.length > 0;
   const roundOffInputValue = autoRoundOff
     ? Math.abs(summary.roundOff).toFixed(2)
     : roundOffAmount.replace(/^\s*-/, "");
+
+  /** Business settings: default due days → due date = invoice date + N (create flows only; stops if user edits due). */
+  useEffect(() => {
+    if (editInvoiceId) return;
+    const days = businessSettings?.defaultDueDays;
+    if (days == null || !Number.isFinite(days) || days < 0) return;
+    const computed = addCalendarDaysToIsoDate(invoiceDate, Math.floor(days));
+    if (!computed) return;
+
+    setDueDate((prev) => {
+      if (prev === "" || prev === expectedAutoDueRef.current) {
+        expectedAutoDueRef.current = computed;
+        return computed;
+      }
+      return prev;
+    });
+  }, [editInvoiceId, businessSettings?.defaultDueDays, invoiceDate]);
 
   useEffect(() => {
     const sourceConfigByReturnType: Record<
@@ -398,7 +383,6 @@ export function useInvoiceCreateState(
     if (hasHydratedSourceInvoice.current) return;
     if (!sourceInvoice) return;
     if (sourceInvoice.invoiceType !== sourceConfig.sourceType) return;
-    if (!stockEntryByIdQuery.data) return;
 
     const partyFromList = parties.find((p) => p.id === sourceInvoice.partyId);
     const fallbackParty: Party = {
@@ -423,10 +407,42 @@ export function useInvoiceCreateState(
     setParty(partyFromList ?? fallbackParty);
     setSelectedConsigneeId(sourceInvoice.partyConsigneeId ?? null);
 
+    if (sourceInvoice.invoiceType === "PURCHASE_INVOICE") {
+      const purchasePrefill: InvoiceLineDraft[] = sourceInvoice.items.map((invoiceItem) => ({
+        id: crypto.randomUUID(),
+        item: null,
+        stockEntryId: null,
+        itemName: invoiceItem.itemName?.trim() ?? "",
+        hsnCode: invoiceItem.hsnCode?.trim() ?? "",
+        sacCode: invoiceItem.sacCode?.trim() ?? "",
+        quantity: invoiceItem.quantity,
+        unitPrice: invoiceItem.unitPrice ?? "",
+        discountPercent: invoiceItem.discountPercent ?? "0",
+        discountAmount: invoiceItem.discountAmount ?? "",
+        cgstRate: pickInvoiceTaxRate(invoiceItem.cgstRate, "0"),
+        sgstRate: pickInvoiceTaxRate(invoiceItem.sgstRate, "0"),
+        igstRate: pickInvoiceTaxRate(invoiceItem.igstRate, "0"),
+      }));
+      if (purchasePrefill.length > 0) {
+        setLines([createLine(), ...purchasePrefill]);
+      }
+      if (!notes.trim()) {
+        setNotes(`${sourceConfig.notePrefix} ${sourceInvoice.invoiceNumber}`);
+      }
+      hasHydratedSourceInvoice.current = true;
+      return;
+    }
+
+    if (!stockEntryMapReady) return;
+
     const prefilledLines: InvoiceLineDraft[] = [];
 
+    const entryById = stockEntryByIdQuery.data ?? {};
+
     for (const invoiceItem of sourceInvoice.items) {
-      const entry = stockEntryByIdQuery.data?.[invoiceItem.stockEntryId];
+      if (invoiceItem.stockEntryId == null) continue;
+
+      const entry = entryById[invoiceItem.stockEntryId];
       if (!entry) continue;
 
       const catalogItem = itemMap.get(entry.itemId);
@@ -481,10 +497,16 @@ export function useInvoiceCreateState(
 
       resolvedItem = mergeItemFromInvoiceLine(resolvedItem, invoiceItem);
 
+      const label = invoiceItem.itemName?.trim();
+      const extraItemName = label && label !== resolvedItem.name.trim() ? label : "";
+
       prefilledLines.push({
         id: crypto.randomUUID(),
         item: resolvedItem,
         stockEntryId: invoiceItem.stockEntryId,
+        itemName: extraItemName,
+        hsnCode: invoiceItem.hsnCode?.trim() ?? "",
+        sacCode: invoiceItem.sacCode?.trim() ?? "",
         quantity: invoiceItem.quantity,
         unitPrice: invoiceItem.unitPrice || entry.sellingPrice || "",
         discountPercent: invoiceItem.discountPercent ?? "0",
@@ -508,6 +530,7 @@ export function useInvoiceCreateState(
     invoiceType,
     sourceInvoiceId,
     sourceInvoice,
+    stockEntryMapReady,
     stockEntryByIdQuery.data,
     parties,
     itemMap,
@@ -518,7 +541,6 @@ export function useInvoiceCreateState(
     if (!editInvoiceId || !editingDraftInvoice) return;
     if (editingDraftInvoice.status !== "DRAFT") return;
     if (hasHydratedEditInvoice.current) return;
-    if (!stockEntryByIdQuery.data) return;
 
     const partyFromList = parties.find((p) => p.id === editingDraftInvoice.partyId);
     const partySide = isSalesFamily(editingDraftInvoice.invoiceType) ? "CUSTOMER" : "SUPPLIER";
@@ -548,10 +570,76 @@ export function useInvoiceCreateState(
     setDiscountAmount(editingDraftInvoice.discountAmount ?? "");
     setDiscountPercent(editingDraftInvoice.discountPercent ?? "");
 
+    if (!isSalesFamily(editingDraftInvoice.invoiceType)) {
+      const purchaseEditPrefill: InvoiceLineDraft[] = editingDraftInvoice.items.map(
+        (invoiceItem) => ({
+          id: crypto.randomUUID(),
+          item: null,
+          stockEntryId: null,
+          itemName: invoiceItem.itemName?.trim() ?? "",
+          hsnCode: invoiceItem.hsnCode?.trim() ?? "",
+          sacCode: invoiceItem.sacCode?.trim() ?? "",
+          quantity: invoiceItem.quantity,
+          unitPrice: invoiceItem.unitPrice ?? "",
+          discountPercent: invoiceItem.discountPercent ?? "0",
+          discountAmount: invoiceItem.discountAmount ?? "",
+          cgstRate: pickInvoiceTaxRate(invoiceItem.cgstRate, "0"),
+          sgstRate: pickInvoiceTaxRate(invoiceItem.sgstRate, "0"),
+          igstRate: pickInvoiceTaxRate(invoiceItem.igstRate, "0"),
+        }),
+      );
+
+      const da = editingDraftInvoice.discountAmount ?? "";
+      const dp = editingDraftInvoice.discountPercent ?? "";
+      const basePaise =
+        purchaseEditPrefill.length > 0
+          ? computeBasePaiseFromAddedLines(purchaseEditPrefill, da, dp)
+          : 0;
+      const autoRoundPaise = Math.round(basePaise / 100) * 100 - basePaise;
+      const apiRoundPaise = Math.round(
+        parseFloat((editingDraftInvoice.roundOffAmount ?? "0").replace(/,/g, "")) * 100,
+      );
+      const apiFinite = Number.isFinite(apiRoundPaise);
+
+      if (purchaseEditPrefill.length === 0) {
+        setAutoRoundOff(true);
+        setRoundOffAmount("0");
+      } else if (apiFinite && apiRoundPaise === autoRoundPaise) {
+        setAutoRoundOff(true);
+        setRoundOffAmount(
+          Math.abs(autoRoundPaise) < 0.5 ? "0" : (Math.abs(autoRoundPaise) / 100).toFixed(2),
+        );
+      } else if (apiFinite && apiRoundPaise === 0) {
+        setAutoRoundOff(false);
+        setRoundOffAmount("0");
+      } else if (apiFinite && apiRoundPaise < 0) {
+        setAutoRoundOff(false);
+        setRoundOffAmount((Math.abs(apiRoundPaise) / 100).toFixed(2));
+      } else {
+        setAutoRoundOff(true);
+        setRoundOffAmount(
+          Math.abs(autoRoundPaise) < 0.5 ? "0" : (Math.abs(autoRoundPaise) / 100).toFixed(2),
+        );
+      }
+
+      if (purchaseEditPrefill.length > 0) {
+        setLines([createLine(), ...purchaseEditPrefill]);
+      }
+
+      hasHydratedEditInvoice.current = true;
+      return;
+    }
+
+    if (!stockEntryMapReady) return;
+
     const prefilledLines: InvoiceLineDraft[] = [];
 
+    const editEntryById = stockEntryByIdQuery.data ?? {};
+
     for (const invoiceItem of editingDraftInvoice.items) {
-      const entry = stockEntryByIdQuery.data?.[invoiceItem.stockEntryId];
+      if (invoiceItem.stockEntryId == null) continue;
+
+      const entry = editEntryById[invoiceItem.stockEntryId];
       if (!entry) continue;
 
       const catalogItem = itemMap.get(entry.itemId);
@@ -606,10 +694,17 @@ export function useInvoiceCreateState(
 
       resolvedItem = mergeItemFromInvoiceLine(resolvedItem, invoiceItem);
 
+      const editLabel = invoiceItem.itemName?.trim();
+      const editExtraItemName =
+        editLabel && editLabel !== resolvedItem.name.trim() ? editLabel : "";
+
       prefilledLines.push({
         id: crypto.randomUUID(),
         item: resolvedItem,
         stockEntryId: invoiceItem.stockEntryId,
+        itemName: editExtraItemName,
+        hsnCode: invoiceItem.hsnCode?.trim() ?? "",
+        sacCode: invoiceItem.sacCode?.trim() ?? "",
         quantity: invoiceItem.quantity,
         unitPrice: invoiceItem.unitPrice || entry.sellingPrice || "",
         discountPercent: invoiceItem.discountPercent ?? "0",
@@ -656,7 +751,14 @@ export function useInvoiceCreateState(
     }
 
     hasHydratedEditInvoice.current = true;
-  }, [editInvoiceId, editingDraftInvoice, stockEntryByIdQuery.data, parties, itemMap]);
+  }, [
+    editInvoiceId,
+    editingDraftInvoice,
+    stockEntryMapReady,
+    stockEntryByIdQuery.data,
+    parties,
+    itemMap,
+  ]);
 
   const updateLine = useCallback((lineId: string, patch: Partial<InvoiceLineDraft>) => {
     setLines((prev) => prev.map((line) => (line.id === lineId ? { ...line, ...patch } : line)));
@@ -671,10 +773,19 @@ export function useInvoiceCreateState(
   const handleStockChoiceSelect = useCallback(
     (lineId: string, choice: StockChoice) => {
       if (!choice.enabledForSelection) return;
+      const purchaseSide = !isSalesFamily(invoiceType);
+      const defaultUnitPrice = purchaseSide
+        ? invoiceType === "PURCHASE_INVOICE"
+          ? (choice.entry.purchasePrice ?? choice.entry.sellingPrice ?? "")
+          : (choice.entry.sellingPrice ?? "")
+        : (choice.entry.sellingPrice ?? "");
       updateLine(lineId, {
         item: choice.item,
         stockEntryId: choice.entry.id,
-        unitPrice: choice.entry.sellingPrice ?? "",
+        itemName: purchaseSide ? choice.item.name : "",
+        hsnCode: purchaseSide ? (choice.item.hsnCode?.trim() ?? "") : "",
+        sacCode: purchaseSide ? (choice.item.sacCode?.trim() ?? "") : "",
+        unitPrice: defaultUnitPrice,
         quantity: "1",
         discountPercent: "",
         discountAmount: "",
@@ -685,7 +796,7 @@ export function useInvoiceCreateState(
       setStockSearchOpen(false);
       setStockSearchText("");
     },
-    [updateLine],
+    [invoiceType, updateLine],
   );
 
   const handleAddStockForItem = useCallback(
@@ -703,6 +814,17 @@ export function useInvoiceCreateState(
 
       if (value.trim() === "") {
         updateLine(lineId, { discountPercent: "", discountAmount: "" });
+        return;
+      }
+
+      if (!isSalesFamily(invoiceType)) {
+        const parsed = toNum(value);
+        const safePercent = Math.min(100, Math.max(0, parsed));
+        const qty = Math.max(0, toNum(line.quantity));
+        const unitPrice = Math.max(0, toNum(line.unitPrice));
+        const gross = qty * unitPrice;
+        const computedAmount = (gross * safePercent) / 100;
+        updateLine(lineId, { discountPercent: value, discountAmount: computedAmount.toFixed(2) });
         return;
       }
 
@@ -727,7 +849,7 @@ export function useInvoiceCreateState(
 
       updateLine(lineId, { discountPercent: value, discountAmount: computedAmount.toFixed(2) });
     },
-    [lines, stockEntries, updateLine],
+    [lines, stockEntries, updateLine, invoiceType],
   );
 
   const handleLineDiscountAmountChange = useCallback(
@@ -737,6 +859,17 @@ export function useInvoiceCreateState(
 
       if (value.trim() === "") {
         updateLine(lineId, { discountAmount: "", discountPercent: "" });
+        return;
+      }
+
+      if (!isSalesFamily(invoiceType)) {
+        const parsed = Math.max(0, toNum(value));
+        const qty = Math.max(0, toNum(line.quantity));
+        const unitPrice = Math.max(0, toNum(line.unitPrice));
+        const gross = qty * unitPrice;
+        const safeAmount = Math.min(gross, parsed);
+        const computedPercent = gross > 0 ? (safeAmount / gross) * 100 : 0;
+        updateLine(lineId, { discountAmount: value, discountPercent: computedPercent.toFixed(2) });
         return;
       }
 
@@ -761,7 +894,7 @@ export function useInvoiceCreateState(
 
       updateLine(lineId, { discountAmount: value, discountPercent: computedPercent.toFixed(2) });
     },
-    [lines, stockEntries, updateLine],
+    [lines, stockEntries, updateLine, invoiceType],
   );
 
   /** Keep ₹ discount in sync when qty changes (% scales with line total; ₹-only scales with qty ratio). */
@@ -774,6 +907,22 @@ export function useInvoiceCreateState(
       const unitPrice = Math.max(0, toNum(line.unitPrice));
       const gross = newQty * unitPrice;
       const patch: Partial<InvoiceLineDraft> = { quantity };
+
+      if (!isSalesFamily(invoiceType)) {
+        if (line.discountPercent.trim() !== "") {
+          const p = Math.min(100, Math.max(0, toNum(line.discountPercent)));
+          patch.discountAmount = ((gross * p) / 100).toFixed(2);
+        } else if (line.discountAmount.trim() !== "") {
+          const oldQty = Math.max(0, toNum(line.quantity));
+          const oldAmt = Math.max(0, toNum(line.discountAmount));
+          const newAmt = oldQty > 0 ? oldAmt * (newQty / oldQty) : oldAmt;
+          const capped = Math.min(newAmt, gross);
+          patch.discountAmount = capped.toFixed(2);
+          patch.discountPercent = gross > 0 ? ((capped / gross) * 100).toFixed(2) : "";
+        }
+        updateLine(lineId, patch);
+        return;
+      }
 
       if (line.discountPercent.trim() !== "") {
         const p = Math.min(100, Math.max(0, toNum(line.discountPercent)));
@@ -797,12 +946,26 @@ export function useInvoiceCreateState(
 
       updateLine(lineId, patch);
     },
-    [lines, stockEntries, updateLine],
+    [lines, stockEntries, updateLine, invoiceType],
   );
 
   const addCurrentLine = useCallback(async () => {
     if (!isLineValid(draftLine)) {
       showErrorToast(null, "Complete item entry before adding");
+      return;
+    }
+
+    if (!isSalesFamily(invoiceType)) {
+      setLines((prev) => {
+        const current = prev[0] ?? createLine();
+        const normalizedCurrent = {
+          ...current,
+          discountPercent: current.discountPercent.trim() === "" ? "0" : current.discountPercent,
+          discountAmount: current.discountAmount.trim() === "" ? "0" : current.discountAmount,
+        };
+        return [createLine(), normalizedCurrent, ...prev.slice(1)];
+      });
+      setStockLineIssues({});
       return;
     }
 
@@ -862,7 +1025,7 @@ export function useInvoiceCreateState(
       return [createLine(), normalizedCurrent, ...prev.slice(1)];
     });
     setStockLineIssues({});
-  }, [draftLine, isLineValid, stockEntries, usedQtyByEntryId, updateLine]);
+  }, [draftLine, invoiceType, isLineValid, stockEntries, usedQtyByEntryId, updateLine]);
 
   const removeAddedLine = useCallback((lineId: string) => {
     setLines((prev) => [prev[0], ...prev.slice(1).filter((line) => line.id !== lineId)]);
@@ -893,7 +1056,7 @@ export function useInvoiceCreateState(
           issues.push({
             lineId: line.id,
             entryId,
-            itemName: line.item?.name ?? "selected item",
+            itemName: line.itemName.trim() || line.item?.name || "selected item",
             selectedQty: Math.max(0, toNum(line.quantity)),
             availableQty: 0,
             suggestedQty: 0,
@@ -912,7 +1075,7 @@ export function useInvoiceCreateState(
           issues.push({
             lineId: line.id,
             entryId,
-            itemName: line.item?.name ?? "selected item",
+            itemName: line.itemName.trim() || line.item?.name || "selected item",
             selectedQty,
             availableQty: remaining,
             suggestedQty: allowedQty,
@@ -962,7 +1125,7 @@ export function useInvoiceCreateState(
       return;
     }
 
-    if (invoiceType !== "SALE_RETURN" && invoiceType !== "PURCHASE_RETURN") {
+    if (invoiceType === "SALE_INVOICE") {
       const liveIssues = await validateLiveStockForAddedLines();
       if (liveIssues.length > 0) {
         const issueMap = Object.fromEntries(liveIssues.map((issue) => [issue.lineId, issue]));
@@ -979,23 +1142,25 @@ export function useInvoiceCreateState(
       setStockLineIssues({});
     }
 
-    const invalidCostLine = addedLines.find((line) => getCostFloorViolation(line, stockEntries));
-    if (invalidCostLine) {
-      const violation = getCostFloorViolation(invalidCostLine, stockEntries);
-      showErrorToast(
-        null,
-        `Discount is too high for ${invalidCostLine.item?.name ?? "selected item"}. Net rate (${formatCurrency(violation?.netUnitPrice ?? 0)}) cannot be below cost (${formatCurrency(violation?.costPrice ?? 0)}).`,
-      );
-      return;
+    if (isSalesFamily(invoiceType)) {
+      const invalidCostLine = addedLines.find((line) => getCostFloorViolation(line, stockEntries));
+      if (invalidCostLine) {
+        const violation = getCostFloorViolation(invalidCostLine, stockEntries);
+        showErrorToast(
+          null,
+          `Discount is too high for ${invalidCostLine.item?.name ?? "selected item"}. Net rate (${formatCurrency(violation?.netUnitPrice ?? 0)}) cannot be below cost (${formatCurrency(violation?.costPrice ?? 0)}).`,
+        );
+        return;
+      }
     }
 
-    const linePayload = addedLines.map((line) => ({
-      stockEntryId: line.stockEntryId!,
-      quantity: line.quantity,
-      unitPrice: line.unitPrice || undefined,
-      discountPercent: line.discountPercent.trim() === "" ? "0" : line.discountPercent,
-      discountAmount: line.discountAmount.trim() === "" ? "0" : line.discountAmount,
-    }));
+    let linePayload: InvoiceItemInput[];
+    try {
+      linePayload = addedLines.map((line) => buildInvoiceItemInput(line, invoiceType));
+    } catch {
+      showErrorToast(null, "One or more lines are invalid for this document type");
+      return;
+    }
 
     /** Signed adjustment: payable = subtotal + tax − invoice discount + roundOffAmount */
     const roundOffForApi = (() => {
