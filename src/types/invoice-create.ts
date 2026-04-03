@@ -18,8 +18,15 @@ export interface InvoiceLineDraft {
   cgstRate: string;
   sgstRate: string;
   igstRate: string;
-  /** Original qty on the source sale invoice (sales return — display / max return qty). */
+  /** Original sale line id (`invoice_items.id`) when this return is linked to a source `SALE_INVOICE`. */
+  sourceInvoiceItemId?: number;
+  /** Original qty on the source invoice line (display). */
   soldQuantity?: string;
+  /**
+   * Max qty returnable now on this line (from GET `quantityReturnableRemaining`; includes other finalized returns).
+   * Client-side cap before submit; falls back to `soldQuantity` when omitted.
+   */
+  remainingReturnableQty?: string;
   /** When false, line is excluded from the return document and totals. */
   selectedForReturn?: boolean;
 }

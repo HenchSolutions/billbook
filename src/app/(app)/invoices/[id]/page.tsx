@@ -35,6 +35,7 @@ import {
   INVOICE_TYPE_OPTIONS,
   invoiceTypeSupportsReceiptPayment,
 } from "@/lib/invoice";
+import { withInvoiceQuantityErrorDetails } from "@/lib/invoice-quantity-error-details";
 import { showSuccessToast, showErrorToast } from "@/lib/toast-helpers";
 import { ApiClientError } from "@/api/error";
 
@@ -74,7 +75,7 @@ export default function InvoiceDetail() {
       await finalizeMutation.mutateAsync(invoiceId);
       showSuccessToast("Invoice finalized");
     } catch (err) {
-      showErrorToast(err, "Failed to finalize");
+      showErrorToast(withInvoiceQuantityErrorDetails(err), "Failed to finalize");
     }
   };
 

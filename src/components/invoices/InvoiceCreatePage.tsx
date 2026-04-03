@@ -109,6 +109,7 @@ export function InvoiceCreatePage({
       />
 
       <LineEditorSection
+        returnValidationWarning={state.returnQtyBlockReason}
         invoiceType={initialType}
         draftLine={state.draftLine}
         addedLines={state.addedLines}
@@ -171,6 +172,7 @@ export function InvoiceCreatePage({
             roundOffInputValue={state.roundOffInputValue}
             onRoundOffAmountChange={state.setRoundOffAmount}
             canSubmit={state.canSubmit}
+            submitBlockedHint={state.returnQtySubmitShortHint}
             isPending={state.saveInvoice.isPending}
             onCreate={state.handleCreate}
             shortLabel={state.pageMeta.shortLabel}

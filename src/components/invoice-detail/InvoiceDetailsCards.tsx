@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getInvoiceBillSummary, getInvoiceTypeCreateCopy } from "@/lib/invoice";
 import { cn, formatCurrency, formatDate, formatSignedCurrency, formatTime } from "@/lib/utils";
@@ -66,6 +67,23 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col space-y-4 text-sm">
+          {(invoice.invoiceType === "SALE_RETURN" || invoice.invoiceType === "PURCHASE_RETURN") &&
+          invoice.sourceInvoiceId != null ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Linked document
+              </p>
+              <div className="rounded-md border bg-muted/15 px-3 py-2.5">
+                <Link
+                  href={`/invoices/${invoice.sourceInvoiceId}`}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Original invoice #{invoice.sourceInvoiceId}
+                </Link>
+              </div>
+            </div>
+          ) : null}
+
           {isPurchaseFamily(invoice.invoiceType) &&
           invoice.sellingPriceMarginPercent != null &&
           String(invoice.sellingPriceMarginPercent).trim() !== "" ? (

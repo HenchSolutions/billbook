@@ -92,7 +92,18 @@ export function InvoiceLineItemsTable({
                       </td>
                       <td className="px-3 py-3 tabular-nums text-muted-foreground">{hsn || "—"}</td>
                       <td className="px-3 py-3 text-muted-foreground">
-                        {purchaseDate ? formatDate(purchaseDate) : "—"}
+                        {purchaseDate ? (
+                          <div>
+                            <div>{formatDate(purchaseDate)}</div>
+                            {sid != null ? (
+                              <div className="mt-0.5 text-xs tabular-nums text-muted-foreground/85">
+                                Batch #{sid}
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums">
                         {formatQuantity(item.quantity)}

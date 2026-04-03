@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Plus, Trash2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
   getLineAmounts,
   toNum,
 } from "@/lib/invoice-create";
+import { getReturnQuantityCap, isReturnQuantityOverCap } from "@/lib/invoice-return-cap";
 import { formatISODateDisplay } from "@/lib/date";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { InvoiceLineDraft, StockChoice, StockLineIssue } from "@/types/invoice-create";
@@ -60,6 +62,8 @@ interface LineEditorSectionProps {
   qtyAutoAdjusted: boolean;
   /** Purchase invoice: updates purchase rate and selling price when margin is set. */
   onPurchaseUnitPriceChange?: (lineId: string, value: string) => void;
+  /** Linked sale/purchase return: show when return qty exceeds remaining (blocks save). */
+  returnValidationWarning?: string | null;
 }
 
 export function LineEditorSection({
@@ -88,6 +92,7 @@ export function LineEditorSection({
   focusedIssueLineId,
   qtyAutoAdjusted,
   onPurchaseUnitPriceChange,
+  returnValidationWarning,
 }: LineEditorSectionProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
   const isSaleReturn = invoiceType === "SALE_RETURN";
@@ -95,6 +100,7 @@ export function LineEditorSection({
   /** Purchase bill lines: cost + selling columns. */
   const isPurchaseCostLine =
     invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
+  const isPurchaseReturn = invoiceType === "PURCHASE_RETURN";
   const batchRequired = isSalesFamily(invoiceType);
   const unitPriceEditable = purchaseFamilyForm;
   const draftGstDerived =
@@ -156,6 +162,12 @@ export function LineEditorSection({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
+        {returnValidationWarning ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{returnValidationWarning}</AlertDescription>
+          </Alert>
+        ) : null}
         {isSaleReturn ? (
           addedLines.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
@@ -180,7 +192,7 @@ export function LineEditorSection({
                       Batch
                     </th>
                     <th scope="col" className={thRight}>
-                      Sold qty
+                      Remaining
                     </th>
                     <th scope="col" className={thRight}>
                       Unit price
@@ -198,6 +210,8 @@ export function LineEditorSection({
                     const selected = line.selectedForReturn !== false;
                     const lineEntry = stockEntries.find((entry) => entry.id === line.stockEntryId);
                     const totals = getLineAmounts(line);
+                    const overCap = selected && isReturnQuantityOverCap(line);
+                    const capHint = getReturnQuantityCap(line);
                     const displayName = line.itemName.trim() || line.item?.name?.trim() || "—";
                     const hsnSac = line.hsnCode.trim()
                       ? line.hsnCode
@@ -214,6 +228,7 @@ export function LineEditorSection({
                         className={cn(
                           "border-b last:border-0",
                           !selected && "bg-muted/30 text-muted-foreground",
+                          overCap && "bg-destructive/[0.06]",
                         )}
                       >
                         <td className="py-2 pl-3 text-center">
@@ -233,19 +248,34 @@ export function LineEditorSection({
                             : "—"}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
-                          {line.soldQuantity?.trim() ? line.soldQuantity : "—"}
+                          {line.remainingReturnableQty?.trim()
+                            ? line.remainingReturnableQty
+                            : line.soldQuantity?.trim()
+                              ? line.soldQuantity
+                              : "—"}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           {formatCurrency(line.unitPrice)}
                         </td>
-                        <td className="px-3 py-2.5 text-right">
-                          <Input
-                            value={line.quantity}
-                            onChange={(e) => onLineQuantityChange(line.id, e.target.value)}
-                            disabled={!selected}
-                            className="inline-block h-8 w-[4.25rem] px-2 py-1 text-right text-xs tabular-nums"
-                            aria-label={`Return quantity for ${displayName}`}
-                          />
+                        <td className="px-3 py-2.5 text-right align-top">
+                          <div className="inline-flex flex-col items-end">
+                            <Input
+                              value={line.quantity}
+                              onChange={(e) => onLineQuantityChange(line.id, e.target.value)}
+                              disabled={!selected}
+                              aria-invalid={overCap}
+                              className={cn(
+                                "inline-block h-8 w-[4.25rem] px-2 py-1 text-right text-xs tabular-nums",
+                                overCap && "border-destructive ring-1 ring-destructive/25",
+                              )}
+                              aria-label={`Return quantity for ${displayName}`}
+                            />
+                            {overCap && capHint != null ? (
+                              <span className="mt-1 max-w-[9rem] text-right text-[11px] leading-tight text-destructive">
+                                Max {capHint}
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
                         <td className="px-3 py-2.5 pr-4 text-right font-medium tabular-nums text-foreground">
                           {selected && toNum(line.quantity) > 0
@@ -615,6 +645,8 @@ export function LineEditorSection({
                   const totals = getLineAmounts(line);
                   const lineEntry = stockEntries.find((entry) => entry.id === line.stockEntryId);
                   const lineIssue = stockLineIssues[line.id];
+                  const purchaseReturnOver = isPurchaseReturn && isReturnQuantityOverCap(line);
+                  const purchaseCap = getReturnQuantityCap(line);
                   return (
                     <tr
                       key={line.id}
@@ -623,6 +655,7 @@ export function LineEditorSection({
                       className={cn(
                         "border-b outline-none last:border-0 hover:bg-muted/20",
                         lineIssue && "bg-amber-50/60",
+                        purchaseReturnOver && "bg-destructive/[0.06]",
                         focusedIssueLineId === line.id && "ring-2 ring-amber-300",
                       )}
                     >
@@ -650,8 +683,18 @@ export function LineEditorSection({
                           ? formatISODateDisplay(getEntryDateIso(lineEntry)) || "No date"
                           : "-"}
                       </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
-                        {line.quantity}
+                      <td
+                        className={cn(
+                          "px-3 py-2.5 text-right tabular-nums text-foreground",
+                          purchaseReturnOver && "text-destructive",
+                        )}
+                      >
+                        <div>{line.quantity}</div>
+                        {purchaseReturnOver && purchaseCap != null ? (
+                          <div className="mt-0.5 text-[11px] font-normal leading-tight text-destructive">
+                            Max {purchaseCap}
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums">
                         {formatCurrency(line.unitPrice)}

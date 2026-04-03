@@ -66,6 +66,13 @@ export function PartyAndDatesCards({
   const primaryAddressLine =
     [party?.address, party?.city, party?.state, party?.postalCode].filter(Boolean).join(" · ") ||
     "No address";
+  /** Keeps Radix Select controlled before party loads (`undefined` would flip uncontrolled → controlled). */
+  const NO_PARTY_VALUE = "__NO_PARTY__";
+  const consigneeSelectValue = !party
+    ? NO_PARTY_VALUE
+    : selectedConsigneeId == null
+      ? "__PRIMARY__"
+      : String(selectedConsigneeId);
   const selectedConsignee = consignees.find((c) => c.id === selectedConsigneeId) ?? null;
   const selectedTitle = selectedConsignee
     ? selectedConsignee.label?.trim() || selectedConsignee.consigneeName
@@ -96,16 +103,11 @@ export function PartyAndDatesCards({
           <div className="space-y-2">
             <Label>{addressRoleLabel}</Label>
             <Select
-              value={
-                party
-                  ? selectedConsigneeId == null
-                    ? "__PRIMARY__"
-                    : String(selectedConsigneeId)
-                  : undefined
-              }
-              onValueChange={(value) =>
-                onConsigneeChange(value === "__PRIMARY__" ? null : Number(value))
-              }
+              value={consigneeSelectValue}
+              onValueChange={(value) => {
+                if (value === NO_PARTY_VALUE) return;
+                onConsigneeChange(value === "__PRIMARY__" ? null : Number(value));
+              }}
               disabled={!party || isConsigneesLoading}
             >
               <SelectTrigger className="h-auto min-h-10 items-start py-2 [&>span]:line-clamp-none">
@@ -125,22 +127,30 @@ export function PartyAndDatesCards({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__PRIMARY__">
-                  <div className="flex flex-col">
-                    <span>{primaryAddressOptionLabel}</span>
-                    <span className="text-xs opacity-80">{primaryAddressLine}</span>
-                  </div>
-                </SelectItem>
-                {consignees.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    <div className="flex flex-col">
-                      <span>{c.label?.trim() || c.consigneeName}</span>
-                      <span className="text-xs opacity-80">
-                        {formatConsigneeAddressLine(c) || "No address"}
-                      </span>
-                    </div>
+                {!party ? (
+                  <SelectItem value={NO_PARTY_VALUE} disabled>
+                    Select party first
                   </SelectItem>
-                ))}
+                ) : (
+                  <>
+                    <SelectItem value="__PRIMARY__">
+                      <div className="flex flex-col">
+                        <span>{primaryAddressOptionLabel}</span>
+                        <span className="text-xs opacity-80">{primaryAddressLine}</span>
+                      </div>
+                    </SelectItem>
+                    {consignees.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>
+                        <div className="flex flex-col">
+                          <span>{c.label?.trim() || c.consigneeName}</span>
+                          <span className="text-xs opacity-80">
+                            {formatConsigneeAddressLine(c) || "No address"}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>

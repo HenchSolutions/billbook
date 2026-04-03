@@ -44,6 +44,8 @@ export interface Invoice {
   partyCity?: string | null;
   partyState?: string | null;
   partyPostalCode?: string | null;
+  /** `SALE_RETURN` / `PURCHASE_RETURN`: original invoice id when linked (cumulative return caps). */
+  sourceInvoiceId?: number | null;
   /** Selected consignee id snapshot source (null means party primary address). */
   partyConsigneeId?: number | null;
   consigneeName?: string | null;
@@ -81,6 +83,12 @@ export interface InvoiceItem {
   cgstAmount: string | null;
   sgstAmount: string | null;
   igstAmount: string | null;
+  /** Return docs: `invoice_items.id` on the original invoice line when linked. */
+  sourceInvoiceItemId?: number | null;
+  /** Finalized source sale/purchase invoice lines: qty already returned elsewhere (GET). */
+  quantityAlreadyReturned?: string | null;
+  /** Finalized source sale/purchase invoice lines: max qty still returnable (GET). */
+  quantityReturnableRemaining?: string | null;
   createdAt: string;
 }
 
@@ -132,10 +140,11 @@ export interface InvoiceCommunicationsSummary {
 /**
  * Create/update invoice line (`items[]`). Rules are enforced server-side by `invoiceType`.
  * - Sale (`SALE_*`): send `stockEntryId`; do **not** send `itemId` or `sellingPrice`.
- * - Purchase (`PURCHASE_*`): do **not** send `stockEntryId`; send `itemName` + rates; optional `itemId` (catalog) and `sellingPrice`.
+ * - Purchase (`PURCHASE_INVOICE`): do **not** send `stockEntryId`; send `itemName` + rates; optional `itemId` and `sellingPrice`.
+ * - `PURCHASE_RETURN` with source link: optional `stockEntryId` when it must match the source purchase line’s batch.
  */
 export interface InvoiceItemInput {
-  /** Sale-side only (`SALE_INVOICE`, `SALE_RETURN`). Omit for purchase flows. */
+  /** `SALE_*` and linked `PURCHASE_RETURN` lines when batch must match source. */
   stockEntryId?: number;
   quantity: string;
   unitPrice?: string;
@@ -157,6 +166,10 @@ export interface InvoiceItemInput {
    * Purchase only: intended selling rate per unit (excl. line GST), same money rules as `unitPrice`; omit or ≥ 0.
    */
   sellingPrice?: string;
+  /**
+   * `SALE_RETURN` / `PURCHASE_RETURN` with `sourceInvoiceId`: original line’s `invoice_items.id` (and `stockEntryId` when applicable).
+   */
+  sourceInvoiceItemId?: number;
 }
 
 export interface CreateInvoiceRequest {
@@ -171,6 +184,8 @@ export interface CreateInvoiceRequest {
   roundOffAmount?: string;
   /** Optional; non-negative decimal string; stored on the invoice (purchase invoice UI). */
   sellingPriceMarginPercent?: string;
+  /** `SALE_RETURN` / `PURCHASE_RETURN`: original invoice id (optional; enables cumulative return caps). */
+  sourceInvoiceId?: number;
   items: InvoiceItemInput[];
 }
 
@@ -187,6 +202,8 @@ export interface UpdateInvoiceRequest {
   discountPercent?: string;
   roundOffAmount?: string;
   sellingPriceMarginPercent?: string;
+  /** Return types: set `null` to clear linkage. */
+  sourceInvoiceId?: number | null;
   items?: InvoiceItemInput[];
 }
 

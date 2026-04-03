@@ -107,6 +107,14 @@ export function buildInvoiceItemInput(
     else if (line.item?.hsnCode?.trim()) payload.hsnCode = line.item.hsnCode.trim();
     if (line.sacCode.trim()) payload.sacCode = line.sacCode.trim();
     else if (line.item?.sacCode?.trim()) payload.sacCode = line.item.sacCode.trim();
+    if (invoiceType === "PURCHASE_RETURN") {
+      if (line.sourceInvoiceItemId != null) {
+        payload.sourceInvoiceItemId = line.sourceInvoiceItemId;
+      }
+      if (line.stockEntryId != null) {
+        payload.stockEntryId = line.stockEntryId;
+      }
+    }
     return payload;
   }
 
@@ -122,6 +130,9 @@ export function buildInvoiceItemInput(
   };
   if (line.unitPrice.trim() !== "") {
     payload.unitPrice = line.unitPrice;
+  }
+  if (invoiceType === "SALE_RETURN" && line.sourceInvoiceItemId != null) {
+    payload.sourceInvoiceItemId = line.sourceInvoiceItemId;
   }
   return payload;
 }

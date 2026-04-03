@@ -35,6 +35,8 @@ interface InvoiceTotalsSummaryProps {
   shortLabel: string;
   /** Default: Create {shortLabel} */
   submitLabel?: string;
+  /** Shown above the submit button when save is blocked (e.g. return qty over cap). */
+  submitBlockedHint?: string | null;
 }
 
 export function InvoiceTotalsSummary({
@@ -50,6 +52,7 @@ export function InvoiceTotalsSummary({
   onCreate,
   shortLabel,
   submitLabel,
+  submitBlockedHint,
 }: InvoiceTotalsSummaryProps) {
   const {
     subTotal,
@@ -180,6 +183,9 @@ export function InvoiceTotalsSummary({
               <span>{isReturnTotal ? "Total return amount" : "Payable Amount"}</span>
               <span className="tabular-nums">{formatCurrency(grandTotal)}</span>
             </div>
+            {submitBlockedHint ? (
+              <p className="text-xs text-destructive">{submitBlockedHint}</p>
+            ) : null}
             <Button className="mt-3 w-full" disabled={!canSubmit || isPending} onClick={onCreate}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {submitLabel ?? `Create ${shortLabel}`}
