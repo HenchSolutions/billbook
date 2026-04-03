@@ -58,6 +58,11 @@ export function isSalesFamily(type: InvoiceType): boolean {
   return type === "SALE_INVOICE" || type === "SALE_RETURN";
 }
 
+/** Purchase document types that support vendor bill metadata on the API. */
+export function isPurchaseVendorBillMetaType(type: InvoiceType): boolean {
+  return type === "PURCHASE_INVOICE" || type === "PURCHASE_RETURN";
+}
+
 /**
  * Inbound receipts record money received from customers and allocate to invoices.
  * Returns and purchase-side documents are not paid this way (use outbound / vendor flows).

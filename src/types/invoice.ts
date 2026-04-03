@@ -58,6 +58,12 @@ export interface Invoice {
   /** API helper labels for customer/vendor contexts. */
   partyRoleLabel?: "Customer" | "Vendor";
   addressRoleLabel?: "Delivery Address" | "Vendor Address";
+  /** Vendor’s bill reference (purchase flows). Absent on older API responses. */
+  originalBillNumber?: string | null;
+  /** Vendor bill date from API (ISO date or datetime). */
+  originalBillDate?: string | null;
+  /** Net payment terms in days (purchase flows). */
+  paymentTermsDays?: number | null;
 }
 
 export interface InvoiceItem {
@@ -186,6 +192,10 @@ export interface CreateInvoiceRequest {
   sellingPriceMarginPercent?: string;
   /** `SALE_RETURN` / `PURCHASE_RETURN`: original invoice id (optional; enables cumulative return caps). */
   sourceInvoiceId?: number;
+  /** `PURCHASE_INVOICE` / `PURCHASE_RETURN` only; omit for sale types. */
+  originalBillNumber?: string;
+  originalBillDate?: string;
+  paymentTermsDays?: number;
   items: InvoiceItemInput[];
 }
 
@@ -204,6 +214,10 @@ export interface UpdateInvoiceRequest {
   sellingPriceMarginPercent?: string;
   /** Return types: set `null` to clear linkage. */
   sourceInvoiceId?: number | null;
+  /** `PURCHASE_INVOICE` / `PURCHASE_RETURN` only; `null` clears. Omit for sale types. */
+  originalBillNumber?: string | null;
+  originalBillDate?: string | null;
+  paymentTermsDays?: number | null;
   items?: InvoiceItemInput[];
 }
 

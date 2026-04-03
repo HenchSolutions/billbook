@@ -42,8 +42,13 @@ import {
   paiseToMoney,
   pickInvoiceTaxRate,
 } from "@/lib/invoice-create-mapping";
-import { addCalendarDaysToIsoDate } from "@/lib/date";
-import { getInvoiceTypeCreateCopy, INVOICE_TYPE_OPTIONS, isSalesFamily } from "@/lib/invoice";
+import { addCalendarDaysToIsoDate, parseISODateString } from "@/lib/date";
+import {
+  getInvoiceTypeCreateCopy,
+  INVOICE_TYPE_OPTIONS,
+  isPurchaseVendorBillMetaType,
+  isSalesFamily,
+} from "@/lib/invoice";
 import { formatCurrency } from "@/lib/utils";
 import {
   clampQuantityToRemainingCap,
@@ -56,6 +61,29 @@ import { ApiClientError } from "@/api/error";
 import { isServiceType, type Item, type StockEntry } from "@/types/item";
 import type { Party, PartyConsignee } from "@/types/party";
 import type { InvoiceType } from "@/types/invoice";
+
+function validatePurchaseVendorBillFields(
+  invoiceType: InvoiceType,
+  originalBillNumber: string,
+  originalBillDate: string,
+  paymentTermsDays: string,
+): string | null {
+  if (!isPurchaseVendorBillMetaType(invoiceType)) return null;
+  if (originalBillNumber.trim().length > 100) {
+    return "Original bill no. must be at most 100 characters.";
+  }
+  const obd = originalBillDate.trim().slice(0, 10);
+  if (obd !== "" && !parseISODateString(obd)) {
+    return "Enter a valid original bill date.";
+  }
+  const raw = paymentTermsDays.trim();
+  if (raw === "") return null;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || String(n) !== raw || n < 0 || n > 3650) {
+    return "Payment terms must be a whole number from 0 to 3650.";
+  }
+  return null;
+}
 
 export function useInvoiceCreateState(
   initialType: InvoiceType,
@@ -72,6 +100,8 @@ export function useInvoiceCreateState(
   const hasHydratedEditInvoice = useRef(false);
   /** Last due date we set from business defaultDueDays + invoiceDate; used to keep syncing invoice date until user edits due. */
   const expectedAutoDueRef = useRef<string | null>(null);
+  /** Last due date suggested from payment terms + purchase bill date (create flow). */
+  const expectedAutoDueFromTermsRef = useRef<string | null>(null);
   const submitGuardRef = useRef(false);
 
   const [party, setParty] = useState<Party | null>(null);
@@ -80,6 +110,9 @@ export function useInvoiceCreateState(
   const [dueDate, setDueDate] = useState("");
   /** PURCHASE_INVOICE: margin on cost for default selling price per line. */
   const [sellingPriceMarginPercent, setSellingPriceMarginPercent] = useState("");
+  const [originalBillNumber, setOriginalBillNumber] = useState("");
+  const [originalBillDate, setOriginalBillDate] = useState("");
+  const [paymentTermsDays, setPaymentTermsDays] = useState("");
   const [notes, setNotes] = useState("");
   const [discountAmount, setDiscountAmount] = useState("");
   const [discountPercent, setDiscountPercent] = useState("");
@@ -402,9 +435,38 @@ export function useInvoiceCreateState(
     ? Math.abs(summary.roundOff).toFixed(2)
     : roundOffAmount.replace(/^\s*-/, "");
 
-  /** Business settings: default due days → due date = invoice date + N (create flows only; stops if user edits due). */
+  /**
+   * Create flow: suggest due date from payment terms + purchase bill date when set;
+   * otherwise from business defaultDueDays + invoice date. Stops if user edits due away from the last auto value.
+   */
   useEffect(() => {
     if (editInvoiceId) return;
+
+    if (isPurchaseVendorBillMetaType(invoiceType)) {
+      const rawTerms = paymentTermsDays.trim();
+      if (rawTerms !== "") {
+        const n = Number.parseInt(rawTerms, 10);
+        if (Number.isFinite(n) && n >= 0 && n <= 3650 && String(n) === rawTerms.trim()) {
+          const computed = addCalendarDaysToIsoDate(invoiceDate, n);
+          if (computed) {
+            setDueDate((prev) => {
+              if (
+                prev === "" ||
+                prev === expectedAutoDueFromTermsRef.current ||
+                prev === expectedAutoDueRef.current
+              ) {
+                expectedAutoDueFromTermsRef.current = computed;
+                expectedAutoDueRef.current = computed;
+                return computed;
+              }
+              return prev;
+            });
+            return;
+          }
+        }
+      }
+    }
+
     const days = businessSettings?.defaultDueDays;
     if (days == null || !Number.isFinite(days) || days < 0) return;
     const computed = addCalendarDaysToIsoDate(invoiceDate, Math.floor(days));
@@ -417,7 +479,7 @@ export function useInvoiceCreateState(
       }
       return prev;
     });
-  }, [editInvoiceId, businessSettings?.defaultDueDays, invoiceDate]);
+  }, [editInvoiceId, invoiceType, paymentTermsDays, businessSettings?.defaultDueDays, invoiceDate]);
 
   useEffect(() => {
     const sourceConfigByReturnType: Record<
@@ -680,6 +742,16 @@ export function useInvoiceCreateState(
     setInvoiceDate(editingDraftInvoice.invoiceDate.slice(0, 10));
     setDueDate(editingDraftInvoice.dueDate?.slice(0, 10) ?? "");
     setSellingPriceMarginPercent(editingDraftInvoice.sellingPriceMarginPercent?.trim() ?? "");
+    setOriginalBillNumber(editingDraftInvoice.originalBillNumber?.trim() ?? "");
+    setOriginalBillDate(
+      editingDraftInvoice.originalBillDate ? editingDraftInvoice.originalBillDate.slice(0, 10) : "",
+    );
+    setPaymentTermsDays(
+      editingDraftInvoice.paymentTermsDays != null &&
+        Number.isFinite(editingDraftInvoice.paymentTermsDays)
+        ? String(editingDraftInvoice.paymentTermsDays)
+        : "",
+    );
     setNotes(editingDraftInvoice.notes ?? "");
     setDiscountAmount(editingDraftInvoice.discountAmount ?? "");
     setDiscountPercent(editingDraftInvoice.discountPercent ?? "");
@@ -1332,6 +1404,18 @@ export function useInvoiceCreateState(
       return;
     }
 
+    const vendorFieldError = validatePurchaseVendorBillFields(
+      invoiceType,
+      originalBillNumber,
+      originalBillDate,
+      paymentTermsDays,
+    );
+    if (vendorFieldError) {
+      submitGuardRef.current = false;
+      showErrorToast(null, vendorFieldError);
+      return;
+    }
+
     const linesToSubmit =
       invoiceType === "SALE_RETURN"
         ? addedLines.filter((l) => l.selectedForReturn !== false && toNum(l.quantity) > 0)
@@ -1429,6 +1513,16 @@ export function useInvoiceCreateState(
           ...(invoiceType === "PURCHASE_INVOICE" && sellingPriceMarginPercent.trim() !== ""
             ? { sellingPriceMarginPercent: sellingPriceMarginPercent.trim() }
             : {}),
+          ...(isPurchaseVendorBillMetaType(invoiceType)
+            ? {
+                originalBillNumber: originalBillNumber.trim().slice(0, 100) || null,
+                originalBillDate: originalBillDate.trim().slice(0, 10) || null,
+                paymentTermsDays:
+                  paymentTermsDays.trim() === ""
+                    ? null
+                    : Number.parseInt(paymentTermsDays.trim(), 10),
+              }
+            : {}),
           ...(isReturnWithSourceLink
             ? {
                 ...(allReturnLinesLinked && previousReturnSourceId != null
@@ -1459,6 +1553,19 @@ export function useInvoiceCreateState(
         roundOffAmount: roundOffForApi,
         ...(invoiceType === "PURCHASE_INVOICE" && sellingPriceMarginPercent.trim() !== ""
           ? { sellingPriceMarginPercent: sellingPriceMarginPercent.trim() }
+          : {}),
+        ...(isPurchaseVendorBillMetaType(invoiceType)
+          ? {
+              ...(originalBillNumber.trim().slice(0, 100)
+                ? { originalBillNumber: originalBillNumber.trim().slice(0, 100) }
+                : {}),
+              ...(originalBillDate.trim().slice(0, 10)
+                ? { originalBillDate: originalBillDate.trim().slice(0, 10) }
+                : {}),
+              ...(paymentTermsDays.trim() !== ""
+                ? { paymentTermsDays: Number.parseInt(paymentTermsDays.trim(), 10) }
+                : {}),
+            }
           : {}),
         ...(isReturnWithSourceLink &&
         sourceInvoiceId != null &&
@@ -1504,6 +1611,9 @@ export function useInvoiceCreateState(
     invoiceType,
     invoiceDate,
     dueDate,
+    originalBillNumber,
+    originalBillDate,
+    paymentTermsDays,
     notes,
     discountAmount,
     discountPercent,
@@ -1571,6 +1681,12 @@ export function useInvoiceCreateState(
     setInvoiceDate,
     dueDate,
     setDueDate,
+    originalBillNumber,
+    setOriginalBillNumber,
+    originalBillDate,
+    setOriginalBillDate,
+    paymentTermsDays,
+    setPaymentTermsDays,
     sellingPriceMarginPercent,
     handleSellingPriceMarginChange,
     handlePurchaseUnitPriceChange,

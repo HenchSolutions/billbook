@@ -15,6 +15,8 @@ import { PartyAutocomplete } from "@/components/invoices/PartyAutocomplete";
 import { getInvoiceTypeCreateCopy } from "@/lib/invoice";
 import { toISODateString } from "@/lib/date";
 import type { Party, PartyConsignee, PartyType } from "@/types/party";
+import { isPurchaseVendorBillMetaType } from "@/lib/invoice";
+import { cn } from "@/lib/utils";
 import type { InvoiceType } from "@/types/invoice";
 
 function formatConsigneeAddressLine(consignee: PartyConsignee): string {
@@ -40,6 +42,13 @@ interface PartyAndDatesCardsProps {
   /** Purchase invoice: margin on purchase rate to suggest selling price per line. */
   sellingPriceMarginPercent?: string;
   onSellingPriceMarginChange?: (value: string) => void;
+  /** Vendor bill metadata (purchase invoice / purchase return). */
+  originalBillNumber?: string;
+  onOriginalBillNumberChange?: (value: string) => void;
+  originalBillDate?: string;
+  onOriginalBillDateChange?: (value: string) => void;
+  paymentTermsDays?: string;
+  onPaymentTermsDaysChange?: (value: string) => void;
 }
 
 export function PartyAndDatesCards({
@@ -59,9 +68,30 @@ export function PartyAndDatesCards({
   onDueDateChange,
   sellingPriceMarginPercent,
   onSellingPriceMarginChange,
+  originalBillNumber,
+  onOriginalBillNumberChange,
+  originalBillDate,
+  onOriginalBillDateChange,
+  paymentTermsDays,
+  onPaymentTermsDaysChange,
 }: PartyAndDatesCardsProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
   const todayIso = toISODateString(new Date());
+  const showVendorBillFields =
+    isPurchaseVendorBillMetaType(invoiceType) &&
+    originalBillNumber !== undefined &&
+    onOriginalBillNumberChange &&
+    originalBillDate !== undefined &&
+    onOriginalBillDateChange &&
+    paymentTermsDays !== undefined &&
+    onPaymentTermsDaysChange;
+  const invoiceDateLabel = isPurchaseVendorBillMetaType(invoiceType)
+    ? "Purchase bill date"
+    : "Invoice date";
+  const showSellingPriceMargin =
+    invoiceType === "PURCHASE_INVOICE" &&
+    sellingPriceMarginPercent !== undefined &&
+    onSellingPriceMarginChange;
   const primaryAddressOptionLabel = "Primary Address";
   const primaryAddressLine =
     [party?.address, party?.city, party?.state, party?.postalCode].filter(Boolean).join(" · ") ||
@@ -163,7 +193,11 @@ export function PartyAndDatesCards({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
-            <DateField label="Invoice Date" value={invoiceDate} onChange={onInvoiceDateChange} />
+            <DateField
+              label={invoiceDateLabel}
+              value={invoiceDate}
+              onChange={onInvoiceDateChange}
+            />
             <DateField
               label="Due Date"
               value={dueDate}
@@ -171,16 +205,55 @@ export function PartyAndDatesCards({
               minDate={todayIso}
             />
           </div>
-          {invoiceType === "PURCHASE_INVOICE" &&
-            sellingPriceMarginPercent !== undefined &&
-            onSellingPriceMarginChange && (
+          {showVendorBillFields && (
+            <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="selling-price-margin">
-                  Selling price margin (%)
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">
-                    — applies to purchase rate on each line
-                  </span>
+                <Label htmlFor="original-bill-no">Original bill no.</Label>
+                <Input
+                  id="original-bill-no"
+                  type="text"
+                  maxLength={100}
+                  value={originalBillNumber}
+                  onChange={(e) => onOriginalBillNumberChange(e.target.value)}
+                  placeholder="Vendor’s bill number"
+                  autoComplete="off"
+                />
+              </div>
+              <DateField
+                label="Original bill date"
+                value={originalBillDate}
+                onChange={onOriginalBillDateChange}
+              />
+            </div>
+          )}
+          {(showVendorBillFields || showSellingPriceMargin) && (
+            <div className="grid gap-x-3 gap-y-2 sm:grid-cols-2">
+              {showVendorBillFields && (
+                <Label
+                  htmlFor="payment-terms-days"
+                  className={cn("leading-snug", !showSellingPriceMargin && "sm:col-span-2")}
+                >
+                  Payment terms (days)
                 </Label>
+              )}
+              {showSellingPriceMargin && (
+                <Label htmlFor="selling-price-margin" className="leading-snug">
+                  Selling price margin (%)
+                </Label>
+              )}
+              {showVendorBillFields && (
+                <Input
+                  id="payment-terms-days"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 30"
+                  value={paymentTermsDays}
+                  onChange={(e) => onPaymentTermsDaysChange(e.target.value)}
+                  className={cn("tabular-nums", !showSellingPriceMargin && "sm:col-span-2")}
+                  autoComplete="off"
+                />
+              )}
+              {showSellingPriceMargin && (
                 <Input
                   id="selling-price-margin"
                   type="text"
@@ -188,11 +261,12 @@ export function PartyAndDatesCards({
                   placeholder="e.g. 20"
                   value={sellingPriceMarginPercent}
                   onChange={(e) => onSellingPriceMarginChange(e.target.value)}
-                  className="max-w-[12rem] tabular-nums"
+                  className="tabular-nums"
                   autoComplete="off"
                 />
-              </div>
-            )}
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

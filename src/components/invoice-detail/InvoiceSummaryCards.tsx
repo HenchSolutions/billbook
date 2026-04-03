@@ -1,7 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
 import { BusinessIdentity } from "../BusinessIdentity";
-import { getInvoiceBalanceDue, INVOICE_TYPE_OPTIONS } from "@/lib/invoice";
+import {
+  getInvoiceBalanceDue,
+  INVOICE_TYPE_OPTIONS,
+  isPurchaseVendorBillMetaType,
+} from "@/lib/invoice";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import type { InvoiceDetail } from "@/types/invoice";
 
@@ -22,6 +26,11 @@ export function InvoiceSummaryCards({
   const typeLabel =
     INVOICE_TYPE_OPTIONS.find((o) => o.type === invoice.invoiceType)?.label ?? invoice.invoiceType;
   const isFullyPaid = balanceDueValue <= 0 && invoice.status === "FINAL";
+  const purchaseBillMeta = isPurchaseVendorBillMetaType(invoice.invoiceType);
+  const invoiceDateLabel = purchaseBillMeta ? "Purchase bill date" : "Invoice date";
+  const obn = invoice.originalBillNumber?.trim();
+  const obd = invoice.originalBillDate;
+  const ptd = invoice.paymentTermsDays;
 
   const partyHeading = invoice.partyType === "SUPPLIER" ? "Supplier" : "Bill to";
 
@@ -81,9 +90,27 @@ export function InvoiceSummaryCards({
             </div>
             <div className="space-y-1 text-sm sm:text-right">
               <div>
-                <span className="text-muted-foreground">Invoice date </span>
+                <span className="text-muted-foreground">{invoiceDateLabel} </span>
                 <span className="font-medium">{formatDate(invoice.invoiceDate)}</span>
               </div>
+              {purchaseBillMeta && obn ? (
+                <div>
+                  <span className="text-muted-foreground">Original bill no. </span>
+                  <span className="font-medium">{obn}</span>
+                </div>
+              ) : null}
+              {purchaseBillMeta && obd ? (
+                <div>
+                  <span className="text-muted-foreground">Original bill date </span>
+                  <span className="font-medium">{formatDate(obd)}</span>
+                </div>
+              ) : null}
+              {purchaseBillMeta && ptd != null && Number.isFinite(ptd) ? (
+                <div>
+                  <span className="text-muted-foreground">Payment terms </span>
+                  <span className="font-medium tabular-nums">{ptd} days</span>
+                </div>
+              ) : null}
               <div>
                 <span className="text-muted-foreground">Due date </span>
                 <span

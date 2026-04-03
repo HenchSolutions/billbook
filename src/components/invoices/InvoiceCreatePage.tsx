@@ -16,6 +16,7 @@ import { ResizableNotesSummaryRow } from "@/components/invoices/invoice-create/R
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useBusinessProfile } from "@/hooks/use-business";
+import { isPurchaseVendorBillMetaType } from "@/lib/invoice";
 import type { InvoiceType } from "@/types/invoice";
 
 interface InvoiceCreatePageProps {
@@ -42,6 +43,7 @@ export function InvoiceCreatePage({
   const numberPending = state.isEditMode
     ? state.isEditingInvoiceLoading
     : state.isNextInvoiceNumberPending;
+  const showPurchaseBillNoLabel = isPurchaseVendorBillMetaType(initialType);
 
   return (
     <div className="page-container max-w-[96rem] animate-fade-in space-y-5">
@@ -75,11 +77,18 @@ export function InvoiceCreatePage({
             showName={!businessProfile?.logoUrl}
             nameClassName="text-sm font-semibold text-foreground"
           />
-          {numberPending ? (
-            <Skeleton className="h-8 w-48" />
-          ) : (
-            <h2 className="text-2xl font-bold tracking-tight">{displayNumber}</h2>
-          )}
+          <div>
+            {showPurchaseBillNoLabel ? (
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Purchase bill no.
+              </p>
+            ) : null}
+            {numberPending ? (
+              <Skeleton className="mt-1 h-8 w-48" />
+            ) : (
+              <h2 className="text-2xl font-bold tracking-tight">{displayNumber}</h2>
+            )}
+          </div>
         </div>
       )}
 
@@ -105,6 +114,24 @@ export function InvoiceCreatePage({
         }
         onSellingPriceMarginChange={
           initialType === "PURCHASE_INVOICE" ? state.handleSellingPriceMarginChange : undefined
+        }
+        originalBillNumber={
+          isPurchaseVendorBillMetaType(initialType) ? state.originalBillNumber : undefined
+        }
+        onOriginalBillNumberChange={
+          isPurchaseVendorBillMetaType(initialType) ? state.setOriginalBillNumber : undefined
+        }
+        originalBillDate={
+          isPurchaseVendorBillMetaType(initialType) ? state.originalBillDate : undefined
+        }
+        onOriginalBillDateChange={
+          isPurchaseVendorBillMetaType(initialType) ? state.setOriginalBillDate : undefined
+        }
+        paymentTermsDays={
+          isPurchaseVendorBillMetaType(initialType) ? state.paymentTermsDays : undefined
+        }
+        onPaymentTermsDaysChange={
+          isPurchaseVendorBillMetaType(initialType) ? state.setPaymentTermsDays : undefined
         }
       />
 

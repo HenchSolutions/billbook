@@ -24,6 +24,9 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
   const showReturnAction = returnInvoiceType !== null;
   const returnButtonLabel =
     returnInvoiceType === "SALE_RETURN" ? "Sales Return" : "Purchase Return";
+  const showVendorBillColumn =
+    invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
+  const mobileColSpan = (showVendorBillColumn ? 8 : 7) + (showReturnAction ? 1 : 0);
 
   return (
     <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
@@ -39,6 +42,14 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
             <th scope="col" className="px-3 py-3 text-left font-medium text-muted-foreground">
               Party
             </th>
+            {showVendorBillColumn && (
+              <th
+                scope="col"
+                className="hidden px-3 py-3 text-left font-medium text-muted-foreground lg:table-cell"
+              >
+                Vendor bill
+              </th>
+            )}
             <th
               scope="col"
               className="hidden px-3 py-3 text-left font-medium text-muted-foreground sm:table-cell"
@@ -85,7 +96,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 )}
               >
                 {/* Mobile: single-cell card-like row */}
-                <td className="block px-4 py-3 sm:hidden" colSpan={showReturnAction ? 8 : 7}>
+                <td className="block px-4 py-3 sm:hidden" colSpan={mobileColSpan}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -95,6 +106,11 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                       <div className="mt-0.5 truncate text-sm text-muted-foreground">
                         {inv.partyName ?? "—"}
                       </div>
+                      {showVendorBillColumn && inv.originalBillNumber?.trim() ? (
+                        <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                          Vendor bill {inv.originalBillNumber.trim()}
+                        </div>
+                      ) : null}
                       <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                         <span>{formatDate(inv.invoiceDate)}</span>
                         {inv.isOverdue && inv.overdueDays && inv.overdueDays > 0 && (
@@ -139,6 +155,11 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                   </span>
                 </td>
                 <td className="hidden px-3 py-3 sm:table-cell">{inv.partyName ?? "—"}</td>
+                {showVendorBillColumn && (
+                  <td className="hidden max-w-[10rem] truncate px-3 py-3 text-muted-foreground lg:table-cell">
+                    {inv.originalBillNumber?.trim() || "—"}
+                  </td>
+                )}
                 <td className="hidden px-3 py-3 text-muted-foreground sm:table-cell">
                   {formatDate(inv.invoiceDate)}
                 </td>
