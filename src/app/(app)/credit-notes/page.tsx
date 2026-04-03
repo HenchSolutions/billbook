@@ -38,17 +38,21 @@ export default function CreditNotes() {
   const finalizeMutation = useFinalizeCreditNote();
   const deleteMutation = useDeleteCreditNote();
   const { isOwner } = usePermissions();
+  const [finalizingId, setFinalizingId] = useState<number | null>(null);
 
   const creditNotes = data?.creditNotes ?? [];
   const total = data?.count ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
 
   const handleFinalize = async (id: number) => {
+    setFinalizingId(id);
     try {
       await finalizeMutation.mutateAsync(id);
       showSuccessToast("Credit note finalized");
     } catch (err) {
       showErrorToast(err, "Failed to finalize");
+    } finally {
+      setFinalizingId(null);
     }
   };
 
@@ -109,8 +113,8 @@ export default function CreditNotes() {
           <CreditNotesTable
             creditNotes={creditNotes}
             isOwner={isOwner}
-            finalizePending={finalizeMutation.isPending}
-            deletePending={deleteMutation.isPending}
+            finalizePendingId={finalizingId}
+            deletePendingId={deleteConfirm.id}
             onView={handleView}
             onFinalize={handleFinalize}
             onDelete={handleDelete}

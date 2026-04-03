@@ -13,6 +13,7 @@ interface InvoiceHeaderActionsProps {
   sentToday: boolean;
   reminderToday: boolean;
   pdfUrl?: string | null;
+  pdfError?: Error | null;
   isFinalizePending: boolean;
   isCancelPending: boolean;
   isMarkSentPending: boolean;
@@ -33,6 +34,7 @@ export function InvoiceHeaderActions({
   sentToday,
   reminderToday,
   pdfUrl,
+  pdfError,
   isFinalizePending,
   isCancelPending,
   isMarkSentPending,
@@ -128,6 +130,13 @@ export function InvoiceHeaderActions({
             <Download className="mr-2 h-3.5 w-3.5" />
             PDF
           </a>
+        </Button>
+      )}
+
+      {!pdfUrl && pdfError && invoice.status === "FINAL" && (
+        <Button variant="outline" size="sm" disabled title="PDF generation failed — try refreshing">
+          <Download className="mr-2 h-3.5 w-3.5" />
+          PDF unavailable
         </Button>
       )}
     </div>

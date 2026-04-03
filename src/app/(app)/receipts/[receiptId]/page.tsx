@@ -42,7 +42,7 @@ export default function ReceiptDetailPage() {
   if (!Number.isFinite(receiptId)) {
     return (
       <div className="page-container">
-        <ErrorBanner error={{ message: "Invalid receipt" }} fallbackMessage="Invalid receipt ID." />
+        <ErrorBanner error={new Error("Invalid receipt")} fallbackMessage="Invalid receipt ID." />
       </div>
     );
   }
@@ -292,13 +292,11 @@ export default function ReceiptDetailPage() {
         </Card>
       )}
 
-      {remaining > 0.001 && (
-        <ReceiptAllocationEditor
-          receiptId={receiptId}
-          receipt={receipt}
-          onSaved={() => void refetch()}
-        />
-      )}
+      <ReceiptAllocationEditor
+        receiptId={receiptId}
+        receipt={receipt}
+        onSaved={() => void refetch()}
+      />
     </div>
   );
 }

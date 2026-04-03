@@ -51,6 +51,7 @@ export function useCreateOutboundPayment() {
         queryKeys.parties.balancePrefix(),
         queryKeys.invoices.detailPrefix(),
         queryKeys.invoices.root(),
+        queryKeys.receipts.root(),
       ]);
     },
   });

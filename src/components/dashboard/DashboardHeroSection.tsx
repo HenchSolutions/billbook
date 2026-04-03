@@ -16,6 +16,15 @@ function toNumber(v: string | number | undefined | null): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function computeRevenueTrend(months: DashboardData["revenueByMonth"]): "up" | "down" | undefined {
+  const arr = months ?? [];
+  if (arr.length < 2) return undefined;
+  const latest = toNumber(arr[arr.length - 1].revenue);
+  const previous = toNumber(arr[arr.length - 2].revenue);
+  if (latest === previous) return undefined;
+  return latest > previous ? "up" : "down";
+}
+
 function netOutstandingAmount(d: DashboardData): number {
   return toNumber(d.netOutstanding ?? d.totalOutstanding);
 }
@@ -81,7 +90,7 @@ export function DashboardHeroSection({ greeting, dashboard }: DashboardHeroSecti
           value={formatCurrency(netRevenue)}
           subtitle={revenueSubtitle}
           icon={<IndianRupee className="h-5 w-5" />}
-          trend={(dashboard.revenueByMonth ?? []).length > 1 ? "up" : undefined}
+          trend={computeRevenueTrend(dashboard.revenueByMonth)}
           href="/reports"
         />
         <HeroCard

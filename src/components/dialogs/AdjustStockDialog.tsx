@@ -18,7 +18,10 @@ import { useAdjustStock } from "@/hooks/use-items";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 
 const schema = z.object({
-  quantity: z.string().regex(/^-?\d+(\.\d{1,2})?$/, "Enter a valid quantity (can be negative)"),
+  quantity: z
+    .string()
+    .regex(/^-?\d+(\.\d{1,2})?$/, "Enter a valid quantity (can be negative)")
+    .refine((v) => parseFloat(v) !== 0, "Quantity cannot be zero"),
   reason: z.string().min(1, "Reason is required"),
 });
 

@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { ApiClientError } from "@/api/error";
 
 function requestIdSuffix(requestId: string) {
-  return `\n\nRequest ID: ${requestId} — share with support when reporting an issue.`;
+  return ` (Request ID: ${requestId})`;
 }
 
 function copyRequestIdAction(requestId: string) {

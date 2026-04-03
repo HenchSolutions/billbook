@@ -109,7 +109,7 @@ export function StockEntryGrid({
   const isRowComplete = useCallback((r: StockEntryRow) => {
     if (!r.item) return false;
     const selling = parseFloat(String(r.sellingPrice ?? "").trim());
-    if (!Number.isFinite(selling) || selling < 0) return false;
+    if (!Number.isFinite(selling) || selling <= 0) return false;
     if (isServiceType(r.item.type)) {
       return true;
     }
@@ -136,7 +136,7 @@ export function StockEntryGrid({
       const isService = isServiceType(currentRow.item!.type);
       const qty = isService ? 1 : parseFloat(currentRow.quantity.trim());
       const selling = parseFloat(String(currentRow.sellingPrice ?? "").trim());
-      if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(selling) || selling < 0) {
+      if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(selling) || selling <= 0) {
         throw new Error("Invalid quantity or selling price");
       }
 
@@ -280,8 +280,8 @@ export function StockEntryGrid({
               <th className="min-w-[88px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:min-w-[100px] sm:px-3">
                 Selling price *
               </th>
-              <th className="hidden min-w-[88px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:table-cell lg:min-w-[100px]">
-                Purchase price
+              <th className="min-w-[88px] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:min-w-[100px]">
+                Purchase price *
               </th>
               <th className="w-12 min-w-[48px] px-2 py-3" aria-label="Remove row" />
             </tr>
@@ -409,7 +409,7 @@ export function StockEntryGrid({
                     className={`${inputClass} text-right tabular-nums`}
                   />
                 </td>
-                <td className="hidden px-2 py-2.5 text-right align-middle lg:table-cell lg:px-3">
+                <td className="px-2 py-2.5 text-right align-middle lg:px-3">
                   {isServiceType(row.item?.type) ? (
                     <div className="flex h-9 items-center justify-center rounded-md border border-dashed text-muted-foreground">
                       —

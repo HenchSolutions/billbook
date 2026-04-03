@@ -21,12 +21,15 @@ export function useSubscription(options?: SubscriptionQueryOptions) {
   return useQuery({
     queryKey: queryKeys.subscription.current(),
     enabled: options?.enabled ?? true,
-    queryFn: async (): Promise<Subscription | null> => {
+    queryFn: async (): Promise<{
+      subscription: Subscription;
+      plan: SubscriptionPlan;
+    } | null> => {
       try {
         const res = await api.get<{ subscription: Subscription; plan: SubscriptionPlan }>(
           "/subscriptions/current",
         );
-        return res.data.subscription;
+        return res.data;
       } catch (e) {
         if (isNoCurrentSubscriptionError(e)) {
           return null;
@@ -59,6 +62,7 @@ export function useSubscribePlan() {
       const res = await api.post("/subscriptions", { planId });
       return res.data;
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.subscription.current()]),
+    onSuccess: () =>
+      invalidateQueryKeys(qc, [queryKeys.subscription.current(), queryKeys.subscription.plans()]),
   });
 }

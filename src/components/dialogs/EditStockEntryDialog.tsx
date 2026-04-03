@@ -112,6 +112,8 @@ export default function EditStockEntryDialog({
     try {
       await onSave(entry.id, payload);
       onOpenChange(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save stock entry");
     } finally {
       setIsSaving(false);
     }

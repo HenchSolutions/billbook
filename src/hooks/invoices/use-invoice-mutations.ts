@@ -67,7 +67,12 @@ export function useCancelInvoice() {
       await api.delete(`/invoices/${invoiceId}`, { reason: reason.trim() });
     },
     onSuccess: (_, { invoiceId }) => {
-      invalidateQueryKeys(qc, [queryKeys.invoices.root(), queryKeys.invoices.detail(invoiceId)]);
+      invalidateQueryKeys(qc, [
+        queryKeys.invoices.root(),
+        queryKeys.invoices.detail(invoiceId),
+        queryKeys.items.root(),
+        queryKeys.items.stockEntriesRoot(),
+      ]);
     },
   });
 }

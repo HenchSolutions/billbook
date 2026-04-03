@@ -20,11 +20,10 @@ export function computeBasePaiseFromAddedLines(
   discountPercentStr: string,
 ): number {
   const lineBreakup = lineDrafts.map((l) => getLineAmounts(l));
-  const subTotal = lineBreakup.reduce((s, x) => s + x.gross, 0);
+  const taxableTotal = lineBreakup.reduce((s, x) => s + x.taxable, 0);
   const invoiceDiscount = discountAmountStr.trim()
     ? Math.max(0, toNum(discountAmountStr))
-    : (subTotal * Math.max(0, toNum(discountPercentStr))) / 100;
-  const taxableTotal = lineBreakup.reduce((s, x) => s + x.taxable, 0);
+    : (taxableTotal * Math.max(0, toNum(discountPercentStr))) / 100;
   const taxTotal = lineBreakup.reduce((s, x) => s + x.tax, 0);
   const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
   return moneyToPaise(baseTotal);

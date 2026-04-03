@@ -43,6 +43,14 @@ export function useCreditNote(creditNoteId: number | undefined) {
   });
 }
 
+const CREDIT_NOTE_INVALIDATION_KEYS = () => [
+  queryKeys.creditNotes.root(),
+  queryKeys.invoices.detailPrefix(),
+  queryKeys.invoices.root(),
+  queryKeys.parties.ledgerPrefix(),
+  queryKeys.parties.balancePrefix(),
+];
+
 export function useCreateCreditNote() {
   const qc = useQueryClient();
   return useMutation({
@@ -50,7 +58,7 @@ export function useCreateCreditNote() {
       const res = await api.post<CreditNote>("/credit-notes", data);
       return res.data;
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.creditNotes.root()]),
+    onSuccess: () => invalidateQueryKeys(qc, CREDIT_NOTE_INVALIDATION_KEYS()),
   });
 }
 
@@ -61,7 +69,7 @@ export function useFinalizeCreditNote() {
       const res = await api.post<CreditNote>(`/credit-notes/${id}/finalize`);
       return res.data;
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.creditNotes.root()]),
+    onSuccess: () => invalidateQueryKeys(qc, CREDIT_NOTE_INVALIDATION_KEYS()),
   });
 }
 
@@ -71,6 +79,6 @@ export function useDeleteCreditNote() {
     mutationFn: async (id: number) => {
       await api.delete(`/credit-notes/${id}`);
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.creditNotes.root()]),
+    onSuccess: () => invalidateQueryKeys(qc, CREDIT_NOTE_INVALIDATION_KEYS()),
   });
 }

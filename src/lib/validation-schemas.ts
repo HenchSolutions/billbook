@@ -14,7 +14,8 @@ export const signedPriceString = z
 // Required price/amount validation (does not allow empty)
 export const requiredPriceString = z
   .string()
-  .regex(/^[0-9]+(\.[0-9]{1,2})?$/, "Enter a valid amount");
+  .regex(/^[0-9]+(\.[0-9]{1,2})?$/, "Enter a valid amount")
+  .refine((v) => parseFloat(v) > 0, "Amount must be greater than zero");
 
 // Percentage validation (e.g., "0", "12.5", "100")
 export const percentString = z

@@ -72,6 +72,7 @@ export function useInvoiceCreateState(
   const hasHydratedEditInvoice = useRef(false);
   /** Last due date we set from business defaultDueDays + invoiceDate; used to keep syncing invoice date until user edits due. */
   const expectedAutoDueRef = useRef<string | null>(null);
+  const submitGuardRef = useRef(false);
 
   const [party, setParty] = useState<Party | null>(null);
   const [selectedConsigneeId, setSelectedConsigneeId] = useState<number | null>(null);
@@ -327,7 +328,7 @@ export function useInvoiceCreateState(
 
     const invoiceDiscount = discountAmount.trim()
       ? Math.max(0, toNum(discountAmount))
-      : (subTotal * Math.max(0, toNum(discountPercent))) / 100;
+      : (taxableTotal * Math.max(0, toNum(discountPercent))) / 100;
 
     const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
     const basePaise = moneyToPaise(baseTotal);
@@ -364,7 +365,11 @@ export function useInvoiceCreateState(
       if (isSalesFamily(invoiceType)) {
         return Boolean(line.item && line.stockEntryId != null);
       }
-      return effectiveLineItemName(line) !== "" && line.unitPrice.trim() !== "";
+      return (
+        effectiveLineItemName(line) !== "" &&
+        line.unitPrice.trim() !== "" &&
+        toNum(line.unitPrice) > 0
+      );
     },
     [invoiceType],
   );
@@ -1079,13 +1084,14 @@ export function useInvoiceCreateState(
       if (!line) return;
 
       let qtyInput = quantity;
-      if (invoiceType === "SALE_RETURN") {
-        const maxSold = toNum(line.soldQuantity ?? "");
-        if (maxSold > 0 && toNum(quantity) > maxSold) {
-          qtyInput = formatQty(maxSold);
+      if (invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN") {
+        const capStr = line.remainingReturnableQty?.trim() || line.soldQuantity?.trim() || "";
+        const maxCap = toNum(capStr);
+        if (maxCap > 0 && toNum(quantity) > maxCap) {
+          qtyInput = formatQty(maxCap);
           showErrorToast(
             null,
-            "Return quantity cannot exceed quantity sold on the original invoice.",
+            "Return quantity cannot exceed what's still returnable on this line.",
           );
         }
       }
@@ -1317,7 +1323,11 @@ export function useInvoiceCreateState(
   );
 
   const handleCreate = useCallback(async () => {
+    if (submitGuardRef.current || createInvoice.isPending || updateDraftInvoice.isPending) return;
+    submitGuardRef.current = true;
+
     if (!party) {
+      submitGuardRef.current = false;
       showErrorToast(null, "Please select a party");
       return;
     }
@@ -1479,6 +1489,8 @@ export function useInvoiceCreateState(
             : `Failed to create ${pageMeta.label.toLowerCase()}`,
         );
       }
+    } finally {
+      submitGuardRef.current = false;
     }
   }, [
     party,

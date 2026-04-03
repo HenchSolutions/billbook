@@ -106,7 +106,7 @@ async function request<T>(
     }
   }
 
-  let response = await fetch(toAbsoluteUrl(path), init);
+  const response = await fetch(toAbsoluteUrl(path), init);
 
   if (response.status === 429 && shouldRetry) {
     const retryAfterHeader = response.headers.get("retry-after");
@@ -114,7 +114,7 @@ async function request<T>(
       ? Math.min(Number(retryAfterHeader) * 1000 || 2000, 10000)
       : 2000;
     await new Promise((resolve) => setTimeout(resolve, retryMs));
-    response = await fetch(toAbsoluteUrl(path), init);
+    return request<T>(method, path, { body, headers, shouldRetry: false, includeAuth });
   }
 
   if (response.status === 401 && !isRefreshRequest && shouldRetry && getRefreshToken()) {
@@ -122,7 +122,7 @@ async function request<T>(
       await refreshAccessToken();
       return request<T>(method, path, { body, headers, shouldRetry: false, includeAuth: true });
     } catch {
-      clearSessionAndNotify();
+      // refreshAccessToken already clears tokens and dispatches AUTH_EXPIRED_EVENT on failure
       throw new ApiClientError("Session expired. Please log in again.", 401);
     }
   }
@@ -228,7 +228,6 @@ async function requestBlob(
         headers: buildAuthorizedHeaders("text/csv, */*"),
       });
     } catch {
-      clearSessionAndNotify();
       throw new ApiClientError("Session expired. Please log in again.", 401);
     }
   }

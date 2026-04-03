@@ -30,9 +30,10 @@ export function useStockEntries(
     itemId != null
       ? `${ITEMS_API_BASE}/${itemId}/stock-entries`
       : `${ITEMS_API_BASE}/stock-entries`;
-  const qs = itemId == null && params ? new URLSearchParams() : null;
+  const qs = params ? new URLSearchParams() : null;
   if (qs) {
-    if (params?.categoryId != null) qs.set("categoryId", String(params.categoryId));
+    if (itemId == null && params?.categoryId != null)
+      qs.set("categoryId", String(params.categoryId));
     if (params?.search) qs.set("search", params.search);
     if (params?.limit != null) qs.set("limit", String(params.limit));
     if (params?.offset != null) qs.set("offset", String(params.offset));

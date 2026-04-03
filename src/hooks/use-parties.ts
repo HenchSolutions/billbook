@@ -92,7 +92,11 @@ export function useCreatePartyConsignee(partyId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreatePartyConsigneeRequest) => {
-      const res = await api.post<PartyConsignee>(`/parties/${partyId}/consignees`, data);
+      const res = await api.post<PartyConsignee>(
+        `/parties/${partyId}/consignees`,
+        data,
+        generateIdempotencyKey(),
+      );
       return res.data;
     },
     onSuccess: () => {
@@ -148,7 +152,7 @@ export function useCreateParty() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreatePartyRequest) => {
-      const res = await api.post<Party>("/parties", data);
+      const res = await api.post<Party>("/parties", data, generateIdempotencyKey());
       return res.data;
     },
     onSuccess: () => invalidateQueryKeys(qc, [queryKeys.parties.root()]),
@@ -163,7 +167,12 @@ export function useUpdateParty(id: number) {
       return res.data;
     },
     onSuccess: () => {
-      invalidateQueryKeys(qc, [queryKeys.parties.root(), queryKeys.parties.detail(id)]);
+      invalidateQueryKeys(qc, [
+        queryKeys.parties.root(),
+        queryKeys.parties.detail(id),
+        queryKeys.parties.ledger(id),
+        queryKeys.parties.balance(id),
+      ]);
     },
   });
 }
@@ -230,6 +239,12 @@ export function useRecordPartyAdvancePayment(partyId: number) {
         queryKeys.parties.root(),
         queryKeys.receipts.root(),
       ]);
+      qc.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return key[0] === "party-statement" && key[1] === partyId;
+        },
+      });
     },
   });
 }

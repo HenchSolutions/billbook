@@ -19,6 +19,14 @@ export default function DashboardPageClient() {
     return <DashboardSkeleton />;
   }
 
+  if (error && !dashboard) {
+    return (
+      <div className="page-container animate-fade-in">
+        <ErrorBanner error={error} fallbackMessage="Failed to load dashboard data." />
+      </div>
+    );
+  }
+
   const data = dashboard ?? EMPTY_DASHBOARD;
   const greeting = data.business?.name
     ? `Welcome back, ${data.business.name}`

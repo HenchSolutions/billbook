@@ -10,7 +10,7 @@ import type {
   AuthMeResponse,
 } from "@/types/auth";
 import { AUTH_EXPIRED_EVENT } from "@/constants/auth-events";
-import { api, setAccessToken, setRefreshToken, ApiClientError } from "@/api";
+import { api, setAccessToken, setRefreshToken, ApiClientError, getRefreshToken } from "@/api";
 
 interface AuthState {
   user: SessionUser | null;
@@ -151,12 +151,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const handleAuthSuccess = useCallback((auth: AuthResponse) => {
-    const sessionUser = toSessionUser(auth);
+  const handleAuthSuccess = useCallback(async (auth: AuthResponse) => {
     setAccessToken(auth.tokens.accessToken);
     setRefreshToken(auth.tokens.refreshToken);
-    persistSession(sessionUser);
-    setUser(sessionUser);
+
+    // Fetch /auth/me to get accurate role (AuthResponse doesn't include role)
+    try {
+      const res = await api.get<AuthMeResponse>("/auth/me");
+      const { user: meUser, business: meBusiness } = res.data;
+      const sessionUser: SessionUser = {
+        id: meUser.id,
+        email: meUser.email,
+        firstName: meUser.firstName,
+        lastName: meUser.lastName,
+        role: meUser.role,
+        businessId: meBusiness.id,
+        businessName: meBusiness.name,
+        organizationCode: meBusiness.organizationCode,
+        businessLogoUrl: meBusiness.logoUrl ?? null,
+      };
+      persistSession(sessionUser);
+      setUser(sessionUser);
+    } catch {
+      const sessionUser = toSessionUser(auth);
+      persistSession(sessionUser);
+      setUser(sessionUser);
+    }
     setIsLoading(false);
   }, []);
 
@@ -215,7 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await api.post("/auth/logout");
+      const refreshToken = getRefreshToken();
+      await api.post("/auth/logout", refreshToken ? { refreshToken } : undefined);
     } catch {
       // Ignore logout errors — clear locally regardless
     } finally {

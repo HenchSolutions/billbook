@@ -116,6 +116,7 @@ export function useInvoicePdf(id: number | undefined) {
       return res.data;
     },
     enabled: !!id,
+    retry: 1,
   });
 }
 

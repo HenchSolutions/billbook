@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -58,7 +58,9 @@ export default function InvoiceDetail() {
       .map((item) => item.stockEntryId)
       .filter((id): id is number => id != null && Number.isFinite(id)) ?? [];
   const stockEntriesQuery = useStockEntriesByIds(stockEntryIds);
-  const { data: pdfData } = useInvoicePdf(invoice?.status === "FINAL" ? invoiceId : undefined);
+  const { data: pdfData, error: pdfError } = useInvoicePdf(
+    invoice?.status === "FINAL" ? invoiceId : undefined,
+  );
   const { data: auditData } = useResourceAuditLogs("INVOICE", invoiceId);
   const communicationsQuery = useInvoiceCommunications(invoiceId);
   const finalizeMutation = useFinalizeInvoice();
@@ -69,8 +71,10 @@ export default function InvoiceDetail() {
   const sentToday = communicationsQuery.data?.sent.today ?? false;
   const reminderToday = communicationsQuery.data?.reminder.today ?? false;
 
+  const finalizeGuard = useRef(false);
   const handleFinalize = async () => {
-    if (!invoiceId) return;
+    if (!invoiceId || finalizeMutation.isPending || finalizeGuard.current) return;
+    finalizeGuard.current = true;
     try {
       await finalizeMutation.mutateAsync(invoiceId);
       showSuccessToast("Invoice finalized");
@@ -88,6 +92,8 @@ export default function InvoiceDetail() {
       } else {
         showErrorToast(withInvoiceQuantityErrorDetails(err), "Failed to finalize");
       }
+    } finally {
+      finalizeGuard.current = false;
     }
   };
 
@@ -199,6 +205,7 @@ export default function InvoiceDetail() {
                 sentToday={sentToday}
                 reminderToday={reminderToday}
                 pdfUrl={pdfData?.downloadUrl}
+                pdfError={pdfError}
                 isFinalizePending={finalizeMutation.isPending}
                 isCancelPending={cancelMutation.isPending}
                 isMarkSentPending={markSentMutation.isPending}

@@ -76,7 +76,19 @@ export default function CreditNoteDialog({ open, onOpenChange, defaultInvoiceId 
     }
   }, [open, defaultInvoiceId, reset]);
 
+  const selectedInvoice = invoices.find((inv) => inv.id === watch("invoiceId"));
+  const invoiceTotal = parseFloat(selectedInvoice?.totalAmount ?? "0") || 0;
+  const invoicePaid = parseFloat(selectedInvoice?.paidAmount ?? "0") || 0;
+  const invoiceDue = Math.max(0, invoiceTotal - invoicePaid);
+
   const onSubmit = async (data: FormData) => {
+    const amt = parseFloat(data.amount) || 0;
+    if (selectedInvoice && amt > invoiceTotal + 0.01) {
+      showErrorToast(
+        `Amount (${data.amount}) cannot exceed invoice total (${selectedInvoice.totalAmount}).`,
+      );
+      return;
+    }
     try {
       await mutation.mutateAsync({
         invoiceId: data.invoiceId,
@@ -130,6 +142,11 @@ export default function CreditNoteDialog({ open, onOpenChange, defaultInvoiceId 
             <Label required>Amount</Label>
             <Input placeholder="0.00" {...register("amount")} aria-invalid={!!errors.amount} />
             {errors.amount && <FieldError>{errors.amount.message}</FieldError>}
+            {selectedInvoice && (
+              <p className="text-xs text-muted-foreground">
+                Invoice total: {selectedInvoice.totalAmount} — Due: {invoiceDue.toFixed(2)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

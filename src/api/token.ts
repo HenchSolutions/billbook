@@ -29,6 +29,7 @@ function clearCookie(name: string) {
 }
 
 export function setAccessToken(token: string | null) {
+  if (typeof window === "undefined") return;
   if (token) {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
     setCookie(COOKIE_ACCESS, token, ACCESS_MAX_AGE);
@@ -39,6 +40,7 @@ export function setAccessToken(token: string | null) {
 }
 
 export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
   let token = localStorage.getItem(ACCESS_TOKEN_KEY);
   if (!token) {
     token = getCookie(COOKIE_ACCESS);
@@ -48,6 +50,7 @@ export function getAccessToken(): string | null {
 }
 
 export function setRefreshToken(token: string | null) {
+  if (typeof window === "undefined") return;
   if (token) {
     localStorage.setItem(REFRESH_TOKEN_KEY, token);
     setCookie(COOKIE_REFRESH, token, REFRESH_MAX_AGE);
@@ -58,6 +61,7 @@ export function setRefreshToken(token: string | null) {
 }
 
 export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
   let token = localStorage.getItem(REFRESH_TOKEN_KEY);
   if (!token) {
     token = getCookie(COOKIE_REFRESH);

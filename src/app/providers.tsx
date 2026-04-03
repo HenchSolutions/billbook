@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,7 +21,7 @@ function createQueryClient() {
         refetchIntervalInBackground: false,
       },
       mutations: {
-        retry: 1,
+        retry: false,
       },
     },
   });
@@ -28,15 +29,16 @@ function createQueryClient() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
+  const pathname = usePathname();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster position="top-right" richColors closeButton />
       <ErrorBoundary>
         <AuthProvider>
           <UIModeProvider>
             <TooltipProvider>
-              <Toaster position="top-right" richColors closeButton />
-              {children}
+              <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
             </TooltipProvider>
           </UIModeProvider>
         </AuthProvider>

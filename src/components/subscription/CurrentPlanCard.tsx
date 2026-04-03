@@ -33,11 +33,12 @@ export function CurrentPlanCard({ subscription, currentPlan }: CurrentPlanCardPr
             </span>
           </div>
           <Progress
-            value={
+            value={Math.min(
               currentPlan && currentPlan.invoiceLimit > 0
                 ? (subscription.invoicesThisMonth / currentPlan.invoiceLimit) * 100
-                : 0
-            }
+                : 0,
+              100,
+            )}
             className="h-2"
           />
         </div>
@@ -50,11 +51,12 @@ export function CurrentPlanCard({ subscription, currentPlan }: CurrentPlanCardPr
             </span>
           </div>
           <Progress
-            value={
+            value={Math.min(
               currentPlan && currentPlan.userLimit > 0
                 ? (subscription.usersCount / currentPlan.userLimit) * 100
-                : 0
-            }
+                : 0,
+              100,
+            )}
             className="h-2"
           />
         </div>

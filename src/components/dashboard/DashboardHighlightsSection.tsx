@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Package, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsSimpleMode } from "@/hooks/use-simple-mode";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatQuantity } from "@/lib/utils";
 import type { TopItem, TopCustomer } from "@/types/dashboard";
 
 interface DashboardHighlightsSectionProps {
@@ -47,7 +47,7 @@ export function DashboardHighlightsSection({
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{item.itemName}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.totalQuantity} net qty (sales − returns)
+                        {formatQuantity(item.totalQuantity)} net qty (sales − returns)
                       </p>
                     </div>
                     <p className="text-sm font-medium tabular-nums">

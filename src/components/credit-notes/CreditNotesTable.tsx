@@ -7,8 +7,8 @@ import type { CreditNote } from "@/types/credit-note";
 interface CreditNotesTableProps {
   creditNotes: CreditNote[];
   isOwner: boolean;
-  finalizePending: boolean;
-  deletePending: boolean;
+  finalizePendingId: number | null;
+  deletePendingId: number | null;
   onView: (id: number) => void;
   onFinalize: (id: number) => void;
   onDelete: (id: number) => void;
@@ -17,8 +17,8 @@ interface CreditNotesTableProps {
 export function CreditNotesTable({
   creditNotes,
   isOwner,
-  finalizePending,
-  deletePending,
+  finalizePendingId,
+  deletePendingId,
   onView,
   onFinalize,
   onDelete,
@@ -110,7 +110,7 @@ export function CreditNotesTable({
                           e.stopPropagation();
                           onFinalize(cn.id);
                         }}
-                        disabled={finalizePending}
+                        disabled={finalizePendingId === cn.id}
                         title="Finalize"
                         aria-label={`Finalize credit note ${cn.creditNoteNumber}`}
                       >
@@ -124,7 +124,7 @@ export function CreditNotesTable({
                           e.stopPropagation();
                           onDelete(cn.id);
                         }}
-                        disabled={deletePending}
+                        disabled={deletePendingId === cn.id}
                         title="Delete"
                         aria-label={`Delete credit note ${cn.creditNoteNumber}`}
                       >

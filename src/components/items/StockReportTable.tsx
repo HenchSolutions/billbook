@@ -28,7 +28,9 @@ function adjustedQtyDisplay(value: string | null): string {
   if (value == null || value === "") return "—";
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return "—";
-  return Math.round(Math.abs(numeric)).toString();
+  const rounded = Math.round(numeric);
+  if (rounded === 0) return "0";
+  return rounded > 0 ? `+${rounded}` : String(rounded);
 }
 
 export function StockReportTable({ rows, items, onAdjust }: StockReportTableProps) {

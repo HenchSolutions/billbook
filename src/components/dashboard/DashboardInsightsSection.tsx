@@ -15,6 +15,13 @@ const EMPTY_PIE_PLACEHOLDER: PaymentStatusItem[] = [
   { name: "PAID", value: 0, count: 0, fill: "hsl(var(--muted) / 0.4)" },
 ];
 
+function normalizeRevenue(data: RevenueByMonth[]): (RevenueByMonth & { revenue: number })[] {
+  return data.map((item) => ({
+    ...item,
+    revenue: typeof item.revenue === "string" ? Number(item.revenue) || 0 : item.revenue,
+  }));
+}
+
 interface DashboardInsightsSectionProps {
   revenueByMonth: RevenueByMonth[];
   paymentStatusData: PaymentStatusItem[];
@@ -172,7 +179,11 @@ export function DashboardInsightsSection({
               className="h-[260px]"
             >
               <BarChart
-                data={revenueByMonth.length > 0 ? revenueByMonth : EMPTY_REVENUE_PLACEHOLDER}
+                data={
+                  revenueByMonth.length > 0
+                    ? normalizeRevenue(revenueByMonth)
+                    : EMPTY_REVENUE_PLACEHOLDER
+                }
                 maxBarSize={60}
               >
                 <XAxis
