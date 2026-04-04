@@ -52,11 +52,7 @@ const schema = z.object({
   phone: z
     .string()
     .trim()
-    .min(1, "Phone is required")
-    .regex(/^\d+$/, "Phone can only contain digits")
-    .refine((val) => {
-      return val.length >= 10 && val.length <= 15;
-    }, "Phone number must have between 10 and 15 digits"),
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   address: optionalString,
   city: optionalString,
   state: optionalString,
@@ -281,13 +277,13 @@ export default function PartyDialog({
                   onChange: (e) => {
                     e.target.value = String(e.target.value ?? "")
                       .replace(/\D/g, "")
-                      .slice(0, 15);
+                      .slice(0, 10);
                   },
                 })}
                 inputMode="numeric"
                 pattern="[0-9]*"
                 autoComplete="tel"
-                maxLength={15}
+                maxLength={10}
               />
               {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
             </div>
