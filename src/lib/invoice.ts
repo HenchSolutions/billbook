@@ -132,9 +132,9 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     discountPercentLabel: "Discount %",
     itemSectionTitle: "Items received",
     batchLabel: "Item / Batch",
-    batchPlaceholder: "Search items or add new item",
+    batchPlaceholder: "Search catalog items",
     itemSectionHelper:
-      "Pick a batch to prefill the row — then edit any field (name, price, tax, HSN/SAC) before adding. Line totals update from your edits.",
+      "Select a catalog item. Name, HSN or SAC, and GST rates come from the item master. Enter quantity and purchase price. Line tax, net, and selling price update automatically when selling price margin (%) is set above.",
     summaryTitle: "Purchase summary",
     loadErrorMessage: "Failed to load items. Check connection and try again.",
   },

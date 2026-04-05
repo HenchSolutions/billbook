@@ -16,6 +16,8 @@ import { cn, formatCurrency } from "@/lib/utils";
 import type { StockChoice } from "@/types/invoice-create";
 import type { Item } from "@/types/item";
 
+export type StockSearchPickerMode = "stockEntries" | "catalog";
+
 interface StockSearchPopoverProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +34,11 @@ interface StockSearchPopoverProps {
   onAddStockForItem: (item: Item) => void;
   onAddNewItem: () => void;
   draftLineId: string;
+  /** Purchase invoice: list all catalog items instead of stock batches. */
+  pickerMode?: StockSearchPickerMode;
+  catalogItems?: Item[];
+  onSelectCatalogItem?: (lineId: string, item: Item) => void;
+  selectedCatalogItemId?: number | null;
 }
 
 export function StockSearchPopover({
@@ -49,7 +56,13 @@ export function StockSearchPopover({
   onAddStockForItem,
   onAddNewItem,
   draftLineId,
+  pickerMode = "stockEntries",
+  catalogItems = [],
+  onSelectCatalogItem,
+  selectedCatalogItemId = null,
 }: StockSearchPopoverProps) {
+  const catalogMode = pickerMode === "catalog";
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
@@ -70,94 +83,129 @@ export function StockSearchPopover({
             <Input
               value={searchText}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search by item, purchase date, or vendor"
+              placeholder={
+                catalogMode ? "Search items by name…" : "Search by item, purchase date, or vendor"
+              }
               className="h-8"
             />
           </div>
           <CommandList className="max-h-[360px]">
             <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-              No matching stock entries found.
+              {catalogMode ? "No matching items." : "No matching stock entries found."}
             </CommandEmpty>
             <CommandGroup>
-              {filteredStockChoices.map((choice) => {
-                const dateText = formatISODateDisplay(getEntryDateIso(choice.entry));
-                const isSelected = draftLineStockEntryId === choice.entry.id;
-                const statusText = choice.enabledForSelection
-                  ? choice.item.type === "SERVICE"
-                    ? "Service item"
-                    : `Available ${choice.remainingQty}`
-                  : choice.remainingQty <= 0
-                    ? "Used up"
-                    : "Locked until older batch is used";
+              {catalogMode
+                ? catalogItems.map((item) => {
+                    const isSelected = selectedCatalogItemId === item.id;
+                    return (
+                      <CommandItem
+                        key={`catalog-${item.id}`}
+                        value={`catalog-${item.id}-${item.name}`}
+                        onSelect={() => onSelectCatalogItem?.(draftLineId, item)}
+                        className="cursor-pointer items-start py-2 text-foreground"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-foreground">
+                            {item.name}
+                          </div>
+                          <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {item.type === "SERVICE" ? "Service" : "Stock item"}
+                            {item.hsnCode ? ` · HSN ${item.hsnCode}` : ""}
+                            {item.sacCode ? ` · SAC ${item.sacCode}` : ""}
+                          </div>
+                        </div>
+                        {isSelected && <span className="ml-2 text-xs text-primary">Selected</span>}
+                      </CommandItem>
+                    );
+                  })
+                : null}
+              {!catalogMode
+                ? filteredStockChoices.map((choice) => {
+                    const dateText = formatISODateDisplay(getEntryDateIso(choice.entry));
+                    const isSelected = draftLineStockEntryId === choice.entry.id;
+                    const statusText = choice.enabledForSelection
+                      ? choice.item.type === "SERVICE"
+                        ? "Service item"
+                        : `Available ${choice.remainingQty}`
+                      : choice.remainingQty <= 0
+                        ? "Used up"
+                        : "Locked until older batch is used";
 
-                return (
-                  <CommandItem
-                    key={choice.entry.id}
-                    value={`${choice.item.name}-${choice.entry.id}`}
-                    onSelect={() => onSelectChoice(draftLineId, choice)}
-                    className={cn(
-                      "items-start py-2",
-                      choice.enabledForSelection
-                        ? "cursor-pointer text-foreground"
-                        : "cursor-not-allowed bg-muted/30 text-muted-foreground",
-                    )}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div
+                    return (
+                      <CommandItem
+                        key={choice.entry.id}
+                        value={`${choice.item.name}-${choice.entry.id}`}
+                        onSelect={() => onSelectChoice(draftLineId, choice)}
                         className={cn(
-                          "truncate text-sm",
+                          "items-start py-2",
                           choice.enabledForSelection
-                            ? "font-medium text-foreground"
-                            : "font-normal text-muted-foreground",
+                            ? "cursor-pointer text-foreground"
+                            : "cursor-not-allowed bg-muted/30 text-muted-foreground",
                         )}
                       >
-                        {choice.item.name}
-                      </div>
-                      <div
-                        className={cn(
-                          "mt-0.5 truncate text-xs",
-                          choice.enabledForSelection
-                            ? "text-muted-foreground"
-                            : "text-muted-foreground/80",
-                        )}
-                      >
-                        Batch: {dateText || "No date"} | Price:{" "}
-                        {formatCurrency(choice.entry.sellingPrice)}
-                        {choice.item.hsnCode ? ` | HSN: ${choice.item.hsnCode}` : ""}
-                        {choice.item.type === "STOCK" ? ` | Remaining: ${choice.remainingQty}` : ""}
-                      </div>
-                      <div
-                        className={cn(
-                          "mt-0.5 text-[11px]",
-                          choice.enabledForSelection
-                            ? "text-emerald-600"
-                            : "text-muted-foreground/90",
-                        )}
-                      >
-                        {statusText}
-                      </div>
-                    </div>
-                    {isSelected && <span className="ml-2 text-xs text-primary">Selected</span>}
-                  </CommandItem>
-                );
-              })}
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className={cn(
+                              "truncate text-sm",
+                              choice.enabledForSelection
+                                ? "font-medium text-foreground"
+                                : "font-normal text-muted-foreground",
+                            )}
+                          >
+                            {choice.item.name}
+                          </div>
+                          <div
+                            className={cn(
+                              "mt-0.5 truncate text-xs",
+                              choice.enabledForSelection
+                                ? "text-muted-foreground"
+                                : "text-muted-foreground/80",
+                            )}
+                          >
+                            Batch: {dateText || "No date"} | Price:{" "}
+                            {formatCurrency(choice.entry.sellingPrice)}
+                            {choice.item.hsnCode ? ` | HSN: ${choice.item.hsnCode}` : ""}
+                            {choice.item.type === "STOCK"
+                              ? ` | Remaining: ${choice.remainingQty}`
+                              : ""}
+                          </div>
+                          <div
+                            className={cn(
+                              "mt-0.5 text-[11px]",
+                              choice.enabledForSelection
+                                ? "text-emerald-600"
+                                : "text-muted-foreground/90",
+                            )}
+                          >
+                            {statusText}
+                          </div>
+                        </div>
+                        {isSelected && <span className="ml-2 text-xs text-primary">Selected</span>}
+                      </CommandItem>
+                    );
+                  })
+                : null}
 
-              {itemsWithoutStockOptions.map((item) => (
-                <CommandItem
-                  key={`no-stock-${item.id}`}
-                  value={`no-stock-${item.id}-${item.name}`}
-                  onSelect={() => onAddStockForItem(item)}
-                  className="items-start py-2 text-foreground"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{item.name}</div>
-                    <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                      No stock available for this item.
-                    </div>
-                    <div className="mt-0.5 text-[11px] text-primary">Add stock for this item</div>
-                  </div>
-                </CommandItem>
-              ))}
+              {!catalogMode
+                ? itemsWithoutStockOptions.map((item) => (
+                    <CommandItem
+                      key={`no-stock-${item.id}`}
+                      value={`no-stock-${item.id}-${item.name}`}
+                      onSelect={() => onAddStockForItem(item)}
+                      className="items-start py-2 text-foreground"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{item.name}</div>
+                        <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                          No stock available for this item.
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-primary">
+                          Add stock for this item
+                        </div>
+                      </div>
+                    </CommandItem>
+                  ))
+                : null}
 
               {showAddItemOption && (
                 <CommandItem

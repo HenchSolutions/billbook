@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { getInvoiceTypeCreateCopy, isSalesFamily } from "@/lib/invoice";
 import {
   formatIgstFromCgstSgst,
+  formatLineGstRateDisplay,
   getEntryDateIso,
   getLineAmounts,
   toNum,
@@ -21,7 +22,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import type { InvoiceLineDraft, StockChoice, StockLineIssue } from "@/types/invoice-create";
 import type { Item, StockEntry } from "@/types/item";
 import type { InvoiceType } from "@/types/invoice";
-import { StockSearchPopover } from "./StockSearchPopover";
+import { StockSearchPopover, type StockSearchPickerMode } from "./StockSearchPopover";
 
 /** Form row: readable labels (grid has more room than table columns). */
 const draftLabelClass = "mb-2 block text-sm font-medium text-foreground";
@@ -69,6 +70,10 @@ interface LineEditorSectionProps {
   onSalesUnitPriceBlur?: (lineId: string) => void;
   /** Linked sale/purchase return: show when return qty exceeds remaining (blocks save). */
   returnValidationWarning?: string | null;
+  /** Purchase invoice: catalog item picker instead of stock batches. */
+  stockPickerMode?: StockSearchPickerMode;
+  filteredCatalogItems?: Item[];
+  onSelectCatalogItem?: (lineId: string, item: Item) => void;
 }
 
 export function LineEditorSection({
@@ -102,10 +107,14 @@ export function LineEditorSection({
   onSalesUnitPriceChange,
   onSalesUnitPriceBlur,
   returnValidationWarning,
+  stockPickerMode = "stockEntries",
+  filteredCatalogItems = [],
+  onSelectCatalogItem,
 }: LineEditorSectionProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
   const isSaleReturn = invoiceType === "SALE_RETURN";
   const purchaseFamilyForm = !isSalesFamily(invoiceType);
+  const isPurchaseInvoiceUi = invoiceType === "PURCHASE_INVOICE";
   /** Purchase bill lines: cost + selling columns. */
   const isPurchaseCostLine =
     invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
@@ -114,19 +123,23 @@ export function LineEditorSection({
   const unitPriceEditable = true;
   const draftGstDerived =
     purchaseFamilyForm && (draftLine.cgstRate.trim() !== "" || draftLine.sgstRate.trim() !== "");
-  const purchaseGridStyle = useMemo(
-    () =>
-      isPurchaseCostLine
-        ? {
-            gridTemplateColumns:
-              "minmax(9.5rem, 1.15fr) minmax(8.5rem, 1.05fr) minmax(3.75rem, 0.36fr) minmax(3.75rem, 0.36fr) minmax(3rem, 0.32fr) minmax(5rem, 0.52fr) minmax(4.25rem, 0.44fr) minmax(3.75rem, 0.42fr) minmax(4.25rem, 0.46fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) auto",
-          }
-        : {
-            gridTemplateColumns:
-              "minmax(9.5rem, 1.15fr) minmax(8.5rem, 1.05fr) minmax(3.75rem, 0.36fr) minmax(3.75rem, 0.36fr) minmax(3rem, 0.32fr) minmax(5rem, 0.52fr) minmax(3.75rem, 0.42fr) minmax(4.25rem, 0.46fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) auto",
-          },
-    [isPurchaseCostLine],
-  );
+  const purchaseGridStyle = useMemo(() => {
+    if (isPurchaseInvoiceUi) {
+      return {
+        gridTemplateColumns:
+          "minmax(8rem, 1.35fr) minmax(2.75rem, 0.22fr) minmax(2.5rem, 0.2fr) minmax(5.25rem, 0.42fr) minmax(3.75rem, 0.32fr) minmax(4.75rem, 0.4fr) minmax(4.75rem, 0.4fr) auto",
+      };
+    }
+    return isPurchaseCostLine
+      ? {
+          gridTemplateColumns:
+            "minmax(9.5rem, 1.15fr) minmax(8.5rem, 1.05fr) minmax(3.75rem, 0.36fr) minmax(3.75rem, 0.36fr) minmax(3rem, 0.32fr) minmax(5rem, 0.52fr) minmax(4.25rem, 0.44fr) minmax(3.75rem, 0.42fr) minmax(4.25rem, 0.46fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) auto",
+        }
+      : {
+          gridTemplateColumns:
+            "minmax(9.5rem, 1.15fr) minmax(8.5rem, 1.05fr) minmax(3.75rem, 0.36fr) minmax(3.75rem, 0.36fr) minmax(3rem, 0.32fr) minmax(5rem, 0.52fr) minmax(3.75rem, 0.42fr) minmax(4.25rem, 0.46fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(2.85rem, 0.3fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.5fr) auto",
+        };
+  }, [isPurchaseCostLine, isPurchaseInvoiceUi]);
 
   const addedLinesTotals = useMemo(() => {
     return addedLines.reduce(
@@ -142,7 +155,13 @@ export function LineEditorSection({
     );
   }, [addedLines]);
 
-  const triggerLabel = draftLine.stockEntryId ? (
+  const triggerLabel = isPurchaseInvoiceUi ? (
+    draftLine.item?.name ? (
+      <span className="truncate">{draftLine.item.name}</span>
+    ) : (
+      <span className="truncate text-left text-muted-foreground">Select item…</span>
+    )
+  ) : draftLine.stockEntryId ? (
     <span className="truncate">
       {draftLine.item?.name ?? "Item"} | Batch{" "}
       {formatISODateDisplay(
@@ -312,203 +331,310 @@ export function LineEditorSection({
             </div>
           )
         ) : purchaseFamilyForm ? (
-          <div className="overflow-x-auto rounded-lg border bg-card">
-            <p className="sr-only">
-              New line fields scroll horizontally when they do not fit on screen.
-            </p>
-            <div className="grid w-max min-w-full items-end gap-3 p-3" style={purchaseGridStyle}>
-              <div className="min-w-0">
-                <Label className={draftLabelClass} required={batchRequired}>
-                  {copy.batchLabel}
-                </Label>
-                <StockSearchPopover
-                  open={stockSearchOpen}
-                  onOpenChange={setStockSearchOpen}
-                  searchText={stockSearchText}
-                  onSearchChange={setStockSearchText}
-                  triggerLabel={triggerLabel}
-                  triggerClassName="h-9 text-sm"
-                  draftLineStockEntryId={draftLine.stockEntryId}
-                  filteredStockChoices={filteredStockChoices}
-                  itemsWithoutStockOptions={itemsWithoutStockOptions}
-                  showAddItemOption={showAddItemOption}
-                  onSelectChoice={onSelectChoice}
-                  onAddStockForItem={onAddStockForItem}
-                  onAddNewItem={onAddNewItem}
-                  draftLineId={draftLine.id}
-                />
-              </div>
-              <div className="min-w-0">
-                <Label className={draftLabelClass} required>
-                  Item
-                </Label>
-                <Input
-                  value={draftLine.itemName}
-                  onChange={(e) => updateLine(draftLine.id, { itemName: e.target.value })}
-                  placeholder={
-                    draftLine.stockEntryId ? "Override catalog name if needed" : "As on vendor bill"
-                  }
-                  className="h-9 text-sm"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>HSN</Label>
-                <Input
-                  value={draftLine.hsnCode}
-                  onChange={(e) => updateLine(draftLine.id, { hsnCode: e.target.value })}
-                  placeholder="—"
-                  className="h-9 text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>SAC</Label>
-                <Input
-                  value={draftLine.sacCode}
-                  onChange={(e) => updateLine(draftLine.id, { sacCode: e.target.value })}
-                  placeholder="—"
-                  className="h-9 text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>Qty</Label>
-                <Input
-                  value={draftLine.quantity}
-                  onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
-                  className={cn(
-                    "h-9 text-right text-sm tabular-nums transition-colors",
-                    qtyAutoAdjusted &&
-                      "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
-                  )}
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass} required>
-                  {isPurchaseCostLine ? "Purchase ₹" : "Unit"}
-                </Label>
-                <Input
-                  value={draftLine.unitPrice}
-                  onChange={(e) =>
-                    isPurchaseCostLine && onPurchaseUnitPriceChange
-                      ? onPurchaseUnitPriceChange(draftLine.id, e.target.value)
-                      : updateLine(draftLine.id, { unitPrice: e.target.value })
-                  }
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              {isPurchaseCostLine ? (
+          isPurchaseInvoiceUi ? (
+            <div className="overflow-x-auto rounded-lg border bg-card">
+              <p className="sr-only">
+                New line fields scroll horizontally when they do not fit on screen.
+              </p>
+              <div
+                className="grid w-full min-w-0 items-end gap-2 p-3 sm:gap-3"
+                style={purchaseGridStyle}
+              >
+                <div className="min-w-0">
+                  <Label className={draftLabelClass} required>
+                    Item
+                  </Label>
+                  <StockSearchPopover
+                    open={stockSearchOpen}
+                    onOpenChange={setStockSearchOpen}
+                    searchText={stockSearchText}
+                    onSearchChange={setStockSearchText}
+                    triggerLabel={triggerLabel}
+                    triggerClassName="h-9 w-full max-w-full truncate text-sm"
+                    draftLineStockEntryId={draftLine.stockEntryId}
+                    filteredStockChoices={filteredStockChoices}
+                    itemsWithoutStockOptions={itemsWithoutStockOptions}
+                    showAddItemOption={showAddItemOption}
+                    onSelectChoice={onSelectChoice}
+                    onAddStockForItem={onAddStockForItem}
+                    onAddNewItem={onAddNewItem}
+                    draftLineId={draftLine.id}
+                    pickerMode={stockPickerMode}
+                    catalogItems={filteredCatalogItems}
+                    onSelectCatalogItem={onSelectCatalogItem}
+                    selectedCatalogItemId={draftLine.item?.id ?? null}
+                  />
+                </div>
                 <div>
-                  <Label className={draftLabelClass}>Selling ₹</Label>
+                  <Label className={draftLabelClass}>Comb</Label>
                   <Input
-                    value={draftLine.sellingPrice ?? ""}
-                    onChange={(e) => updateLine(draftLine.id, { sellingPrice: e.target.value })}
-                    placeholder="Auto"
+                    value={draftLine.item?.unit?.trim() ? draftLine.item.unit : "—"}
+                    disabled
+                    className="h-9 cursor-default bg-muted/40 text-sm tabular-nums"
+                    title="Unit of measure from item master"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Qty</Label>
+                  <Input
+                    value={draftLine.quantity}
+                    onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
+                    className={cn(
+                      "h-9 text-right text-sm tabular-nums transition-colors",
+                      qtyAutoAdjusted &&
+                        "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
+                    )}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass} required>
+                    Purchase price
+                  </Label>
+                  <Input
+                    value={draftLine.unitPrice}
+                    onChange={(e) =>
+                      onPurchaseUnitPriceChange
+                        ? onPurchaseUnitPriceChange(draftLine.id, e.target.value)
+                        : updateLine(draftLine.id, { unitPrice: e.target.value })
+                    }
+                    placeholder="0.00"
+                    className="h-9 min-w-0 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass}>Tax rate</Label>
+                  <Input
+                    value={formatLineGstRateDisplay(draftLine)}
+                    disabled
+                    className="h-9 min-w-0 cursor-default bg-muted/40 text-right text-sm tabular-nums"
+                    title="From item master (GST on line)"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass}>Tax</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).tax)}
+                    disabled
+                    className="h-9 min-w-0 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass}>Net amount</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).total)}
+                    disabled
+                    className="h-9 min-w-0 text-right text-sm font-medium tabular-nums"
+                  />
+                </div>
+                <div className="flex items-end justify-end pb-0.5">
+                  <Button type="button" onClick={addCurrentLine} size="sm" className="h-9 shrink-0">
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border bg-card">
+              <p className="sr-only">
+                New line fields scroll horizontally when they do not fit on screen.
+              </p>
+              <div className="grid w-max min-w-full items-end gap-3 p-3" style={purchaseGridStyle}>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass} required={batchRequired}>
+                    {copy.batchLabel}
+                  </Label>
+                  <StockSearchPopover
+                    open={stockSearchOpen}
+                    onOpenChange={setStockSearchOpen}
+                    searchText={stockSearchText}
+                    onSearchChange={setStockSearchText}
+                    triggerLabel={triggerLabel}
+                    triggerClassName="h-9 text-sm"
+                    draftLineStockEntryId={draftLine.stockEntryId}
+                    filteredStockChoices={filteredStockChoices}
+                    itemsWithoutStockOptions={itemsWithoutStockOptions}
+                    showAddItemOption={showAddItemOption}
+                    onSelectChoice={onSelectChoice}
+                    onAddStockForItem={onAddStockForItem}
+                    onAddNewItem={onAddNewItem}
+                    draftLineId={draftLine.id}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass} required>
+                    Item
+                  </Label>
+                  <Input
+                    value={draftLine.itemName}
+                    onChange={(e) => updateLine(draftLine.id, { itemName: e.target.value })}
+                    placeholder={
+                      draftLine.stockEntryId
+                        ? "Override catalog name if needed"
+                        : "As on vendor bill"
+                    }
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>HSN</Label>
+                  <Input
+                    value={draftLine.hsnCode}
+                    onChange={(e) => updateLine(draftLine.id, { hsnCode: e.target.value })}
+                    placeholder="—"
+                    className="h-9 text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>SAC</Label>
+                  <Input
+                    value={draftLine.sacCode}
+                    onChange={(e) => updateLine(draftLine.id, { sacCode: e.target.value })}
+                    placeholder="—"
+                    className="h-9 text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Qty</Label>
+                  <Input
+                    value={draftLine.quantity}
+                    onChange={(e) => onLineQuantityChange(draftLine.id, e.target.value)}
+                    className={cn(
+                      "h-9 text-right text-sm tabular-nums transition-colors",
+                      qtyAutoAdjusted &&
+                        "animate-pulse bg-amber-50 ring-2 ring-amber-300 focus-visible:ring-amber-400",
+                    )}
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass} required>
+                    {isPurchaseCostLine ? "Purchase ₹" : "Unit"}
+                  </Label>
+                  <Input
+                    value={draftLine.unitPrice}
+                    onChange={(e) =>
+                      isPurchaseCostLine && onPurchaseUnitPriceChange
+                        ? onPurchaseUnitPriceChange(draftLine.id, e.target.value)
+                        : updateLine(draftLine.id, { unitPrice: e.target.value })
+                    }
                     className="h-9 text-right text-sm tabular-nums"
                   />
                 </div>
-              ) : null}
-              <div>
-                <Label className={draftLabelClass}>Disc %</Label>
-                <Input
-                  value={draftLine.discountPercent}
-                  onChange={(e) => onLineDiscountChange(draftLine.id, e.target.value)}
-                  placeholder="0"
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>Disc ₹</Label>
-                <Input
-                  value={draftLine.discountAmount}
-                  onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
-                  placeholder="0"
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>CGST %</Label>
-                <Input
-                  value={draftLine.cgstRate}
-                  onChange={(e) => {
-                    const cgstRate = e.target.value;
-                    const patch: Partial<InvoiceLineDraft> = { cgstRate };
-                    if (cgstRate.trim() !== "" || draftLine.sgstRate.trim() !== "") {
-                      patch.igstRate = formatIgstFromCgstSgst(cgstRate, draftLine.sgstRate);
+                {isPurchaseCostLine ? (
+                  <div>
+                    <Label className={draftLabelClass}>Selling ₹</Label>
+                    <Input
+                      value={draftLine.sellingPrice ?? ""}
+                      onChange={(e) => updateLine(draftLine.id, { sellingPrice: e.target.value })}
+                      placeholder="Auto"
+                      className="h-9 text-right text-sm tabular-nums"
+                    />
+                  </div>
+                ) : null}
+                <div>
+                  <Label className={draftLabelClass}>Disc %</Label>
+                  <Input
+                    value={draftLine.discountPercent}
+                    onChange={(e) => onLineDiscountChange(draftLine.id, e.target.value)}
+                    placeholder="0"
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Disc ₹</Label>
+                  <Input
+                    value={draftLine.discountAmount}
+                    onChange={(e) => onLineDiscountAmountChange(draftLine.id, e.target.value)}
+                    placeholder="0"
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>CGST %</Label>
+                  <Input
+                    value={draftLine.cgstRate}
+                    onChange={(e) => {
+                      const cgstRate = e.target.value;
+                      const patch: Partial<InvoiceLineDraft> = { cgstRate };
+                      if (cgstRate.trim() !== "" || draftLine.sgstRate.trim() !== "") {
+                        patch.igstRate = formatIgstFromCgstSgst(cgstRate, draftLine.sgstRate);
+                      }
+                      updateLine(draftLine.id, patch);
+                    }}
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>SGST %</Label>
+                  <Input
+                    value={draftLine.sgstRate}
+                    onChange={(e) => {
+                      const sgstRate = e.target.value;
+                      const patch: Partial<InvoiceLineDraft> = { sgstRate };
+                      if (draftLine.cgstRate.trim() !== "" || sgstRate.trim() !== "") {
+                        patch.igstRate = formatIgstFromCgstSgst(draftLine.cgstRate, sgstRate);
+                      }
+                      updateLine(draftLine.id, patch);
+                    }}
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>IGST %</Label>
+                  <Input
+                    value={
+                      draftGstDerived
+                        ? formatIgstFromCgstSgst(draftLine.cgstRate, draftLine.sgstRate)
+                        : draftLine.igstRate
                     }
-                    updateLine(draftLine.id, patch);
-                  }}
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>SGST %</Label>
-                <Input
-                  value={draftLine.sgstRate}
-                  onChange={(e) => {
-                    const sgstRate = e.target.value;
-                    const patch: Partial<InvoiceLineDraft> = { sgstRate };
-                    if (draftLine.cgstRate.trim() !== "" || sgstRate.trim() !== "") {
-                      patch.igstRate = formatIgstFromCgstSgst(draftLine.cgstRate, sgstRate);
+                    title={
+                      draftGstDerived
+                        ? "Computed as CGST % + SGST %"
+                        : "Enter IGST %, or fill CGST and SGST to calculate automatically"
                     }
-                    updateLine(draftLine.id, patch);
-                  }}
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>IGST %</Label>
-                <Input
-                  value={
-                    draftGstDerived
-                      ? formatIgstFromCgstSgst(draftLine.cgstRate, draftLine.sgstRate)
-                      : draftLine.igstRate
-                  }
-                  title={
-                    draftGstDerived
-                      ? "Computed as CGST % + SGST %"
-                      : "Enter IGST %, or fill CGST and SGST to calculate automatically"
-                  }
-                  readOnly={draftGstDerived}
-                  onChange={(e) =>
-                    !draftGstDerived && updateLine(draftLine.id, { igstRate: e.target.value })
-                  }
-                  className={cn(
-                    "h-9 text-right text-sm tabular-nums",
-                    draftGstDerived && "cursor-default bg-muted/50",
-                  )}
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>Taxable</Label>
-                <Input
-                  value={formatCurrency(getLineAmounts(draftLine).taxable)}
-                  disabled
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>Tax</Label>
-                <Input
-                  value={formatCurrency(getLineAmounts(draftLine).tax)}
-                  disabled
-                  className="h-9 text-right text-sm tabular-nums"
-                />
-              </div>
-              <div>
-                <Label className={draftLabelClass}>Net</Label>
-                <Input
-                  value={formatCurrency(getLineAmounts(draftLine).total)}
-                  disabled
-                  className="h-9 text-right text-sm font-medium tabular-nums"
-                />
-              </div>
-              <div className="flex items-end justify-end pb-0.5">
-                <Button type="button" onClick={addCurrentLine} size="sm" className="h-9 shrink-0">
-                  <Plus className="mr-1 h-3.5 w-3.5" />
-                  Add
-                </Button>
+                    readOnly={draftGstDerived}
+                    onChange={(e) =>
+                      !draftGstDerived && updateLine(draftLine.id, { igstRate: e.target.value })
+                    }
+                    className={cn(
+                      "h-9 text-right text-sm tabular-nums",
+                      draftGstDerived && "cursor-default bg-muted/50",
+                    )}
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Taxable</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).taxable)}
+                    disabled
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Tax</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).tax)}
+                    disabled
+                    className="h-9 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div>
+                  <Label className={draftLabelClass}>Net</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).total)}
+                    disabled
+                    className="h-9 text-right text-sm font-medium tabular-nums"
+                  />
+                </div>
+                <div className="flex items-end justify-end pb-0.5">
+                  <Button type="button" onClick={addCurrentLine} size="sm" className="h-9 shrink-0">
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )
         ) : (
           <div className="grid gap-3 rounded-lg border p-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.95fr)_minmax(0,.85fr)_minmax(0,.85fr)_minmax(0,.95fr)_minmax(0,.95fr)_minmax(0,.95fr)_auto] xl:items-end">
             <div>
@@ -631,18 +757,31 @@ export function LineEditorSection({
             <table
               className={cn(
                 "w-full text-sm",
-                isPurchaseCostLine ? "min-w-[1120px]" : "min-w-[1000px]",
+                isPurchaseInvoiceUi
+                  ? "min-w-[720px]"
+                  : isPurchaseCostLine
+                    ? "min-w-[1120px]"
+                    : "min-w-[1000px]",
               )}
               aria-label="Added invoice items"
             >
               <thead className="sticky top-0 z-10 border-b bg-muted/90 backdrop-blur-sm supports-[backdrop-filter]:bg-muted/75">
                 <tr className="[&_th]:align-bottom">
-                  <th scope="col" className={cn(thLeft, "min-w-[9rem] pl-4")}>
+                  <th
+                    scope="col"
+                    className={cn(
+                      thLeft,
+                      "pl-4",
+                      isPurchaseInvoiceUi ? "min-w-[8rem]" : "min-w-[9rem]",
+                    )}
+                  >
                     Item
                   </th>
-                  <th scope="col" className={thLeft}>
-                    HSN/SAC
-                  </th>
+                  {!isPurchaseInvoiceUi ? (
+                    <th scope="col" className={thLeft}>
+                      HSN/SAC
+                    </th>
+                  ) : null}
                   <th scope="col" className={cn(thLeft, "min-w-[6.5rem]")}>
                     Stock batch
                   </th>
@@ -650,27 +789,45 @@ export function LineEditorSection({
                     Qty
                   </th>
                   <th scope="col" className={thRight}>
-                    {isPurchaseCostLine ? "Purchase ₹" : "Unit price"}
+                    {isPurchaseInvoiceUi
+                      ? "Purchase price"
+                      : isPurchaseCostLine
+                        ? "Purchase ₹"
+                        : "Unit price"}
                   </th>
-                  {isPurchaseCostLine ? (
+                  {isPurchaseCostLine && !isPurchaseInvoiceUi ? (
                     <th scope="col" className={thRight}>
                       Selling ₹
                     </th>
                   ) : null}
-                  <th scope="col" className={cn(thRight, "min-w-[5.5rem]")}>
-                    Discount %
-                  </th>
-                  <th scope="col" className={cn(thRight, "min-w-[5.5rem]")}>
-                    Discount ₹
-                  </th>
+                  {isPurchaseInvoiceUi ? (
+                    <th scope="col" className={cn(thRight, "min-w-[4.5rem]")}>
+                      Tax rate
+                    </th>
+                  ) : null}
+                  {isPurchaseInvoiceUi ? (
+                    <th scope="col" className={thRight}>
+                      Tax
+                    </th>
+                  ) : null}
+                  {!isPurchaseInvoiceUi ? (
+                    <>
+                      <th scope="col" className={cn(thRight, "min-w-[5.5rem]")}>
+                        Discount %
+                      </th>
+                      <th scope="col" className={cn(thRight, "min-w-[5.5rem]")}>
+                        Discount ₹
+                      </th>
+                      <th scope="col" className={thRight}>
+                        Taxable
+                      </th>
+                      <th scope="col" className={thRight}>
+                        Tax
+                      </th>
+                    </>
+                  ) : null}
                   <th scope="col" className={thRight}>
-                    Taxable
-                  </th>
-                  <th scope="col" className={thRight}>
-                    Tax
-                  </th>
-                  <th scope="col" className={thRight}>
-                    Net
+                    {isPurchaseInvoiceUi ? "Net amount" : "Net"}
                   </th>
                   <th scope="col" className={cn(thCenter, "w-[5.5rem] pr-4")}>
                     Actions
@@ -704,17 +861,19 @@ export function LineEditorSection({
                           </div>
                         )}
                       </td>
-                      <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                        {line.hsnCode.trim()
-                          ? line.hsnCode
-                          : line.sacCode.trim()
-                            ? line.sacCode
-                            : line.item?.hsnCode?.trim()
-                              ? line.item.hsnCode
-                              : line.item?.sacCode?.trim()
-                                ? line.item.sacCode
-                                : "—"}
-                      </td>
+                      {!isPurchaseInvoiceUi ? (
+                        <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                          {line.hsnCode.trim()
+                            ? line.hsnCode
+                            : line.sacCode.trim()
+                              ? line.sacCode
+                              : line.item?.hsnCode?.trim()
+                                ? line.item.hsnCode
+                                : line.item?.sacCode?.trim()
+                                  ? line.item.sacCode
+                                  : "—"}
+                        </td>
+                      ) : null}
                       <td className="px-3 py-2.5">
                         {lineEntry
                           ? formatISODateDisplay(getEntryDateIso(lineEntry)) || "No date"
@@ -736,25 +895,39 @@ export function LineEditorSection({
                       <td className="px-3 py-2.5 text-right tabular-nums">
                         {formatCurrency(line.unitPrice)}
                       </td>
-                      {isPurchaseCostLine ? (
+                      {isPurchaseCostLine && !isPurchaseInvoiceUi ? (
                         <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
                           {line.sellingPrice?.trim() ? formatCurrency(line.sellingPrice) : "—"}
                         </td>
                       ) : null}
-                      <td className="px-3 py-2.5 text-right tabular-nums">
-                        {line.discountPercent.trim() === "" ? "0" : line.discountPercent}
-                      </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums">
-                        {formatCurrency(
-                          line.discountAmount.trim() === "" ? "0" : line.discountAmount,
-                        )}
-                      </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums">
-                        {formatCurrency(totals.taxable)}
-                      </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums">
-                        {formatCurrency(totals.tax)}
-                      </td>
+                      {isPurchaseInvoiceUi ? (
+                        <td className="px-3 py-2.5 text-right text-xs tabular-nums text-muted-foreground">
+                          {formatLineGstRateDisplay(line)}
+                        </td>
+                      ) : null}
+                      {isPurchaseInvoiceUi ? (
+                        <td className="px-3 py-2.5 text-right tabular-nums">
+                          {formatCurrency(totals.tax)}
+                        </td>
+                      ) : null}
+                      {!isPurchaseInvoiceUi ? (
+                        <>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {line.discountPercent.trim() === "" ? "0" : line.discountPercent}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {formatCurrency(
+                              line.discountAmount.trim() === "" ? "0" : line.discountAmount,
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {formatCurrency(totals.taxable)}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {formatCurrency(totals.tax)}
+                          </td>
+                        </>
+                      ) : null}
                       <td className="px-3 py-2.5 text-right font-medium tabular-nums">
                         {formatCurrency(totals.total)}
                       </td>
@@ -788,25 +961,45 @@ export function LineEditorSection({
               </tbody>
               <tfoot>
                 <tr className="border-t bg-muted/40 font-semibold text-foreground">
-                  <td
-                    colSpan={isPurchaseCostLine ? 7 : 6}
-                    className="whitespace-nowrap px-3 py-2.5 pl-4 text-left"
-                  >
-                    Total
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
-                    {formatCurrency(addedLinesTotals.lineDiscount)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
-                    {formatCurrency(addedLinesTotals.taxable)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
-                    {formatCurrency(addedLinesTotals.tax)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
-                    {formatCurrency(addedLinesTotals.net)}
-                  </td>
-                  <td className="px-3 py-2.5 pr-4" />
+                  {isPurchaseInvoiceUi ? (
+                    <>
+                      <td colSpan={4} className="whitespace-nowrap px-3 py-2.5 pl-4 text-left">
+                        Total
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right text-xs text-muted-foreground">
+                        —
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                        {formatCurrency(addedLinesTotals.tax)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
+                        {formatCurrency(addedLinesTotals.net)}
+                      </td>
+                      <td className="px-3 py-2.5 pr-4" />
+                    </>
+                  ) : (
+                    <>
+                      <td
+                        colSpan={isPurchaseCostLine ? 7 : 6}
+                        className="whitespace-nowrap px-3 py-2.5 pl-4 text-left"
+                      >
+                        Total
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                        {formatCurrency(addedLinesTotals.lineDiscount)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                        {formatCurrency(addedLinesTotals.taxable)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                        {formatCurrency(addedLinesTotals.tax)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
+                        {formatCurrency(addedLinesTotals.net)}
+                      </td>
+                      <td className="px-3 py-2.5 pr-4" />
+                    </>
+                  )}
                 </tr>
               </tfoot>
             </table>

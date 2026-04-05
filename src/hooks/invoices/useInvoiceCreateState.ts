@@ -355,6 +355,27 @@ export function useInvoiceCreateState(
     filteredStockChoices.length === 0 &&
     itemsWithoutStockOptions.length === 0;
 
+  /** Purchase invoice: flat catalog list (all active items), not stock batches. */
+  const purchaseCatalogItems = useMemo(() => {
+    if (invoiceType !== "PURCHASE_INVOICE") return [];
+    return items.filter((i) => i.isActive && (i.type === "STOCK" || i.type === "SERVICE"));
+  }, [items, invoiceType]);
+
+  const filteredPurchaseCatalogItems = useMemo(() => {
+    const q = stockSearchText.trim().toLowerCase();
+    const base = purchaseCatalogItems;
+    if (!q) return base;
+    return base.filter((item) => item.name.toLowerCase().includes(q));
+  }, [purchaseCatalogItems, stockSearchText]);
+
+  const purchaseShowAddItemOption = useMemo(() => {
+    if (invoiceType !== "PURCHASE_INVOICE") return false;
+    const q = stockSearchText.trim();
+    if (q.length === 0) return false;
+    if (items.some((item) => item.name.trim().toLowerCase() === q.toLowerCase())) return false;
+    return filteredPurchaseCatalogItems.length === 0;
+  }, [invoiceType, stockSearchText, items, filteredPurchaseCatalogItems]);
+
   const summary = useMemo(() => {
     const lineBreakup = linesForBillSummary.map((line) => getLineAmounts(line));
     const subTotal = lineBreakup.reduce((sum, x) => sum + x.gross, 0);
@@ -1071,6 +1092,31 @@ export function useInvoiceCreateState(
       updateLine(lineId, patch);
     },
     [invoiceType, sellingPriceMarginPercent, updateLine],
+  );
+
+  const handlePurchaseCatalogItemSelect = useCallback(
+    (lineId: string, item: Item) => {
+      if (invoiceType !== "PURCHASE_INVOICE") return;
+      updateLine(lineId, {
+        item,
+        stockEntryId: null,
+        itemName: item.name,
+        hsnCode: item.hsnCode?.trim() ?? "",
+        sacCode: item.sacCode?.trim() ?? "",
+        unitPrice: "",
+        sellingPrice: "",
+        quantity: "1",
+        discountPercent: "0",
+        discountAmount: "0",
+        cgstRate: item.cgstRate ?? "0",
+        sgstRate: item.sgstRate ?? "0",
+        igstRate: item.igstRate ?? "0",
+      });
+      setStockSearchOpen(false);
+      setStockSearchText("");
+      clearUnitPriceFloorWarning();
+    },
+    [clearUnitPriceFloorWarning, invoiceType, updateLine],
   );
 
   const handleStockChoiceSelect = useCallback(
@@ -1833,6 +1879,8 @@ export function useInvoiceCreateState(
     filteredStockChoices,
     itemsWithoutStockOptions,
     showAddItemOption,
+    filteredPurchaseCatalogItems,
+    purchaseShowAddItemOption,
     summary,
     usedQtyByEntryId,
     itemMap,
@@ -1848,6 +1896,7 @@ export function useInvoiceCreateState(
     // Handlers
     updateLine,
     handleStockChoiceSelect,
+    handlePurchaseCatalogItemSelect,
     handleAddStockForItem,
     handleLineDiscountChange,
     handleLineDiscountAmountChange,

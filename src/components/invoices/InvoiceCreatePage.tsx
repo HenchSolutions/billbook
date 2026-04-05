@@ -147,7 +147,6 @@ export function InvoiceCreatePage({
         stockEntries={state.stockEntries}
         filteredStockChoices={state.filteredStockChoices}
         itemsWithoutStockOptions={state.itemsWithoutStockOptions}
-        showAddItemOption={state.showAddItemOption}
         onSelectChoice={state.handleStockChoiceSelect}
         onAddStockForItem={state.handleAddStockForItem}
         onAddNewItem={state.handleAddItemClick}
@@ -173,6 +172,18 @@ export function InvoiceCreatePage({
         }
         onSalesUnitPriceBlur={
           initialType === "SALE_INVOICE" ? state.handleSalesUnitPriceBlur : undefined
+        }
+        stockPickerMode={initialType === "PURCHASE_INVOICE" ? "catalog" : "stockEntries"}
+        filteredCatalogItems={
+          initialType === "PURCHASE_INVOICE" ? state.filteredPurchaseCatalogItems : []
+        }
+        onSelectCatalogItem={
+          initialType === "PURCHASE_INVOICE" ? state.handlePurchaseCatalogItemSelect : undefined
+        }
+        showAddItemOption={
+          initialType === "PURCHASE_INVOICE"
+            ? state.purchaseShowAddItemOption
+            : state.showAddItemOption
         }
       />
 

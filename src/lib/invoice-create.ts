@@ -136,6 +136,43 @@ function lineGstTotalPercent(line: InvoiceLineDraft): number {
   return Math.max(0, toNum(line.item?.igstRate?.trim() ?? "0"));
 }
 
+function fmtGstRate(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return "";
+  const rounded = Math.round(n * 100) / 100;
+  if (rounded === 0) return "";
+  if (rounded === Math.floor(rounded)) return String(Math.floor(rounded));
+  return String(rounded);
+}
+
+/** Label for invoice line GST (e.g. 9+9%, IGST 18%) — matches {@link lineGstTotalPercent} rules. */
+export function formatLineGstRateDisplay(line: InvoiceLineDraft): string {
+  const cTrim = line.cgstRate.trim();
+  const sTrim = line.sgstRate.trim();
+  const iTrim = line.igstRate.trim();
+
+  const c = cTrim !== "" ? toNum(line.cgstRate) : toNum(line.item?.cgstRate ?? "0");
+  const s = sTrim !== "" ? toNum(line.sgstRate) : toNum(line.item?.sgstRate ?? "0");
+  const ig = iTrim !== "" ? toNum(line.igstRate) : toNum(line.item?.igstRate ?? "0");
+
+  if (cTrim !== "" || sTrim !== "") {
+    if (c > 0 && s > 0) return `${fmtGstRate(c)}+${fmtGstRate(s)}%`;
+    if (c > 0) return `CGST ${fmtGstRate(c)}%`;
+    if (s > 0) return `SGST ${fmtGstRate(s)}%`;
+    return "—";
+  }
+
+  if (iTrim !== "") {
+    return ig > 0 ? `IGST ${fmtGstRate(ig)}%` : "—";
+  }
+
+  if (c > 0 && s > 0) return `${fmtGstRate(c)}+${fmtGstRate(s)}%`;
+  if (ig > 0 && c === 0 && s === 0) return `IGST ${fmtGstRate(ig)}%`;
+
+  const total = lineGstTotalPercent(line);
+  if (total <= 0) return "—";
+  return `${fmtGstRate(total)}%`;
+}
+
 /** Purchase API `items[]` GST fields: same rules as {@link lineGstTotalPercent}. */
 export function effectivePurchaseLineGstPayload(
   line: InvoiceLineDraft,
