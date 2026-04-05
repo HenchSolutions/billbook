@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Bar, BarChart, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 import { CHART_COLORS, type PaymentStatusItem, type InvoiceStatusItem } from "@/lib/dashboard";
@@ -79,83 +78,6 @@ export function DashboardInsightsSection({
   invoiceStatusData,
   totalInvoiceStatusAmount,
 }: DashboardInsightsSectionProps) {
-  const isSimpleMode = useIsSimpleMode();
-
-  // In simple mode, only show the essential payment status chart
-  if (isSimpleMode) {
-    return (
-      <section className="space-y-4">
-        <Card className="rounded-3xl border bg-gradient-to-br from-muted/40 via-background to-muted/20 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">Sale invoice payment status</CardTitle>
-            <p className="text-xs font-normal text-muted-foreground">
-              Final sale invoices only — status from recorded paid amount vs total.
-            </p>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex flex-col items-center gap-6">
-              <ChartContainer config={{}} className="h-[220px] w-full max-w-[280px]">
-                <PieChart>
-                  <Pie
-                    data={
-                      paymentStatusData.length > 0
-                        ? paymentStatusData
-                        : [{ ...EMPTY_PIE_PLACEHOLDER[0], value: 1 }]
-                    }
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {(paymentStatusData.length > 0
-                      ? paymentStatusData
-                      : [{ ...EMPTY_PIE_PLACEHOLDER[0], value: 1 }]
-                    ).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<CustomPaymentTooltip />} cursor={false} />
-                </PieChart>
-              </ChartContainer>
-              {paymentStatusData.length > 0 ? (
-                <div className="flex w-full flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                  {paymentStatusData.map((item) => {
-                    const share = totalPaymentAmount
-                      ? Math.round((item.value / totalPaymentAmount) * 100)
-                      : 0;
-                    return (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <div
-                          className="h-3 w-3 shrink-0 rounded-sm"
-                          style={{ backgroundColor: item.fill }}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          {item.name} ({item.count})
-                        </span>
-                        <span className="text-sm font-semibold">{formatCurrency(item.value)}</span>
-                        <span className="text-xs text-muted-foreground">· {share}%</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">No payment data yet</p>
-                  <p className="text-[11px] text-muted-foreground/80">
-                    Appears when you have final sale invoices to analyse.
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    );
-  }
-
-  // Advanced mode shows full dashboard
   return (
     <section className="space-y-4">
       <div className="grid gap-6 lg:grid-cols-3">

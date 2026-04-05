@@ -1,6 +1,5 @@
 import { History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import {
   buildAuditHighlightParams,
   getAuditActivityTitle,
@@ -38,9 +37,6 @@ function deduplicateLogs(logs: AuditLog[]): Array<AuditLog & { collapsedCount?: 
 }
 
 export function InvoiceAuditHistory({ logs }: InvoiceAuditHistoryProps) {
-  const isSimpleMode = useIsSimpleMode();
-
-  if (isSimpleMode) return null;
   if (!logs.length) return null;
 
   const entries = deduplicateLogs(logs);

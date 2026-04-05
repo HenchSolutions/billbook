@@ -1,11 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useUIMode } from "@/contexts/UIModeContext";
-import { useSimpleLabel } from "@/hooks/use-simple-mode";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Menu, ChevronLeft } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +20,6 @@ export default function TopBar({
   isMobile = false,
 }: TopBarProps) {
   const { user } = useAuth();
-  const { mode, setMode } = useUIMode();
-  const modeLabel = useSimpleLabel("Advanced", "Simple");
-  const modeToggleTitle = useSimpleLabel("Switch to Simple Mode", "Switch to Advanced Mode");
   const router = useRouter();
 
   const displayName = user ? `${user.firstName} ${user.lastName}` : "";
@@ -62,9 +55,11 @@ export default function TopBar({
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label="Toggle sidebar"
           >
-            <ChevronLeft
-              className={cn("h-5 w-5 transition-transform", sidebarCollapsed && "rotate-180")}
-            />
+            {sidebarCollapsed ? (
+              <PanelLeftOpen className="h-5 w-5" aria-hidden />
+            ) : (
+              <PanelLeftClose className="h-5 w-5" aria-hidden />
+            )}
           </Button>
         )}
         <div className="flex min-w-0 items-center gap-2">
@@ -104,17 +99,6 @@ export default function TopBar({
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="hidden items-center gap-2 pr-4 sm:flex">
-          <Label htmlFor="mode-toggle" className="cursor-pointer text-xs text-muted-foreground">
-            {modeLabel}
-          </Label>
-          <Switch
-            id="mode-toggle"
-            checked={mode === "advanced"}
-            onCheckedChange={(checked) => setMode(checked ? "advanced" : "simple")}
-            title={modeToggleTitle}
-          />
-        </div>
         <button
           type="button"
           onClick={handleOpenProfile}

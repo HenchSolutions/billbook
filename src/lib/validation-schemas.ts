@@ -11,6 +11,13 @@ export const signedPriceString = z
   .optional()
   .or(z.literal(""));
 
+/** Unsigned amount for opening balance (Debit/Credit chosen separately). */
+export const unsignedPriceString = z
+  .string()
+  .regex(/^$|^[0-9]+(\.[0-9]{1,2})?$/, "Invalid amount")
+  .optional()
+  .or(z.literal(""));
+
 // Required price/amount validation (does not allow empty)
 export const requiredPriceString = z
   .string()

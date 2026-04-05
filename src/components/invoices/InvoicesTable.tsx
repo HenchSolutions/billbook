@@ -86,6 +86,8 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
             const balanceDue = getInvoiceBalanceDue(inv);
             const isFullyPaid = balanceDue <= 0 && inv.status === "FINAL";
 
+            const canCreateReturn = showReturnAction && inv.status === "FINAL";
+
             return (
               <tr
                 key={inv.id}
@@ -128,7 +130,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                         </div>
                       )}
                       {isFullyPaid && <div className="mt-0.5 text-xs text-emerald-600">Paid</div>}
-                      {showReturnAction && (
+                      {canCreateReturn && (
                         <Button
                           type="button"
                           size="sm"
@@ -188,19 +190,23 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 </td>
                 {showReturnAction && (
                   <td className="hidden px-3 py-3 text-center sm:table-cell">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        router.push(
-                          `/invoices/new?type=${returnInvoiceType}&sourceInvoiceId=${inv.id}`,
-                        );
-                      }}
-                    >
-                      {returnButtonLabel}
-                    </Button>
+                    {canCreateReturn ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          router.push(
+                            `/invoices/new?type=${returnInvoiceType}&sourceInvoiceId=${inv.id}`,
+                          );
+                        }}
+                      >
+                        {returnButtonLabel}
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </td>
                 )}
               </tr>

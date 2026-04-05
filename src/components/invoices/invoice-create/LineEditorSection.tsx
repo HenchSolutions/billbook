@@ -127,7 +127,7 @@ export function LineEditorSection({
     if (isPurchaseInvoiceUi) {
       return {
         gridTemplateColumns:
-          "minmax(8rem, 1.35fr) minmax(2.75rem, 0.22fr) minmax(2.5rem, 0.2fr) minmax(5.25rem, 0.42fr) minmax(3.75rem, 0.32fr) minmax(4.75rem, 0.4fr) minmax(4.75rem, 0.4fr) auto",
+          "minmax(8rem, 1.35fr) minmax(2.75rem, 0.22fr) minmax(2.5rem, 0.2fr) minmax(5.25rem, 0.42fr) minmax(4.75rem, 0.38fr) minmax(3.75rem, 0.32fr) minmax(4.75rem, 0.4fr) minmax(4.75rem, 0.4fr) auto",
       };
     }
     return isPurchaseCostLine
@@ -350,6 +350,7 @@ export function LineEditorSection({
                     searchText={stockSearchText}
                     onSearchChange={setStockSearchText}
                     triggerLabel={triggerLabel}
+                    inputTrigger={stockPickerMode === "catalog"}
                     triggerClassName="h-9 w-full max-w-full truncate text-sm"
                     draftLineStockEntryId={draftLine.stockEntryId}
                     filteredStockChoices={filteredStockChoices}
@@ -366,7 +367,7 @@ export function LineEditorSection({
                   />
                 </div>
                 <div>
-                  <Label className={draftLabelClass}>Comb</Label>
+                  <Label className={draftLabelClass}>Unit</Label>
                   <Input
                     value={draftLine.item?.unit?.trim() ? draftLine.item.unit : "—"}
                     disabled
@@ -399,6 +400,15 @@ export function LineEditorSection({
                     }
                     placeholder="0.00"
                     className="h-9 min-w-0 text-right text-sm tabular-nums"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label className={draftLabelClass}>Taxable</Label>
+                  <Input
+                    value={formatCurrency(getLineAmounts(draftLine).taxable)}
+                    disabled
+                    className="h-9 min-w-0 cursor-default bg-muted/40 text-right text-sm tabular-nums"
+                    title="Amount before GST on this line"
                   />
                 </div>
                 <div className="min-w-0">
@@ -758,7 +768,7 @@ export function LineEditorSection({
               className={cn(
                 "w-full text-sm",
                 isPurchaseInvoiceUi
-                  ? "min-w-[720px]"
+                  ? "min-w-[800px]"
                   : isPurchaseCostLine
                     ? "min-w-[1120px]"
                     : "min-w-[1000px]",
@@ -795,6 +805,11 @@ export function LineEditorSection({
                         ? "Purchase ₹"
                         : "Unit price"}
                   </th>
+                  {isPurchaseInvoiceUi ? (
+                    <th scope="col" className={thRight}>
+                      Taxable
+                    </th>
+                  ) : null}
                   {isPurchaseCostLine && !isPurchaseInvoiceUi ? (
                     <th scope="col" className={thRight}>
                       Selling ₹
@@ -895,6 +910,11 @@ export function LineEditorSection({
                       <td className="px-3 py-2.5 text-right tabular-nums">
                         {formatCurrency(line.unitPrice)}
                       </td>
+                      {isPurchaseInvoiceUi ? (
+                        <td className="px-3 py-2.5 text-right tabular-nums">
+                          {formatCurrency(totals.taxable)}
+                        </td>
+                      ) : null}
                       {isPurchaseCostLine && !isPurchaseInvoiceUi ? (
                         <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
                           {line.sellingPrice?.trim() ? formatCurrency(line.sellingPrice) : "—"}
@@ -965,6 +985,9 @@ export function LineEditorSection({
                     <>
                       <td colSpan={4} className="whitespace-nowrap px-3 py-2.5 pl-4 text-left">
                         Total
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                        {formatCurrency(addedLinesTotals.taxable)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-right text-xs text-muted-foreground">
                         —

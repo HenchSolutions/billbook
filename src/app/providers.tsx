@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { UIModeProvider } from "@/contexts/UIModeContext";
 
 function createQueryClient() {
   return new QueryClient({
@@ -36,11 +35,9 @@ export default function Providers({ children }: { children: ReactNode }) {
       <Toaster position="top-right" richColors closeButton />
       <ErrorBoundary>
         <AuthProvider>
-          <UIModeProvider>
-            <TooltipProvider>
-              <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
-            </TooltipProvider>
-          </UIModeProvider>
+          <TooltipProvider>
+            <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
+          </TooltipProvider>
         </AuthProvider>
       </ErrorBoundary>
     </QueryClientProvider>

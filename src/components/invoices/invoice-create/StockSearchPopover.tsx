@@ -9,7 +9,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatISODateDisplay } from "@/lib/date";
 import { getEntryDateIso } from "@/lib/invoice-create";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -23,7 +23,10 @@ interface StockSearchPopoverProps {
   onOpenChange: (open: boolean) => void;
   searchText: string;
   onSearchChange: (value: string) => void;
-  triggerLabel: React.ReactNode;
+  /** Button label when not using `inputTrigger` (stock picker / catalog button mode). */
+  triggerLabel?: React.ReactNode;
+  /** Purchase catalog: text field as trigger — typing filters; popover lists matches (no duplicate search inside). */
+  inputTrigger?: boolean;
   /** Narrower trigger (e.g. purchase line layout). */
   triggerClassName?: string;
   draftLineStockEntryId: number | null;
@@ -47,6 +50,7 @@ export function StockSearchPopover({
   searchText,
   onSearchChange,
   triggerLabel,
+  inputTrigger = false,
   triggerClassName,
   draftLineStockEntryId,
   filteredStockChoices,
@@ -62,34 +66,64 @@ export function StockSearchPopover({
   selectedCatalogItemId = null,
 }: StockSearchPopoverProps) {
   const catalogMode = pickerMode === "catalog";
+  const useInputTrigger = Boolean(inputTrigger && catalogMode);
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className={cn("h-10 w-full justify-start text-left font-normal", triggerClassName)}
-        >
-          {triggerLabel}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(38rem,calc(100vw-1rem))] p-0">
+    <Popover open={open} onOpenChange={onOpenChange} modal={false}>
+      {useInputTrigger ? (
+        <PopoverAnchor asChild>
+          <div className="w-full min-w-0">
+            <Input
+              value={searchText}
+              onChange={(e) => {
+                onSearchChange(e.target.value);
+                onOpenChange(true);
+              }}
+              onFocus={() => onOpenChange(true)}
+              placeholder="Search item by name…"
+              className={cn(
+                "h-9 w-full max-w-full truncate text-left text-sm font-normal",
+                triggerClassName,
+              )}
+              autoComplete="off"
+              aria-expanded={open}
+              aria-controls="stock-search-command-list"
+            />
+          </div>
+        </PopoverAnchor>
+      ) : (
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className={cn("h-10 w-full justify-start text-left font-normal", triggerClassName)}
+          >
+            {triggerLabel}
+          </Button>
+        </PopoverTrigger>
+      )}
+      <PopoverContent
+        align="start"
+        className="w-[min(38rem,calc(100vw-1rem))] p-0"
+        onOpenAutoFocus={useInputTrigger ? (e) => e.preventDefault() : undefined}
+      >
         <Command
           shouldFilter={false}
           className="[&_[cmdk-item]:hover]:!bg-muted/45 [&_[cmdk-item]:hover]:!text-foreground [&_[cmdk-item][data-selected=true]]:!bg-muted/55 [&_[cmdk-item][data-selected=true]]:!text-foreground [&_[cmdk-item]]:transition-colors"
         >
-          <div className="border-b p-2">
-            <Input
-              value={searchText}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={
-                catalogMode ? "Search items by name…" : "Search by item, purchase date, or vendor"
-              }
-              className="h-8"
-            />
-          </div>
-          <CommandList className="max-h-[360px]">
+          {!useInputTrigger ? (
+            <div className="border-b p-2">
+              <Input
+                value={searchText}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder={
+                  catalogMode ? "Search items by name…" : "Search by item, purchase date, or vendor"
+                }
+                className="h-8"
+              />
+            </div>
+          ) : null}
+          <CommandList id="stock-search-command-list" className="max-h-[360px]">
             <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
               {catalogMode ? "No matching items." : "No matching stock entries found."}
             </CommandEmpty>

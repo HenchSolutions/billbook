@@ -1,9 +1,8 @@
 "use client";
 
-import { Building2, Settings2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { BusinessUsersCard, DocumentNumberingCard } from "@/components/settings/SettingsSections";
-import { InterfaceModeCard } from "@/components/settings/InterfaceModeCard";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
@@ -11,7 +10,7 @@ export default function SettingsPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Business settings"
-        description="Configure document numbering, defaults, and team access for your organization. Personal display options are separate below."
+        description="Configure document numbering, defaults, and team access for your organization."
       />
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
@@ -50,20 +49,6 @@ export default function SettingsPage() {
               <BusinessUsersCard embedded />
             </div>
           </div>
-        </section>
-
-        {/* Personal */}
-        <section aria-labelledby="personal-settings-heading">
-          <div className="mb-4 flex items-center gap-2 text-muted-foreground">
-            <Settings2 className="h-4 w-4" aria-hidden />
-            <h2
-              id="personal-settings-heading"
-              className="text-xs font-semibold uppercase tracking-wider"
-            >
-              Personal
-            </h2>
-          </div>
-          <InterfaceModeCard />
         </section>
       </div>
     </div>

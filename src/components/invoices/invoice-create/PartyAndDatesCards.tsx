@@ -237,7 +237,7 @@ export function PartyAndDatesCards({
                 </Label>
               )}
               {showSellingPriceMargin && (
-                <Label htmlFor="selling-price-margin" className="leading-snug">
+                <Label htmlFor="selling-price-margin" className="leading-snug" required>
                   Selling price margin (%)
                 </Label>
               )}

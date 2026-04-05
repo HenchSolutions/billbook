@@ -37,8 +37,13 @@ import {
   gstinString,
   optionalEmail,
   optionalString,
-  signedPriceString,
+  unsignedPriceString,
 } from "@/lib/validation-schemas";
+import {
+  hasPersistedOpeningBalance,
+  openingBalanceFromApi,
+  openingBalanceToApi,
+} from "@/lib/party-opening-balance";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 import { capitaliseWords } from "@/lib/utils";
 import { fetchPostalOffice } from "@/lib/pincode";
@@ -57,7 +62,8 @@ const schema = z.object({
   city: optionalString,
   state: optionalString,
   postalCode: optionalString,
-  openingBalance: signedPriceString,
+  openingBalanceAmount: unsignedPriceString,
+  openingBalanceNature: z.enum(["DEBIT", "CREDIT"]),
   isActive: z.boolean().default(true),
 });
 
@@ -85,6 +91,8 @@ export default function PartyDialog({
   onSuccess,
 }: Props) {
   const isEdit = !!party;
+  const openingBalanceLocked =
+    isEdit && party != null && hasPersistedOpeningBalance(party.openingBalance);
   const createMutation = useCreateParty();
   const updateMutation = useUpdateParty(party?.id ?? 0);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
@@ -98,7 +106,7 @@ export default function PartyDialog({
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { type: defaultType },
+    defaultValues: { type: defaultType, openingBalanceNature: "DEBIT" },
   });
 
   const partyType = watch("type");
@@ -146,6 +154,7 @@ export default function PartyDialog({
     if (open) {
       pincodeInitialMountRef.current = true;
       if (party) {
+        const ob = openingBalanceFromApi(party.openingBalance);
         reset({
           name: party.name,
           type: typeLocked ? defaultType : party.type,
@@ -156,7 +165,8 @@ export default function PartyDialog({
           city: party.city ?? "",
           state: party.state ?? "",
           postalCode: party.postalCode ?? "",
-          openingBalance: party.openingBalance ?? "",
+          openingBalanceAmount: ob.amount,
+          openingBalanceNature: ob.nature,
           isActive: party.isActive ?? true,
         });
       } else {
@@ -170,7 +180,8 @@ export default function PartyDialog({
           city: "",
           state: "",
           postalCode: "",
-          openingBalance: "",
+          openingBalanceAmount: "",
+          openingBalanceNature: "DEBIT",
           isActive: true,
         });
       }
@@ -188,8 +199,15 @@ export default function PartyDialog({
       city: data.city || undefined,
       state: data.state || undefined,
       postalCode: data.postalCode || undefined,
-      openingBalance: data.openingBalance || undefined,
       isActive: data.isActive,
+      ...(!openingBalanceLocked
+        ? {
+            openingBalance: openingBalanceToApi(
+              data.openingBalanceAmount,
+              data.openingBalanceNature,
+            ),
+          }
+        : {}),
     };
     try {
       if (isEdit) {
@@ -289,17 +307,59 @@ export default function PartyDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>GSTIN</Label>
-              <Input placeholder="22AAAAA0000A1Z5" {...register("gstin")} />
-              {errors.gstin && <FieldError>{errors.gstin.message}</FieldError>}
+          <div className="space-y-2 sm:max-w-md">
+            <Label>GSTIN</Label>
+            <Input placeholder="22AAAAA0000A1Z5" {...register("gstin")} />
+            {errors.gstin && <FieldError>{errors.gstin.message}</FieldError>}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Opening balance</Label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Input
+                  placeholder="0.00"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  aria-invalid={!!errors.openingBalanceAmount}
+                  disabled={openingBalanceLocked}
+                  {...register("openingBalanceAmount")}
+                />
+                {errors.openingBalanceAmount && (
+                  <FieldError>{errors.openingBalanceAmount.message}</FieldError>
+                )}
+              </div>
+              <div className="w-full shrink-0 sm:w-[10.5rem]">
+                <Label
+                  htmlFor="opening-balance-nature"
+                  className="mb-1.5 block text-xs text-muted-foreground"
+                >
+                  Type
+                </Label>
+                <Select
+                  value={watch("openingBalanceNature")}
+                  onValueChange={(v) =>
+                    setValue("openingBalanceNature", v as "DEBIT" | "CREDIT", { shouldDirty: true })
+                  }
+                  disabled={openingBalanceLocked}
+                >
+                  <SelectTrigger id="opening-balance-nature" className="h-10 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DEBIT">Debit</SelectItem>
+                    <SelectItem value="CREDIT">Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Opening Balance</Label>
-              <Input placeholder="0.00" {...register("openingBalance")} />
-              {errors.openingBalance && <FieldError>{errors.openingBalance.message}</FieldError>}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              {openingBalanceLocked
+                ? "Opening balance is fixed after the first save and cannot be changed here."
+                : partyType === "SUPPLIER"
+                  ? "Debit: advance paid to vendor · Credit: amount you owe the vendor"
+                  : "Debit: customer owes you · Credit: advance from customer"}
+            </p>
           </div>
 
           <div className="space-y-2">

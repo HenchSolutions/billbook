@@ -1,7 +1,6 @@
 import { History, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import { formatCurrency } from "@/lib/utils";
 import type { Party } from "@/types/party";
 
@@ -12,8 +11,6 @@ interface PartiesTableProps {
 }
 
 export function PartiesTable({ parties, onEdit, onLedger }: PartiesTableProps) {
-  const isSimpleMode = useIsSimpleMode();
-
   return (
     <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
       <table className="w-full min-w-[320px] text-sm" role="table" aria-label="Parties list">
@@ -83,17 +80,15 @@ export function PartiesTable({ parties, onEdit, onLedger }: PartiesTableProps) {
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  {!isSimpleMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onLedger(party.id)}
-                      title="Account History"
-                      aria-label={`View account history for ${party.name}`}
-                    >
-                      <History className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onLedger(party.id)}
+                    title="Account History"
+                    aria-label={`View account history for ${party.name}`}
+                  >
+                    <History className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </td>
             </tr>

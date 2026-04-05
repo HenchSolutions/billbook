@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Package, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import type { TopItem, TopCustomer } from "@/types/dashboard";
 
@@ -14,12 +13,8 @@ export function DashboardHighlightsSection({
   topItems = [],
   topCustomers = [],
 }: DashboardHighlightsSectionProps) {
-  const isSimpleMode = useIsSimpleMode();
   const items = Array.isArray(topItems) ? topItems : [];
   const customers = Array.isArray(topCustomers) ? topCustomers : [];
-
-  // Hide in simple mode completely
-  if (isSimpleMode) return null;
 
   return (
     <section className="space-y-4">

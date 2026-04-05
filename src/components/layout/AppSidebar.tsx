@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import {
   LayoutDashboard,
   FileText,
@@ -28,8 +27,6 @@ interface NavItem {
   path: string;
   icon: React.ElementType;
   ownerOnly?: boolean;
-  simpleMode?: boolean;
-  advancedOnly?: boolean;
 }
 
 interface NavSection {
@@ -45,7 +42,7 @@ const navSections: NavSection[] = [
       { label: "Invoices", path: "/invoices", icon: FileText },
       { label: "Receipts", path: "/receipts", icon: Wallet },
       { label: "Payments out", path: "/payments/outbound", icon: ArrowDownLeft },
-      { label: "Credit Notes", path: "/credit-notes", icon: FileMinus, advancedOnly: true },
+      { label: "Credit Notes", path: "/credit-notes", icon: FileMinus },
     ],
   },
   {
@@ -65,8 +62,8 @@ const navSections: NavSection[] = [
   {
     title: "Reports",
     items: [
-      { label: "Reports", path: "/reports", icon: BarChart3, advancedOnly: true },
-      { label: "Tax / GST", path: "/tax", icon: Receipt, advancedOnly: true },
+      { label: "Reports", path: "/reports", icon: BarChart3 },
+      { label: "Tax / GST", path: "/tax", icon: Receipt },
     ],
   },
   {
@@ -77,7 +74,6 @@ const navSections: NavSection[] = [
         path: "/audit-logs",
         icon: BarChart3,
         ownerOnly: true,
-        advancedOnly: true,
       },
     ],
   },
@@ -105,7 +101,6 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { logout, user } = useAuth();
-  const isSimpleMode = useIsSimpleMode();
   const safePathname = pathname ?? "";
   const ledgerSource = searchParams.get("from");
   const isPartyLedgerRoute = /^\/parties\/[^/]+\/ledger\/?$/.test(safePathname);
@@ -149,14 +144,11 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
-          // Hide if owner-only and user is not owner
           if (item.ownerOnly && user?.role !== "OWNER") return false;
-          // Hide if advanced-only and in simple mode
-          if (item.advancedOnly && isSimpleMode) return false;
           return true;
         }),
       }))
-      .filter((section) => section.items.length > 0); // Hide empty sections
+      .filter((section) => section.items.length > 0);
   };
 
   return (

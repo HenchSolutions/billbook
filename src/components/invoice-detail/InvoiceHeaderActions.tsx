@@ -1,7 +1,6 @@
 import { Download, Loader2, Pencil, CreditCard, Send, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import { invoiceTypeSupportsReceiptPayment } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/utils";
 import type { InvoiceDetail } from "@/types/invoice";
@@ -50,7 +49,6 @@ export function InvoiceHeaderActions({
   onMarkSent,
   onMarkReminder,
 }: InvoiceHeaderActionsProps) {
-  const isSimpleMode = useIsSimpleMode();
   const showRecordPayment = invoiceTypeSupportsReceiptPayment(invoice.invoiceType);
 
   return (
@@ -61,17 +59,15 @@ export function InvoiceHeaderActions({
             <Pencil className="mr-2 h-3.5 w-3.5" />
             Edit
           </Button>
-          {!isSimpleMode && (
-            <Button variant="outline" size="sm" onClick={onCancel} disabled={isCancelPending}>
-              Cancel Invoice
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={onCancel} disabled={isCancelPending}>
+            Cancel Invoice
+          </Button>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="inline-flex">
                 <Button size="sm" onClick={onFinalize} disabled={isFinalizePending}>
                   {isFinalizePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isSimpleMode ? "Confirm Invoice" : "Finalize"}
+                  Finalize
                 </Button>
               </span>
             </TooltipTrigger>
@@ -100,7 +96,7 @@ export function InvoiceHeaderActions({
         </Button>
       )}
 
-      {invoice.status === "FINAL" && !isSimpleMode && (
+      {invoice.status === "FINAL" && (
         <>
           <div className="flex flex-col">
             <Button variant="outline" size="sm" onClick={onMarkSent} disabled={isMarkSentPending}>

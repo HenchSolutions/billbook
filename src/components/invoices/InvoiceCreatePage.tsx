@@ -94,6 +94,15 @@ export function InvoiceCreatePage({
 
       <ErrorBanner error={state.stockEntriesError} fallbackMessage={copy.loadErrorMessage} />
 
+      {state.returnLinkedSourceBlockedReason ? (
+        <div
+          className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
+          role="alert"
+        >
+          {state.returnLinkedSourceBlockedReason}
+        </div>
+      ) : null}
+
       <PartyAndDatesCards
         invoiceType={initialType}
         party={state.party}
@@ -218,7 +227,9 @@ export function InvoiceCreatePage({
             roundOffInputValue={state.roundOffInputValue}
             onRoundOffAmountChange={state.setRoundOffAmount}
             canSubmit={state.canSubmit}
-            submitBlockedHint={state.returnQtySubmitShortHint}
+            submitBlockedHint={
+              state.returnLinkedSourceBlockedReason ?? state.returnQtySubmitShortHint
+            }
             isPending={state.saveInvoice.isPending}
             onCreate={state.handleCreate}
             shortLabel={state.pageMeta.shortLabel}

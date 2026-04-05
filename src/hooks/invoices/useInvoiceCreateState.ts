@@ -154,7 +154,10 @@ export function useInvoiceCreateState(
     [consigneesData, party?.id],
   );
 
-  /** Only while the batch popover is open; avoids /items + /stock-entries on every keystroke site-wide. */
+  /**
+   * Only while the batch popover is open; avoids /items + /stock-entries on every keystroke site-wide.
+   * Purchase invoice catalog picker needs the list as soon as the popover opens (empty search = full page).
+   */
   const { data: itemsData } = useItems(
     {
       includeInactive: false,
@@ -162,7 +165,8 @@ export function useInvoiceCreateState(
       limit: 100,
     },
     {
-      enabled: stockSearchOpen && stockSearchQuery.length > 0,
+      enabled:
+        stockSearchOpen && (invoiceType === "PURCHASE_INVOICE" || stockSearchQuery.length > 0),
       staleTime: 30_000,
     },
   );
@@ -459,8 +463,28 @@ export function useInvoiceCreateState(
     ? "Cannot save until each return qty is at or below the remaining amount."
     : null;
 
+  const returnLinkedSourceBlockedReason = useMemo(() => {
+    if (editInvoiceId) return null;
+    if (invoiceType !== "SALE_RETURN" && invoiceType !== "PURCHASE_RETURN") return null;
+    if (sourceInvoiceId == null) return null;
+    if (!sourceInvoice) return null;
+    if (sourceInvoice.status === "FINAL") return null;
+    return "Returns can only be created from a finalised invoice. Finalise the source invoice first.";
+  }, [editInvoiceId, invoiceType, sourceInvoiceId, sourceInvoice]);
+
+  const purchaseSellingMarginOk =
+    invoiceType !== "PURCHASE_INVOICE" ||
+    (() => {
+      const t = sellingPriceMarginPercent.trim();
+      if (t === "") return false;
+      const n = Number(t);
+      return Number.isFinite(n) && n >= 0;
+    })();
+
   const canSubmit =
+    returnLinkedSourceBlockedReason == null &&
     party != null &&
+    purchaseSellingMarginOk &&
     (invoiceType === "SALE_RETURN"
       ? linesForBillSummary.length > 0 && linesForBillSummary.every(isLineValid)
       : addedLines.length > 0 && addedLines.every(isLineValid));
@@ -540,6 +564,10 @@ export function useInvoiceCreateState(
     if (hasHydratedSourceInvoice.current) return;
     if (!sourceInvoice) return;
     if (sourceInvoice.invoiceType !== sourceConfig.sourceType) return;
+    if (sourceInvoice.status !== "FINAL") {
+      hasHydratedSourceInvoice.current = true;
+      return;
+    }
 
     const partyFromList = parties.find((p) => p.id === sourceInvoice.partyId);
     const fallbackParty: Party = {
@@ -1113,7 +1141,7 @@ export function useInvoiceCreateState(
         igstRate: item.igstRate ?? "0",
       });
       setStockSearchOpen(false);
-      setStockSearchText("");
+      setStockSearchText(item.name);
       clearUnitPriceFloorWarning();
     },
     [clearUnitPriceFloorWarning, invoiceType, updateLine],
@@ -1882,6 +1910,7 @@ export function useInvoiceCreateState(
     canSubmit,
     returnQtyBlockReason,
     returnQtySubmitShortHint,
+    returnLinkedSourceBlockedReason,
     // Handlers
     updateLine,
     handleStockChoiceSelect,
