@@ -11,14 +11,15 @@ interface DateFieldProps {
   value: string;
   onChange: (value: string) => void;
   minDate?: string;
+  required?: boolean;
 }
 
-export function DateField({ label, value, onChange, minDate }: DateFieldProps) {
+export function DateField({ label, value, onChange, minDate, required }: DateFieldProps) {
   const minDateObj = minDate ? parseISODateString(minDate) : undefined;
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label required={required}>{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button

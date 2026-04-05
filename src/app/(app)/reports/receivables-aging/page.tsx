@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
-import { ReportBackLink } from "@/components/reports/ReportBackLink";
 import { ReportCsvButton } from "@/components/reports/ReportCsvButton";
 import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import { ReportRegisterFilterCard } from "@/components/reports/report-register-ui";
@@ -25,10 +24,11 @@ export default function ReceivablesAgingPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <ReportBackLink />
       <PageHeader
         title={reportInvoiceAging.title}
         description={reportInvoiceAging.description}
+        backHref="/reports"
+        backLabel="Back to reports"
         action={
           <ReportCsvButton
             reportPath="/reports/receivables-aging"

@@ -195,6 +195,7 @@ export function PartyAndDatesCards({
               label={invoiceDateLabel}
               value={invoiceDate}
               onChange={onInvoiceDateChange}
+              required
             />
             <DateField
               label="Due Date"

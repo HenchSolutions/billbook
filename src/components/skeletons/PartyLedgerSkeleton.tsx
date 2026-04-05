@@ -4,12 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function PartyLedgerSkeleton() {
   return (
     <div className="page-container animate-fade-in">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="page-header mb-0">
-          <Skeleton className="h-9 w-full max-w-lg" />
-          <Skeleton className="mt-2 h-4 w-full max-w-md" />
-        </div>
-        <Skeleton className="h-10 w-44 shrink-0 rounded-md" />
+      <Skeleton className="mb-4 h-4 w-48" />
+      <div className="page-header">
+        <Skeleton className="h-9 w-full max-w-lg" />
+        <Skeleton className="mt-2 h-4 w-full max-w-md" />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

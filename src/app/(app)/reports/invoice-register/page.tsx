@@ -7,7 +7,6 @@ import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { ReportBackLink } from "@/components/reports/ReportBackLink";
 import { ReportCsvButton } from "@/components/reports/ReportCsvButton";
 import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
@@ -45,10 +44,11 @@ export default function InvoiceRegisterPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <ReportBackLink />
       <PageHeader
         title={reportInvoiceRegister.title}
         description={reportInvoiceRegister.description}
+        backHref="/reports"
+        backLabel="Back to reports"
         action={
           <ReportCsvButton
             reportPath="/reports/invoice-register"

@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, History, Package } from "lucide-react";
+import { History, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PageHeader from "@/components/PageHeader";
+import { PageBackLink } from "@/components/PageBackLink";
 import ItemDetailSkeleton from "@/components/skeletons/ItemDetailSkeleton";
 import { useItem, useItemLedger } from "@/hooks/use-items";
 import { cn, formatDate, formatQuantity } from "@/lib/utils";
@@ -75,17 +76,7 @@ export function ItemDetailView({ id }: { id: number }) {
 
   return (
     <div className="page-container animate-fade-in">
-      <div className="mb-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push(backHref)}
-          className="-ml-2 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
-          {backLabel}
-        </Button>
-      </div>
+      <PageBackLink href={backHref}>{backLabel}</PageBackLink>
 
       {isPending ? (
         <ItemDetailSkeleton />

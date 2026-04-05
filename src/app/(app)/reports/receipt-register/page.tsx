@@ -5,7 +5,6 @@ import Link from "next/link";
 import DateRangePicker from "@/components/DateRangePicker";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
-import { ReportBackLink } from "@/components/reports/ReportBackLink";
 import { ReportCsvButton } from "@/components/reports/ReportCsvButton";
 import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
@@ -41,10 +40,11 @@ export default function ReceiptRegisterPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <ReportBackLink />
       <PageHeader
         title={reportReceiptRegister.title}
         description={reportReceiptRegister.description}
+        backHref="/reports"
+        backLabel="Back to reports"
         action={
           <ReportCsvButton
             reportPath="/reports/receipt-register"

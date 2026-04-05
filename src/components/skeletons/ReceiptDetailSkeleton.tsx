@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function ReceiptDetailSkeleton() {
   return (
     <div className="page-container max-w-5xl animate-fade-in space-y-8 pb-10">
-      <Skeleton className="h-4 w-32" />
+      <Skeleton className="mb-4 h-4 w-40" />
 
       <div className="overflow-hidden rounded-2xl border border-border/80 shadow-sm">
         <div className="grid lg:grid-cols-[1fr_minmax(280px,340px)]">

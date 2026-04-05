@@ -1,14 +1,33 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import ErrorBanner from "@/components/ErrorBanner";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import {
   DashboardHeroSection,
   DashboardQuickStatsSection,
-  DashboardInsightsSection,
   DashboardHighlightsSection,
   DashboardRecentInvoicesSection,
 } from "@/components/dashboard/DashboardSections";
+
+const DashboardInsightsSection = dynamic(
+  () =>
+    import("@/components/dashboard/DashboardInsightsSection").then((m) => ({
+      default: m.DashboardInsightsSection,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <section className="space-y-5" aria-busy="true" aria-label="Loading charts">
+        <div className="h-10 max-w-sm animate-pulse rounded-lg bg-muted/60" />
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div className="h-[min(320px,55vw)] min-h-[220px] animate-pulse rounded-2xl bg-muted/40 lg:col-span-2" />
+          <div className="h-[min(320px,55vw)] min-h-[220px] animate-pulse rounded-2xl bg-muted/40" />
+        </div>
+      </section>
+    ),
+  },
+);
 import { buildPaymentStatusData, buildInvoiceStatusData, EMPTY_DASHBOARD } from "@/lib/dashboard";
 import { useDashboard } from "@/hooks/use-business";
 

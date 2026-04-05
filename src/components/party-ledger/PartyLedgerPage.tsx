@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useParty, usePartyLedger, usePartyBalance, usePartyStatement } from "@/hooks/use-parties";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +15,6 @@ import { StatementPanel } from "@/components/party-ledger/StatementPanel";
 import { showErrorToast } from "@/lib/toast-helpers";
 
 export default function PartyLedgerPage() {
-  const router = useRouter();
   const params = useParams<{ partyId?: string | string[] }>();
   const pathname = usePathname();
   const partyIdParam = Array.isArray(params?.partyId) ? params.partyId[0] : params?.partyId;
@@ -91,12 +89,8 @@ export default function PartyLedgerPage() {
         <PageHeader
           title="Ledger"
           description="View account details"
-          action={
-            <Button variant="ghost" onClick={() => router.push(fallbackBackTo)} className="mr-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {fallbackBackLabel}
-            </Button>
-          }
+          backHref={fallbackBackTo}
+          backLabel={fallbackBackLabel}
         />
         <ErrorBanner
           error={isLoadError ? partyQuery.error : { message: "Record not found" }}
@@ -124,12 +118,8 @@ export default function PartyLedgerPage() {
       <PageHeader
         title={`${partyLabelTitle} ledger — ${party.name}`}
         description={`Activity and balance for this ${partyLabel}`}
-        action={
-          <Button variant="ghost" onClick={() => router.push(backTo)} className="mr-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {backLabel}
-          </Button>
-        }
+        backHref={backTo}
+        backLabel={backLabel}
       />
 
       <ErrorBanner

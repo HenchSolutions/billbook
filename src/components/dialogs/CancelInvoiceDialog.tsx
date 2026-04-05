@@ -26,6 +26,7 @@ import {
   INVOICE_CANCEL_PRESET_REASONS,
   validateCancelInvoiceReason,
 } from "@/constants/invoice-cancel";
+import { showErrorToast } from "@/lib/toast-helpers";
 
 interface CancelInvoiceDialogProps {
   open: boolean;
@@ -68,7 +69,11 @@ export default function CancelInvoiceDialog({
   const canSubmit = validationError === null;
 
   const handleSubmit = async () => {
-    if (!canSubmit || isPending) return;
+    if (isPending) return;
+    if (!canSubmit) {
+      showErrorToast(validationError ?? "Complete the required fields.");
+      return;
+    }
     await onConfirm(resolvedReason);
   };
 
@@ -84,7 +89,9 @@ export default function CancelInvoiceDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="cancel-reason-preset">Reason</Label>
+            <Label htmlFor="cancel-reason-preset" required>
+              Reason
+            </Label>
             <Select value={presetId || undefined} onValueChange={setPresetId}>
               <SelectTrigger id="cancel-reason-preset" className="w-full">
                 <SelectValue placeholder="Choose a reason…" />
@@ -102,7 +109,9 @@ export default function CancelInvoiceDialog({
 
           {presetId === INVOICE_CANCEL_OTHER_ID && (
             <div className="space-y-2">
-              <Label htmlFor="cancel-reason-other">Details</Label>
+              <Label htmlFor="cancel-reason-other" required>
+                Details
+              </Label>
               <Textarea
                 id="cancel-reason-other"
                 value={otherText}
@@ -126,12 +135,7 @@ export default function CancelInvoiceDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Back</AlertDialogCancel>
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={!canSubmit || isPending}
-            onClick={handleSubmit}
-          >
+          <Button type="button" variant="destructive" disabled={isPending} onClick={handleSubmit}>
             {isPending ? "Cancelling…" : "Cancel invoice"}
           </Button>
         </AlertDialogFooter>

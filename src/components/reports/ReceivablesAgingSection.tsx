@@ -1,9 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { formatISODateDisplay } from "@/lib/date";
@@ -20,6 +20,17 @@ import {
   rr,
 } from "@/components/reports/report-register-ui";
 import Link from "next/link";
+
+const ReceivablesAgingBarChart = dynamic(
+  () =>
+    import("@/components/reports/ReceivablesAgingBarChart").then((m) => ({
+      default: m.ReceivablesAgingBarChart,
+    })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[220px] w-full rounded-lg" />,
+  },
+);
 
 const BUCKET_LABEL: Record<ReceivablesAgingBucket, string> = {
   CURRENT: "Current",
@@ -95,26 +106,7 @@ export function ReceivablesAgingSection({ data }: { data: ReceivablesAgingData }
           <CardTitle className="text-base">{reportInvoiceAging.chartTitle}</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <ChartContainer config={{}} className="h-[220px] w-full">
-            <BarChart data={chartRows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" tickLine={false} className="text-xs" />
-              <YAxis
-                tickLine={false}
-                tickFormatter={(v) => `₹${(Number(v) / 1000).toFixed(0)}k`}
-                className="text-xs"
-              />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    formatter={(value) => formatCurrency(Number(value))}
-                    labelFormatter={(label) => String(label)}
-                  />
-                }
-              />
-              <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
+          <ReceivablesAgingBarChart chartRows={chartRows} />
         </CardContent>
       </Card>
 

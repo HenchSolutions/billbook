@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { LinkedInvoiceLink } from "@/components/invoices/LinkedInvoiceLink";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Calendar, FileText, Landmark, List, User, Wallet } from "lucide-react";
+import { Calendar, FileText, Landmark, List, User, Wallet } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { PageBackLink } from "@/components/PageBackLink";
 import ErrorBanner from "@/components/ErrorBanner";
 import ReceiptDetailSkeleton from "@/components/skeletons/ReceiptDetailSkeleton";
 import { Badge } from "@/components/ui/badge";
@@ -53,14 +54,9 @@ export default function ReceiptDetailPage() {
   if (!receipt) {
     return (
       <div className="page-container max-w-2xl">
+        <PageBackLink href="/receipts">Back to receipts</PageBackLink>
         <PageHeader title="Receipt" description="" />
         <ErrorBanner error={error} fallbackMessage="Receipt not found." />
-        <Button variant="ghost" asChild className="mt-4">
-          <Link href="/receipts">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to receipts
-          </Link>
-        </Button>
       </div>
     );
   }
@@ -82,13 +78,7 @@ export default function ReceiptDetailPage() {
 
   return (
     <div className="page-container max-w-5xl animate-fade-in space-y-8 pb-10">
-      <Link
-        href="/receipts"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4 shrink-0" />
-        All receipts
-      </Link>
+      <PageBackLink href="/receipts">Back to receipts</PageBackLink>
 
       <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
         <div className="grid lg:grid-cols-[1fr_minmax(280px,340px)] lg:items-stretch">

@@ -163,7 +163,7 @@ export function OutboundPaymentCreateForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-xl space-y-8">
       <div className="space-y-3">
-        <Label>Type</Label>
+        <Label required>Type</Label>
         <RadioGroup
           value={category}
           onValueChange={(v) => onCategoryChange(v as OutboundPaymentCategory)}
@@ -254,7 +254,7 @@ export function OutboundPaymentCreateForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>Payment method</Label>
+        <Label required>Payment method</Label>
         <Select
           value={watch("paymentMethod")}
           onValueChange={(v) => setValue("paymentMethod", v as PaymentMethod)}

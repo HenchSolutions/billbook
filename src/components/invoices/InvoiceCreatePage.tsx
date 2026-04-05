@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { BusinessIdentity } from "../BusinessIdentity";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
@@ -43,6 +41,12 @@ export function InvoiceCreatePage({
   const numberPending = state.isEditMode
     ? state.isEditingInvoiceLoading
     : state.isNextInvoiceNumberPending;
+  const backHref =
+    state.isEditMode && editInvoiceId != null ? `/invoices/${editInvoiceId}` : state.pageMeta.path;
+  const backLabel =
+    state.isEditMode && editInvoiceId != null
+      ? "Back to invoice"
+      : `Back to ${state.pageMeta.label}`;
   return (
     <div className="page-container max-w-[96rem] animate-fade-in space-y-5">
       <PageHeader
@@ -52,18 +56,8 @@ export function InvoiceCreatePage({
             ? "Update party, dates, lines, and totals. Save applies changes to this draft."
             : copy.pageDescription
         }
-        action={
-          <div className="flex flex-wrap gap-2">
-            {state.isEditMode && editInvoiceId ? (
-              <Button variant="outline" asChild>
-                <Link href={`/invoices/${editInvoiceId}`}>Back to invoice</Link>
-              </Button>
-            ) : null}
-            <Button variant="outline" asChild>
-              <Link href={state.pageMeta.path}>Back to List</Link>
-            </Button>
-          </div>
-        }
+        backHref={backHref}
+        backLabel={backLabel}
       />
 
       {showNumberRow && (
@@ -219,7 +213,6 @@ export function InvoiceCreatePage({
             }}
             roundOffInputValue={state.roundOffInputValue}
             onRoundOffAmountChange={state.setRoundOffAmount}
-            canSubmit={state.canSubmit}
             submitBlockedHint={
               state.returnLinkedSourceBlockedReason ?? state.returnQtySubmitShortHint
             }

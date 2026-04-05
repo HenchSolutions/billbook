@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
-import { ReportBackLink } from "@/components/reports/ReportBackLink";
 import { ReportCsvButton } from "@/components/reports/ReportCsvButton";
 import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
@@ -30,10 +29,11 @@ export default function DebtRegisterPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <ReportBackLink />
       <PageHeader
         title={reportDebtRegister.title}
         description={reportDebtRegister.description}
+        backHref="/reports"
+        backLabel="Back to reports"
         action={
           <ReportCsvButton
             reportPath="/reports/debt-register"

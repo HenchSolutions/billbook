@@ -8,7 +8,6 @@ import {
   getCostFloorViolation,
   getEntryDateIso,
   getEntryTotalQty,
-  getLineAmounts,
   getMaxAllowedDiscountAmount,
   getMaxAllowedDiscountPercent,
   getSalesUnitPriceFloor,
@@ -39,11 +38,11 @@ import {
   computeBasePaiseFromAddedLines,
   effectiveLineItemName,
   mergeItemFromInvoiceLine,
-  moneyToPaise,
-  paiseToMoney,
   pickInvoiceTaxRate,
 } from "@/lib/invoice-create-mapping";
-import { addCalendarDaysToIsoDate, parseISODateString } from "@/lib/date";
+import { addCalendarDaysToIsoDate } from "@/lib/date";
+import { computeInvoiceCreateBillSummary } from "@/lib/invoice-create-bill-summary";
+import { validatePurchaseVendorBillFields } from "@/lib/invoice-create-vendor-validation";
 import {
   getInvoiceTypeCreateCopy,
   INVOICE_TYPE_OPTIONS,
@@ -62,29 +61,6 @@ import { maybeShowTrialExpiredToast } from "@/lib/trial";
 import { isServiceType, type Item, type StockEntry } from "@/types/item";
 import type { Party, PartyConsignee } from "@/types/party";
 import type { InvoiceType } from "@/types/invoice";
-
-function validatePurchaseVendorBillFields(
-  invoiceType: InvoiceType,
-  originalBillNumber: string,
-  originalBillDate: string,
-  paymentTermsDays: string,
-): string | null {
-  if (!isPurchaseVendorBillMetaType(invoiceType)) return null;
-  if (originalBillNumber.trim().length > 100) {
-    return "Original bill no. must be at most 100 characters.";
-  }
-  const obd = originalBillDate.trim().slice(0, 10);
-  if (obd !== "" && !parseISODateString(obd)) {
-    return "Enter a valid original bill date.";
-  }
-  const raw = paymentTermsDays.trim();
-  if (raw === "") return null;
-  const n = Number.parseInt(raw, 10);
-  if (!Number.isFinite(n) || String(n) !== raw || n < 0 || n > 3650) {
-    return "Payment terms must be a whole number from 0 to 3650.";
-  }
-  return null;
-}
 
 export function useInvoiceCreateState(
   initialType: InvoiceType,
@@ -380,37 +356,17 @@ export function useInvoiceCreateState(
     return filteredPurchaseCatalogItems.length === 0;
   }, [invoiceType, stockSearchText, items, filteredPurchaseCatalogItems]);
 
-  const summary = useMemo(() => {
-    const lineBreakup = linesForBillSummary.map((line) => getLineAmounts(line));
-    const subTotal = lineBreakup.reduce((sum, x) => sum + x.gross, 0);
-    const lineDiscountTotal = lineBreakup.reduce((sum, x) => sum + x.lineDiscount, 0);
-    const taxableTotal = lineBreakup.reduce((sum, x) => sum + x.taxable, 0);
-    const taxTotal = lineBreakup.reduce((sum, x) => sum + x.tax, 0);
-
-    const invoiceDiscount = discountAmount.trim()
-      ? Math.max(0, toNum(discountAmount))
-      : (taxableTotal * Math.max(0, toNum(discountPercent))) / 100;
-
-    const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
-    const basePaise = moneyToPaise(baseTotal);
-    /** API: payable = baseTotal + roundOffAmount (signed). Auto: adjust to nearest ₹ (+ or −). Manual: always subtract entered amount. */
-    const roundPaise = autoRoundOff
-      ? Math.round(basePaise / 100) * 100 - basePaise
-      : -moneyToPaise(Math.max(0, toNum(roundOffAmount)));
-    const roundOff = paiseToMoney(roundPaise);
-    const grandTotal = Math.max(0, paiseToMoney(basePaise + roundPaise));
-
-    return {
-      subTotal,
-      lineDiscountTotal,
-      taxableTotal,
-      invoiceDiscount,
-      taxTotal,
-      taxPercent: taxableTotal > 0 ? (taxTotal / taxableTotal) * 100 : 0,
-      roundOff,
-      grandTotal,
-    };
-  }, [linesForBillSummary, discountAmount, discountPercent, roundOffAmount, autoRoundOff]);
+  const summary = useMemo(
+    () =>
+      computeInvoiceCreateBillSummary(
+        linesForBillSummary,
+        discountAmount,
+        discountPercent,
+        roundOffAmount,
+        autoRoundOff,
+      ),
+    [linesForBillSummary, discountAmount, discountPercent, roundOffAmount, autoRoundOff],
+  );
 
   const isLineValid = useCallback(
     (line: InvoiceLineDraft) => {
@@ -495,13 +451,6 @@ export function useInvoiceCreateState(
       return Number.isFinite(n) && n >= 0;
     })();
 
-  const canSubmit =
-    returnLinkedSourceBlockedReason == null &&
-    party != null &&
-    purchaseSellingMarginOk &&
-    (invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN"
-      ? linesForBillSummary.length > 0 && linesForBillSummary.every(isLineValid)
-      : addedLines.length > 0 && addedLines.every(isLineValid));
   const roundOffInputValue = autoRoundOff
     ? Math.abs(summary.roundOff).toFixed(2)
     : roundOffAmount.replace(/^\s*-/, "");
@@ -1606,6 +1555,21 @@ export function useInvoiceCreateState(
       return;
     }
 
+    if (returnLinkedSourceBlockedReason) {
+      submitGuardRef.current = false;
+      showErrorToast(null, returnLinkedSourceBlockedReason);
+      return;
+    }
+
+    if (invoiceType === "PURCHASE_INVOICE" && !purchaseSellingMarginOk) {
+      submitGuardRef.current = false;
+      showErrorToast(
+        null,
+        "Enter selling price margin (%) — required for purchase invoices so sale prices can be suggested on lines.",
+      );
+      return;
+    }
+
     const vendorFieldError = validatePurchaseVendorBillFields(
       invoiceType,
       originalBillNumber,
@@ -1643,6 +1607,7 @@ export function useInvoiceCreateState(
           ? "Select at least one line and enter a return quantity"
           : "Add at least one valid item row",
       );
+      submitGuardRef.current = false;
       return;
     }
 
@@ -1654,6 +1619,7 @@ export function useInvoiceCreateState(
           null,
           `Return quantity cannot exceed what’s still returnable${capStr ? ` (${capStr})` : ""} for ${line.item?.name?.trim() || effectiveLineItemName(line) || "this line"}.`,
         );
+        submitGuardRef.current = false;
         return;
       }
     }
@@ -1668,6 +1634,7 @@ export function useInvoiceCreateState(
           null,
           `Stock changed for ${liveIssues.length} product${liveIssues.length !== 1 ? "s" : ""} on this invoice. Fix quantity or pick another batch.`,
         );
+        submitGuardRef.current = false;
         return;
       }
       setStockLineIssues({});
@@ -1685,6 +1652,7 @@ export function useInvoiceCreateState(
           null,
           `Discount is too high for ${invalidCostLine.item?.name ?? "selected item"}. Net rate (${formatCurrency(violation?.netUnitPrice ?? 0)}) cannot be below cost (${formatCurrency(violation?.costPrice ?? 0)}).`,
         );
+        submitGuardRef.current = false;
         return;
       }
     }
@@ -1697,6 +1665,7 @@ export function useInvoiceCreateState(
         lineErr instanceof Error ? lineErr.message : null,
         "One or more lines are invalid for this document type",
       );
+      submitGuardRef.current = false;
       return;
     }
 
@@ -1831,6 +1800,8 @@ export function useInvoiceCreateState(
     sellingPriceMarginPercent,
     editingDraftInvoice?.sourceInvoiceId,
     sourceInvoiceId,
+    returnLinkedSourceBlockedReason,
+    purchaseSellingMarginOk,
   ]);
 
   useEffect(() => {
@@ -1940,7 +1911,6 @@ export function useInvoiceCreateState(
     unitPriceFloorWarning,
     unitPriceFloorIsError,
     roundOffInputValue,
-    canSubmit,
     returnQtyBlockReason,
     returnQtySubmitShortHint,
     returnLinkedSourceBlockedReason,

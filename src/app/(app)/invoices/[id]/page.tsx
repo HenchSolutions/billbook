@@ -1,12 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import InvoiceDetailSkeleton from "@/components/skeletons/InvoiceDetailSkeleton";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
+import { PageBackLink } from "@/components/PageBackLink";
 import PaymentDialog from "@/components/dialogs/PaymentDialog";
 import CancelInvoiceDialog from "@/components/dialogs/CancelInvoiceDialog";
 import {
@@ -144,13 +143,7 @@ export default function InvoiceDetail() {
   if (invalidInvoiceId) {
     return (
       <div className="page-container animate-fade-in">
-        <Link
-          href="/invoices"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Invoices
-        </Link>
+        <PageBackLink href="/invoices">Back to invoices</PageBackLink>
         <div className="mt-6 rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           This URL doesn&apos;t look like a valid invoice ID (use a numeric id).
         </div>
@@ -174,15 +167,9 @@ export default function InvoiceDetail() {
 
   return (
     <div className="page-container animate-fade-in">
-      <div className="mb-4">
-        <Link
-          href={typeMeta?.path ?? "/invoices"}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to {typeMeta?.label ?? "Invoices"}
-        </Link>
-      </div>
+      <PageBackLink href={typeMeta?.path ?? "/invoices"}>
+        Back to {typeMeta?.label ?? "invoices"}
+      </PageBackLink>
 
       <ErrorBanner error={error} fallbackMessage="Failed to load invoice" />
 

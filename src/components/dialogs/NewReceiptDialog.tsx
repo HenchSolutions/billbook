@@ -103,6 +103,7 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
   const onSubmit = async (data: FormData) => {
     if (!party) {
       setPartyError(true);
+      showErrorToast("Select a party to continue.");
       return;
     }
     setPartyError(false);
@@ -173,7 +174,7 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
                 {errors.totalAmount && <FieldError>{errors.totalAmount.message}</FieldError>}
               </div>
               <div className="space-y-2">
-                <Label>Payment method</Label>
+                <Label required>Payment method</Label>
                 <Select
                   value={watch("paymentMethod")}
                   onValueChange={(v) => setValue("paymentMethod", v as PaymentMethod)}

@@ -86,6 +86,10 @@ export default function Profile() {
   }, [isDirty]);
 
   const onSubmit = async (data: ProfileForm) => {
+    if (!isDirty) {
+      showErrorToast("No changes to save.");
+      return;
+    }
     try {
       const extraDetails = (data.extraDetails ?? [])
         .map((d) => ({
@@ -151,7 +155,7 @@ export default function Profile() {
               type="submit"
               size="sm"
               form="profile-form"
-              disabled={isSubmitting || updateProfile.isPending || !isDirty}
+              disabled={isSubmitting || updateProfile.isPending}
             >
               Save Changes
             </Button>

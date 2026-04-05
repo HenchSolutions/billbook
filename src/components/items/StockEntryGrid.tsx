@@ -193,8 +193,6 @@ export function StockEntryGrid({
     }
   };
 
-  const canSubmit = isRowComplete(rows[0] ?? defaultRow());
-
   const handleEditClick = useCallback((row: AddedSessionRow) => {
     setRowBeingEdited(row);
     setEditDialogOpen(true);
@@ -453,7 +451,7 @@ export function StockEntryGrid({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={!canSubmit || isSubmitting}>
+        <Button type="submit" variant="outline" size="sm" disabled={!!isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {!isSubmitting && <Plus className="mr-2 h-4 w-4" />}
           Add row

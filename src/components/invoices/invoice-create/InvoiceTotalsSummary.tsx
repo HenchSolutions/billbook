@@ -29,7 +29,6 @@ interface InvoiceTotalsSummaryProps {
   onAutoRoundOffChange: (checked: boolean) => void;
   roundOffInputValue: string;
   onRoundOffAmountChange: (value: string) => void;
-  canSubmit: boolean;
   isPending: boolean;
   onCreate: () => void;
   shortLabel: string;
@@ -47,7 +46,6 @@ export function InvoiceTotalsSummary({
   onAutoRoundOffChange,
   roundOffInputValue,
   onRoundOffAmountChange,
-  canSubmit,
   isPending,
   onCreate,
   shortLabel,
@@ -186,7 +184,7 @@ export function InvoiceTotalsSummary({
             {submitBlockedHint ? (
               <p className="text-xs text-destructive">{submitBlockedHint}</p>
             ) : null}
-            <Button className="mt-3 w-full" disabled={!canSubmit || isPending} onClick={onCreate}>
+            <Button className="mt-3 w-full" disabled={isPending} onClick={onCreate}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {submitLabel ?? `Create ${shortLabel}`}
             </Button>

@@ -1,12 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { useInvoice } from "@/hooks/use-invoices";
-import { Button } from "@/components/ui/button";
 import ErrorBanner from "@/components/ErrorBanner";
+import { PageBackLink } from "@/components/PageBackLink";
 
 const InvoiceCreatePage = dynamic(
   () =>
@@ -33,12 +31,7 @@ export default function EditDraftInvoicePage() {
   if (!invoiceId) {
     return (
       <div className="page-container space-y-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/invoices" className="gap-1">
-            <ArrowLeft className="h-4 w-4" />
-            Invoices
-          </Link>
-        </Button>
+        <PageBackLink href="/invoices">Back to invoices</PageBackLink>
         <p className="text-sm text-muted-foreground">Invalid invoice link.</p>
       </div>
     );
@@ -55,12 +48,7 @@ export default function EditDraftInvoicePage() {
   if (error || !inv) {
     return (
       <div className="page-container space-y-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={`/invoices/${invoiceId}`} className="gap-1">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
-        </Button>
+        <PageBackLink href={`/invoices/${invoiceId}`}>Back to invoice</PageBackLink>
         <ErrorBanner error={error} fallbackMessage="Could not load invoice" />
       </div>
     );
@@ -69,12 +57,7 @@ export default function EditDraftInvoicePage() {
   if (inv.status !== "DRAFT") {
     return (
       <div className="page-container max-w-lg animate-fade-in space-y-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={`/invoices/${invoiceId}`} className="gap-1">
-            <ArrowLeft className="h-4 w-4" />
-            Back to invoice
-          </Link>
-        </Button>
+        <PageBackLink href={`/invoices/${invoiceId}`}>Back to invoice</PageBackLink>
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
           <p className="font-medium text-foreground">This invoice can&apos;t be edited here.</p>
           <p className="mt-1 text-muted-foreground">
