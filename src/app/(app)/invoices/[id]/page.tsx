@@ -89,6 +89,10 @@ export default function InvoiceDetail() {
           "Your subscription is inactive or missing — please renew to finalize invoices.",
           "Subscription required",
         );
+      } else if (err instanceof ApiClientError && err.status === 409) {
+        showErrorToast(withInvoiceQuantityErrorDetails(err), "Insufficient stock");
+      } else if (err instanceof ApiClientError && err.status === 400) {
+        showErrorToast(withInvoiceQuantityErrorDetails(err), "Cannot finalize");
       } else {
         showErrorToast(withInvoiceQuantityErrorDetails(err), "Failed to finalize");
       }

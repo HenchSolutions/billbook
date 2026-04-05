@@ -1,9 +1,13 @@
 import { Download, Loader2, Pencil, CreditCard, Send, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsSimpleMode } from "@/hooks/use-simple-mode";
 import { invoiceTypeSupportsReceiptPayment } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/utils";
 import type { InvoiceDetail } from "@/types/invoice";
+
+const FINALIZE_INVENTORY_HELP =
+  "Finalizing updates inventory: it can deduct stock (sales), add stock back (sale returns), create batches (purchase invoices), or remove quantity from batches (purchase returns), depending on this document. If the request fails, you can retry safely — an already finalized invoice returns success without duplicating stock effects.";
 
 interface InvoiceHeaderActionsProps {
   invoice: InvoiceDetail;
@@ -62,10 +66,19 @@ export function InvoiceHeaderActions({
               Cancel Invoice
             </Button>
           )}
-          <Button size="sm" onClick={onFinalize} disabled={isFinalizePending}>
-            {isFinalizePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSimpleMode ? "Confirm Invoice" : "Finalize"}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button size="sm" onClick={onFinalize} disabled={isFinalizePending}>
+                  {isFinalizePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSimpleMode ? "Confirm Invoice" : "Finalize"}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-sm text-left text-xs leading-snug">
+              {FINALIZE_INVENTORY_HELP}
+            </TooltipContent>
+          </Tooltip>
         </>
       )}
 

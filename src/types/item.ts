@@ -119,6 +119,9 @@ export interface CreateItemRequest {
   isActive?: boolean;
 }
 
+/** How this batch was created (GET responses; omit on create — server defaults manual adds to ADD_STOCK). */
+export type StockEntrySource = "ADD_STOCK" | "PURCHASE_INVOICE";
+
 export interface StockEntry {
   id: number;
   businessId: number;
@@ -131,6 +134,8 @@ export interface StockEntry {
   supplierId: number | null;
   supplierName?: string | null;
   supplierIsActive?: boolean | null;
+  /** When present: manual add vs purchase invoice finalize. */
+  entrySource?: StockEntrySource;
   createdAt: string;
   updatedAt: string;
   item?:
@@ -152,6 +157,7 @@ export interface StockEntry {
   /** Per-batch quantity breakdown; null for SERVICE entries */
   quantityPurchased?: string | null;
   quantityAdjusted?: string | null;
+  /** Outbound from this batch: sales plus returns to supplier (combined total from API). */
   quantitySold?: string | null;
   actualQuantity?: string | null;
 }
@@ -185,6 +191,7 @@ export interface StockListItem {
   /** null for SERVICE (no inventory) */
   quantityPurchased: string | null;
   quantityAdjusted: string | null;
+  /** Outbound: sales + returns to supplier (combined). */
   quantitySold: string | null;
   actualQuantity: string | null;
   stockValue: string | null;

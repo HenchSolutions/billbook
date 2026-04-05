@@ -62,7 +62,12 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
               <th className={cn(thClass, "hidden text-left sm:table-cell")}>Unit</th>
               <th className={cn(thRight, "hidden md:table-cell")}>Quantity</th>
               <th className={cn(thRight, "hidden md:table-cell")}>Adjusted</th>
-              <th className={cn(thRight, "hidden md:table-cell")}>Sold</th>
+              <th
+                className={cn(thRight, "hidden md:table-cell")}
+                title="Sold and returned to supplier (combined outbound)"
+              >
+                Outbound
+              </th>
               <th className={cn(thRight, "min-w-[72px]")}>Current</th>
               <th className={cn(thRight, "hidden sm:table-cell")}>Total Value (sell)</th>
               <th className={cn(thRight, "hidden lg:table-cell")}>Total Value (cost)</th>

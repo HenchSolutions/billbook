@@ -4,7 +4,7 @@
  */
 import { api } from "@/api";
 import { normalizeItemType } from "@/types/item";
-import type { Item, StockEntry } from "@/types/item";
+import type { Item, StockEntry, StockEntrySource } from "@/types/item";
 
 export const ITEMS_API_BASE = "/items";
 
@@ -27,10 +27,18 @@ export function normalizeItem(item: Item): Item {
   };
 }
 
+function normalizeEntrySource(raw: unknown): StockEntrySource | undefined {
+  if (raw === "PURCHASE_INVOICE" || raw === "ADD_STOCK") return raw;
+  return undefined;
+}
+
 export function normalizeStockEntry(entry: StockEntry): StockEntry {
+  const { entrySource: rawSource, ...rest } = entry;
+  const entrySource = rawSource !== undefined ? normalizeEntrySource(rawSource) : undefined;
   return {
-    ...entry,
+    ...rest,
     itemType: entry.itemType ? normalizeItemType(entry.itemType) : entry.itemType,
+    ...(entrySource !== undefined ? { entrySource } : {}),
   };
 }
 

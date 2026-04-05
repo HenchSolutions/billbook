@@ -85,6 +85,10 @@ export const queryKeys = {
         args.offset,
       ] as const,
     stockEntry: (entryId: number | undefined) => ["items", "stock-entry", entryId] as const,
+    /** Invalidate all `stockEntryMap` queries (e.g. after finalize changes batch ids on invoice lines). */
+    stockEntryMapPrefix: () => ["items", "stock-entry-map"] as const,
+    /** Invalidate all single-entry detail queries. */
+    stockEntryDetailPrefix: () => ["items", "stock-entry"] as const,
     stockEntryMap: (uniqueEntryIds: number[]) =>
       ["items", "stock-entry-map", uniqueEntryIds] as const,
     /** Invalidate all GET /items/stock list queries. */

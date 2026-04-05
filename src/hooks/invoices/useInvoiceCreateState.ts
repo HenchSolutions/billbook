@@ -398,6 +398,15 @@ export function useInvoiceCreateState(
         if (isReturnQuantityOverCap(line)) return false;
       }
 
+      if (
+        invoiceType === "PURCHASE_RETURN" &&
+        line.item != null &&
+        !isDraftLineServiceItem(line) &&
+        line.stockEntryId == null
+      ) {
+        return false;
+      }
+
       if (isSalesFamily(invoiceType)) {
         return Boolean(line.item && line.stockEntryId != null);
       }
@@ -1511,6 +1520,19 @@ export function useInvoiceCreateState(
         : addedLines;
 
     if (linesToSubmit.length === 0 || !linesToSubmit.every(isLineValid)) {
+      if (
+        invoiceType === "PURCHASE_RETURN" &&
+        linesToSubmit.some(
+          (l) => l.item != null && !isDraftLineServiceItem(l) && l.stockEntryId == null,
+        )
+      ) {
+        showErrorToast(
+          null,
+          "Each stock line needs a batch (stock entry). Link this return to the source purchase bill or select the batch.",
+        );
+        submitGuardRef.current = false;
+        return;
+      }
       showErrorToast(
         null,
         invoiceType === "SALE_RETURN"

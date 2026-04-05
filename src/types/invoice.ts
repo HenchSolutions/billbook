@@ -147,10 +147,11 @@ export interface InvoiceCommunicationsSummary {
  * Create/update invoice line (`items[]`). Rules are enforced server-side by `invoiceType`.
  * - Sale (`SALE_*`): send `stockEntryId`; do **not** send `itemId` or `sellingPrice`.
  * - Purchase (`PURCHASE_INVOICE`): do **not** send `stockEntryId`; send `itemName` + rates; optional `itemId` and `sellingPrice`.
- * - `PURCHASE_RETURN` with source link: optional `stockEntryId` when it must match the source purchase line’s batch.
+ * - `PURCHASE_RETURN` + catalog **STOCK** line: send `stockEntryId` (batch being returned). Omit for SERVICE lines.
+ * - Link returns with `sourceInvoiceId` on the document and `sourceInvoiceItemId` per line when matching the source bill.
  */
 export interface InvoiceItemInput {
-  /** `SALE_*` and linked `PURCHASE_RETURN` lines when batch must match source. */
+  /** `SALE_*`; `PURCHASE_RETURN` STOCK lines (batch to return). Not used for SERVICE purchase returns. */
   stockEntryId?: number;
   quantity: string;
   unitPrice?: string;

@@ -37,7 +37,7 @@ type ListViewMode = "item" | "stock";
 export default function Stock() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
-  const [listViewMode, setListViewMode] = useState<ListViewMode>("item");
+  const [listViewMode, setListViewMode] = useState<ListViewMode>("stock");
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [adjustItemId, setAdjustItemId] = useState<number | null>(null);
@@ -300,21 +300,6 @@ export default function Stock() {
                       size="sm"
                       className={cn(
                         "gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
-                        listViewMode === "item"
-                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                      onClick={() => setListViewMode("item")}
-                      aria-pressed={listViewMode === "item"}
-                    >
-                      <Package className="h-3.5 w-3.5" />
-                      By item
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
                         listViewMode === "stock"
                           ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
                           : "text-muted-foreground hover:text-foreground",
@@ -324,6 +309,21 @@ export default function Stock() {
                     >
                       <Layers className="h-3.5 w-3.5" />
                       By stock
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
+                        listViewMode === "item"
+                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                      onClick={() => setListViewMode("item")}
+                      aria-pressed={listViewMode === "item"}
+                    >
+                      <Package className="h-3.5 w-3.5" />
+                      By item
                     </Button>
                   </div>
                 </div>

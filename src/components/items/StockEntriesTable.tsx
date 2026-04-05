@@ -2,6 +2,7 @@ import { Eye, SlidersHorizontal, Layers, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatDateCompact, formatQuantity, cn } from "@/lib/utils";
+import { stockEntrySourceShortLabel } from "@/lib/stock-entry-labels";
 import type { StockEntry } from "@/types/item";
 import type { Item } from "@/types/item";
 import { isServiceType } from "@/types/item";
@@ -72,15 +73,21 @@ export function StockEntriesTable({
   return (
     <Card>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] text-sm" role="table" aria-label="Stock by batch">
+        <table className="w-full min-w-[1080px] text-sm" role="table" aria-label="Stock by batch">
           <thead>
             <tr className="border-b border-border bg-muted/50">
               <th className={cn(thClass, "min-w-[120px] px-3 text-left sm:px-4")}>Item</th>
+              <th className={cn(thClass, "min-w-[120px] text-left")}>Source</th>
               <th className={cn(thClass, "min-w-[140px] text-left")}>Vendor/Category</th>
               <th className={cn(thClass, "min-w-[88px] text-left")}>Date</th>
               <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Quantity</th>
               <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Adjusted</th>
-              <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Sold</th>
+              <th
+                className={cn(thRight, "hidden min-w-[88px] md:table-cell")}
+                title="Sold and returned to supplier (combined outbound)"
+              >
+                Outbound
+              </th>
               <th className={cn(thRight, "min-w-[72px]")}>Balance Quantity</th>
               <th className={cn(thRight, "min-w-[80px]")}>Selling Price</th>
               <th className={cn(thRight, "hidden min-w-[88px] sm:table-cell")}>Purchase Price</th>
@@ -133,6 +140,9 @@ export function StockEntriesTable({
                     {unit && (
                       <span className="ml-1.5 font-normal text-muted-foreground">({unit})</span>
                     )}
+                  </td>
+                  <td className={cn(tdClass, "whitespace-nowrap text-left text-muted-foreground")}>
+                    {isService ? "—" : stockEntrySourceShortLabel(entry.entrySource)}
                   </td>
                   <td className={cn(tdClass, "whitespace-nowrap text-left")}>
                     <span className={cn(vendor.isInactive && "font-medium text-destructive")}>

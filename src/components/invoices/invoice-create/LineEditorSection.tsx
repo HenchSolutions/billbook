@@ -13,7 +13,6 @@ import {
   formatIgstFromCgstSgst,
   getEntryDateIso,
   getLineAmounts,
-  getSalesUnitPriceFloor,
   toNum,
 } from "@/lib/invoice-create";
 import { getReturnQuantityCap, isReturnQuantityOverCap } from "@/lib/invoice-return-cap";
@@ -115,10 +114,6 @@ export function LineEditorSection({
   const unitPriceEditable = true;
   const draftGstDerived =
     purchaseFamilyForm && (draftLine.cgstRate.trim() !== "" || draftLine.sgstRate.trim() !== "");
-  const salesUnitPriceFloor = useMemo(
-    () => getSalesUnitPriceFloor(draftLine, stockEntries),
-    [draftLine, stockEntries],
-  );
   const purchaseGridStyle = useMemo(
     () =>
       isPurchaseCostLine

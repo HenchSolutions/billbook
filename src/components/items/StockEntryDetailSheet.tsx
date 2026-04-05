@@ -8,6 +8,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatQuantity, formatDate, cn } from "@/lib/utils";
+import { stockEntrySourceFullLabel } from "@/lib/stock-entry-labels";
 import { useStockEntry } from "@/hooks/use-items";
 import { Package, Calendar, Scale, DollarSign, Building2, Layers, Wrench } from "lucide-react";
 import Link from "next/link";
@@ -118,6 +119,12 @@ export function StockEntryDetailSheet({
                       <p className={valueClass}>{entry.categoryName}</p>
                     </div>
                   )}
+                  {!isService && (
+                    <div>
+                      <p className={labelClass}>Source</p>
+                      <p className={valueClass}>{stockEntrySourceFullLabel(entry.entrySource)}</p>
+                    </div>
+                  )}
                   <div>
                     <p className={labelClass}>{isService ? "Date" : "Purchase date"}</p>
                     <p className={`${valueClass} flex items-center gap-1.5`}>
@@ -155,7 +162,9 @@ export function StockEntryDetailSheet({
                             <span>· Adjusted {formatQuantity(entry.quantityAdjusted)}</span>
                           )}
                           {entry.quantitySold != null && entry.quantitySold !== "0" && (
-                            <span>· Sold {formatQuantity(entry.quantitySold)}</span>
+                            <span title="Sales and returns to supplier (combined)">
+                              · Outbound {formatQuantity(entry.quantitySold)}
+                            </span>
                           )}
                         </p>
                       )}

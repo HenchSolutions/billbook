@@ -55,6 +55,9 @@ export function useFinalizeInvoice() {
         /** Purchase finalize creates/updates stock batches — refresh lists and entries. */
         queryKeys.items.root(),
         queryKeys.items.stockEntriesRoot(),
+        queryKeys.items.stockPrefix(),
+        queryKeys.items.stockEntryMapPrefix(),
+        queryKeys.items.stockEntryDetailPrefix(),
       ]);
     },
   });
