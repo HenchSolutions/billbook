@@ -47,10 +47,64 @@ export function formatInvoiceQuantityErrorDetails(details: unknown): string {
   return parts.length ? parts.join(" · ") : "";
 }
 
-/** Combine server message with structured return-qty details for toasts (keeps request id). */
+/** Structured 400s when purchase return lines do not match the source purchase (item/batch/link). */
+export function formatPurchaseReturnSourceMismatchDetails(details: unknown): string {
+  if (!details || typeof details !== "object") return "";
+  const d = details as Record<string, unknown>;
+  const nested =
+    d.details && typeof d.details === "object" && !Array.isArray(d.details)
+      ? (d.details as Record<string, unknown>)
+      : d;
+  const parts: string[] = [];
+
+  const pick = (k: string) => nested[k] ?? d[k];
+
+  const expItem = pick("expectedItemId") ?? pick("expected_item_id") ?? pick("sourceItemId");
+  const gotItem = pick("itemId") ?? pick("actualItemId");
+  if (expItem != null && gotItem != null && String(expItem) !== String(gotItem)) {
+    parts.push(
+      `Item id must match the source purchase line (expected ${String(expItem)}, got ${String(gotItem)}).`,
+    );
+  }
+
+  const expEntry =
+    pick("expectedStockEntryId") ?? pick("expected_stock_entry_id") ?? pick("sourceStockEntryId");
+  const gotEntry = pick("stockEntryId") ?? pick("actualStockEntryId");
+  if (expEntry != null && gotEntry != null && String(expEntry) !== String(gotEntry)) {
+    parts.push(
+      `Stock batch must match the source line (expected ${String(expEntry)}, got ${String(gotEntry)}).`,
+    );
+  }
+
+  const field = pick("field");
+  const msg = pick("message");
+  if (typeof field === "string" && typeof msg === "string" && msg.trim()) {
+    parts.push(`${field}: ${msg.trim()}`);
+  }
+
+  const errs = pick("errors");
+  if (Array.isArray(errs)) {
+    for (const e of errs) {
+      if (e && typeof e === "object" && !Array.isArray(e)) {
+        const fe = e as Record<string, unknown>;
+        const f = fe.field;
+        const m = fe.message ?? fe.error;
+        if (typeof m === "string" && m.trim()) {
+          parts.push(typeof f === "string" && f.trim() ? `${f.trim()}: ${m.trim()}` : m.trim());
+        }
+      }
+    }
+  }
+
+  return parts.length ? parts.join("\n") : "";
+}
+
+/** Combine server message with structured invoice validation details for toasts (keeps request id). */
 export function withInvoiceQuantityErrorDetails(err: unknown): unknown {
   if (!(err instanceof ApiClientError)) return err;
-  const extra = formatInvoiceQuantityErrorDetails(err.details);
+  const qty = formatInvoiceQuantityErrorDetails(err.details);
+  const pr = formatPurchaseReturnSourceMismatchDetails(err.details);
+  const extra = [qty, pr].filter(Boolean).join("\n");
   if (!extra) return err;
   return new ApiClientError(`${err.message}\n${extra}`, err.status, err.details, err.requestId);
 }

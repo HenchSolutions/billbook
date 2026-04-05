@@ -84,7 +84,12 @@ export function StockEntriesTable({
               <th className={cn(thClass, "min-w-[120px] text-left")}>Source</th>
               <th className={cn(thClass, "min-w-[140px] text-left")}>Vendor/Category</th>
               <th className={cn(thClass, "min-w-[88px] text-left")}>Date</th>
-              <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Quantity</th>
+              <th
+                className={cn(thRight, "hidden min-w-[72px] md:table-cell")}
+                title="Original purchase quantity for this batch (not current on-hand stock)"
+              >
+                Purchased qty
+              </th>
               <th className={cn(thRight, "hidden min-w-[72px] md:table-cell")}>Adjusted</th>
               <th
                 className={cn(thRight, "hidden min-w-[88px] md:table-cell")}
@@ -92,7 +97,12 @@ export function StockEntriesTable({
               >
                 Outbound
               </th>
-              <th className={cn(thRight, "min-w-[72px]")}>Balance Quantity</th>
+              <th
+                className={cn(thRight, "min-w-[72px]")}
+                title="On-hand quantity for this batch (ledger / actualQuantity)"
+              >
+                On hand
+              </th>
               <th className={cn(thRight, "min-w-[80px]")}>Selling Price</th>
               <th className={cn(thRight, "hidden min-w-[88px] sm:table-cell")}>Purchase Price</th>
               <th className={cn(thClass, "min-w-[132px] text-center")}>Actions</th>

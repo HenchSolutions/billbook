@@ -1,4 +1,9 @@
-import { effectivePurchaseLineGstPayload, getLineAmounts, toNum } from "@/lib/invoice-create";
+import {
+  effectivePurchaseLineGstPayload,
+  getLineAmounts,
+  isDraftLineServiceItem,
+  toNum,
+} from "@/lib/invoice-create";
 import { isSalesFamily } from "@/lib/invoice";
 import type { InvoiceLineDraft } from "@/types/invoice-create";
 import type { Item } from "@/types/item";
@@ -106,12 +111,39 @@ export function buildInvoiceItemInput(
     else if (line.item?.hsnCode?.trim()) payload.hsnCode = line.item.hsnCode.trim();
     if (line.sacCode.trim()) payload.sacCode = line.sacCode.trim();
     else if (line.item?.sacCode?.trim()) payload.sacCode = line.item.sacCode.trim();
+
     if (invoiceType === "PURCHASE_RETURN") {
-      if (line.sourceInvoiceItemId != null) {
-        payload.sourceInvoiceItemId = line.sourceInvoiceItemId;
-      }
-      if (line.stockEntryId != null) {
+      /**
+       * Inventory purchase returns: API matches `itemId`, `stockEntryId`, and `sourceInvoiceItemId`
+       * to the original purchase line so stock moves on finalize. Service lines omit batch fields.
+       */
+      const isService = isDraftLineServiceItem(line);
+      if (!isService) {
+        if (line.stockEntryId == null) {
+          throw new Error(
+            "Each stock line needs the batch (stock entry id) from the original purchase line.",
+          );
+        }
+        if (line.item?.id == null) {
+          throw new Error(
+            "Each stock line needs the catalog item id from the original purchase line.",
+          );
+        }
+        if (line.sourceInvoiceItemId == null) {
+          throw new Error(
+            "Link each line to the original purchase line (source invoice item id from the source bill).",
+          );
+        }
+        payload.itemId = line.item.id;
         payload.stockEntryId = line.stockEntryId;
+        payload.sourceInvoiceItemId = line.sourceInvoiceItemId;
+      } else {
+        if (line.sourceInvoiceItemId != null) {
+          payload.sourceInvoiceItemId = line.sourceInvoiceItemId;
+        }
+        if (line.stockEntryId != null) {
+          payload.stockEntryId = line.stockEntryId;
+        }
       }
     }
     return payload;

@@ -58,9 +58,9 @@ export function isSalesFamily(type: InvoiceType): boolean {
   return type === "SALE_INVOICE" || type === "SALE_RETURN";
 }
 
-/** Purchase document types that support vendor bill metadata on the API. */
+/** Purchase invoices only: vendor’s bill no., dates, and payment terms (API). Returns use the same layout as sales returns. */
 export function isPurchaseVendorBillMetaType(type: InvoiceType): boolean {
-  return type === "PURCHASE_INVOICE" || type === "PURCHASE_RETURN";
+  return type === "PURCHASE_INVOICE";
 }
 
 /**
@@ -123,8 +123,8 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
   PURCHASE_INVOICE: {
     pageDescription:
       "Record what you received from the vendor. Add any item from the bill — you can add stock for it later if needed.",
-    partyCardTitle: "Vendor & bill details",
-    detailsCardTitle: "Bill details",
+    partyCardTitle: "Vendor & invoice details",
+    detailsCardTitle: "Invoice details",
     partyLabel: "Vendor",
     partyPlaceholder: "vendor",
     addPartyLabel: "Add vendor",
@@ -135,7 +135,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     batchPlaceholder: "Search catalog items",
     itemSectionHelper:
       "Select a catalog item. Name, HSN or SAC, and GST rates come from the item master. Enter quantity and purchase price. Line tax, net, and selling price update automatically when selling price margin (%) is set above.",
-    summaryTitle: "Purchase summary",
+    summaryTitle: "Bill summary",
     loadErrorMessage: "Failed to load items. Check connection and try again.",
   },
   SALE_RETURN: {
@@ -155,7 +155,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     loadErrorMessage: "Failed to load stock entries. Check connection and try again.",
   },
   PURCHASE_RETURN: {
-    pageDescription: "Record items you're returning to the vendor. Select from stock.",
+    pageDescription: "Record items returned to the vendor. Select from existing stock.",
     partyCardTitle: "Vendor & return details",
     detailsCardTitle: "Return details",
     partyLabel: "Vendor",
@@ -166,8 +166,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     itemSectionTitle: "Items returned",
     batchLabel: "Item / Batch",
     batchPlaceholder: "Search stock batches",
-    itemSectionHelper:
-      "Prefill from a batch, then adjust name, qty, price, or GST% as needed for this return.",
+    itemSectionHelper: null,
     summaryTitle: "Return summary",
     loadErrorMessage: "Failed to load stock entries. Check connection and try again.",
   },

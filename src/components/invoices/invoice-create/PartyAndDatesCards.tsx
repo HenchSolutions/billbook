@@ -42,7 +42,7 @@ interface PartyAndDatesCardsProps {
   /** Purchase invoice: margin on purchase rate to suggest selling price per line. */
   sellingPriceMarginPercent?: string;
   onSellingPriceMarginChange?: (value: string) => void;
-  /** Vendor bill metadata (purchase invoice / purchase return). */
+  /** Vendor bill metadata (purchase invoice only). */
   originalBillNumber?: string;
   onOriginalBillNumberChange?: (value: string) => void;
   originalBillDate?: string;
@@ -85,9 +85,7 @@ export function PartyAndDatesCards({
     onOriginalBillDateChange &&
     paymentTermsDays !== undefined &&
     onPaymentTermsDaysChange;
-  const invoiceDateLabel = isPurchaseVendorBillMetaType(invoiceType)
-    ? "Purchase bill date"
-    : "Invoice date";
+  const invoiceDateLabel = "Invoice date";
   const showSellingPriceMargin =
     invoiceType === "PURCHASE_INVOICE" &&
     sellingPriceMarginPercent !== undefined &&

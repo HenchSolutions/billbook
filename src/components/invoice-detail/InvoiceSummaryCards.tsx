@@ -27,7 +27,7 @@ export function InvoiceSummaryCards({
     INVOICE_TYPE_OPTIONS.find((o) => o.type === invoice.invoiceType)?.label ?? invoice.invoiceType;
   const isFullyPaid = balanceDueValue <= 0 && invoice.status === "FINAL";
   const purchaseBillMeta = isPurchaseVendorBillMetaType(invoice.invoiceType);
-  const invoiceDateLabel = purchaseBillMeta ? "Purchase bill date" : "Invoice date";
+  const invoiceDateLabel = "Invoice date";
   const obn = invoice.originalBillNumber?.trim();
   const obd = invoice.originalBillDate;
   const ptd = invoice.paymentTermsDays;

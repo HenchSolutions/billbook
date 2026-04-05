@@ -43,8 +43,6 @@ export function InvoiceCreatePage({
   const numberPending = state.isEditMode
     ? state.isEditingInvoiceLoading
     : state.isNextInvoiceNumberPending;
-  const showPurchaseBillNoLabel = isPurchaseVendorBillMetaType(initialType);
-
   return (
     <div className="page-container max-w-[96rem] animate-fade-in space-y-5">
       <PageHeader
@@ -78,11 +76,6 @@ export function InvoiceCreatePage({
             nameClassName="text-sm font-semibold text-foreground"
           />
           <div>
-            {showPurchaseBillNoLabel ? (
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Purchase bill no.
-              </p>
-            ) : null}
             {numberPending ? (
               <Skeleton className="mt-1 h-8 w-48" />
             ) : (

@@ -120,7 +120,7 @@ export function useInvoiceCreateState(
   const [roundOffAmount, setRoundOffAmount] = useState("0");
   const [autoRoundOff, setAutoRoundOff] = useState(true);
   const [lines, setLines] = useState<InvoiceLineDraft[]>(() =>
-    initialType === "SALE_RETURN" ? [] : [createLine()],
+    initialType === "SALE_RETURN" || initialType === "PURCHASE_RETURN" ? [] : [createLine()],
   );
 
   const [addPartyDialogOpen, setAddPartyDialogOpen] = useState(false);
@@ -242,13 +242,13 @@ export function useInvoiceCreateState(
     return map;
   }, [items, stockEntries]);
 
-  /** Sales return: all rows are return lines (no add-item draft row). */
-  const saleReturnLayout = invoiceType === "SALE_RETURN";
-  const draftLine = saleReturnLayout ? createLine() : (lines[0] ?? createLine());
-  const addedLines = saleReturnLayout ? lines : lines.slice(1);
+  /** Linked sale/purchase return: all rows are return lines (no add-item draft row). */
+  const linkedReturnLayout = invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN";
+  const draftLine = linkedReturnLayout ? createLine() : (lines[0] ?? createLine());
+  const addedLines = linkedReturnLayout ? lines : lines.slice(1);
 
   const linesForBillSummary = useMemo(() => {
-    if (invoiceType !== "SALE_RETURN") return addedLines;
+    if (invoiceType !== "SALE_RETURN" && invoiceType !== "PURCHASE_RETURN") return addedLines;
     return addedLines.filter((l) => l.selectedForReturn !== false && toNum(l.quantity) > 0);
   }, [addedLines, invoiceType]);
 
@@ -414,7 +414,12 @@ export function useInvoiceCreateState(
 
   const isLineValid = useCallback(
     (line: InvoiceLineDraft) => {
-      if (invoiceType === "SALE_RETURN" && line.selectedForReturn === false) return true;
+      if (
+        (invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN") &&
+        line.selectedForReturn === false
+      ) {
+        return true;
+      }
 
       const qty = toNum(line.quantity);
       if (!Number.isFinite(qty) || qty <= 0) return false;
@@ -448,7 +453,8 @@ export function useInvoiceCreateState(
     if (invoiceType !== "SALE_RETURN" && invoiceType !== "PURCHASE_RETURN") return null;
     const over = addedLines.filter(
       (l) =>
-        (invoiceType !== "SALE_RETURN" || l.selectedForReturn !== false) &&
+        ((invoiceType !== "SALE_RETURN" && invoiceType !== "PURCHASE_RETURN") ||
+          l.selectedForReturn !== false) &&
         toNum(l.quantity) > 0 &&
         isReturnQuantityOverCap(l),
     );
@@ -485,7 +491,7 @@ export function useInvoiceCreateState(
     returnLinkedSourceBlockedReason == null &&
     party != null &&
     purchaseSellingMarginOk &&
-    (invoiceType === "SALE_RETURN"
+    (invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN"
       ? linesForBillSummary.length > 0 && linesForBillSummary.every(isLineValid)
       : addedLines.length > 0 && addedLines.every(isLineValid));
   const roundOffInputValue = autoRoundOff
@@ -617,11 +623,12 @@ export function useInvoiceCreateState(
               soldQuantity: invoiceItem.quantity,
               remainingReturnableQty:
                 invoiceItem.quantityReturnableRemaining?.trim() || invoiceItem.quantity,
+              selectedForReturn: true,
             }
           : {}),
       }));
       if (purchasePrefill.length > 0) {
-        setLines([createLine(), ...purchasePrefill]);
+        setLines(purchasePrefill);
       }
       if (!notes.trim()) {
         setNotes(`${sourceConfig.notePrefix} ${sourceInvoice.invoiceNumber}`);
@@ -839,6 +846,9 @@ export function useInvoiceCreateState(
                 ...(invoiceItem.sourceInvoiceItemId != null
                   ? { sourceInvoiceItemId: invoiceItem.sourceInvoiceItemId }
                   : {}),
+                selectedForReturn: true,
+                remainingReturnableQty:
+                  invoiceItem.quantityReturnableRemaining?.trim() || invoiceItem.quantity,
               }
             : {}),
         }),
@@ -878,7 +888,11 @@ export function useInvoiceCreateState(
       }
 
       if (purchaseEditPrefill.length > 0) {
-        setLines([createLine(), ...purchaseEditPrefill]);
+        setLines(
+          editingDraftInvoice.invoiceType === "PURCHASE_RETURN"
+            ? purchaseEditPrefill
+            : [createLine(), ...purchaseEditPrefill],
+        );
       }
 
       hasHydratedEditInvoice.current = true;
@@ -1365,7 +1379,7 @@ export function useInvoiceCreateState(
   );
 
   const addCurrentLine = useCallback(async () => {
-    if (invoiceType === "SALE_RETURN") return;
+    if (invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN") return;
 
     if (!isLineValid(draftLine)) {
       showErrorToast(null, "Complete item entry before adding");
@@ -1475,7 +1489,7 @@ export function useInvoiceCreateState(
   const removeAddedLine = useCallback(
     (lineId: string) => {
       setLines((prev) =>
-        invoiceType === "SALE_RETURN"
+        invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN"
           ? prev.filter((line) => line.id !== lineId)
           : [prev[0], ...prev.slice(1).filter((line) => line.id !== lineId)],
       );
@@ -1589,7 +1603,7 @@ export function useInvoiceCreateState(
     }
 
     const linesToSubmit =
-      invoiceType === "SALE_RETURN"
+      invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN"
         ? addedLines.filter((l) => l.selectedForReturn !== false && toNum(l.quantity) > 0)
         : addedLines;
 
@@ -1609,7 +1623,7 @@ export function useInvoiceCreateState(
       }
       showErrorToast(
         null,
-        invoiceType === "SALE_RETURN"
+        invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN"
           ? "Select at least one line and enter a return quantity"
           : "Add at least one valid item row",
       );
@@ -1764,12 +1778,15 @@ export function useInvoiceCreateState(
       router.push(created?.id != null ? `/invoices/${created.id}` : pageMeta.path);
     } catch (err) {
       if (maybeShowTrialExpiredToast(err)) return;
-      showErrorToast(
-        withInvoiceQuantityErrorDetails(err),
-        editInvoiceId
-          ? "Failed to update invoice"
-          : `Failed to create ${pageMeta.label.toLowerCase()}`,
-      );
+      const failTitle =
+        editInvoiceId != null
+          ? invoiceType === "PURCHASE_RETURN"
+            ? "Could not update purchase return"
+            : "Failed to update invoice"
+          : invoiceType === "PURCHASE_RETURN"
+            ? "Could not save purchase return"
+            : `Failed to create ${pageMeta.label.toLowerCase()}`;
+      showErrorToast(withInvoiceQuantityErrorDetails(err), failTitle);
     } finally {
       submitGuardRef.current = false;
     }

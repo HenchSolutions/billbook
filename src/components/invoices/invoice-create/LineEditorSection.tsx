@@ -112,13 +112,12 @@ export function LineEditorSection({
   onSelectCatalogItem,
 }: LineEditorSectionProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
-  const isSaleReturn = invoiceType === "SALE_RETURN";
+  const isLinkedReturnTable = invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN";
   const purchaseFamilyForm = !isSalesFamily(invoiceType);
   const isPurchaseInvoiceUi = invoiceType === "PURCHASE_INVOICE";
   /** Purchase bill lines: cost + selling columns. */
   const isPurchaseCostLine =
     invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
-  const isPurchaseReturn = invoiceType === "PURCHASE_RETURN";
   const batchRequired = isSalesFamily(invoiceType);
   const unitPriceEditable = true;
   const draftGstDerived =
@@ -209,15 +208,29 @@ export function LineEditorSection({
             </AlertDescription>
           </Alert>
         ) : null}
-        {isSaleReturn ? (
+        {isLinkedReturnTable ? (
           addedLines.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-              No sale lines loaded. Use <strong>Return</strong> on a sales invoice so items from
-              that bill appear here.
+              {invoiceType === "PURCHASE_RETURN" ? (
+                <>
+                  No purchase lines loaded. Use <strong>Return</strong> on a purchase invoice so
+                  items from that bill appear here.
+                </>
+              ) : (
+                <>
+                  No sale lines loaded. Use <strong>Return</strong> on a sales invoice so items from
+                  that bill appear here.
+                </>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto rounded-lg border bg-card">
-              <table className="w-full min-w-[800px] text-sm" aria-label="Sales return lines">
+              <table
+                className="w-full min-w-[800px] text-sm"
+                aria-label={
+                  invoiceType === "PURCHASE_RETURN" ? "Purchase return lines" : "Sales return lines"
+                }
+              >
                 <thead className="border-b bg-muted/90">
                   <tr className="[&_th]:py-2.5 [&_th]:text-xs [&_th]:font-medium">
                     <th scope="col" className="w-10 pl-3 text-center">
@@ -330,7 +343,7 @@ export function LineEditorSection({
               </table>
             </div>
           )
-        ) : purchaseFamilyForm ? (
+        ) : purchaseFamilyForm && !isLinkedReturnTable ? (
           isPurchaseInvoiceUi ? (
             <div className="overflow-x-auto rounded-lg border bg-card">
               <p className="sr-only">
@@ -762,7 +775,7 @@ export function LineEditorSection({
           </div>
         )}
 
-        {!isSaleReturn && addedLines.length > 0 && (
+        {!isLinkedReturnTable && addedLines.length > 0 && (
           <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
             <table
               className={cn(
@@ -854,8 +867,6 @@ export function LineEditorSection({
                   const totals = getLineAmounts(line);
                   const lineEntry = stockEntries.find((entry) => entry.id === line.stockEntryId);
                   const lineIssue = stockLineIssues[line.id];
-                  const purchaseReturnOver = isPurchaseReturn && isReturnQuantityOverCap(line);
-                  const purchaseCap = getReturnQuantityCap(line);
                   return (
                     <tr
                       key={line.id}
@@ -864,7 +875,6 @@ export function LineEditorSection({
                       className={cn(
                         "border-b outline-none last:border-0 hover:bg-muted/20",
                         lineIssue && "bg-amber-50/60",
-                        purchaseReturnOver && "bg-destructive/[0.06]",
                         focusedIssueLineId === line.id && "ring-2 ring-amber-300",
                       )}
                     >
@@ -894,18 +904,8 @@ export function LineEditorSection({
                           ? formatISODateDisplay(getEntryDateIso(lineEntry)) || "No date"
                           : "-"}
                       </td>
-                      <td
-                        className={cn(
-                          "px-3 py-2.5 text-right tabular-nums text-foreground",
-                          purchaseReturnOver && "text-destructive",
-                        )}
-                      >
+                      <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
                         <div>{line.quantity}</div>
-                        {purchaseReturnOver && purchaseCap != null ? (
-                          <div className="mt-0.5 text-[11px] font-normal leading-tight text-destructive">
-                            Max {purchaseCap}
-                          </div>
-                        ) : null}
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums">
                         {formatCurrency(line.unitPrice)}
