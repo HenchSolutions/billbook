@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -332,9 +333,13 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         </Button>
 
         {!collapsed && (
-          <p className="px-3 pb-1 pt-2 text-left text-xs leading-snug text-sidebar-foreground/50">
-            Bill Book by Hench
-          </p>
+          <>
+            <Separator className="bg-sidebar-border" />
+            <div className="flex items-center gap-2 px-3 pb-1 pt-2 text-left text-sm font-bold leading-snug text-sidebar-foreground/50">
+              <Image src="/logo.png" alt="Hench logo" width={20} height={20} className="h-5 w-5" />
+              <span>Bill Book by Hench</span>
+            </div>
+          </>
         )}
       </div>
     </aside>
