@@ -68,7 +68,7 @@ function consigneeUiLabels(partyType: PartyType) {
     emptyList: "No extra delivery addresses yet.",
     addDialogTitle: "Add delivery address",
     editDialogTitle: "Edit delivery address",
-    contactFieldLabel: "Contact at delivery",
+    contactFieldLabel: "Contact Person",
     labelPlaceholder: "e.g. Home, Office",
     defaultCheckbox: "Default delivery address",
     itemAriaPrefix: "delivery address",
@@ -229,13 +229,6 @@ function ConsigneeEditorDialog({
       setError("consigneeName", { type: "manual", message: "Contact name is required" });
       return;
     }
-    if (partyType === "CUSTOMER" && !/^\d{10}$/.test(data.consigneeName.trim())) {
-      setError("consigneeName", {
-        type: "manual",
-        message: "Contact at delivery must be exactly 10 digits",
-      });
-      return;
-    }
     if (!data.address.trim()) {
       setError("address", { type: "manual", message: "Address is required" });
       return;
@@ -257,8 +250,6 @@ function ConsigneeEditorDialog({
   };
 
   const pending = createMutation.isPending || updateMutation.isPending;
-  const isCustomer = partyType === "CUSTOMER";
-
   const handleConsigneeFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     // Prevent submit bubbling into parent PartyDialog form.
     event.preventDefault();
@@ -280,21 +271,7 @@ function ConsigneeEditorDialog({
             </div>
             <div className="space-y-2">
               <Label required>{L.contactFieldLabel}</Label>
-              <Input
-                {...register("consigneeName", {
-                  onChange: isCustomer
-                    ? (e) => {
-                        e.target.value = String(e.target.value ?? "")
-                          .replace(/\D/g, "")
-                          .slice(0, 10);
-                      }
-                    : undefined,
-                })}
-                aria-invalid={!!errors.consigneeName}
-                inputMode={isCustomer ? "numeric" : undefined}
-                pattern={isCustomer ? "[0-9]*" : undefined}
-                maxLength={isCustomer ? 10 : undefined}
-              />
+              <Input {...register("consigneeName")} aria-invalid={!!errors.consigneeName} />
               {errors.consigneeName && <FieldError>{errors.consigneeName.message}</FieldError>}
             </div>
           </div>
