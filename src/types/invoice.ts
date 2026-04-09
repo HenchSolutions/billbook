@@ -108,41 +108,37 @@ export interface InvoiceDetail extends Invoice {
 
 export type InvoiceCommunicationChannel = "EMAIL" | "WHATSAPP" | "SMS" | "OTHER";
 
-export interface InvoiceCommunicationRequest {
-  channel?: InvoiceCommunicationChannel;
+/** POST mark-sent / mark-reminder — only optional metadata; channel is server-defined. */
+export interface InvoiceMarkCommunicationRequest {
   metadata?: Record<string, unknown>;
 }
 
-export interface InvoiceCommunicationResponse {
-  id: number;
-  invoiceId: number;
-  action: "SENT" | "REMINDER";
-  channel: InvoiceCommunicationChannel | null;
-  metadata?: Record<string, unknown> | null;
-  createdAt: string;
+/** POST mark-sent / mark-reminder success payload */
+export interface InvoiceMarkCommunicationResponse {
+  communication: {
+    id: number;
+    businessId: number;
+    invoiceId: number;
+    channel: InvoiceCommunicationChannel | string;
+    action: "REMINDER" | "SENT";
+    metadata: unknown;
+    actionDate: string;
+    createdAt: string;
+  };
+  delivery: {
+    channel: InvoiceCommunicationChannel | string;
+    outcome: "sent" | "already_recorded_today" | "skipped_integration_pending";
+    to?: string;
+    messagePreview?: string;
+    message?: string;
+  };
 }
 
-export interface InvoiceCommunicationLatest {
-  id: number;
-  business_id: number;
-  invoice_id: number;
-  channel: InvoiceCommunicationChannel | null;
-  action: "SENT" | "REMINDER";
-  metadata: Record<string, unknown> | null;
-  action_date: string;
-  created_at: string;
-}
-
+/** GET /invoices/:id/communications — fields used by the app */
 export interface InvoiceCommunicationsSummary {
   invoiceId: number;
-  sent: {
-    today: boolean;
-    latest: InvoiceCommunicationLatest | null;
-  };
-  reminder: {
-    today: boolean;
-    latest: InvoiceCommunicationLatest | null;
-  };
+  sent: { today: boolean };
+  reminder: { today: boolean };
 }
 
 /**

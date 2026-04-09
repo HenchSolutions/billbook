@@ -34,11 +34,14 @@ import { useResourceAuditLogs } from "@/hooks/use-audit-logs";
 import {
   getInvoiceBalanceDue,
   INVOICE_TYPE_OPTIONS,
+  invoiceTypeSupportsBalanceReminderEmail,
+  invoiceTypeSupportsDocumentShareLog,
   invoiceTypeSupportsReceiptPayment,
   invoiceTypeSupportsSaleReturnRefund,
   invoiceTypeSupportsSupplierPayment,
 } from "@/lib/invoice";
 import { withInvoiceQuantityErrorDetails } from "@/lib/invoice-quantity-error-details";
+import { markReminderFeedbackMessage, markSentFeedbackMessage } from "@/lib/invoice-api-helpers";
 import { showSuccessToast, showErrorToast } from "@/lib/toast-helpers";
 import { maybeShowTrialExpiredToast } from "@/lib/trial";
 import { ApiClientError } from "@/api/error";
@@ -103,32 +106,46 @@ export default function InvoiceDetail() {
   };
 
   const handleMarkSent = async () => {
-    if (!invoiceId) return;
-    if (markSentMutation.isPending) return;
+    if (!invoiceId || !invoice || !invoiceTypeSupportsDocumentShareLog(invoice.invoiceType)) return;
+    if (markSentMutation.isPending || sentToday) return;
     try {
-      await markSentMutation.mutateAsync({ channel: "WHATSAPP" });
-      showSuccessToast("Invoice marked as sent");
+      const res = await markSentMutation.mutateAsync({});
+      showSuccessToast(markSentFeedbackMessage(res));
     } catch (err) {
-      if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {
-        showSuccessToast("Invoice already marked as sent");
+      if (err instanceof ApiClientError && err.status === 503) {
+        showErrorToast(err, "Could not complete request — try again later");
         return;
       }
-      showErrorToast(err, "Failed to mark as sent");
+      if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {
+        showErrorToast(err, "Can't log WhatsApp");
+        return;
+      }
+      showErrorToast(err, "WhatsApp log failed");
     }
   };
 
   const handleMarkReminder = async () => {
-    if (!invoiceId) return;
-    if (markReminderMutation.isPending) return;
+    if (!invoiceId || !invoice) return;
+    if (
+      !invoiceTypeSupportsBalanceReminderEmail(invoice.invoiceType) ||
+      getInvoiceBalanceDue(invoice) <= 0
+    ) {
+      return;
+    }
+    if (markReminderMutation.isPending || reminderToday) return;
     try {
-      await markReminderMutation.mutateAsync({ channel: "EMAIL" });
-      showSuccessToast("Reminder recorded");
+      const res = await markReminderMutation.mutateAsync({});
+      showSuccessToast(markReminderFeedbackMessage(res));
     } catch (err) {
-      if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {
-        showSuccessToast("Reminder already recorded");
+      if (err instanceof ApiClientError && err.status === 503) {
+        showErrorToast(err, "Email failed — check SMTP or try later");
         return;
       }
-      showErrorToast(err, "Failed to mark reminder");
+      if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {
+        showErrorToast(err, "Can't send reminder");
+        return;
+      }
+      showErrorToast(err, "Reminder failed");
     }
   };
 

@@ -3,8 +3,8 @@
  * Lives under `lib/` (not `hooks/`) because these are not React hooks.
  */
 import type {
-  InvoiceCommunicationChannel,
   InvoiceCommunicationsSummary,
+  InvoiceMarkCommunicationResponse,
   LegacyInvoicePayment,
   RecordSupplierPaymentData,
 } from "@/types/invoice";
@@ -40,36 +40,78 @@ export function parseRecordSupplierPaymentResponse(data: unknown): RecordSupplie
   return data;
 }
 
-/** Normalize communications API (isToday → today, build latest). */
+function communicationsTodayFlag(bucket: unknown): boolean {
+  if (!bucket || typeof bucket !== "object") return false;
+  const b = bucket as Record<string, unknown>;
+  if (typeof b.isToday === "boolean") return b.isToday;
+  if (typeof b.today === "boolean") return b.today;
+  return false;
+}
+
+/** Normalize communications API (`isToday` / `today` → `sent.today` / `reminder.today`). */
 export function normalizeCommunicationsSummary(
-  raw: Record<string, unknown> & {
-    sent?: { action?: string; channel?: string; actionDate?: string; isToday?: boolean } | null;
-    reminder?: { action?: string; channel?: string; actionDate?: string; isToday?: boolean } | null;
-  },
+  raw: Record<string, unknown>,
   invoiceId: number,
 ): InvoiceCommunicationsSummary {
-  const toLatest = (s: typeof raw.sent): InvoiceCommunicationsSummary["sent"]["latest"] =>
-    s
-      ? {
-          id: 0,
-          business_id: 0,
-          invoice_id: invoiceId,
-          channel: (s.channel ?? null) as InvoiceCommunicationChannel | null,
-          action: (s.action as "SENT" | "REMINDER") ?? "SENT",
-          metadata: null,
-          action_date: s.actionDate ?? "",
-          created_at: "",
-        }
-      : null;
   return {
     invoiceId,
-    sent: {
-      today: raw.sent?.isToday ?? false,
-      latest: toLatest(raw.sent),
-    },
-    reminder: {
-      today: raw.reminder?.isToday ?? false,
-      latest: toLatest(raw.reminder),
-    },
+    sent: { today: communicationsTodayFlag(raw.sent) },
+    reminder: { today: communicationsTodayFlag(raw.reminder) },
   };
+}
+
+const DELIVERY_OUTCOMES = new Set([
+  "sent",
+  "already_recorded_today",
+  "skipped_integration_pending",
+]);
+
+export function parseInvoiceMarkCommunicationResponse(
+  data: unknown,
+): InvoiceMarkCommunicationResponse {
+  if (!data || typeof data !== "object") throw new Error("Invalid mark communication response");
+  const root = data as Record<string, unknown>;
+  const communication = root.communication;
+  const delivery = root.delivery;
+  if (!communication || typeof communication !== "object") {
+    throw new Error("Invalid mark communication response");
+  }
+  if (!delivery || typeof delivery !== "object") {
+    throw new Error("Invalid mark communication response");
+  }
+  const d = delivery as Record<string, unknown>;
+  const outcome = d.outcome;
+  if (typeof outcome !== "string" || !DELIVERY_OUTCOMES.has(outcome)) {
+    throw new Error("Invalid mark communication response");
+  }
+  return data as InvoiceMarkCommunicationResponse;
+}
+
+/** User-facing success copy after mark-reminder (email). */
+export function markReminderFeedbackMessage(res: InvoiceMarkCommunicationResponse): string {
+  const msg = typeof res.delivery.message === "string" ? res.delivery.message.trim() : "";
+  if (msg) return msg;
+  switch (res.delivery.outcome) {
+    case "sent":
+      return "Reminder sent";
+    case "already_recorded_today":
+      return "Already sent today";
+    default:
+      return "Reminder updated";
+  }
+}
+
+/** User-facing success copy after mark-sent (WhatsApp stub). */
+export function markSentFeedbackMessage(res: InvoiceMarkCommunicationResponse): string {
+  const msg = typeof res.delivery.message === "string" ? res.delivery.message.trim() : "";
+  if (msg) return msg;
+  const preview =
+    typeof res.delivery.messagePreview === "string" ? res.delivery.messagePreview.trim() : "";
+  if (res.delivery.outcome === "skipped_integration_pending") {
+    return preview ? `WhatsApp not live yet — ${preview}` : "WhatsApp not live yet — logged.";
+  }
+  if (res.delivery.outcome === "already_recorded_today") {
+    return "Already logged today";
+  }
+  return "Logged for WhatsApp";
 }

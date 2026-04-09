@@ -1,7 +1,9 @@
-import { Download, Loader2, Pencil, CreditCard, Send, Bell, Banknote } from "lucide-react";
+import { Download, Loader2, Pencil, CreditCard, MessageCircle, Mail, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  invoiceTypeSupportsBalanceReminderEmail,
+  invoiceTypeSupportsDocumentShareLog,
   invoiceTypeSupportsReceiptPayment,
   invoiceTypeSupportsSaleReturnRefund,
   invoiceTypeSupportsSupplierPayment,
@@ -11,6 +13,29 @@ import type { InvoiceDetail } from "@/types/invoice";
 
 const FINALIZE_INVENTORY_HELP =
   "Finalizing updates inventory: it can deduct stock (sales), add stock back (sale returns), create batches (purchase invoices), or remove quantity from batches (purchase returns), depending on this document. If the request fails, you can retry safely — an already finalized invoice returns success without duplicating stock effects.";
+
+const NOTIFY_WHATSAPP_HELP = (
+  <>
+    <p className="font-medium">You shared the document</p>
+    <p className="mt-1.5 text-muted-foreground">
+      Saves that you told the party about this bill on WhatsApp (same summary as number, dates,
+      totals, and balance). Real WhatsApp send is not live yet — you get a preview for now. Needs a
+      phone on the party or consignee. At most once per day.
+    </p>
+  </>
+);
+
+const BALANCE_EMAIL_HELP = (
+  <>
+    <p className="font-medium">Follow up on money they owe you</p>
+    <p className="mt-1.5 text-muted-foreground">
+      <strong>Sales invoice:</strong> email the customer about payment still due.{" "}
+      <strong>Purchase return:</strong> email the vendor about credit or refund still owed to you.
+      Same figures as total, paid, and balance on this page. Party email, then consignee. At most
+      once per day.
+    </p>
+  </>
+);
 
 interface InvoiceHeaderActionsProps {
   invoice: InvoiceDetail;
@@ -62,6 +87,9 @@ export function InvoiceHeaderActions({
   const isSupplierBill = invoiceTypeSupportsSupplierPayment(invoice.invoiceType);
   const showRecordRefund =
     invoiceTypeSupportsSaleReturnRefund(invoice.invoiceType) && onOpenRefund != null;
+  const showWhatsAppLog = invoiceTypeSupportsDocumentShareLog(invoice.invoiceType);
+  const showBalanceEmail =
+    balanceDueValue > 0 && invoiceTypeSupportsBalanceReminderEmail(invoice.invoiceType);
 
   return (
     <div className="flex gap-2">
@@ -130,40 +158,73 @@ export function InvoiceHeaderActions({
         </Button>
       )}
 
-      {invoice.status === "FINAL" && (
+      {invoice.status === "FINAL" && (showWhatsAppLog || showBalanceEmail) && (
         <>
-          <div className="flex flex-col">
-            <Button variant="outline" size="sm" onClick={onMarkSent} disabled={isMarkSentPending}>
-              {isMarkSentPending ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-3.5 w-3.5" />
-              )}
-              Mark Sent
-            </Button>
-            {sentToday && (
-              <span className="mt-1 text-[11px] text-muted-foreground">Sent today</span>
-            )}
-          </div>
+          {showWhatsAppLog && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex flex-col">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onMarkSent}
+                    disabled={isMarkSentPending || sentToday}
+                    aria-label={
+                      sentToday
+                        ? "WhatsApp share already logged today"
+                        : "Log that you shared this document on WhatsApp"
+                    }
+                  >
+                    {isMarkSentPending ? (
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <MessageCircle className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    WhatsApp log
+                  </Button>
+                  {sentToday && (
+                    <span className="mt-1 text-[11px] text-muted-foreground">Logged today</span>
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-left text-xs leading-snug">
+                {NOTIFY_WHATSAPP_HELP}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
-          <div className="flex flex-col">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onMarkReminder}
-              disabled={isMarkReminderPending}
-            >
-              {isMarkReminderPending ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Bell className="mr-2 h-3.5 w-3.5" />
-              )}
-              Reminder
-            </Button>
-            {reminderToday && (
-              <span className="mt-1 text-[11px] text-muted-foreground">Reminder today</span>
-            )}
-          </div>
+          {showBalanceEmail && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex flex-col">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onMarkReminder}
+                    disabled={isMarkReminderPending || reminderToday}
+                    aria-label={
+                      reminderToday
+                        ? "Balance reminder email already sent today"
+                        : "Email party about balance due on this document"
+                    }
+                  >
+                    {isMarkReminderPending ? (
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Mail className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    Balance email
+                  </Button>
+                  {reminderToday && (
+                    <span className="mt-1 text-[11px] text-muted-foreground">Emailed today</span>
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-left text-xs leading-snug">
+                {BALANCE_EMAIL_HELP}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </>
       )}
 

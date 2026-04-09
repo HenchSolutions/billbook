@@ -78,6 +78,23 @@ export function invoiceTypeSupportsSaleReturnRefund(type: InvoiceType): boolean 
   return type === "SALE_RETURN";
 }
 
+/**
+ * POST mark-reminder (balance email): only when **we are collecting** — customer owes on a sale, or vendor
+ * owes on a purchase return. Not when **we pay** (purchase bill, sales return refund).
+ */
+export function invoiceTypeSupportsBalanceReminderEmail(type: InvoiceType): boolean {
+  return type === "SALE_INVOICE" || type === "PURCHASE_RETURN";
+}
+
+/**
+ * POST mark-sent (WhatsApp log): documents **we issue** to the party (invoice, credit/return to customer,
+ * return to vendor). Omit **purchase bills** — that’s the vendor’s bill to us; we’re the payer, not sharing
+ * “our invoice” in the same sense.
+ */
+export function invoiceTypeSupportsDocumentShareLog(type: InvoiceType): boolean {
+  return type === "SALE_INVOICE" || type === "SALE_RETURN" || type === "PURCHASE_RETURN";
+}
+
 /** UI copy for the invoice create flow — aligns labels and descriptions with each invoice type. */
 export interface InvoiceTypeCreateCopy {
   /** Page description (create screen). */

@@ -135,11 +135,10 @@ export function useInvoiceCommunications(invoiceId: number | undefined) {
         `/invoices/${invoiceId}/communications`,
       );
       const data = res.data as Record<string, unknown>;
-      if (data?.sent && typeof data.sent === "object" && "isToday" in (data.sent as object)) {
-        return normalizeCommunicationsSummary(
-          data as Parameters<typeof normalizeCommunicationsSummary>[0],
-          invoiceId!,
-        );
+      const sent = data?.sent;
+      const reminder = data?.reminder;
+      if (sent && typeof sent === "object" && reminder && typeof reminder === "object") {
+        return normalizeCommunicationsSummary(data, invoiceId!);
       }
       return res.data as InvoiceCommunicationsSummary;
     },

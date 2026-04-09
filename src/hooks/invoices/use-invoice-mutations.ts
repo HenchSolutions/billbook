@@ -8,10 +8,10 @@ import type {
   UpdateInvoiceRequest,
   RecordPaymentRequest,
   FinalizeInvoiceResponse,
-  InvoiceCommunicationRequest,
-  InvoiceCommunicationResponse,
+  InvoiceMarkCommunicationRequest,
 } from "@/types/invoice";
 import {
+  parseInvoiceMarkCommunicationResponse,
   parseRecordPaymentResponse,
   parseRecordSupplierPaymentResponse,
 } from "@/lib/invoice-api-helpers";
@@ -122,13 +122,13 @@ export function useRecordSupplierPayment(invoiceId: number) {
 export function useMarkInvoiceSent(invoiceId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data?: InvoiceCommunicationRequest) => {
-      const res = await api.post<InvoiceCommunicationResponse>(
+    mutationFn: async (data?: InvoiceMarkCommunicationRequest) => {
+      const res = await api.post<unknown>(
         `/invoices/${invoiceId}/mark-sent`,
-        data,
+        data ?? {},
         generateIdempotencyKey(),
       );
-      return res.data;
+      return parseInvoiceMarkCommunicationResponse(res.data);
     },
     onSuccess: () => {
       invalidateQueryKeys(qc, [
@@ -143,13 +143,13 @@ export function useMarkInvoiceSent(invoiceId: number) {
 export function useMarkInvoiceReminder(invoiceId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data?: InvoiceCommunicationRequest) => {
-      const res = await api.post<InvoiceCommunicationResponse>(
+    mutationFn: async (data?: InvoiceMarkCommunicationRequest) => {
+      const res = await api.post<unknown>(
         `/invoices/${invoiceId}/mark-reminder`,
-        data,
+        data ?? {},
         generateIdempotencyKey(),
       );
-      return res.data;
+      return parseInvoiceMarkCommunicationResponse(res.data);
     },
     onSuccess: () => {
       invalidateQueryKeys(qc, [
