@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import StatusBadge from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
 import { getInvoiceBalanceDue } from "@/lib/invoice";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import type { Invoice, InvoiceType } from "@/types/invoice";
@@ -14,19 +13,9 @@ interface InvoicesTableProps {
 
 export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
   const router = useRouter();
-  const returnTypeByInvoiceType: Record<InvoiceType, InvoiceType | null> = {
-    SALE_INVOICE: "SALE_RETURN",
-    PURCHASE_INVOICE: "PURCHASE_RETURN",
-    SALE_RETURN: null,
-    PURCHASE_RETURN: null,
-  };
-  const returnInvoiceType = returnTypeByInvoiceType[invoiceType];
-  const showReturnAction = returnInvoiceType !== null;
-  const returnButtonLabel =
-    returnInvoiceType === "SALE_RETURN" ? "Sales Return" : "Purchase Return";
   const showVendorBillColumn =
     invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
-  const mobileColSpan = (showVendorBillColumn ? 8 : 7) + (showReturnAction ? 1 : 0);
+  const mobileColSpan = showVendorBillColumn ? 8 : 7;
 
   return (
     <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
@@ -74,19 +63,12 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
             <th scope="col" className="px-3 py-3 text-center font-medium text-muted-foreground">
               Status
             </th>
-            {showReturnAction && (
-              <th scope="col" className="px-3 py-3 text-center font-medium text-muted-foreground">
-                Return
-              </th>
-            )}
           </tr>
         </thead>
         <tbody>
           {invoices.map((inv) => {
             const balanceDue = getInvoiceBalanceDue(inv);
             const isFullyPaid = balanceDue <= 0 && inv.status === "FINAL";
-
-            const canCreateReturn = showReturnAction && inv.status === "FINAL";
 
             return (
               <tr
@@ -129,22 +111,6 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                         </div>
                       )}
                       {isFullyPaid && <div className="mt-0.5 text-xs text-emerald-600">Paid</div>}
-                      {canCreateReturn && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="mt-2 h-7 px-2 text-xs"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            router.push(
-                              `/invoices/new?type=${returnInvoiceType}&sourceInvoiceId=${inv.id}`,
-                            );
-                          }}
-                        >
-                          {returnButtonLabel}
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </td>
@@ -186,27 +152,6 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 <td className="hidden px-3 py-3 text-center sm:table-cell">
                   <StatusBadge status={inv.status} />
                 </td>
-                {showReturnAction && (
-                  <td className="hidden px-3 py-3 text-center sm:table-cell">
-                    {canCreateReturn ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          router.push(
-                            `/invoices/new?type=${returnInvoiceType}&sourceInvoiceId=${inv.id}`,
-                          );
-                        }}
-                      >
-                        {returnButtonLabel}
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                )}
               </tr>
             );
           })}

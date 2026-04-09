@@ -87,14 +87,14 @@ export function DashboardHeroSection({ greeting, dashboard }: DashboardHeroSecti
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Overview
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Sales dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Sales Dashboard</h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>{greeting}</span>
             <Link
               href="/invoices/purchases"
               className="inline-flex items-center rounded-full border border-border bg-background/90 px-3 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted/80"
             >
-              Purchase bills →
+              Purchase Bills →
             </Link>
             <Link
               href="/reports"
@@ -106,7 +106,7 @@ export function DashboardHeroSection({ greeting, dashboard }: DashboardHeroSecti
         </div>
         <Button asChild size="lg" className="h-11 shrink-0 rounded-full px-6 shadow-sm">
           <Link href="/invoices?action=new">
-            <span className="mr-1">+</span> New sale invoice
+            <span className="mr-1">+</span> New Sales Invoice
           </Link>
         </Button>
       </div>
