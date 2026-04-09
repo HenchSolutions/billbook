@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorBanner from "@/components/ErrorBanner";
@@ -12,7 +12,8 @@ import { fileToDataUrl } from "@/lib/file-to-url";
 import { profileSchema, type ProfileForm } from "@/components/settings/profileSchema";
 import { Button } from "@/components/ui/button";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
-import type { UpdateBusinessProfile } from "@/types/auth";
+import { getProfileFormValues } from "@/lib/profile-form-values";
+import type { BusinessProfile, UpdateBusinessProfile } from "@/types/auth";
 
 function trimOrNull(value: string | null | undefined): string | null {
   const t = (value ?? "").trim();
@@ -24,65 +25,23 @@ function trimTaxId(value: string | null | undefined): string | null {
   return t === "" ? null : t;
 }
 
-const getProfileFormValues = (business?: {
-  name?: string | null;
-  country?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  businessType?: string | null;
-  industryType?: string | null;
-  registrationType?: string | null;
-  street?: string | null;
-  area?: string | null;
-  city?: string | null;
-  state?: string | null;
-  pincode?: string | null;
-  gstin?: string | null;
-  pan?: string | null;
-  financialYearStart?: number | null;
-  extraDetails?: Array<{ key: string; value: string }> | null;
-  taxType?: "GST" | "NON_GST" | null;
-  logoUrl?: string | null;
-  signatureUrl?: string | null;
-}) => ({
-  name: business?.name || "",
-  country: business?.country || "India",
-  email: business?.email || "",
-  phone: business?.phone || "",
-  businessType: business?.businessType || "",
-  industryType: business?.industryType || "",
-  registrationType: business?.registrationType || "",
-  street: business?.street || "",
-  area: business?.area || "",
-  city: business?.city || "",
-  state: business?.state || "",
-  pincode: business?.pincode || "",
-  gstin: business?.gstin || "",
-  pan: business?.pan || "",
-  financialYearStart: business?.financialYearStart ?? 4,
-  extraDetails: business?.extraDetails?.length ? business.extraDetails : [],
-  taxType: business?.taxType || "GST",
-  logoUrl: business?.logoUrl ?? null,
-  signatureUrl: business?.signatureUrl ?? null,
-});
-
-export default function Profile() {
-  const { data: business, isPending, error } = useBusinessProfile();
+/** Renders only after profile is loaded so `useForm` is never initialised with empty defaults (that makes the whole form "dirty"). */
+function ProfileEditor({ business }: { business: BusinessProfile }) {
   const updateProfile = useUpdateBusinessProfile();
+
+  const profileValues = useMemo(() => getProfileFormValues(business), [business]);
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
-    defaultValues: getProfileFormValues(),
+    defaultValues: profileValues,
+    values: profileValues,
+    resetOptions: { keepDirtyValues: true },
   });
 
   const {
     formState: { isSubmitting, isDirty },
     reset,
   } = form;
-
-  useEffect(() => {
-    reset(getProfileFormValues(business));
-  }, [business, reset]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -108,7 +67,6 @@ export default function Profile() {
           value: (d.value ?? "").trim(),
         }))
         .filter((d) => d.key !== "");
-      // JSON.stringify drops `undefined` — the API must receive explicit null / [] or fields never update.
       const payload: UpdateBusinessProfile = {
         name: data.name.trim(),
         country: trimOrNull(data.country) ?? "India",
@@ -151,13 +109,8 @@ export default function Profile() {
     reset(getProfileFormValues(business));
   };
 
-  if (isPending) {
-    return <SettingsSkeleton variant="profile" />;
-  }
-
   return (
-    <div className="page-container animate-fade-in pb-10">
-      <ErrorBanner error={error} fallbackMessage="Failed to load profile" />
+    <>
       <PageHeader
         title="My Profile"
         description="Manage your business settings and profile details"
@@ -179,7 +132,7 @@ export default function Profile() {
       />
 
       <div className="w-full space-y-6">
-        {business?.profileCompletion && (
+        {business.profileCompletion && (
           <ProfileCompletionCard profileCompletion={business.profileCompletion} />
         )}
         <BusinessProfileForm
@@ -191,6 +144,28 @@ export default function Profile() {
           onSignatureUpload={handleSignatureUpload}
         />
       </div>
+    </>
+  );
+}
+
+export default function Profile() {
+  const { data: business, isPending, error } = useBusinessProfile();
+
+  if (isPending) {
+    return <SettingsSkeleton variant="profile" />;
+  }
+
+  return (
+    <div className="page-container animate-fade-in pb-10">
+      <ErrorBanner error={error} fallbackMessage="Failed to load profile" />
+      {business ? (
+        <ProfileEditor business={business} />
+      ) : (
+        <PageHeader
+          title="My Profile"
+          description="Manage your business settings and profile details"
+        />
+      )}
     </div>
   );
 }

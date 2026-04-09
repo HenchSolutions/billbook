@@ -38,7 +38,10 @@ export function useUpdateBusinessProfile() {
       const res = await api.put<BusinessProfile>("/business/profile", data);
       return normalizeBusinessProfile(res.data as unknown as Record<string, unknown>);
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.business.profile()]),
+    onSuccess: (profile) => {
+      qc.setQueryData(queryKeys.business.profile(), profile);
+      invalidateQueryKeys(qc, [queryKeys.business.profile()]);
+    },
   });
 }
 

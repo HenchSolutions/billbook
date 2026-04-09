@@ -94,6 +94,13 @@ export function BusinessProfileForm({
   const displaySignatureUrl = pendingSignatureFile ? signaturePreviewUrl : signatureUrl || null;
 
   useEffect(() => {
+    const label = (countryName ?? "").trim();
+    if (!label) return;
+    const match = COUNTRIES.find((c) => c.label.toLowerCase() === label.toLowerCase());
+    if (match) setPhoneCountryCode(match.code);
+  }, [countryName]);
+
+  useEffect(() => {
     if (!pendingLogoFile) {
       setLogoPreviewUrl(null);
       return;
@@ -263,7 +270,10 @@ export function BusinessProfileForm({
                       name="registrationType"
                       control={control}
                       render={({ field }) => (
-                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <Select
+                          value={field.value?.trim() ? field.value : undefined}
+                          onValueChange={field.onChange}
+                        >
                           <SelectTrigger id="registrationType">
                             <SelectValue placeholder="Select registration" />
                           </SelectTrigger>
@@ -402,8 +412,10 @@ export function BusinessProfileForm({
                         name="country"
                         control={control}
                         render={({ field }) => {
+                          const v = (field.value ?? "").trim();
                           const selected =
-                            COUNTRIES.find((c) => c.label === field.value) ?? selectedPhoneCountry;
+                            COUNTRIES.find((c) => c.label.toLowerCase() === v.toLowerCase()) ??
+                            selectedPhoneCountry;
                           return (
                             <Select
                               value={selected.code}
@@ -461,7 +473,10 @@ export function BusinessProfileForm({
                         name="businessType"
                         control={control}
                         render={({ field }) => (
-                          <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <Select
+                            value={field.value?.trim() ? field.value : undefined}
+                            onValueChange={field.onChange}
+                          >
                             <SelectTrigger id="businessType">
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
@@ -485,13 +500,16 @@ export function BusinessProfileForm({
                         name="industryType"
                         control={control}
                         render={({ field }) => (
-                          <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <Select
+                            value={field.value?.trim() ? field.value : undefined}
+                            onValueChange={field.onChange}
+                          >
                             <SelectTrigger id="industryType">
                               <SelectValue placeholder="Select industry" />
                             </SelectTrigger>
                             <SelectContent>
-                              {INDUSTRY_TYPES.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
+                              {INDUSTRY_TYPES.map((item, idx) => (
+                                <SelectItem key={`${item.value}-${idx}`} value={item.value}>
                                   {item.label}
                                 </SelectItem>
                               ))}
