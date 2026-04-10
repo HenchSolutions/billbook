@@ -25,6 +25,17 @@ export const profileSchema = z
     city: z.string().trim().max(100).optional().or(z.literal("")),
     state: z.string().trim().max(100).optional().or(z.literal("")),
     pincode: z.string().trim().max(10).optional().or(z.literal("")),
+    accountHolderName: z.string().trim().max(200).optional().or(z.literal("")),
+    bankAccountNumber: z.string().trim().max(34).optional().or(z.literal("")),
+    confirmAccountNumber: z.string().trim().max(34).optional().or(z.literal("")),
+    bankName: z.string().trim().max(200).optional().or(z.literal("")),
+    branchName: z.string().trim().max(200).optional().or(z.literal("")),
+    bankCity: z.string().trim().max(100).optional().or(z.literal("")),
+    bankState: z.string().trim().max(100).optional().or(z.literal("")),
+    ifscCode: z.string().trim().max(11).optional().or(z.literal("")),
+    transferAmount: z.string().trim().max(20).optional().or(z.literal("")),
+    transferCurrency: z.string().trim().max(10).optional().or(z.literal("")),
+    transferType: z.enum(["NEFT", "RTGS", "IMPS", "UPI"]).optional().or(z.literal("")),
     gstin: gstinString,
     pan: panString,
     financialYearStart: z.coerce.number().min(1).max(12).default(4),
@@ -46,6 +57,131 @@ export const profileSchema = z
         path: ["street"],
         message: "Address line 1 is required when pincode, area, city, or state is filled",
       });
+    }
+
+    const bankAccountNumber = (data.bankAccountNumber ?? "").trim();
+    const confirmAccountNumber = (data.confirmAccountNumber ?? "").trim();
+    const ifscCode = (data.ifscCode ?? "").trim();
+    const accountHolderName = (data.accountHolderName ?? "").trim();
+    const bankName = (data.bankName ?? "").trim();
+    const branchName = (data.branchName ?? "").trim();
+    const bankCity = (data.bankCity ?? "").trim();
+    const bankState = (data.bankState ?? "").trim();
+    const transferAmount = (data.transferAmount ?? "").trim();
+
+    const hasAnyBankDetail =
+      accountHolderName !== "" ||
+      bankAccountNumber !== "" ||
+      confirmAccountNumber !== "" ||
+      ifscCode !== "" ||
+      bankName !== "" ||
+      branchName !== "" ||
+      bankCity !== "" ||
+      bankState !== "";
+
+    if (hasAnyBankDetail) {
+      if (accountHolderName === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["accountHolderName"],
+          message: "Account holder name is required",
+        });
+      }
+
+      if (bankAccountNumber === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankAccountNumber"],
+          message: "Bank account number is required",
+        });
+      }
+
+      if (confirmAccountNumber === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["confirmAccountNumber"],
+          message: "Confirm account number is required",
+        });
+      }
+
+      if (ifscCode === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["ifscCode"],
+          message: "IFSC code is required",
+        });
+      }
+
+      if (bankName === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankName"],
+          message: "Bank name is required",
+        });
+      }
+
+      if (branchName === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["branchName"],
+          message: "Branch name is required",
+        });
+      }
+
+      if (bankCity === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankCity"],
+          message: "Bank city is required",
+        });
+      }
+
+      if (bankState === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankState"],
+          message: "Bank state is required",
+        });
+      }
+    }
+
+    if (bankAccountNumber !== "" && !/^\d{6,34}$/.test(bankAccountNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["bankAccountNumber"],
+        message: "Account number must be 6 to 34 digits",
+      });
+    }
+
+    if (
+      bankAccountNumber !== "" &&
+      confirmAccountNumber !== "" &&
+      bankAccountNumber !== confirmAccountNumber
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmAccountNumber"],
+        message: "Account numbers do not match",
+      });
+    }
+
+    if (ifscCode !== "" && !/^[A-Z0-9]{11}$/i.test(ifscCode)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["ifscCode"],
+        message: "IFSC code must be exactly 11 alphanumeric characters",
+      });
+    }
+
+    if (transferAmount !== "") {
+      const numericAmount = Number(transferAmount);
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["transferAmount"],
+          message: "Amount must be greater than 0",
+        });
+      }
     }
   });
 

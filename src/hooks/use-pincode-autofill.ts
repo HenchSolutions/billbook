@@ -87,7 +87,7 @@ export function usePincodeAutofill<T extends FieldValues & AddressFields>(
             !currentCountry ||
             (isNewPincode && (isFirstAutofill || (lastCountry && currentCountry === lastCountry)));
           if (shouldUpdateCountry) {
-            setValue(countryKey, office.country as T[Path<T>], { shouldDirty: true });
+            setValue(countryKey, office.country as T[Path<T>], { shouldDirty: false });
           }
         }
 
@@ -96,16 +96,16 @@ export function usePincodeAutofill<T extends FieldValues & AddressFields>(
             !currentArea ||
             (isNewPincode && (isFirstAutofill || (lastArea && currentArea === lastArea)));
           if (shouldUpdateArea) {
-            setValue(areaKey, office.name as T[Path<T>], { shouldDirty: true });
+            setValue(areaKey, office.name as T[Path<T>], { shouldDirty: false });
           }
         }
 
         // If pincode changed, overwrite city/state (these fields are treated as auto-filled).
         if ((isNewPincode || !currentState) && office.state) {
-          setValue(stateKey, office.state as T[Path<T>], { shouldDirty: true });
+          setValue(stateKey, office.state as T[Path<T>], { shouldDirty: false });
         }
         if ((isNewPincode || !currentCity) && office.district) {
-          setValue(cityKey, office.district as T[Path<T>], { shouldDirty: true });
+          setValue(cityKey, office.district as T[Path<T>], { shouldDirty: false });
         }
 
         if (office.state || office.district || office.name || office.country) {
