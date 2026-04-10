@@ -29,6 +29,17 @@ export type ProfileFormSource = Partial<{
   city: string | null;
   state: string | null;
   pincode: string | null;
+  accountHolderName: string | null;
+  bankAccountNumber: string | null;
+  confirmAccountNumber: string | null;
+  bankName: string | null;
+  branchName: string | null;
+  bankCity: string | null;
+  bankState: string | null;
+  ifscCode: string | null;
+  transferAmount: string | null;
+  transferCurrency: string | null;
+  transferType: "NEFT" | "RTGS" | "IMPS" | "UPI" | null;
   gstin: string | null;
   pan: string | null;
   financialYearStart: number | null;
@@ -58,6 +69,21 @@ export function getProfileFormValues(business?: ProfileFormSource): ProfileForm 
     city: (business?.city ?? "").trim(),
     state: (business?.state ?? "").trim(),
     pincode: (business?.pincode ?? "").trim(),
+    accountHolderName: (business?.accountHolderName ?? "").trim(),
+    bankAccountNumber: (business?.bankAccountNumber ?? "").trim(),
+    confirmAccountNumber: (
+      business?.confirmAccountNumber ??
+      business?.bankAccountNumber ??
+      ""
+    ).trim(),
+    bankName: (business?.bankName ?? "").trim(),
+    branchName: (business?.branchName ?? "").trim(),
+    bankCity: (business?.bankCity ?? "").trim(),
+    bankState: (business?.bankState ?? "").trim(),
+    ifscCode: (business?.ifscCode ?? "").trim().toUpperCase(),
+    transferAmount: (business?.transferAmount ?? "").trim(),
+    transferCurrency: (business?.transferCurrency ?? "").trim(),
+    transferType: (business?.transferType ?? "") as ProfileForm["transferType"],
     gstin: (business?.gstin ?? "").trim(),
     pan: (business?.pan ?? "").trim(),
     financialYearStart,

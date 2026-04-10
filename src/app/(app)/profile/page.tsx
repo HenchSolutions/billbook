@@ -25,7 +25,47 @@ function trimTaxId(value: string | null | undefined): string | null {
   return t === "" ? null : t;
 }
 
-/** Renders only after profile is loaded so `useForm` is never initialised with empty defaults (that makes the whole form "dirty"). */
+function getComparableProfileSnapshot(values: ProfileForm): string {
+  return JSON.stringify({
+    ...values,
+    name: (values.name ?? "").trim(),
+    country: values.country ?? "",
+    email: (values.email ?? "").trim(),
+    phone: (values.phone ?? "").trim(),
+    businessType: values.businessType ?? "",
+    industryType: values.industryType ?? "",
+    registrationType: values.registrationType ?? "",
+    street: (values.street ?? "").trim(),
+    area: (values.area ?? "").trim(),
+    city: (values.city ?? "").trim(),
+    state: (values.state ?? "").trim(),
+    pincode: (values.pincode ?? "").trim(),
+    accountHolderName: (values.accountHolderName ?? "").trim(),
+    bankAccountNumber: (values.bankAccountNumber ?? "").trim(),
+    confirmAccountNumber: (values.confirmAccountNumber ?? "").trim(),
+    bankName: (values.bankName ?? "").trim(),
+    branchName: (values.branchName ?? "").trim(),
+    bankCity: (values.bankCity ?? "").trim(),
+    bankState: (values.bankState ?? "").trim(),
+    ifscCode: (values.ifscCode ?? "").trim().toUpperCase(),
+    transferAmount: (values.transferAmount ?? "").trim(),
+    transferCurrency: (values.transferCurrency ?? "").trim(),
+    transferType: values.transferType ?? "",
+    gstin: (values.gstin ?? "").trim(),
+    pan: (values.pan ?? "").trim(),
+    financialYearStart: values.financialYearStart ?? 4,
+    taxType: values.taxType ?? "GST",
+    logoUrl: values.logoUrl ?? null,
+    signatureUrl: values.signatureUrl ?? null,
+    extraDetails: (values.extraDetails ?? [])
+      .map((detail) => ({
+        key: (detail?.key ?? "").trim(),
+        value: (detail?.value ?? "").trim(),
+      }))
+      .filter((detail) => detail.key !== "" || detail.value !== ""),
+  });
+}
+
 function ProfileEditor({ business }: { business: BusinessProfile }) {
   const updateProfile = useUpdateBusinessProfile();
 
@@ -41,7 +81,17 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
   const {
     formState: { isSubmitting, isDirty },
     reset,
+    watch,
   } = form;
+
+  const formValues = watch();
+  const hasUserChanges =
+    getComparableProfileSnapshot(formValues) !== getComparableProfileSnapshot(profileValues);
+  const checklistBusiness = hasUserChanges ? { ...business, ...formValues } : business;
+
+  useEffect(() => {
+    reset(profileValues);
+  }, [profileValues, reset]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -56,7 +106,7 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
   }, [isDirty]);
 
   const onSubmit = async (data: ProfileForm) => {
-    if (!isDirty) {
+    if (!hasUserChanges) {
       showErrorToast("No changes to save.");
       return;
     }
@@ -80,6 +130,17 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
         city: trimOrNull(data.city),
         state: trimOrNull(data.state),
         pincode: trimOrNull(data.pincode),
+        accountHolderName: trimOrNull(data.accountHolderName),
+        bankAccountNumber: trimOrNull(data.bankAccountNumber),
+        confirmAccountNumber: trimOrNull(data.confirmAccountNumber),
+        bankName: trimOrNull(data.bankName),
+        branchName: trimOrNull(data.branchName),
+        bankCity: trimOrNull(data.bankCity),
+        bankState: trimOrNull(data.bankState),
+        ifscCode: trimTaxId(data.ifscCode),
+        transferAmount: trimOrNull(data.transferAmount),
+        transferCurrency: trimOrNull(data.transferCurrency),
+        transferType: data.transferType ? data.transferType : null,
         gstin: trimTaxId(data.gstin),
         pan: trimTaxId(data.pan),
         financialYearStart: data.financialYearStart,
@@ -106,7 +167,7 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
   };
 
   const handleCancel = () => {
-    reset(getProfileFormValues(business));
+    reset(profileValues);
   };
 
   return (
@@ -123,7 +184,7 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
               type="submit"
               size="sm"
               form="profile-form"
-              disabled={!isDirty || isSubmitting || updateProfile.isPending}
+              disabled={!hasUserChanges || isSubmitting || updateProfile.isPending}
             >
               Save Changes
             </Button>
@@ -132,8 +193,11 @@ function ProfileEditor({ business }: { business: BusinessProfile }) {
       />
 
       <div className="w-full space-y-6">
-        {business.profileCompletion && (
-          <ProfileCompletionCard profileCompletion={business.profileCompletion} />
+        {business?.profileCompletion && (
+          <ProfileCompletionCard
+            profileCompletion={business.profileCompletion}
+            business={checklistBusiness}
+          />
         )}
         <BusinessProfileForm
           form={form}

@@ -1,6 +1,7 @@
 export type Role = "OWNER" | "STAFF" | "ADMIN";
 
 export type TaxType = "GST" | "NON_GST";
+export type TransferType = "NEFT" | "RTGS" | "IMPS" | "UPI";
 
 /** Lightweight user returned inside AuthResponse */
 export interface User {
@@ -66,6 +67,17 @@ export interface BusinessProfile {
   city: string | null;
   state: string | null;
   pincode: string | null;
+  accountHolderName: string | null;
+  bankAccountNumber: string | null;
+  confirmAccountNumber: string | null;
+  bankName: string | null;
+  branchName: string | null;
+  bankCity: string | null;
+  bankState: string | null;
+  ifscCode: string | null;
+  transferAmount: string | null;
+  transferCurrency: string | null;
+  transferType: TransferType | null;
   gstin: string | null;
   pan: string | null;
   financialYearStart: number;
@@ -94,6 +106,17 @@ export interface UpdateBusinessProfile {
   city?: string | null;
   state?: string | null;
   pincode?: string | null;
+  accountHolderName?: string | null;
+  bankAccountNumber?: string | null;
+  confirmAccountNumber?: string | null;
+  bankName?: string | null;
+  branchName?: string | null;
+  bankCity?: string | null;
+  bankState?: string | null;
+  ifscCode?: string | null;
+  transferAmount?: string | null;
+  transferCurrency?: string | null;
+  transferType?: TransferType | null;
   gstin?: string | null;
   pan?: string | null;
   financialYearStart?: number;

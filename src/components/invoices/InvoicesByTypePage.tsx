@@ -117,7 +117,8 @@ export function InvoicesByTypePage({
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle className="text-sm">Complete your profile to create invoices</AlertTitle>
           <AlertDescription className="text-xs">
-            Business address is required. Add street, city, state and pincode in{" "}
+            Required: profile completion at least 75%, complete address (street, city, state,
+            pincode), and complete bank details in{" "}
             <Link href="/profile" className="font-medium underline underline-offset-2">
               profile settings
             </Link>
