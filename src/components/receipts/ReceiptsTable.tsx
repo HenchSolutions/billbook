@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import TablePagination from "@/components/TablePagination";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { PAYMENT_METHOD_LABEL } from "@/constants/receipt-ui";
+import { PAYMENT_METHOD_LABEL, receiptPaymentMethodBadgeProps } from "@/constants/receipt-ui";
 import type { ReceiptListItem } from "@/types/receipt";
 
 interface ReceiptsTableProps {
@@ -45,6 +45,7 @@ export function ReceiptsTable({
             <tbody>
               {receipts.map((r) => {
                 const canAllocate = parseFloat(r.unallocatedAmount || "0") > 0.001;
+                const methodBadge = receiptPaymentMethodBadgeProps(r.paymentMethod);
                 return (
                   <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="px-4 py-3">
@@ -62,8 +63,13 @@ export function ReceiptsTable({
                       {formatDate(r.receivedAt || r.createdAt)}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant="outline">
-                        {PAYMENT_METHOD_LABEL[r.paymentMethod] ?? r.paymentMethod}
+                      <Badge
+                        variant="outline"
+                        className={methodBadge.className}
+                        title={methodBadge.title}
+                      >
+                        {PAYMENT_METHOD_LABEL[r.paymentMethod] ??
+                          r.paymentMethod.replace(/_/g, " ")}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right font-medium tabular-nums">

@@ -10,6 +10,7 @@ import PaymentDialog from "@/components/dialogs/PaymentDialog";
 import SupplierPaymentDialog from "@/components/dialogs/SupplierPaymentDialog";
 import SaleReturnRefundDialog from "@/components/dialogs/SaleReturnRefundDialog";
 import CancelInvoiceDialog from "@/components/dialogs/CancelInvoiceDialog";
+import CreditNoteDialog from "@/components/dialogs/CreditNoteDialog";
 import {
   InvoiceHeaderActions,
   InvoiceSummaryCards,
@@ -27,6 +28,7 @@ import {
   useMarkInvoiceReminder,
   useInvoiceCommunications,
 } from "@/hooks/use-invoices";
+import { useCreditNotes } from "@/hooks/use-credit-notes";
 import { useStockEntriesByIds } from "@/hooks/use-items";
 import { useBusinessProfile } from "@/hooks/use-business";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -58,9 +60,18 @@ export default function InvoiceDetail() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [supplierPaymentOpen, setSupplierPaymentOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [creditNoteOpen, setCreditNoteOpen] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
 
   const { data: invoice, isPending, error } = useInvoice(invoiceId);
+  const { data: creditNotesForReturn } = useCreditNotes({
+    invoiceId: invoice?.invoiceType === "SALE_RETURN" && invoiceId != null ? invoiceId : undefined,
+    page: 1,
+    pageSize: 50,
+    enabled: !!invoice && invoice.invoiceType === "SALE_RETURN" && invoiceId != null,
+  });
+  const returnCreditNoteExists =
+    (creditNotesForReturn?.creditNotes ?? []).filter((cn) => cn.deletedAt == null).length > 0;
   const { data: businessProfile } = useBusinessProfile();
   const stockEntryIds =
     invoice?.items
@@ -86,7 +97,16 @@ export default function InvoiceDetail() {
     finalizeGuard.current = true;
     try {
       await finalizeMutation.mutateAsync(invoiceId);
-      showSuccessToast("Invoice finalized");
+      const type = invoice?.invoiceType;
+      const paymentHint =
+        type === "SALE_INVOICE"
+          ? " Allocate customer receipts (including any opening-advance receipt) to reduce balance due — not applied on finalize."
+          : type === "PURCHASE_INVOICE"
+            ? " Record supplier payments to reduce payables — finalize does not pay the bill from opening or advance."
+            : type === "SALE_RETURN" || type === "PURCHASE_RETURN"
+              ? " Use Record payment / refund on this document to settle amounts — finalize alone does not move money."
+              : "";
+      showSuccessToast(`Invoice finalized.${paymentHint}`);
     } catch (err) {
       if (maybeShowTrialExpiredToast(err)) return;
       if (err instanceof ApiClientError && err.status === 409) {
@@ -230,6 +250,12 @@ export default function InvoiceDetail() {
                     ? () => setRefundOpen(true)
                     : undefined
                 }
+                onOpenRefundCreditNote={
+                  invoiceTypeSupportsSaleReturnRefund(invoice.invoiceType)
+                    ? () => setCreditNoteOpen(true)
+                    : undefined
+                }
+                returnCreditNoteExists={returnCreditNoteExists}
                 onMarkSent={handleMarkSent}
                 onMarkReminder={handleMarkReminder}
               />
@@ -291,6 +317,14 @@ export default function InvoiceDetail() {
             onConfirm={confirmCancel}
             isPending={cancelMutation.isPending}
           />
+
+          {invoice.invoiceType === "SALE_RETURN" && invoiceId != null && (
+            <CreditNoteDialog
+              open={creditNoteOpen}
+              onOpenChange={setCreditNoteOpen}
+              defaultInvoiceId={invoiceId}
+            />
+          )}
         </>
       )}
     </div>

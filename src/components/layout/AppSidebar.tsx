@@ -17,6 +17,7 @@ import {
   Wallet,
   ArrowDownLeft,
   UserCog,
+  ScrollText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,31 +39,37 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: "Core",
+    title: "Overview",
+    items: [{ label: "Dashboard", path: "/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    title: "Invoicing",
+    items: [{ label: "Invoices", path: "/invoices", icon: FileText }],
+  },
+  {
+    title: "Money & credit",
     items: [
-      { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-      { label: "Invoices", path: "/invoices", icon: FileText },
       { label: "Receipts", path: "/receipts", icon: Wallet },
-      { label: "Payouts", path: "/payments/outbound", icon: ArrowDownLeft },
-      { label: "Credit Notes", path: "/credit-notes", icon: FileMinus },
+      { label: "Outbound payouts", path: "/payments/outbound", icon: ArrowDownLeft },
+      { label: "Credit notes", path: "/credit-notes", icon: FileMinus },
     ],
   },
   {
-    title: "Master",
+    title: "Catalog",
     items: [
       { label: "Items", path: "/items", icon: Package },
-      { label: "Vendor", path: "/vendors", icon: Truck },
-    ],
-  },
-  {
-    title: "Manage",
-    items: [
       { label: "Stock", path: "/stock", icon: PackageCheck },
-      { label: "Customer", path: "/parties", icon: Users },
     ],
   },
   {
-    title: "Reports",
+    title: "Parties",
+    items: [
+      { label: "Customers", path: "/parties", icon: Users },
+      { label: "Vendors", path: "/vendors", icon: Truck },
+    ],
+  },
+  {
+    title: "Reports & tax",
     items: [
       { label: "Reports", path: "/reports", icon: BarChart3 },
       { label: "Tax / GST", path: "/tax", icon: Receipt },
@@ -71,18 +78,9 @@ const navSections: NavSection[] = [
   {
     title: "Account",
     items: [
-      {
-        label: "Team",
-        path: "/team",
-        icon: UserCog,
-        ownerOnly: true,
-      },
-      {
-        label: "Audit Logs",
-        path: "/audit-logs",
-        icon: BarChart3,
-        ownerOnly: true,
-      },
+      { label: "Business settings", path: "/settings", icon: Settings },
+      { label: "Team", path: "/team", icon: UserCog, ownerOnly: true },
+      { label: "Audit logs", path: "/audit-logs", icon: ScrollText, ownerOnly: true },
     ],
   },
 ];
@@ -188,11 +186,11 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
 
       <Separator className="bg-sidebar-border" />
 
-      <nav className="min-h-0 flex-1 space-y-4 overflow-y-auto px-2 py-3">
+      <nav className="min-h-0 flex-1 space-y-6 overflow-y-auto px-2 py-4">
         {getVisibleSections().map((section) => (
           <div key={section.title}>
             {!collapsed && (
-              <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+              <h3 className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/45">
                 {section.title}
               </h3>
             )}
@@ -306,31 +304,15 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
       <Separator className="bg-sidebar-border" />
 
       <div className="shrink-0 space-y-1 p-2">
-        {!collapsed && (
-          <Link
-            href="/settings"
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-              isActive("/settings")
-                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-            )}
-          >
-            <Settings className="h-4 w-4 shrink-0" />
-            <span>Business settings</span>
-          </Link>
-        )}
-
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
           onClick={handleLogout}
-          title="Logout"
+          title="Log out"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="ml-3">Logout</span>}
+          {!collapsed && <span className="ml-3">Log out</span>}
         </Button>
 
         {!collapsed && (

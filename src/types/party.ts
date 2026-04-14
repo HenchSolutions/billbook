@@ -74,6 +74,11 @@ export interface CreatePartyRequest {
   city?: string;
   state?: string;
   postalCode?: string;
+  /**
+   * Signed decimal string. Positive = debit (party owes you / you owe vendor per API rules).
+   * **Customer advance opening:** negative value (credit). May create an opening receipt
+   * (`OPENING_BALANCE`); paid amounts on invoices still move only via receipt allocations, not here.
+   */
   openingBalance?: string;
   contactPersonName?: string | null;
   contactPersonMobile?: string | null;
@@ -102,6 +107,7 @@ export interface PartyLedgerResponse {
   entries: PartyLedgerEntry[];
 }
 
+/** Authoritative balances for UI — already reflects opening, receipts, and invoices (no extra +opening). */
 export interface PartyBalanceResponse {
   currentBalance: string;
   receivable: string;

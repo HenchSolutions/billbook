@@ -15,37 +15,43 @@ export function BalanceSummaryCards({
   const dueLabel = partyType === "SUPPLIER" ? "Payable" : "Receivable";
 
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      <div className="rounded-md border bg-muted/20 p-3">
-        <p className="text-xs font-medium text-muted-foreground">Current balance</p>
-        <div className="mt-2">
+    <div className="space-y-2">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-md border bg-muted/20 p-3">
+          <p className="text-xs font-medium text-muted-foreground">Current balance</p>
+          <div className="mt-2">
+            {isLoading ? (
+              <Skeleton className="h-14 w-36" />
+            ) : (
+              <LedgerBalanceText value={summary.current} size="lg" align="start" layout="stacked" />
+            )}
+          </div>
+        </div>
+        <div className="rounded-md border bg-muted/20 p-3">
+          <p className="text-xs font-medium text-muted-foreground">{dueLabel}</p>
           {isLoading ? (
-            <Skeleton className="h-14 w-36" />
+            <Skeleton className="mt-2 h-8 w-28" />
           ) : (
-            <LedgerBalanceText value={summary.current} size="lg" align="start" layout="stacked" />
+            <p className="mt-2 text-lg font-semibold tabular-nums text-foreground sm:text-xl">
+              {formatCurrency(summary.receivable)}
+            </p>
+          )}
+        </div>
+        <div className="rounded-md border bg-muted/20 p-3">
+          <p className="text-xs font-medium text-muted-foreground">Advance</p>
+          {isLoading ? (
+            <Skeleton className="mt-2 h-8 w-28" />
+          ) : (
+            <p className="mt-2 text-lg font-semibold tabular-nums text-foreground sm:text-xl">
+              {formatCurrency(summary.advance)}
+            </p>
           )}
         </div>
       </div>
-      <div className="rounded-md border bg-muted/20 p-3">
-        <p className="text-xs font-medium text-muted-foreground">{dueLabel}</p>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-8 w-28" />
-        ) : (
-          <p className="mt-2 text-lg font-semibold tabular-nums text-foreground sm:text-xl">
-            {formatCurrency(summary.receivable)}
-          </p>
-        )}
-      </div>
-      <div className="rounded-md border bg-muted/20 p-3">
-        <p className="text-xs font-medium text-muted-foreground">Advance</p>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-8 w-28" />
-        ) : (
-          <p className="mt-2 text-lg font-semibold tabular-nums text-foreground sm:text-xl">
-            {formatCurrency(summary.advance)}
-          </p>
-        )}
-      </div>
+      <p className="text-[11px] leading-snug text-muted-foreground">
+        Totals come from the balance API (ledger-backed). Do not add party openingBalance on top of
+        these figures — opening is already reflected in receivable / advance.
+      </p>
     </div>
   );
 }

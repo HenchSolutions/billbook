@@ -2,8 +2,14 @@
  * Party `openingBalance` from the API is a signed decimal string.
  * Form UX uses an unsigned amount + Debit/Credit instead of typing − manually.
  *
- * Convention: positive API value = debit balance, negative = credit balance
- * (matches prior behaviour of entering +amount vs −amount in one field).
+ * **API sign (critical for customers):**
+ * - **Positive** = debit (e.g. customer owes you, or you owe the vendor) — sent as-is.
+ * - **Negative** = **credit / customer advance** — the API stores a negative string; the server may
+ *   create a receipt with `payment_method` **OPENING_BALANCE** (no duplicate “cash” line on the ledger).
+ *
+ * **Do not double-count money in the UI:** use `GET /parties/:id/balance` (receivable / advance /
+ * current) as the single source of truth. Treat `party.openingBalance` as the configured opening only,
+ * not an extra addend on top of ledger advance.
  */
 
 export type OpeningBalanceNature = "DEBIT" | "CREDIT";

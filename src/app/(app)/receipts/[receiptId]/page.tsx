@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ReceiptAllocationEditor } from "@/components/receipts/ReceiptSections";
-import { PAYMENT_METHOD_LABEL } from "@/constants/receipt-ui";
+import { PAYMENT_METHOD_LABEL, receiptPaymentMethodBadgeProps } from "@/constants/receipt-ui";
 import { useReceipt } from "@/hooks/use-receipts";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { openSignedPdfFromApiPath } from "@/lib/signed-pdf";
@@ -71,6 +71,7 @@ export default function ReceiptDetailPage() {
     totalReceipt > 0 ? Math.min(100, Math.round((allocatedSum / totalReceipt) * 100)) : 0;
   const methodLabel =
     PAYMENT_METHOD_LABEL[receipt.paymentMethod] ?? receipt.paymentMethod.replace(/_/g, " ");
+  const methodBadge = receiptPaymentMethodBadgeProps(receipt.paymentMethod);
 
   const appliedAllocations = (receipt.allocations ?? []).filter(
     (a) => (parseFloat(a.amount) || 0) > 0.001,
@@ -134,7 +135,11 @@ export default function ReceiptDetailPage() {
                     <Landmark className="h-4 w-4" />
                   </span>
                   <span>
-                    <Badge variant="outline" className="mr-2 align-middle font-normal">
+                    <Badge
+                      variant="outline"
+                      className={cn("mr-2 align-middle", methodBadge.className)}
+                      title={methodBadge.title}
+                    >
                       {methodLabel}
                     </Badge>
                     {receipt.referenceNumber && (

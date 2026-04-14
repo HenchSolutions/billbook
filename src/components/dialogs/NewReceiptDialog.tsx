@@ -138,7 +138,8 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
           <DialogHeader>
             <DialogTitle>New receipt</DialogTitle>
             <DialogDescription>
-              Record money received from a party. You can allocate it to invoices afterwards.
+              Record money received from a party. Allocate it to invoices when ready — same flow as
+              opening-advance receipts created from customer credit at party setup.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

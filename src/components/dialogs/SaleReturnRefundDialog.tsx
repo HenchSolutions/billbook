@@ -97,11 +97,11 @@ export default function SaleReturnRefundDialog({
         referenceNumber: data.referenceNumber || undefined,
         notes: data.notes || undefined,
       });
-      showSuccessToast("Refund recorded");
+      showSuccessToast("Refund paid");
       onOpenChange(false);
     } catch (err) {
       if (maybeShowTrialExpiredToast(err)) return;
-      showErrorToast(err, "Failed to record refund");
+      showErrorToast(err, "Failed to pay refund");
     }
   };
 
@@ -109,7 +109,7 @@ export default function SaleReturnRefundDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Record Refund</DialogTitle>
+          <DialogTitle>Pay refund</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -153,7 +153,7 @@ export default function SaleReturnRefundDialog({
             </Button>
             <Button type="submit" disabled={isSubmitting || mutation.isPending}>
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Record Refund
+              Pay refund
             </Button>
           </DialogFooter>
         </form>

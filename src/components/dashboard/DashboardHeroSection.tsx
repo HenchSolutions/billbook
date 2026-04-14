@@ -75,8 +75,8 @@ export function DashboardHeroSection({
   }
 
   const paymentHint = showPaymentReconcile
-    ? `Ledger includes all party payment credits (advances, suppliers, etc.). On final sale invoices only, paid amount recorded is ${formatCurrency(invoiceFieldPaid!)}.`
-    : "Sum of party-ledger payment credits for this business — includes advances and other payments, not only sale invoices.";
+    ? `Ledger totals all money-in on parties (receipts, opening advances, supplier-side flows). Finalized sale invoices only show paid amounts from receipt allocations — finalizing does not pull from party opening/advance. Invoice “Paid” here: ${formatCurrency(invoiceFieldPaid!)} · ledger payments: ${formatCurrency(ledgerPaid)}.`
+    : "Ledger sums party payment credits (receipts, advances, supplier payments). Invoice paid amounts change when you allocate receipts or record payments — not automatically when you finalize.";
 
   const outstandingHint =
     outstanding < 0

@@ -17,7 +17,7 @@ export function DashboardQuickStatsSection({ dashboard }: DashboardQuickStatsSec
     <section className="rounded-2xl border border-border/80 bg-card/40 p-5 shadow-sm ring-1 ring-black/[0.03] dark:bg-card/30 dark:ring-white/[0.04] sm:p-6">
       <DashboardSectionHeader
         title="Catalog & ledger"
-        description="Items and parties are live catalog counts. Receivables and advances come from the party ledger (all activity), not sales-only totals."
+        description="Items and parties are live catalog counts. Receivables and advances use ledger-backed totals — do not add party openingBalance again; opening is already inside those aggregates."
         action={
           <Button variant="outline" size="sm" className="shrink-0" asChild>
             <Link href="/reports">View reports</Link>

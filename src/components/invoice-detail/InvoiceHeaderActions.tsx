@@ -1,4 +1,14 @@
-import { Download, Loader2, Pencil, CreditCard, MessageCircle, Mail, Banknote } from "lucide-react";
+import type { ReactNode } from "react";
+import {
+  Download,
+  Loader2,
+  Pencil,
+  CreditCard,
+  MessageCircle,
+  Mail,
+  Banknote,
+  FileMinus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -11,8 +21,26 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import type { InvoiceDetail } from "@/types/invoice";
 
-const FINALIZE_INVENTORY_HELP =
-  "Finalizing updates inventory: it can deduct stock (sales), add stock back (sale returns), create batches (purchase invoices), or remove quantity from batches (purchase returns), depending on this document. If the request fails, you can retry safely — an already finalized invoice returns success without duplicating stock effects.";
+const FINALIZE_INVENTORY_HELP: ReactNode = (
+  <div className="space-y-2 text-xs leading-snug">
+    <p>
+      Finalizing updates inventory: it can deduct stock (sales), add stock back (sale returns),
+      create batches (purchase invoices), or remove quantity from batches (purchase returns),
+      depending on this document. If the request fails, you can retry safely — an already finalized
+      invoice returns success without duplicating stock effects.
+    </p>
+    <p className="border-t border-border/60 pt-2 text-muted-foreground">
+      <span className="font-medium text-foreground">Payments:</span> Finalizing does{" "}
+      <span className="font-medium text-foreground">not</span> apply party opening balance or
+      advances to this document. For <strong>sales</strong>, use{" "}
+      <span className="text-foreground">Record payment</span> / allocate receipts (including opening
+      advance receipts). For <strong>purchases</strong>, use{" "}
+      <span className="text-foreground">Record supplier payment</span> —{" "}
+      <span className="font-medium text-foreground">paid</span> on the bill stays at whatever it was
+      until you post those payments.
+    </p>
+  </div>
+);
 
 const NOTIFY_WHATSAPP_HELP = (
   <>
@@ -54,8 +82,12 @@ interface InvoiceHeaderActionsProps {
   onCancel: () => void;
   onFinalize: () => void;
   onOpenPayment: () => void;
-  /** Sales return: record customer refund (outbound payout). */
+  /** Sales return: pay customer refund (outbound payout). */
   onOpenRefund?: () => void;
+  /** Sales return: open credit note dialog for this return (refund generation). */
+  onOpenRefundCreditNote?: () => void;
+  /** When true, a credit note already exists for this sales return. */
+  returnCreditNoteExists?: boolean;
   onMarkSent: () => void;
   onMarkReminder: () => void;
 }
@@ -78,6 +110,8 @@ export function InvoiceHeaderActions({
   onFinalize,
   onOpenPayment,
   onOpenRefund,
+  onOpenRefundCreditNote,
+  returnCreditNoteExists = false,
   onMarkSent,
   onMarkReminder,
 }: InvoiceHeaderActionsProps) {
@@ -147,21 +181,40 @@ export function InvoiceHeaderActions({
       )}
 
       {invoice.status === "FINAL" && showRecordRefund && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onOpenRefund}
-          disabled={balanceDueValue <= 0}
-          className={balanceDueValue <= 0 ? "cursor-not-allowed opacity-50" : ""}
-          title={
-            balanceDueValue <= 0
-              ? "Return is fully settled. Nothing left to refund."
-              : `Record refund (Owing to customer: ${formatCurrency(balanceDue)})`
-          }
-        >
-          <Banknote className="mr-2 h-3.5 w-3.5" />
-          Record Refund
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenRefund}
+            disabled={balanceDueValue <= 0}
+            className={balanceDueValue <= 0 ? "cursor-not-allowed opacity-50" : ""}
+            title={
+              balanceDueValue <= 0
+                ? "Return is fully settled. Nothing left to pay out."
+                : `Pay refund to customer (owing: ${formatCurrency(balanceDue)})`
+            }
+          >
+            <Banknote className="mr-2 h-3.5 w-3.5" />
+            Pay refund
+          </Button>
+          {onOpenRefundCreditNote && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenRefundCreditNote}
+              disabled={returnCreditNoteExists}
+              className={returnCreditNoteExists ? "cursor-not-allowed opacity-50" : ""}
+              title={
+                returnCreditNoteExists
+                  ? "A credit note already exists for this sales return."
+                  : "Create a credit note linked to this sales return (refund generation)."
+              }
+            >
+              <FileMinus className="mr-2 h-3.5 w-3.5" />
+              Refund generation
+            </Button>
+          )}
+        </>
       )}
 
       {invoice.status === "FINAL" && (showWhatsAppLog || showBalanceEmail) && (

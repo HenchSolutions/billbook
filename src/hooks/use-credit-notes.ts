@@ -10,9 +10,9 @@ import type {
 } from "@/types/credit-note";
 
 export function useCreditNotes(
-  params: { invoiceId?: number; page?: number; pageSize?: number } = {},
+  params: { invoiceId?: number; page?: number; pageSize?: number; enabled?: boolean } = {},
 ) {
-  const { invoiceId, page, pageSize } = params;
+  const { invoiceId, page, pageSize, enabled = true } = params;
 
   const limit = invoiceId ? undefined : pageSize;
   const offset = invoiceId
@@ -24,6 +24,7 @@ export function useCreditNotes(
   const qs = buildQueryString({ invoiceId, limit, offset });
 
   return useQuery({
+    enabled,
     queryKey: queryKeys.creditNotes.list(invoiceId, page, pageSize),
     queryFn: async () => {
       const res = await api.get<CreditNoteListResponse>(`/credit-notes?${qs}`);

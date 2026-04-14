@@ -358,7 +358,7 @@ export default function PartyDialog({
                 ? "Opening balance is fixed after the first save and cannot be changed here."
                 : partyType === "SUPPLIER"
                   ? "Debit: advance paid to vendor · Credit: amount you owe the vendor"
-                  : "Debit: customer owes you · Credit: advance from customer"}
+                  : "Debit: customer owes you · Credit: customer advance (stored as a negative openingBalance). Credit opening usually creates an opening receipt — allocate it to invoices on the Receipts page; balance cards use the balance API only (no double-count with opening)."}
             </p>
           </div>
 

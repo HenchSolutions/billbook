@@ -133,6 +133,22 @@ export default function PartyLedgerPage() {
         isLoading={!balanceQuery.data && (balanceQuery.isPending || balanceQuery.isFetching)}
       />
 
+      {party.type === "CUSTOMER" && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Customer credit at opening creates an{" "}
+          <Link
+            href="/receipts"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            opening receipt
+          </Link>{" "}
+          — keep it unallocated until you{" "}
+          <span className="font-medium text-foreground">Allocate to invoices</span> (same as other
+          receipts). Ledger lines show OPENING_BALANCE; there is no separate cash payment for that
+          leg.
+        </p>
+      )}
+
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
           <span className="font-medium text-red-600 dark:text-red-400">Debit</span> and{" "}

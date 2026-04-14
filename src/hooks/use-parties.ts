@@ -155,7 +155,14 @@ export function useCreateParty() {
       const res = await api.post<Party>("/parties", data, generateIdempotencyKey());
       return res.data;
     },
-    onSuccess: () => invalidateQueryKeys(qc, [queryKeys.parties.root()]),
+    onSuccess: () => {
+      invalidateQueryKeys(qc, [
+        queryKeys.parties.root(),
+        /** Opening balance (e.g. customer advance) may create an implicit receipt. */
+        queryKeys.receipts.root(),
+        queryKeys.receipts.detailPrefix(),
+      ]);
+    },
   });
 }
 
@@ -172,6 +179,9 @@ export function useUpdateParty(id: number) {
         queryKeys.parties.detail(id),
         queryKeys.parties.ledger(id),
         queryKeys.parties.balance(id),
+        /** First-time or changed opening balance can create or adjust a receipt. */
+        queryKeys.receipts.root(),
+        queryKeys.receipts.detailPrefix(),
       ]);
     },
   });

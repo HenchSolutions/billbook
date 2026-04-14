@@ -32,6 +32,13 @@ function deepEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+function isEffectivelyZeroNumberish(value: unknown): boolean {
+  const n = parseFloat(String(value ?? "0").replace(/,/g, ""));
+  return !Number.isFinite(n) || Math.abs(n) < 1e-9;
+}
+
+const PAID_FROM_ADVANCE_KEYS = new Set(["paidFromAdvanceAmount", "paid_from_advance_amount"]);
+
 /** Human-readable label for API keys (camelCase, snake_case). */
 function formatAuditFieldLabel(key: string): string {
   const idSuffix = (word: string) => (word.toLowerCase() === "id" ? "ID" : word);
@@ -219,6 +226,13 @@ function getInvoiceUpdateDiff(
       if (key === "items") continue;
       if (!Object.prototype.hasOwnProperty.call(prev, key)) continue;
       if (IRRELEVANT_UPDATE_KEYS.has(key)) continue;
+      if (
+        PAID_FROM_ADVANCE_KEYS.has(key) &&
+        isEffectivelyZeroNumberish(curr[key]) &&
+        isEffectivelyZeroNumberish(prev[key])
+      ) {
+        continue;
+      }
       if (deepEqual(prev[key], curr[key])) continue;
       changedScalarKeys.push(key);
       scalarLabels.push(formatAuditFieldLabel(key));
@@ -521,9 +535,16 @@ export function getAuditChangeHighlights(
       parts.push(lineHighlights.join(" • "));
     }
 
-    const scalarEntries = Object.entries(actualChanges).filter(([key]) => {
+    const scalarEntries = Object.entries(actualChanges).filter(([key, value]) => {
       if (key === "items") return false;
       if (HIDDEN_HIGHLIGHT_KEYS.has(key)) return false;
+      if (
+        PAID_FROM_ADVANCE_KEYS.has(key) &&
+        isEffectivelyZeroNumberish(value) &&
+        isEffectivelyZeroNumberish((ctx.previousChanges as Record<string, unknown> | null)?.[key])
+      ) {
+        return false;
+      }
       if (!Object.prototype.hasOwnProperty.call(ctx.previousChanges ?? {}, key)) return false;
       return !deepEqual((ctx.previousChanges as Record<string, unknown>)[key], actualChanges[key]);
     });
@@ -537,10 +558,13 @@ export function getAuditChangeHighlights(
     if (parts.length > 0) return parts.join(" • ");
   }
 
-  const entries = Object.entries(actualChanges);
+  const entries = Object.entries(actualChanges).filter(([key, value]) => {
+    if (HIDDEN_HIGHLIGHT_KEYS.has(key)) return false;
+    if (PAID_FROM_ADVANCE_KEYS.has(key) && isEffectivelyZeroNumberish(value)) return false;
+    return true;
+  });
 
   const readableEntries = entries
-    .filter(([key]) => !HIDDEN_HIGHLIGHT_KEYS.has(key))
     .slice(0, 4)
     .map(([key, value]) => `${formatAuditFieldLabel(key)}: ${formatEntryValue(key, value)}`);
 
