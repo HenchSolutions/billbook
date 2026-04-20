@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -53,8 +54,16 @@ import {
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 import { normalizeMinStockThresholdValue } from "@/lib/item-api";
 import { formatIgstFromCgstSgst } from "@/lib/invoice-create";
+import {
+  isDuplicateItemName,
+  isDuplicateItemNameApiError,
+  ITEM_NAME_DUPLICATE_ERROR,
+  ITEM_NAME_REQUIRED_ERROR,
+  normalizeItemName,
+} from "@/lib/item-name";
+import { queryKeys } from "@/lib/query-keys";
 import { capitaliseWords } from "@/lib/utils";
-import type { Item, Category, CreateItemRequest, Unit } from "@/types/item";
+import type { Item, Category, CreateItemRequest, ItemListResponse, Unit } from "@/types/item";
 
 function defaultUnitForType(type: "STOCK" | "SERVICE"): string {
   return type === "SERVICE" ? "hr" : "nos";
@@ -62,7 +71,7 @@ function defaultUnitForType(type: "STOCK" | "SERVICE"): string {
 
 const schema = z
   .object({
-    name: z.string().trim().min(1, "Name is required"),
+    name: z.string().trim().min(1, ITEM_NAME_REQUIRED_ERROR),
     type: z.enum(["STOCK", "SERVICE"]),
     isActive: z.boolean(),
     hsnCode,
@@ -193,6 +202,7 @@ export default function ItemDialog({
   onSuccess,
   canManageUnits = true,
 }: ItemDialogProps) {
+  const queryClient = useQueryClient();
   const isEdit = !!item;
   const createMutation = useCreateItem();
   const updateMutation = useUpdateItem(item?.id ?? 0);
@@ -210,6 +220,8 @@ export default function ItemDialog({
     setValue,
     getValues,
     watch,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -325,10 +337,32 @@ export default function ItemDialog({
   };
 
   const onSubmit = async (data: FormData) => {
+    const normalizedName = normalizeItemName(data.name);
+    if (!normalizedName) {
+      setError("name", { type: "manual", message: ITEM_NAME_REQUIRED_ERROR });
+      return;
+    }
+
     if (!category || !category.id || category.id <= 0) {
       setShowCategoryError(true);
       showErrorToast(null, "Category is required");
       return;
+    }
+
+    const listQueries = queryClient.getQueriesData<ItemListResponse>({
+      queryKey: queryKeys.items.listPrefix(),
+    });
+    const cachedItemsById = new Map<number, Item>();
+    listQueries.forEach(([, listData]) => {
+      const listItems = Array.isArray(listData?.items) ? listData.items : [];
+      listItems.forEach((existingItem) => {
+        cachedItemsById.set(existingItem.id, existingItem);
+      });
+    });
+
+    const cachedItems = Array.from(cachedItemsById.values());
+    if (cachedItems.length > 0 && isDuplicateItemName(normalizedName, cachedItems, item?.id)) {
+      setError("name", { type: "manual", message: ITEM_NAME_DUPLICATE_ERROR });
     }
 
     await submitItem(data);
@@ -343,8 +377,14 @@ export default function ItemDialog({
       return;
     }
 
+    const normalizedName = normalizeItemName(data.name);
+    if (!normalizedName) {
+      setError("name", { type: "manual", message: ITEM_NAME_REQUIRED_ERROR });
+      return;
+    }
+
     const payload: CreateItemRequest = {
-      name: capitaliseWords(data.name),
+      name: normalizedName,
       type: data.type,
       hsnCode: data.hsnCode || null,
       sacCode: data.sacCode || null,
@@ -379,6 +419,10 @@ export default function ItemDialog({
       }
       onOpenChange(false);
     } catch (err) {
+      if (isDuplicateItemNameApiError(err)) {
+        setError("name", { type: "manual", message: ITEM_NAME_DUPLICATE_ERROR });
+        return;
+      }
       showErrorToast(err, isEdit ? "Failed to update item" : "Failed to create item");
     }
   };
@@ -506,7 +550,13 @@ export default function ItemDialog({
                     <Input
                       className="placeholder:opacity-80"
                       aria-invalid={!!errors.name}
-                      {...register("name")}
+                      {...register("name", {
+                        onChange: () => {
+                          if (errors.name?.message === ITEM_NAME_DUPLICATE_ERROR) {
+                            clearErrors("name");
+                          }
+                        },
+                      })}
                       placeholder="Item or service name"
                     />
                     {errors.name && <FieldError>{errors.name.message}</FieldError>}
