@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   type ReactNode,
 } from "react";
@@ -366,26 +367,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated,
-        requestLoginOtp,
-        verifyLoginOtp,
-        requestSignupOtp,
-        verifySignupOtp,
-        adminLogin,
-        refreshSession,
-        logout,
-        accessBlockedMessage,
-        clearAccessBlocked,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const contextValue = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated,
+      requestLoginOtp,
+      verifyLoginOtp,
+      requestSignupOtp,
+      verifySignupOtp,
+      adminLogin,
+      refreshSession,
+      logout,
+      accessBlockedMessage,
+      clearAccessBlocked,
+    }),
+    [
+      user,
+      isLoading,
+      isAuthenticated,
+      requestLoginOtp,
+      verifyLoginOtp,
+      requestSignupOtp,
+      verifySignupOtp,
+      adminLogin,
+      refreshSession,
+      logout,
+      accessBlockedMessage,
+      clearAccessBlocked,
+    ],
   );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

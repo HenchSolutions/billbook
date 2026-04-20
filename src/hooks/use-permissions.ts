@@ -20,12 +20,15 @@ export function usePermissions() {
     [user, permissionSet],
   );
 
-  return {
-    isOwner: user?.role === "OWNER",
-    isStaff: user?.role === "STAFF",
-    role: user?.role as Role | undefined,
-    user,
-    can,
-    permissionSet,
-  };
+  return useMemo(
+    () => ({
+      isOwner: user?.role === "OWNER",
+      isStaff: user?.role === "STAFF",
+      role: user?.role as Role | undefined,
+      user,
+      can,
+      permissionSet,
+    }),
+    [user, can, permissionSet],
+  );
 }

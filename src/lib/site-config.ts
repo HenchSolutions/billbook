@@ -1,6 +1,11 @@
+import { env } from "@/lib/env";
+
 const defaultSiteUrl = "https://billbook-henchsolutions.vercel.app";
 
-const normalizedEnvUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+function resolvedSiteUrl(): string {
+  const fromEnv = env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  return fromEnv && fromEnv.length > 0 ? fromEnv : defaultSiteUrl;
+}
 
 export const siteConfig = {
   name: "BillBook",
@@ -8,7 +13,7 @@ export const siteConfig = {
   title: "BillBook \u2013 Invoicing & Billing Management",
   description:
     "BillBook is invoicing and billing software for small businesses in India: GST invoices, credit notes, receipts, stock, customer and vendor balances, CSV reports, GST / Tax HTML export, and audit logs.",
-  url: normalizedEnvUrl && normalizedEnvUrl.length > 0 ? normalizedEnvUrl : defaultSiteUrl,
+  url: resolvedSiteUrl(),
   keywords: [
     "BillBook",
     "GST invoice software India",
@@ -42,6 +47,6 @@ export const siteConfig = {
 const MARKETING_CONTACT_FALLBACK = "it@henchsolutions.com";
 
 export function marketingContactEmail(): string {
-  const v = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
+  const v = env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
   return v && v.length > 0 ? v : MARKETING_CONTACT_FALLBACK;
 }

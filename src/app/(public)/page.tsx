@@ -58,6 +58,7 @@ function buildLandingJsonLd(contactEmail: string) {
         "@type": "SoftwareApplication",
         "@id": `${siteConfig.url}/#app`,
         name: siteConfig.name,
+        url: siteConfig.url,
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description: siteConfig.description,

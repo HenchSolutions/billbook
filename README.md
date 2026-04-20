@@ -83,7 +83,7 @@ bun dev
 
 ### Environment variables
 
-This app expects API/auth configuration via `.env`. Start from `.env.example` and update values as needed.
+This app expects API/auth configuration via `.env`. Start from `.env.example` and update values as needed. `NEXT_PUBLIC_API_BASE_URL` is required; optional `NEXT_PUBLIC_*` entries are validated when set (see `src/lib/env.ts`). For production SEO and canonical URLs, set **`NEXT_PUBLIC_SITE_URL`** to your public `https://…` origin.
 
 ## Notes
 

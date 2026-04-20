@@ -66,6 +66,23 @@ export function publicPageMetadata(opts: {
   };
 }
 
+/**
+ * Auth/marketing shell routes that immediately redirect (e.g. `/login` → `/?auth=login`).
+ * Keeps titles consistent and avoids indexing redirect endpoints.
+ */
+export function authRedirectPageMetadata(pageTitle: string): Metadata {
+  const description = `${pageTitle} — ${siteConfig.name}. You will be redirected to complete this action.`;
+  return {
+    title: { absolute: `${pageTitle} | ${siteConfig.name}` },
+    description,
+    robots: {
+      index: false,
+      follow: false,
+      googleBot: { index: false, follow: false },
+    },
+  };
+}
+
 /** Home page: absolute title (no template suffix). */
 export function homePageMetadata(homeDescription: string): Metadata {
   return {

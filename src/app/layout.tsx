@@ -4,8 +4,11 @@ import "../index.css";
 import Providers from "./providers";
 import { siteConfig } from "@/lib/site-config";
 import { defaultOgImages, defaultTwitterImageUrl } from "@/lib/seo-metadata";
+import { env } from "@/lib/env";
 
-const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+const apiOrigin = new URL(env.NEXT_PUBLIC_API_BASE_URL).origin;
+
+const googleSiteVerification = env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -28,7 +31,6 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
-  manifest: "/manifest.json",
   icons: {
     icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
     apple: [{ url: "/logo.svg" }],
@@ -60,6 +62,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-IN">
+      <head>
+        <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={apiOrigin} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

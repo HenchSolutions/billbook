@@ -40,6 +40,7 @@ export default function robots(): MetadataRoute.Robots {
           "/settings",
           "/stock",
           "/tax",
+          "/team",
           "/vendors",
           "/receipts",
           "/payments",

@@ -18,11 +18,9 @@ const entries: Array<{
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
+  // Omit `lastModified` unless tied to real content updates — a build-timestamp would churn on every deploy.
   return entries.map(({ path, changeFrequency, priority }) => ({
     url: `${origin}${path}`,
-    lastModified: now,
     changeFrequency,
     priority,
   }));

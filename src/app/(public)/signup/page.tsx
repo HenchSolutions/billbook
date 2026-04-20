@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { authRedirectPageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export const metadata = authRedirectPageMetadata("Sign up");
 
 export default function SignupRedirectPage() {
   redirect("/?auth=signup");
