@@ -3,7 +3,6 @@
 import { useCallback, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Package, Layers } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import SearchInput from "@/components/SearchInput";
@@ -13,7 +12,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { StockOverviewCards } from "@/components/items/StockOverviewCards";
 import { StockAlertsBanner } from "@/components/items/StockAlertsBanner";
 import { StockEntryGrid } from "@/components/items/StockEntryGrid";
-import { StockReportTable } from "@/components/items/StockReportTable";
 import { StockEntriesTable } from "@/components/items/StockEntriesTable";
 import AdjustStockDialog from "@/components/dialogs/AdjustStockDialog";
 import EditStockEntryDialog from "@/components/dialogs/EditStockEntryDialog";
@@ -29,11 +27,9 @@ import { useAlerts, useMarkAlertRead } from "@/hooks/use-alerts";
 import type { CreateStockEntryRequest, StockEntry, UpdateStockEntryRequest } from "@/types/item";
 import type { Party } from "@/types/party";
 import { showSuccessToast, showErrorToast } from "@/lib/toast-helpers";
-import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/use-permissions";
 import { P } from "@/constants/permissions";
-
-type ListViewMode = "item" | "stock";
+import { PAGE } from "@/constants/page-access";
 
 export default function Stock() {
   const { can } = usePermissions();
@@ -41,9 +37,10 @@ export default function Stock() {
   const canAdjustStock = can(P.item.adjust_stock);
   const canSeeAlerts = can(P.alerts.view);
   const canManageAlerts = can(P.alerts.manage);
+  const canStockOverview = can(PAGE.stock_overview);
+  const canStockLedger = can(PAGE.stock_ledger);
   const searchParams = useSearchParams();
   const stockView = searchParams.get("view");
-  const [listViewMode, setListViewMode] = useState<ListViewMode>("stock");
   const [adjustItemId, setAdjustItemId] = useState<number | null>(null);
   const [adjustItemName, setAdjustItemName] = useState<string>("");
   const [adjustStockEntryId, setAdjustStockEntryId] = useState<number | undefined>(undefined);
@@ -54,13 +51,15 @@ export default function Stock() {
   const debouncedSearch = useDebounce(search, 300);
 
   const { data: itemsData, isPending: itemsPending, error: itemsError } = useItems({ limit: 100 });
-  const { data: stockDataForCards, isPending: stockCardsPending } = useStockList({ limit: 1 });
-  const {
-    data: stockData,
-    isPending: stockPending,
-    error: stockError,
-  } = useStockList({ limit: 200, search: debouncedSearch || undefined });
-  const { data: alertsData } = useAlerts(true, canSeeAlerts);
+  const { data: stockDataForCards, isPending: stockCardsPending } = useStockList({
+    limit: 1,
+    enabled: canStockOverview,
+  });
+  const { data: stockData, error: stockError } = useStockList({
+    limit: 200,
+    search: debouncedSearch || undefined,
+  });
+  const { data: alertsData } = useAlerts(true, canSeeAlerts, { limit: 500 });
   const markAlertRead = useMarkAlertRead();
   const {
     data: stockEntriesData,
@@ -85,6 +84,11 @@ export default function Stock() {
       ? (items.find((item) => item.id === prefillItemId) ?? null)
       : null;
   const showAddStockView = canManageStock && (stockView === "add" || prefillItemId > 0);
+
+  const { data: stockDataForLowFlags } = useStockList({
+    limit: 500,
+    enabled: !showAddStockView,
+  });
 
   const stockEntries = useMemo(
     (): StockEntry[] => stockEntriesData?.entries ?? [],
@@ -143,15 +147,22 @@ export default function Stock() {
   }, [stockData?.stock, stockEntries]);
   const activeSuppliers = useMemo(() => suppliersData?.parties ?? [], [suppliersData?.parties]);
 
-  const summary = stockDataForCards?.summary ?? stockData?.summary;
+  const summary = (canStockOverview ? stockDataForCards?.summary : undefined) ?? stockData?.summary;
   const totalPurchasedValue = summary?.stockValue?.totalPurchasedValue ?? "0";
   const totalItems = summary?.stockValue?.totalItems ?? 0;
   const totalQuantity = summary?.stockValue?.totalQuantity ?? "0";
   const lowStockCount = summary?.lowStock?.totalItems ?? 0;
   const lowStockQuantity = summary?.lowStock?.totalQuantity;
   const totalSellingValue = summary?.stockValue?.totalAmount ?? "0";
-  const stockList = stockData?.stock ?? [];
   const unreadAlerts = useMemo(() => alertsData?.alerts ?? [], [alertsData?.alerts]);
+
+  const lowStockItemIds = useMemo(() => {
+    const s = new Set<number>();
+    for (const row of stockDataForLowFlags?.stock ?? []) {
+      if (row.isLowStock === true) s.add(row.itemId);
+    }
+    return s;
+  }, [stockDataForLowFlags?.stock]);
 
   const handleStockSubmit = useCallback(
     async (entries: CreateStockEntryRequest[]): Promise<StockEntry[]> => {
@@ -211,8 +222,6 @@ export default function Stock() {
     setAdjustStockEntryId(undefined);
   }, []);
 
-  const listPending = listViewMode === "item" ? stockPending : entriesPending;
-
   return (
     <div className="page-container animate-fade-in">
       <PageHeader
@@ -220,28 +229,30 @@ export default function Stock() {
         description={
           showAddStockView
             ? "Add new stock entries for your items"
-            : "View stock by item or by stock entry, add purchases, and adjust quantities"
+            : "View stock entries, add purchases, and adjust quantities. Summarize by item in Reports → Item register."
         }
       />
 
-      <div className="mb-6">
-        {stockCardsPending && !stockDataForCards ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-            <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-            <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-          </div>
-        ) : (
-          <StockOverviewCards
-            totalPurchasedValue={totalPurchasedValue}
-            totalItems={totalItems}
-            totalQuantity={totalQuantity}
-            lowStockCount={lowStockCount}
-            lowStockQuantity={lowStockQuantity}
-            totalSellingValue={totalSellingValue}
-          />
-        )}
-      </div>
+      {canStockOverview ? (
+        <div className="mb-6">
+          {stockCardsPending && !stockDataForCards ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
+            </div>
+          ) : (
+            <StockOverviewCards
+              totalPurchasedValue={totalPurchasedValue}
+              totalItems={totalItems}
+              totalQuantity={totalQuantity}
+              lowStockCount={lowStockCount}
+              lowStockQuantity={lowStockQuantity}
+              totalSellingValue={totalSellingValue}
+            />
+          )}
+        </div>
+      ) : null}
 
       {!showAddStockView && (
         <section className="space-y-6">
@@ -268,11 +279,7 @@ export default function Stock() {
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-base font-semibold">Stock list</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {listViewMode === "item"
-                      ? "One row per item (total quantity and value)."
-                      : "One row per stock entry."}
-                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">One row per stock entry.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <SearchInput
@@ -281,62 +288,19 @@ export default function Stock() {
                     placeholder="Search stock..."
                     className="min-w-[180px]"
                   />
-                  <div
-                    className="flex rounded-lg border border-border bg-muted/30 p-0.5"
-                    role="tablist"
-                    aria-label="List view"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
-                        listViewMode === "stock"
-                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                      onClick={() => setListViewMode("stock")}
-                      aria-pressed={listViewMode === "stock"}
-                    >
-                      <Layers className="h-3.5 w-3.5" />
-                      By stock
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
-                        listViewMode === "item"
-                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                      onClick={() => setListViewMode("item")}
-                      aria-pressed={listViewMode === "item"}
-                    >
-                      <Package className="h-3.5 w-3.5" />
-                      By item
-                    </Button>
-                  </div>
                 </div>
               </div>
-              <ErrorBanner
-                error={listViewMode === "stock" ? entriesError : undefined}
-                fallbackMessage="Failed to load stock entries"
-              />
-              {listPending ? (
+              <ErrorBanner error={entriesError} fallbackMessage="Failed to load stock entries" />
+              {entriesPending ? (
                 <TableSkeleton rows={5} />
-              ) : listViewMode === "item" ? (
-                <StockReportTable
-                  rows={stockList}
-                  items={items}
-                  onAdjust={canAdjustStock ? openAdjustStock : undefined}
-                />
               ) : (
                 <StockEntriesTable
                   entries={stockEntries}
                   items={items}
+                  lowStockItemIds={lowStockItemIds}
                   onAdjust={canAdjustStock ? openAdjustStock : undefined}
                   onEditEntry={canManageStock ? openEditStockEntry : undefined}
+                  showStockLedger={canStockLedger}
                 />
               )}
             </div>

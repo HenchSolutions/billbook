@@ -148,9 +148,9 @@ export function invoiceTypeSupportsDocumentShareLog(type: InvoiceType): boolean 
 export interface InvoiceTypeCreateCopy {
   /** Page description (create screen). */
   pageDescription: string;
-  /** First card: party + discount (e.g. "Vendor & bill details"). */
+  /** First card: party + address (no overlap with document/dates card title). */
   partyCardTitle: string;
-  /** Second card: dates + notes (e.g. "Bill details"). */
+  /** Second card: document no., dates, and bill-specific fields. */
   detailsCardTitle: string;
   /** Label for party field (e.g. "Vendor", "Customer"). */
   partyLabel: string;
@@ -179,7 +179,7 @@ export interface InvoiceTypeCreateCopy {
 const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
   SALE_INVOICE: {
     pageDescription: "Create invoices for what you're selling to customers. Pick items from stock.",
-    partyCardTitle: "Customer & invoice details",
+    partyCardTitle: "Customer & delivery",
     detailsCardTitle: "Invoice details",
     partyLabel: "Customer",
     partyPlaceholder: "customer",
@@ -196,7 +196,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
   PURCHASE_INVOICE: {
     pageDescription:
       "Record what you received from the vendor. Add any item from the bill — you can add stock for it later if needed.",
-    partyCardTitle: "Vendor & invoice details",
+    partyCardTitle: "Vendor & delivery",
     detailsCardTitle: "Invoice details",
     partyLabel: "Vendor",
     partyPlaceholder: "vendor",
@@ -207,13 +207,13 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
     batchLabel: "Item / Batch",
     batchPlaceholder: "Search catalog items",
     itemSectionHelper:
-      "Select a catalog item. Name, HSN or SAC, and GST rates come from the item master. Enter quantity and purchase price. Line tax, net, and selling price update automatically when selling price margin (%) is set above.",
+      "Catalog items carry HSN/SAC and GST from the master. Enter qty and purchase rate; selling price uses the margin above if you leave it blank on a line.",
     summaryTitle: "Bill summary",
     loadErrorMessage: "Failed to load items. Check connection and try again.",
   },
   SALE_RETURN: {
     pageDescription: "Record items returned by the customer. Select from existing stock.",
-    partyCardTitle: "Customer & return details",
+    partyCardTitle: "Customer & delivery",
     detailsCardTitle: "Return details",
     partyLabel: "Customer",
     partyPlaceholder: "customer",
@@ -229,7 +229,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
   },
   PURCHASE_RETURN: {
     pageDescription: "Record items returned to the vendor. Select from existing stock.",
-    partyCardTitle: "Vendor & return details",
+    partyCardTitle: "Vendor & delivery",
     detailsCardTitle: "Return details",
     partyLabel: "Vendor",
     partyPlaceholder: "vendor",

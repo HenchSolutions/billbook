@@ -1,7 +1,5 @@
 "use client";
 
-import { BusinessIdentity } from "../BusinessIdentity";
-import { Skeleton } from "@/components/ui/skeleton";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import ItemDialog from "@/components/dialogs/ItemDialog";
@@ -13,7 +11,6 @@ import { InvoiceTotalsSummary } from "@/components/invoices/invoice-create/Invoi
 import { ResizableNotesSummaryRow } from "@/components/invoices/invoice-create/ResizableNotesSummaryRow";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useBusinessProfile } from "@/hooks/use-business";
 import { usePermissions } from "@/hooks/use-permissions";
 import { P } from "@/constants/permissions";
 import { isPurchaseVendorBillMetaType } from "@/lib/invoice";
@@ -36,7 +33,6 @@ export function InvoiceCreatePage({
     editInvoiceId,
   });
   const copy = state.createCopy;
-  const { data: businessProfile } = useBusinessProfile();
   const { can } = usePermissions();
   const showNumberRow =
     state.isEditMode || state.isNextInvoiceNumberPending || Boolean(state.nextInvoiceNumber);
@@ -50,8 +46,13 @@ export function InvoiceCreatePage({
     state.isEditMode && editInvoiceId != null
       ? "Back to invoice"
       : `Back to ${state.pageMeta.label}`;
+  const documentNumberLabel =
+    initialType === "SALE_RETURN" || initialType === "PURCHASE_RETURN"
+      ? "Return no."
+      : "Invoice no.";
+
   return (
-    <div className="page-container max-w-[96rem] animate-fade-in space-y-5">
+    <div className="page-container max-w-[96rem] animate-fade-in space-y-4">
       <PageHeader
         title={state.isEditMode ? `Edit ${state.pageMeta.label}` : `Create ${state.pageMeta.label}`}
         description={
@@ -62,25 +63,6 @@ export function InvoiceCreatePage({
         backHref={backHref}
         backLabel={backLabel}
       />
-
-      {showNumberRow && (
-        <div className="flex items-center gap-4">
-          <BusinessIdentity
-            name={businessProfile?.name}
-            logoUrl={businessProfile?.logoUrl}
-            size="md"
-            showName={!businessProfile?.logoUrl}
-            nameClassName="text-sm font-semibold text-foreground"
-          />
-          <div>
-            {numberPending ? (
-              <Skeleton className="mt-1 h-8 w-48" />
-            ) : (
-              <h2 className="text-2xl font-bold tracking-tight">{displayNumber}</h2>
-            )}
-          </div>
-        </div>
-      )}
 
       <ErrorBanner error={state.stockEntriesError} fallbackMessage={copy.loadErrorMessage} />
 
@@ -134,6 +116,12 @@ export function InvoiceCreatePage({
         onPaymentTermsDaysChange={
           isPurchaseVendorBillMetaType(initialType) ? state.setPaymentTermsDays : undefined
         }
+        invoiceDocumentBanner={{
+          visible: showNumberRow,
+          loading: numberPending,
+          documentNumber: displayNumber ?? undefined,
+          numberLabel: documentNumberLabel,
+        }}
       />
 
       <LineEditorSection
@@ -190,7 +178,7 @@ export function InvoiceCreatePage({
 
       <ResizableNotesSummaryRow
         notes={
-          <div className="ml-1 mt-4 w-full space-y-2">
+          <div className="w-full space-y-2 pt-1">
             <Label htmlFor="notes" className="text-sm font-medium text-foreground">
               Notes (optional)
             </Label>

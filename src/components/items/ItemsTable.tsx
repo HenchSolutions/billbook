@@ -8,7 +8,8 @@ import { getItemCategoryDisplay, getItemTaxDisplay, isServiceType } from "@/type
 interface ItemsTableProps {
   items: Item[];
   onEdit: (item: Item) => void;
-  onViewLedger: (id: number) => void;
+  /** When omitted, stock ledger navigation and the history action are hidden. */
+  onViewLedger?: (id: number) => void;
 }
 
 export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
@@ -46,9 +47,13 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
               key={item.id}
               className={cn(
                 "group transition-colors",
-                isServiceType(item.type) ? "cursor-default" : "cursor-pointer hover:bg-muted/30",
+                isServiceType(item.type) || !onViewLedger
+                  ? "cursor-default"
+                  : "cursor-pointer hover:bg-muted/30",
               )}
-              onClick={() => !isServiceType(item.type) && onViewLedger(item.id)}
+              onClick={
+                !isServiceType(item.type) && onViewLedger ? () => onViewLedger(item.id) : undefined
+              }
             >
               <td className="px-4 py-3.5">
                 <span className="truncate font-medium text-foreground" title={item.name}>
@@ -87,7 +92,12 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
               </td>
               <td className="px-3 py-3.5 text-right align-middle">
                 <div
-                  className="grid grid-cols-[2rem_2rem] items-center justify-end gap-1.5"
+                  className={cn(
+                    "grid items-center justify-end gap-1.5",
+                    onViewLedger && !isServiceType(item.type)
+                      ? "grid-cols-[2rem_2rem]"
+                      : "grid-cols-[2rem]",
+                  )}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Button
@@ -100,7 +110,7 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  {!isServiceType(item.type) ? (
+                  {!isServiceType(item.type) && onViewLedger ? (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -111,9 +121,7 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                     >
                       <History className="h-3.5 w-3.5" />
                     </Button>
-                  ) : (
-                    <div className="h-8 w-8" aria-hidden />
-                  )}
+                  ) : null}
                 </div>
               </td>
             </tr>

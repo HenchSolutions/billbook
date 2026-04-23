@@ -181,7 +181,8 @@ export const queryKeys = {
 
   alerts: {
     root: () => ["alerts"] as const,
-    list: (unreadOnly: boolean) => ["alerts", unreadOnly] as const,
+    list: (unreadOnly: boolean, limit?: number) =>
+      ["alerts", unreadOnly, limit ?? "default"] as const,
   },
 
   creditNotes: {

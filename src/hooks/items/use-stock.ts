@@ -108,6 +108,7 @@ export function useCreateStockEntry() {
         queryKeys.items.stockEntriesRoot(),
         queryKeys.items.stockPrefix(),
         queryKeys.items.root(),
+        queryKeys.alerts.root(),
       ]);
     },
   });
@@ -125,6 +126,7 @@ export function useUpdateStockEntry() {
         queryKeys.items.stockEntriesRoot(),
         queryKeys.items.stockPrefix(),
         queryKeys.items.root(),
+        queryKeys.alerts.root(),
       ]);
     },
   });
@@ -136,15 +138,18 @@ export function useStockList(params?: {
   search?: string;
   limit?: number;
   offset?: number;
+  enabled?: boolean;
 }) {
+  const { enabled, ...listKeyParams } = params ?? {};
   const qs = new URLSearchParams();
-  if (params?.categoryId != null) qs.set("categoryId", String(params.categoryId));
-  if (params?.search) qs.set("search", params.search ?? "");
-  if (params?.limit != null) qs.set("limit", String(params.limit));
-  if (params?.offset != null) qs.set("offset", String(params.offset));
+  if (listKeyParams.categoryId != null) qs.set("categoryId", String(listKeyParams.categoryId));
+  if (listKeyParams.search) qs.set("search", listKeyParams.search ?? "");
+  if (listKeyParams.limit != null) qs.set("limit", String(listKeyParams.limit));
+  if (listKeyParams.offset != null) qs.set("offset", String(listKeyParams.offset));
   const query = qs.toString();
   return useQuery({
-    queryKey: queryKeys.items.stockList(params ?? {}),
+    queryKey: queryKeys.items.stockList(listKeyParams),
+    enabled: enabled !== false,
     queryFn: async () => {
       const res = await api.get<StockListResponse>(
         `${ITEMS_API_BASE}/stock${query ? `?${query}` : ""}`,
@@ -175,6 +180,7 @@ export function useAdjustStock(itemId: number) {
         queryKeys.items.stockEntryMapPrefix(),
         queryKeys.items.stockEntryDetailPrefix(),
         queryKeys.items.ledger(itemId),
+        queryKeys.alerts.root(),
       ]);
       void qc.invalidateQueries({
         predicate: (q) =>

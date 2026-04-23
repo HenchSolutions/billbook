@@ -26,10 +26,12 @@ import type { Item } from "@/types/item";
 import { Switch } from "@/components/ui/switch";
 import { usePermissions } from "@/hooks/use-permissions";
 import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 
 export default function ItemsPage() {
   const { can } = usePermissions();
   const canCreateItem = can(P.item.create);
+  const canStockLedger = can(PAGE.stock_ledger);
   const router = useRouter();
   const params = useParams<{ itemId?: string | string[] }>();
   const itemId = Array.isArray(params?.itemId) ? params.itemId[0] : params?.itemId;
@@ -143,7 +145,9 @@ export default function ItemsPage() {
         <ItemsTable
           items={filteredItems}
           onEdit={openEdit}
-          onViewLedger={(id) => router.push(`/items/${id}#stock-ledger`)}
+          {...(canStockLedger
+            ? { onViewLedger: (id: number) => router.push(`/items/${id}#stock-ledger`) }
+            : {})}
         />
       )}
 

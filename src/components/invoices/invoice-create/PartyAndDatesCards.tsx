@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -52,6 +53,13 @@ interface PartyAndDatesCardsProps {
   partyErrorText?: string | null;
   /** Inline validation under selling margin (purchase types). */
   sellingMarginErrorText?: string | null;
+  /** Document number only (business name is in the app shell; keeps this card compact). */
+  invoiceDocumentBanner?: {
+    visible: boolean;
+    loading: boolean;
+    documentNumber?: string;
+    numberLabel?: string;
+  };
 }
 
 export function PartyAndDatesCards({
@@ -79,6 +87,7 @@ export function PartyAndDatesCards({
   onPaymentTermsDaysChange,
   partyErrorText,
   sellingMarginErrorText,
+  invoiceDocumentBanner,
 }: PartyAndDatesCardsProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
   const todayIso = toISODateString(new Date());
@@ -115,7 +124,7 @@ export function PartyAndDatesCards({
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-base">{copy.partyCardTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -187,30 +196,8 @@ export function PartyAndDatesCards({
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{copy.detailsCardTitle}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <DateField
-              label={invoiceDateLabel}
-              value={invoiceDate}
-              onChange={onInvoiceDateChange}
-              required
-            />
-            <DateField
-              label="Due Date"
-              value={dueDate}
-              onChange={onDueDateChange}
-              minDate={todayIso}
-            />
-          </div>
-          {showVendorBillFields && (
-            <div className="grid gap-3 sm:grid-cols-2">
+          {showVendorBillFields ? (
+            <div className="grid gap-3 border-t border-border/60 pt-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="original-bill-no" required>
                   Original bill no.
@@ -234,23 +221,67 @@ export function PartyAndDatesCards({
                 required
               />
             </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{copy.detailsCardTitle}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {invoiceDocumentBanner?.visible ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {invoiceDocumentBanner.numberLabel ?? "Document no."}
+                </span>
+                <span className="text-muted-foreground/45" aria-hidden>
+                  -
+                </span>
+                {invoiceDocumentBanner.loading ? (
+                  <Skeleton className="h-6 w-36 rounded-md" />
+                ) : (
+                  <span className="text-base font-semibold tabular-nums tracking-tight text-foreground">
+                    {invoiceDocumentBanner.documentNumber ?? "—"}
+                  </span>
+                )}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <DateField
+                  label={invoiceDateLabel}
+                  value={invoiceDate}
+                  onChange={onInvoiceDateChange}
+                  required
+                />
+                <DateField
+                  label="Due Date"
+                  value={dueDate}
+                  onChange={onDueDateChange}
+                  minDate={todayIso}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <DateField
+                label={invoiceDateLabel}
+                value={invoiceDate}
+                onChange={onInvoiceDateChange}
+                required
+              />
+              <DateField
+                label="Due Date"
+                value={dueDate}
+                onChange={onDueDateChange}
+                minDate={todayIso}
+              />
+            </div>
           )}
-          {(showVendorBillFields || showSellingPriceMargin) && (
-            <div className="grid gap-x-3 gap-y-2 sm:grid-cols-2">
-              {showVendorBillFields && (
-                <Label
-                  htmlFor="payment-terms-days"
-                  className={cn("leading-snug", !showSellingPriceMargin && "sm:col-span-2")}
-                >
-                  Payment terms (days)
-                </Label>
-              )}
-              {showSellingPriceMargin && (
-                <Label htmlFor="selling-price-margin" className="leading-snug" required>
-                  Selling margin (%)
-                </Label>
-              )}
-              {showVendorBillFields && (
+          {showVendorBillFields && showSellingPriceMargin ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="payment-terms-days">Payment terms (days)</Label>
                 <Input
                   id="payment-terms-days"
                   type="text"
@@ -258,49 +289,88 @@ export function PartyAndDatesCards({
                   placeholder="e.g. 30"
                   value={paymentTermsDays}
                   onChange={(e) => onPaymentTermsDaysChange(e.target.value)}
-                  className={cn("h-8 tabular-nums", !showSellingPriceMargin && "sm:col-span-2")}
+                  className="h-8 w-full tabular-nums"
                   autoComplete="off"
                 />
-              )}
-              {showSellingPriceMargin && (
-                <div className="space-y-1.5">
-                  <Input
-                    id="selling-price-margin"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 20"
-                    value={sellingPriceMarginPercent}
-                    onChange={(e) => onSellingPriceMarginChange(e.target.value)}
-                    aria-invalid={Boolean(sellingMarginErrorText)}
-                    aria-describedby={
-                      sellingMarginErrorText ? "selling-price-margin-error" : undefined
-                    }
-                    className={cn(
-                      "h-8 tabular-nums",
-                      sellingMarginErrorText &&
-                        "border-destructive focus-visible:ring-destructive/40",
-                    )}
-                    autoComplete="off"
-                  />
-                  {sellingMarginErrorText ? (
-                    <p
-                      id="selling-price-margin-error"
-                      role="alert"
-                      className="text-sm text-destructive"
-                    >
-                      {sellingMarginErrorText}
-                    </p>
-                  ) : null}
-                </div>
-              )}
-              {showSellingPriceMargin && (
-                <p className="text-xs text-muted-foreground sm:col-span-2">
-                  Required. Prefilled from business settings when a default is saved. Used when a
-                  line has no selling price; after save, the invoice shows the effective margin.
-                </p>
-              )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="selling-price-margin" required>
+                  Selling margin (%)
+                </Label>
+                <Input
+                  id="selling-price-margin"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="e.g. 20"
+                  value={sellingPriceMarginPercent}
+                  onChange={(e) => onSellingPriceMarginChange(e.target.value)}
+                  aria-invalid={Boolean(sellingMarginErrorText)}
+                  aria-describedby={
+                    sellingMarginErrorText ? "selling-price-margin-error" : undefined
+                  }
+                  className={cn(
+                    "h-8 w-full tabular-nums",
+                    sellingMarginErrorText &&
+                      "border-destructive focus-visible:ring-destructive/40",
+                  )}
+                  autoComplete="off"
+                />
+                {sellingMarginErrorText ? (
+                  <p
+                    id="selling-price-margin-error"
+                    role="alert"
+                    className="text-sm text-destructive"
+                  >
+                    {sellingMarginErrorText}
+                  </p>
+                ) : null}
+              </div>
             </div>
-          )}
+          ) : showVendorBillFields ? (
+            <div className="space-y-2">
+              <Label htmlFor="payment-terms-days">Payment terms (days)</Label>
+              <Input
+                id="payment-terms-days"
+                type="text"
+                inputMode="numeric"
+                placeholder="e.g. 30"
+                value={paymentTermsDays}
+                onChange={(e) => onPaymentTermsDaysChange(e.target.value)}
+                className="h-8 max-w-xs tabular-nums"
+                autoComplete="off"
+              />
+            </div>
+          ) : showSellingPriceMargin ? (
+            <div className="space-y-2">
+              <Label htmlFor="selling-price-margin" required>
+                Selling margin (%)
+              </Label>
+              <Input
+                id="selling-price-margin"
+                type="text"
+                inputMode="decimal"
+                placeholder="e.g. 20"
+                value={sellingPriceMarginPercent}
+                onChange={(e) => onSellingPriceMarginChange(e.target.value)}
+                aria-invalid={Boolean(sellingMarginErrorText)}
+                aria-describedby={sellingMarginErrorText ? "selling-price-margin-error" : undefined}
+                className={cn(
+                  "h-8 max-w-xs tabular-nums",
+                  sellingMarginErrorText && "border-destructive focus-visible:ring-destructive/40",
+                )}
+                autoComplete="off"
+              />
+              {sellingMarginErrorText ? (
+                <p
+                  id="selling-price-margin-error"
+                  role="alert"
+                  className="text-sm text-destructive"
+                >
+                  {sellingMarginErrorText}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

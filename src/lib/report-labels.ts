@@ -36,6 +36,12 @@ export const reportReceiptRegister = {
   csvFilename: "customer-receipts.csv",
 } as const;
 
+export const reportItemRegister = {
+  title: "Item register",
+  description: "Current stock summarized by item — quantity, values, and status.",
+  loadError: "Failed to load stock by item",
+} as const;
+
 export const reportInvoiceRegister = {
   title: "Sales & purchase invoices",
   description: "All invoices dated in the selected period.",

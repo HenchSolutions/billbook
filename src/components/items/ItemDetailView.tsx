@@ -17,6 +17,8 @@ import {
   getItemTaxDisplay,
   isServiceType,
 } from "@/types/item";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PAGE } from "@/constants/page-access";
 
 function stockMovementLabel(type: LedgerMovementType): string {
   switch (type) {
@@ -47,6 +49,8 @@ function stockMovementBadgeVariant(
 }
 
 export function ItemDetailView({ id }: { id: number }) {
+  const { can } = usePermissions();
+  const canStockLedger = can(PAGE.stock_ledger);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { backHref, backLabel } = useMemo(() => {
@@ -58,13 +62,12 @@ export function ItemDetailView({ id }: { id: number }) {
   }, [searchParams]);
 
   const { data: item, isPending: itemPending } = useItem(id);
-  const { data: ledger, isPending: ledgerPending } = useItemLedger(
-    item == null || isServiceType(item.type) ? undefined : id,
-  );
-  const isPending = itemPending || (item && !isServiceType(item.type) && ledgerPending);
+  const ledgerItemId = item != null && !isServiceType(item.type) && canStockLedger ? id : undefined;
+  const { data: ledger, isPending: ledgerPending } = useItemLedger(ledgerItemId);
+  const isPending = itemPending || (ledgerItemId != null && ledgerPending);
 
   useEffect(() => {
-    if (isPending || !item || isServiceType(item.type)) return;
+    if (isPending || !item || isServiceType(item.type) || !canStockLedger) return;
     if (typeof window === "undefined" || window.location.hash !== "#stock-ledger") return;
     const raf = window.requestAnimationFrame(() => {
       document
@@ -72,7 +75,7 @@ export function ItemDetailView({ id }: { id: number }) {
         ?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
     return () => window.cancelAnimationFrame(raf);
-  }, [isPending, item]);
+  }, [isPending, item, canStockLedger]);
 
   return (
     <div className="page-container animate-fade-in">
@@ -164,7 +167,7 @@ export function ItemDetailView({ id }: { id: number }) {
             </Card>
           </div>
 
-          {!isServiceType(item.type) && (
+          {!isServiceType(item.type) && canStockLedger && (
             <Card id="stock-ledger" className="scroll-mt-24">
               <CardHeader className="border-b border-border pb-3">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">

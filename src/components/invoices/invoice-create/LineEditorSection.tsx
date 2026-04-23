@@ -180,12 +180,14 @@ export function LineEditorSection({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold text-foreground">
           {copy.itemSectionTitle}
         </CardTitle>
         {copy.itemSectionHelper && (
-          <p className="mt-1 text-xs font-normal text-muted-foreground">{copy.itemSectionHelper}</p>
+          <p className="mt-1 text-xs font-normal leading-relaxed text-muted-foreground">
+            {copy.itemSectionHelper}
+          </p>
         )}
       </CardHeader>
       <CardContent className="space-y-3">

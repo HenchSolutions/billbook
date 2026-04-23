@@ -14,6 +14,8 @@ interface PartiesTableProps {
   parties: Party[];
   onEdit: (party: Party) => void;
   onLedger: (partyId: number) => void;
+  /** When false, the account history (ledger) action is hidden. */
+  showLedger?: boolean;
 }
 
 /** API may send balances as string or number; never call .trim on unknown types. */
@@ -24,7 +26,7 @@ function coerceBalanceText(v: unknown): string | undefined {
   return t === "" ? undefined : t;
 }
 
-export function PartiesTable({ parties, onEdit, onLedger }: PartiesTableProps) {
+export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: PartiesTableProps) {
   const idsToFetch = useMemo(
     () => parties.filter((p) => coerceBalanceText(p.currentBalance) == null).map((p) => p.id),
     [parties],
@@ -134,15 +136,17 @@ export function PartiesTable({ parties, onEdit, onLedger }: PartiesTableProps) {
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onLedger(party.id)}
-                      title="Account History"
-                      aria-label={`View account history for ${party.name}`}
-                    >
-                      <History className="h-3.5 w-3.5" />
-                    </Button>
+                    {showLedger ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onLedger(party.id)}
+                        title="Account History"
+                        aria-label={`View account history for ${party.name}`}
+                      >
+                        <History className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : null}
                   </div>
                 </td>
               </tr>

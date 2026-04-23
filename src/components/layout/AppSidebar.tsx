@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -21,23 +21,24 @@ import {
   Wallet,
   ArrowDownLeft,
   ScrollText,
+  Folder,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BusinessIdentity } from "@/components/BusinessIdentity";
 import { usePermissions } from "@/hooks/use-permissions";
-import { P } from "@/constants/permissions";
+import { INVOICE_PAGE_ACCESS_KEYS, PAGE } from "@/constants/page-access";
 import { TeamRolesSidebarBlock } from "@/components/layout/TeamRolesSidebarBlock";
 
 interface NavItem {
   label: string;
   path: string;
   icon: React.ElementType;
-  /** If set, item is shown only when `can(permission)` */
-  permission?: string;
-  /** Show when user has any of these permissions (e.g. role groups view or manage) */
-  anyPermission?: string[];
+  /** If set, item is shown only when `can(pageKey)` — see `PAGE` in `@/constants/page-access`. */
+  pageKey?: string;
+  /** Show when user has any of these page keys */
+  anyPageKey?: string[];
   /** `exact` = only `/path` matches, not `/path/...` (used for Business settings vs role groups) */
   activeMatch?: "exact" | "prefix";
 }
@@ -49,6 +50,9 @@ interface NavSection {
 
 type SectionTitle = NavSection["title"];
 
+/** Sidebar sections follow the active route until the user folds/expands; then we store explicit open state (including “none”). */
+type SectionFoldMode = { kind: "route" } | { kind: "custom"; open: SectionTitle | null };
+
 const navSections: NavSection[] = [
   {
     title: "Overview",
@@ -57,40 +61,45 @@ const navSections: NavSection[] = [
         label: "Dashboard",
         path: "/dashboard",
         icon: LayoutDashboard,
-        permission: P.business.dashboard.view,
+        pageKey: PAGE.dashboard,
       },
     ],
   },
   {
     title: "Master",
     items: [
-      { label: "Items", path: "/items", icon: Package, permission: P.item.view },
-      { label: "Stock", path: "/stock", icon: PackageCheck, permission: P.item.stock.view },
+      { label: "Items", path: "/items", icon: Package, pageKey: PAGE.items },
+      { label: "Stock", path: "/stock", icon: PackageCheck, pageKey: PAGE.stock },
     ],
   },
   {
     title: "Parties",
     items: [
-      { label: "Customers", path: "/parties", icon: Users, permission: P.party.view },
-      { label: "Vendors", path: "/vendors", icon: Truck, permission: P.party.view },
+      { label: "Customers", path: "/parties", icon: Users, pageKey: PAGE.parties },
+      { label: "Vendors", path: "/vendors", icon: Truck, pageKey: PAGE.vendors },
     ],
   },
   {
     title: "Accounting",
     items: [
-      { label: "Invoices", path: "/invoices", icon: FileText, permission: P.invoice.view },
-      { label: "Receipts", path: "/receipts", icon: Wallet, permission: P.receipt.view },
+      {
+        label: "Invoices",
+        path: "/invoices",
+        icon: FileText,
+        anyPageKey: [...INVOICE_PAGE_ACCESS_KEYS],
+      },
+      { label: "Receipts", path: "/receipts", icon: Wallet, pageKey: PAGE.receipts },
       {
         label: "Credit Notes",
         path: "/credit-notes",
         icon: FileMinus,
-        permission: P.credit_note.view,
+        pageKey: PAGE.credit_notes,
       },
       {
         label: "Payments",
         path: "/payments/outbound",
         icon: ArrowDownLeft,
-        permission: P.payment.outbound.view,
+        pageKey: PAGE.payments_outbound,
       },
     ],
   },
@@ -101,38 +110,44 @@ const navSections: NavSection[] = [
         label: "Reports Dashboard",
         path: "/reports",
         icon: BarChart3,
-        permission: P.reports.view,
+        pageKey: PAGE.reports,
         activeMatch: "exact",
       },
       {
         label: "Sales Register",
         path: "/reports/invoice-register",
         icon: BarChart3,
-        permission: P.reports.view,
+        pageKey: PAGE.reports_sales_register,
       },
       {
         label: "Purchase Register",
         path: "/reports/payables-register",
         icon: BarChart3,
-        permission: P.reports.view,
+        pageKey: PAGE.reports_purchase_register,
       },
       {
         label: "Receipt Register",
         path: "/reports/receipt-register",
         icon: BarChart3,
-        permission: P.reports.view,
+        pageKey: PAGE.reports_receipt_register,
+      },
+      {
+        label: "Item Register",
+        path: "/reports/item-register",
+        icon: BarChart3,
+        pageKey: PAGE.reports_item_register,
       },
     ],
   },
   {
     title: "Settings",
     items: [
-      { label: "Profile", path: "/profile", icon: Users, permission: P.business.settings.view },
+      { label: "Profile", path: "/profile", icon: Users, pageKey: PAGE.profile },
       {
         label: "Business Settings",
         path: "/settings",
         icon: Settings,
-        permission: P.business.settings.view,
+        pageKey: PAGE.settings,
         activeMatch: "exact",
       },
     ],
@@ -140,8 +155,8 @@ const navSections: NavSection[] = [
   {
     title: "More",
     items: [
-      { label: "Tax / GST", path: "/tax", icon: Receipt, permission: P.tax.view },
-      { label: "Audit Logs", path: "/audit-logs", icon: ScrollText, permission: P.audit.view },
+      { label: "Tax / GST", path: "/tax", icon: Receipt, pageKey: PAGE.tax },
+      { label: "Audit Logs", path: "/audit-logs", icon: ScrollText, pageKey: PAGE.audit_logs },
     ],
   },
 ];
@@ -152,11 +167,15 @@ interface AppSidebarProps {
 }
 
 const invoiceNavItems = [
-  { label: "Sales Invoice", path: "/invoices/sales" },
-  { label: "Purchase Invoice", path: "/invoices/purchases" },
-  { label: "Sales Return", path: "/invoices/sales-return" },
-  { label: "Purchase Return", path: "/invoices/purchase-return" },
-];
+  { label: "Sales Invoice", path: "/invoices/sales", pageKey: PAGE.invoices_sales },
+  { label: "Purchase Invoice", path: "/invoices/purchases", pageKey: PAGE.invoices_purchases },
+  { label: "Sales Return", path: "/invoices/sales-return", pageKey: PAGE.invoices_sales_return },
+  {
+    label: "Purchase Return",
+    path: "/invoices/purchase-return",
+    pageKey: PAGE.invoices_purchase_return,
+  },
+] as const;
 
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
@@ -164,7 +183,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const router = useRouter();
   const { logout, user } = useAuth();
   const { can } = usePermissions();
-  const [manualOpenSection, setManualOpenSection] = useState<SectionTitle | null>(null);
+  const [sectionFold, setSectionFold] = useState<SectionFoldMode>({ kind: "route" });
   const safePathname = pathname ?? "";
   const normalizedPathname = (safePathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
   const ledgerSource = searchParams.get("from");
@@ -176,17 +195,20 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
     await logout();
   };
 
-  const isPathActive = (path: string, activeMatch: NavItem["activeMatch"] = "prefix") => {
-    if (isPartyLedgerRoute && ledgerSource === "vendors") {
-      if (path === "/vendors") return true;
-      if (path === "/parties") return false;
-    }
+  const isPathActive = useCallback(
+    (path: string, activeMatch: NavItem["activeMatch"] = "prefix") => {
+      if (isPartyLedgerRoute && ledgerSource === "vendors") {
+        if (path === "/vendors") return true;
+        if (path === "/parties") return false;
+      }
 
-    const base = path.replace(/\/$/, "") || "/";
-    if (base === "/dashboard") return normalizedPathname === "/dashboard";
-    if (activeMatch === "exact") return normalizedPathname === base;
-    return normalizedPathname === base || normalizedPathname.startsWith(`${base}/`);
-  };
+      const base = path.replace(/\/$/, "") || "/";
+      if (base === "/dashboard") return normalizedPathname === "/dashboard";
+      if (activeMatch === "exact") return normalizedPathname === base;
+      return normalizedPathname === base || normalizedPathname.startsWith(`${base}/`);
+    },
+    [isPartyLedgerRoute, ledgerSource, normalizedPathname],
+  );
 
   const isInvoiceTypeActive = (path: string) => {
     if (safePathname.startsWith(path)) return true;
@@ -210,9 +232,9 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
-          if (item.anyPermission?.length) {
-            if (!item.anyPermission.some((key) => can(key))) return false;
-          } else if (item.permission && !can(item.permission)) {
+          if (item.anyPageKey?.length) {
+            if (!item.anyPageKey.some((key) => can(key))) return false;
+          } else if (item.pageKey && !can(item.pageKey)) {
             return false;
           }
           return true;
@@ -243,13 +265,20 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   }, [isPathActive, isSettingsSidebarRoute, visibleSections]);
 
   useEffect(() => {
-    setManualOpenSection(null);
+    setSectionFold({ kind: "route" });
   }, [activeSection]);
 
-  const openSection = manualOpenSection ?? activeSection;
+  const openSection: SectionTitle | null =
+    sectionFold.kind === "route" ? activeSection : sectionFold.open;
 
   const handleSectionToggle = (sectionTitle: SectionTitle) => {
-    setManualOpenSection((current) => (current === sectionTitle ? null : sectionTitle));
+    setSectionFold((prev) => {
+      const currentlyOpen = prev.kind === "route" ? activeSection : prev.open;
+      if (currentlyOpen === sectionTitle) {
+        return { kind: "custom", open: null };
+      }
+      return { kind: "custom", open: sectionTitle };
+    });
   };
 
   const sectionButtonClass = (active: boolean) =>
@@ -299,9 +328,13 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
               <button
                 type="button"
                 onClick={() => handleSectionToggle(section.title)}
-                className={sectionButtonClass(openSection === section.title)}
+                className={cn(sectionButtonClass(openSection === section.title), "justify-between")}
                 aria-expanded={openSection === section.title}
               >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Folder className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
+                  <span className="truncate">{section.title}</span>
+                </span>
                 <ChevronRight
                   className={cn(
                     "h-3.5 w-3.5 shrink-0 transition-transform",
@@ -309,7 +342,6 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                   )}
                   aria-hidden
                 />
-                <span>{section.title}</span>
               </button>
             )}
             {(collapsed || openSection === section.title) && (
@@ -346,21 +378,23 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                       </Link>
                       {invoicesExpanded && (
                         <div className="ml-6 mt-1 space-y-1">
-                          {invoiceNavItems.map((invoiceItem) => (
-                            <Link
-                              key={invoiceItem.path}
-                              href={invoiceItem.path}
-                              onClick={onNavigate}
-                              className={cn(
-                                "block rounded-md px-3 py-2 text-sm transition-colors",
-                                isInvoiceTypeActive(invoiceItem.path)
-                                  ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                              )}
-                            >
-                              {invoiceItem.label}
-                            </Link>
-                          ))}
+                          {invoiceNavItems
+                            .filter((invoiceItem) => can(invoiceItem.pageKey))
+                            .map((invoiceItem) => (
+                              <Link
+                                key={invoiceItem.path}
+                                href={invoiceItem.path}
+                                onClick={onNavigate}
+                                className={cn(
+                                  "block rounded-md px-3 py-2 text-sm transition-colors",
+                                  isInvoiceTypeActive(invoiceItem.path)
+                                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                                )}
+                              >
+                                {invoiceItem.label}
+                              </Link>
+                            ))}
                         </div>
                       )}
                     </div>

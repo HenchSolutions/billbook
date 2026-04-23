@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronDown, Shield, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 
 type CanFn = (key: string) => boolean;
 
@@ -20,8 +20,8 @@ export function TeamRolesSidebarBlock({
   can,
   onNavigate,
 }: TeamRolesSidebarBlockProps) {
-  const canTeam = can(P.business.team.view);
-  const canRoles = can(P.business.role_groups.view) || can(P.business.role_groups.manage);
+  const canTeam = can(PAGE.team);
+  const canRoles = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
 
   if (!canTeam && !canRoles) return null;
 

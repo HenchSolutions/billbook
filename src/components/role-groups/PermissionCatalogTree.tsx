@@ -278,19 +278,19 @@ export function PermissionCatalogTree({
         )}
       >
         <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground">By area</p>
+          <p className="text-sm font-medium text-foreground">Areas of Billbook</p>
           <p className="text-xs text-muted-foreground">
             {selectedCount === totalInCatalog && totalInCatalog > 0
-              ? "All permissions enabled"
-              : `${selectedCount} of ${totalInCatalog} selected`}
+              ? "Every area included"
+              : `${selectedCount} of ${totalInCatalog} areas allowed`}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" onClick={expandAll}>
-            Expand all
+            Show all sections
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={collapseAll}>
-            Collapse all
+            Hide sections
           </Button>
         </div>
       </div>

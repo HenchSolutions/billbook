@@ -19,8 +19,12 @@ import { isServiceType } from "@/types/item";
 interface StockEntriesTableProps {
   entries: StockEntry[];
   items: Item[];
+  /** Item IDs currently below min stock (from stock summary); rows are highlighted. */
+  lowStockItemIds?: ReadonlySet<number>;
   onAdjust?: (itemId: number, itemName: string, stockEntryId?: number) => void;
   onEditEntry?: (entry: StockEntry) => void;
+  /** When false, links to per-item stock ledger are hidden. */
+  showStockLedger?: boolean;
 }
 
 function getItemName(entry: StockEntry, items: Item[]): string {
@@ -44,8 +48,10 @@ function getSupplierDisplay(entry: StockEntry): {
 export function StockEntriesTable({
   entries,
   items,
+  lowStockItemIds,
   onAdjust,
   onEditEntry,
+  showStockLedger = true,
 }: StockEntriesTableProps) {
   if (entries.length === 0) {
     return (
@@ -126,6 +132,8 @@ export function StockEntriesTable({
               const actualStr = typeof actual === "string" ? actual : String(actual);
               const vendor = getSupplierDisplay(entry);
               const category = entry.categoryName?.trim();
+              const isLowStockRow =
+                !isService && lowStockItemIds != null && lowStockItemIds.has(entry.itemId);
               return (
                 <tr
                   key={entry.id}
@@ -134,7 +142,14 @@ export function StockEntriesTable({
                     i % 2 === 1 && "bg-muted/10",
                   )}
                 >
-                  <td className={cn(stockTableTdClass, "px-3 text-left font-medium sm:px-4")}>
+                  <td
+                    className={cn(
+                      stockTableTdClass,
+                      "px-3 text-left font-medium sm:px-4",
+                      isLowStockRow &&
+                        "border-l-[3px] border-l-destructive/70 dark:border-l-destructive/60",
+                    )}
+                  >
                     {itemName}
                     {unit && (
                       <span className="ml-1.5 font-normal text-muted-foreground">({unit})</span>
@@ -197,7 +212,7 @@ export function StockEntriesTable({
                   </td>
                   <td className={cn(stockTableTdClass, "w-[132px] text-left")}>
                     <div className="inline-flex min-h-8 items-center gap-1 whitespace-nowrap">
-                      {!isService ? (
+                      {!isService && showStockLedger ? (
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
                           <Link
                             href={`/items/${entry.itemId}?from=stock#stock-ledger`}
@@ -208,9 +223,9 @@ export function StockEntriesTable({
                             <History className="h-4 w-4" />
                           </Link>
                         </Button>
-                      ) : (
+                      ) : !isService ? (
                         <div className="h-8 w-8" aria-hidden />
-                      )}
+                      ) : null}
                       {onAdjust && (
                         <Button
                           variant="ghost"

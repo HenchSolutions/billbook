@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   type ReactNode,
@@ -21,13 +22,19 @@ import type {
 } from "@/types/auth";
 import { AUTH_EXPIRED_EVENT } from "@/constants/auth-events";
 import { ACCESS_BLOCKED_EVENT, REFRESH_PERMISSIONS_EVENT } from "@/constants/access-events";
-import { LAST_ORGANIZATION_CODE_KEY } from "@/constants/auth-storage";
+import { BILLBOOK_SESSION_KEY, LAST_ORGANIZATION_CODE_KEY } from "@/constants/auth-storage";
 import { api, setAccessToken, setRefreshToken, ApiClientError } from "@/api";
 import {
   extractRoleGroupFromAuthMeBusiness,
   extractRoleGroupFromAuthMeUser,
 } from "@/lib/auth-me-user";
-import { parseAuthMePayload } from "@/lib/parse-auth-me-payload";
+import {
+  fetchAuthMeValidated,
+  hasStoredCredentials,
+  isLikelyTransientRestoreFailure,
+  readCachedSessionUser,
+} from "@/lib/auth-restore";
+import { isInactiveRoleGroupAccessMessage } from "@/lib/rbac-access";
 
 interface AuthState {
   user: SessionUser | null;
@@ -49,8 +56,6 @@ interface AuthContextValue extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-const SESSION_KEY = "billbook_session";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   INVALID_OTP: "Invalid or expired OTP. Please request a new OTP and try again.",
@@ -147,7 +152,7 @@ function sessionUserFromMe(me: AuthMeResponse): SessionUser {
 }
 
 function persistSession(sessionUser: SessionUser) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+  localStorage.setItem(BILLBOOK_SESSION_KEY, JSON.stringify(sessionUser));
 }
 
 /** Persist and return the session derived from GET /auth/me (single code path for hydration). */
@@ -161,11 +166,7 @@ function commitSessionFromMe(me: AuthMeResponse): SessionUser {
 function clearSession() {
   setAccessToken(null);
   setRefreshToken(null);
-  localStorage.removeItem(SESSION_KEY);
-}
-
-function authMeFromApiGet(res: unknown): AuthMeResponse | null {
-  return parseAuthMePayload(res) ?? parseAuthMePayload((res as { data?: unknown }).data);
+  localStorage.removeItem(BILLBOOK_SESSION_KEY);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -211,29 +212,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Session check on every app load: GET /auth/me with credentials (cookie token sent).
-  useEffect(() => {
+  // Session restore: optimistic UI when tokens + cached user exist; validate with GET /auth/me (retries on transient errors).
+  useLayoutEffect(() => {
     let cancelled = false;
+
+    const cached = readCachedSessionUser();
+    const creds = hasStoredCredentials();
+
+    if (!creds) {
+      clearSession();
+      setUser(null);
+      setIsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (cached) {
+      setUser(cached);
+      setIsLoading(false);
+    }
 
     async function restore() {
       try {
-        const res = await api.get<AuthMeResponse>("/auth/me");
-        const me = authMeFromApiGet(res);
-        if (!me) throw new Error("Invalid /auth/me response");
-        if (!cancelled) {
-          setUser(commitSessionFromMe(me));
+        const me = await fetchAuthMeValidated();
+        if (cancelled) return;
+        setUser(commitSessionFromMe(me));
+        setAccessBlockedMessage(null);
+      } catch (e) {
+        if (cancelled) return;
+
+        if (
+          e instanceof ApiClientError &&
+          e.status === 403 &&
+          isInactiveRoleGroupAccessMessage(e.message)
+        ) {
+          const snap = readCachedSessionUser();
+          if (snap) setUser(snap);
+          setAccessBlockedMessage((prev) => prev ?? e.message.trim());
+          return;
         }
-      } catch {
-        if (!cancelled) {
-          clearSession();
-          setUser(null);
+
+        if (isLikelyTransientRestoreFailure(e) && cached) {
+          setUser(cached);
+          return;
         }
+
+        clearSession();
+        setUser(null);
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled && !cached) {
+          setIsLoading(false);
+        }
       }
     }
 
-    restore();
+    void restore();
+
     return () => {
       cancelled = true;
     };
@@ -243,11 +278,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(auth.tokens.accessToken);
     setRefreshToken(auth.tokens.refreshToken);
 
-    // Fetch /auth/me to get accurate role, validity, and branding
+    // Fetch /auth/me to get accurate role, validity, and branding (retries transient failures).
     try {
-      const res = await api.get<AuthMeResponse>("/auth/me");
-      const me = authMeFromApiGet(res);
-      if (!me) throw new Error("Invalid /auth/me response");
+      const me = await fetchAuthMeValidated();
       setUser(commitSessionFromMe(me));
     } catch {
       const sessionUser = toSessionUser(auth);
@@ -325,11 +358,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSession = useCallback(async () => {
     try {
-      const res = await api.get<AuthMeResponse>("/auth/me");
-      const me = authMeFromApiGet(res);
-      if (!me) throw new Error("Invalid /auth/me response");
+      const me = await fetchAuthMeValidated();
       setUser(commitSessionFromMe(me));
-    } catch {
+      setAccessBlockedMessage(null);
+    } catch (e) {
+      if (
+        e instanceof ApiClientError &&
+        e.status === 403 &&
+        isInactiveRoleGroupAccessMessage(e.message)
+      ) {
+        const snap = readCachedSessionUser();
+        if (snap) setUser(snap);
+        return;
+      }
+      if (isLikelyTransientRestoreFailure(e)) {
+        return;
+      }
       clearSession();
       setUser(null);
     }

@@ -22,9 +22,16 @@ interface StockReportTableProps {
   /** Used to detect SERVICE items so cost/stock columns show "—" and adjust is hidden */
   items?: Item[];
   onAdjust?: (itemId: number, itemName: string) => void;
+  /** When false, links to per-item stock ledger are hidden. */
+  showStockLedger?: boolean;
 }
 
-export function StockReportTable({ rows, items, onAdjust }: StockReportTableProps) {
+export function StockReportTable({
+  rows,
+  items,
+  onAdjust,
+  showStockLedger = true,
+}: StockReportTableProps) {
   const isService = (row: StockListItem) =>
     isServiceType(row.itemType) || isServiceType(items?.find((i) => i.id === row.itemId)?.type);
   if (rows.length === 0) {
@@ -36,7 +43,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
           </div>
           <p className="mt-4 text-sm font-medium text-foreground">No stock data yet</p>
           <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">
-            Add stock entries in the Add Stock tab to see items and quantities here.
+            Add stock from Stock → Add Stock to see items and quantities here.
           </p>
         </CardContent>
       </Card>
@@ -154,7 +161,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                   </td>
                   <td className={cn(stockTableTdClass, "w-[132px] px-2 text-left sm:px-4")}>
                     <div className="inline-flex min-h-8 items-center gap-1 whitespace-nowrap">
-                      {!service ? (
+                      {!service && showStockLedger ? (
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
                           <Link
                             href={`/items/${row.itemId}?from=stock#stock-ledger`}
@@ -164,9 +171,9 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                             <History className="h-4 w-4" />
                           </Link>
                         </Button>
-                      ) : (
+                      ) : !service ? (
                         <div className="h-8 w-8" aria-hidden />
-                      )}
+                      ) : null}
                       {onAdjust && (
                         <Button
                           variant="ghost"

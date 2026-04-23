@@ -37,6 +37,7 @@ import { useRoleGroupsList } from "@/hooks/use-role-groups";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 import { strongPasswordSchema } from "@/lib/validation-schemas";
 import { showErrorToast, showSuccessToast } from "@/lib/toast-helpers";
 import type { BusinessUser } from "@/types/auth";
@@ -188,7 +189,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
   const canView = can(P.business.team.view);
   const canInvite = can(P.business.team.invite);
   const canManage = can(P.business.team.manage);
-  const canSeeRoleGroups = can(P.business.role_groups.view) || can(P.business.role_groups.manage);
+  const canSeeRoleGroups = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
 
   const { data: users, isPending, error } = useBusinessUsers(canView);
   const { data: roleGroups = [] } = useRoleGroupsList(canInvite || canManage);

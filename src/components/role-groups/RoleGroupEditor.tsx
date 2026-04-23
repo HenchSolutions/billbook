@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateRoleGroup,
   useDeleteRoleGroup,
-  usePermissionCatalog,
   useRoleGroup,
   useUpdateRoleGroup,
   isRoleGroupDeleteConflict,
@@ -30,8 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { P } from "@/constants/permissions";
-import { buildSidebarAlignedCatalog } from "@/lib/permission-catalog-presentation";
+import { buildPageAccessCatalog, PAGE } from "@/constants/page-access";
 
 interface RoleGroupEditorProps {
   roleGroupId?: number;
@@ -40,15 +38,10 @@ interface RoleGroupEditorProps {
 export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
   const router = useRouter();
   const { can } = usePermissions();
-  const canManage = can(P.business.role_groups.manage);
+  const canManage = can(PAGE.role_groups_manage);
   const isCreate = roleGroupId == null;
 
   const { data: existing, isPending: loadingGroup } = useRoleGroup(roleGroupId, !isCreate);
-  const {
-    data: catalogData,
-    isPending: loadingCatalog,
-    error: catalogError,
-  } = usePermissionCatalog(can(P.business.role_groups.view) || can(P.business.role_groups.manage));
 
   const createMutation = useCreateRoleGroup();
   const updateMutation = useUpdateRoleGroup();
@@ -59,14 +52,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
   const [isActive, setIsActive] = useState(true);
   const [permissionKeys, setPermissionKeys] = useState<string[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const presentedCatalog = useMemo(
-    () =>
-      buildSidebarAlignedCatalog({
-        keys: catalogData?.keys,
-        catalog: catalogData?.catalog,
-      }),
-    [catalogData],
-  );
+  const presentedCatalog = buildPageAccessCatalog();
 
   useEffect(() => {
     if (!existing) return;
@@ -161,18 +147,10 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
         title={isCreate ? "New role group" : (existing?.name ?? "Role group")}
         description={
           isCreate
-            ? "Choose a name and pick permissions. Staff members assigned to this group only get the keys you enable."
-            : "Update permissions for this group. Changes apply to all staff currently in the group."
+            ? "Name the role and choose which areas of Billbook it may use. People in this group only see what you allow."
+            : "Update access for this group. Changes apply to everyone currently assigned to it."
         }
       />
-
-      {catalogError && (
-        <p className="mb-4 text-sm text-destructive" role="alert">
-          {catalogError instanceof Error
-            ? catalogError.message
-            : "Could not load permission catalog"}
-        </p>
-      )}
 
       <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-5xl flex-col gap-10 pb-8">
         <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
@@ -229,30 +207,20 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
 
           <div className="border-t border-border/70">
             <div className="border-b border-border/60 bg-muted/15 px-5 py-4 sm:px-6">
-              <h2 className="text-lg font-semibold tracking-tight">Permissions</h2>
+              <h2 className="text-lg font-semibold tracking-tight">What they can open</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Expand an area to fine-tune keys, or use folder checkboxes to select a whole section
-                at once.
+                Pick the parts of Billbook this role may use. Team members only see sidebar items
+                for areas you allow here.
               </p>
             </div>
             <div className="p-4 sm:p-5">
-              {loadingCatalog ? (
-                <div className="flex min-h-[12rem] items-center justify-center rounded-lg border border-dashed border-border/80 bg-muted/10">
-                  <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
-                </div>
-              ) : presentedCatalog.length ? (
-                <PermissionCatalogTree
-                  catalog={presentedCatalog}
-                  value={permissionKeys}
-                  onChange={setPermissionKeys}
-                  disabled={readOnly}
-                  embedded
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No catalog entries returned from the server.
-                </p>
-              )}
+              <PermissionCatalogTree
+                catalog={presentedCatalog}
+                value={permissionKeys}
+                onChange={setPermissionKeys}
+                disabled={readOnly}
+                embedded
+              />
             </div>
           </div>
         </div>
@@ -286,8 +254,8 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this role group?</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. If anyone still uses this group, the server will reject the
-              delete.
+              This cannot be undone. If anyone is still assigned to this group, move them to another
+              role first—then you can delete it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

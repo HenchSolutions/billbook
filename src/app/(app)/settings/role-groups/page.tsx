@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRoleGroupsList } from "@/hooks/use-role-groups";
 import { usePermissions } from "@/hooks/use-permissions";
-import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 import { AccessDeniedPage } from "@/components/auth/AccessDeniedPage";
 import { cn } from "@/lib/utils";
 
 export default function RoleGroupsListPage() {
   const { can } = usePermissions();
-  const canSee = can(P.business.role_groups.view) || can(P.business.role_groups.manage);
-  const canManage = can(P.business.role_groups.manage);
+  const canSee = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
+  const canManage = can(PAGE.role_groups_manage);
 
   const { data: groups, isPending, error } = useRoleGroupsList(canSee);
 

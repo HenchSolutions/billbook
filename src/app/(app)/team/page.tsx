@@ -6,17 +6,17 @@ import PageHeader from "@/components/PageHeader";
 import { BusinessUsersCard } from "@/components/settings/SettingsSections";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/use-permissions";
-import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 import { AccessDeniedPage } from "@/components/auth/AccessDeniedPage";
 
 export default function TeamPage() {
   const { can } = usePermissions();
 
-  if (!can(P.business.team.view)) {
+  if (!can(PAGE.team)) {
     return <AccessDeniedPage />;
   }
 
-  const canRoleGroups = can(P.business.role_groups.view) || can(P.business.role_groups.manage);
+  const canRoleGroups = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
 
   return (
     <div className="page-container animate-fade-in">

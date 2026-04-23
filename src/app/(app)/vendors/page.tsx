@@ -15,10 +15,14 @@ import { Switch } from "@/components/ui/switch";
 import { useParties } from "@/hooks/use-parties";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Party } from "@/types/party";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PAGE } from "@/constants/page-access";
 
 const PARTY_TYPE = "SUPPLIER" as const;
 
 export default function Vendors() {
+  const { can } = usePermissions();
+  const canVendorLedger = can(PAGE.vendors_ledger);
   const router = useRouter();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -97,6 +101,7 @@ export default function Vendors() {
           parties={parties}
           onEdit={openEdit}
           onLedger={(partyId) => router.push(`/vendors/${partyId}/ledger`)}
+          showLedger={canVendorLedger}
         />
       )}
 

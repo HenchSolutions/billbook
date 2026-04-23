@@ -4,12 +4,16 @@ import { invalidateQueryKeys } from "@/lib/query";
 import { queryKeys } from "@/lib/query-keys";
 import type { Alert, AlertListResponse } from "@/types/alert";
 
-export function useAlerts(unreadOnly = false, enabled = true) {
-  const qs = unreadOnly ? "?unreadOnly=true" : "";
+export function useAlerts(unreadOnly = false, enabled = true, options?: { limit?: number }) {
+  const limit = options?.limit;
+  const qs = new URLSearchParams();
+  if (unreadOnly) qs.set("unreadOnly", "true");
+  if (limit != null) qs.set("limit", String(limit));
+  const q = qs.toString();
   return useQuery({
-    queryKey: queryKeys.alerts.list(unreadOnly),
+    queryKey: queryKeys.alerts.list(unreadOnly, limit),
     queryFn: async () => {
-      const res = await api.get<AlertListResponse>(`/alerts${qs}`);
+      const res = await api.get<AlertListResponse>(`/alerts${q ? `?${q}` : ""}`);
       return res.data;
     },
     enabled,

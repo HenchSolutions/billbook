@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useRoleGroupsList } from "@/hooks/use-role-groups";
-import { P } from "@/constants/permissions";
+import { PAGE } from "@/constants/page-access";
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -32,7 +32,7 @@ export default function TopBar({
   const businessName = user?.businessName?.trim();
   const handleOpenProfile = () => router.push("/profile");
 
-  const canListRoleGroups = can(P.business.role_groups.view) || can(P.business.role_groups.manage);
+  const canListRoleGroups = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
   const shouldResolveRoleGroupName =
     user?.role === "STAFF" &&
     !user.roleGroupName?.trim() &&

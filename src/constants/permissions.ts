@@ -1,6 +1,9 @@
 /**
- * Permission keys — must match backend; source of truth is GET /business/permissions/catalog (data.keys).
- * Used for route guards and UI checks only; API enforces access.
+ * Fine-grained permission keys (legacy / API) — still used for in-page actions (e.g. invoice finalize).
+ * Staff **sidebar and route access** use `page.*` keys from `@/constants/page-access`; `usePermissions().can()`
+ * resolves both: holding e.g. `page.invoices.sales` implies the invoice.* keys listed in `PAGE_IMPLIES_LEGACY` for that lane.
+ *
+ * Role groups should store `page.*` keys; GET /business/permissions/catalog may be retired on the backend.
  */
 export const P = {
   business: {
@@ -37,7 +40,12 @@ export const P = {
     view: "item.view",
     update: "item.update",
     delete: "item.delete",
-    stock: { view: "item.stock.view", manage: "item.stock.manage" },
+    stock: {
+      view: "item.stock.view",
+      manage: "item.stock.manage",
+      summaryView: "item.stock.summary.view",
+      ledgerView: "item.stock.ledger.view",
+    },
     adjust_stock: "item.adjust_stock",
     unit: { manage: "item.unit.manage" },
     category: {
@@ -53,7 +61,11 @@ export const P = {
     update: "party.update",
     delete: "party.delete",
     consignee: { manage: "party.consignee.manage" },
-    ledger: { view: "party.ledger.view" },
+    ledger: {
+      view: "party.ledger.view",
+      customerView: "party.ledger.customer.view",
+      vendorView: "party.ledger.vendor.view",
+    },
     payment: { advance: "party.payment.advance" },
     statement: { view: "party.statement.view" },
   },
