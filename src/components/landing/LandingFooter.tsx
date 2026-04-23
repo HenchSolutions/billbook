@@ -12,7 +12,7 @@ export function LandingFooter() {
             <Logo className="h-9 w-9" />
             <p className="mt-3 text-sm text-muted-foreground">
               Invoicing, stock, reports, and GST / Tax — the same modules you use after sign-in,
-              marketed honestly.
+              described clearly.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm">

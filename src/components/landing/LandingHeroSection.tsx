@@ -43,7 +43,7 @@ export function LandingHeroSection() {
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-status-paid" />
-              GST-compliant from day 1
+              GST-ready workflows from day 1
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-status-paid" />
@@ -54,7 +54,7 @@ export function LandingHeroSection() {
           <div className="animation-delay-400 mt-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground motion-safe:animate-fade-in">
             <span className="mr-1">Loved for:</span>
             <Badge variant="secondary">Fast invoicing</Badge>
-            <Badge variant="secondary">GST-ready exports</Badge>
+            <Badge variant="secondary">CSV + GST HTML exports</Badge>
             <Badge variant="secondary">Audit logs</Badge>
             <Badge variant="secondary">Mobile-friendly</Badge>
           </div>

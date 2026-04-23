@@ -68,7 +68,11 @@ export function LandingFaq() {
                 },
                 {
                   q: "Can I export data for my accountant?",
-                  a: "Yes — export invoices, parties, products, and reports to share with your accountant or maintain backups.",
+                  a: "Yes — download report CSVs and GST / Tax HTML exports, and keep invoice documents ready to share for reconciliation.",
+                },
+                {
+                  q: "Does BillBook directly send WhatsApp messages?",
+                  a: "Not yet. Today you can log WhatsApp document sharing activity and use balance reminder email workflows from invoice screens.",
                 },
                 {
                   q: "Does it support audit logs?",

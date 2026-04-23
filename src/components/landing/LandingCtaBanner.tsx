@@ -32,7 +32,7 @@ export function LandingCtaBanner() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          No credit card to sign up · GST-ready workflows · Reports &amp; tax export like in the app
+          No credit card to sign up · GST-ready workflows · CSV reports and GST / Tax HTML export
         </p>
       </div>
     </section>

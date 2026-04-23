@@ -39,14 +39,14 @@ export function LandingValueGrid() {
               desc: "Rupee formatting, en-IN dates, and GST-oriented flows by default.",
             },
             {
-              title: "Responsive support",
+              title: "Help & contact",
               icon: LifeBuoy,
-              desc: "Help when you need it — without long hand-offs.",
+              desc: "Use the help center and contact page when you need guidance.",
             },
             {
-              title: "WhatsApp / email sharing",
+              title: "Communication logs",
               icon: MessageCircle,
-              desc: "Share invoices and updates in common channels.",
+              desc: "Track WhatsApp share logs and balance reminder emails on invoices.",
             },
             {
               title: "Secure by default",
