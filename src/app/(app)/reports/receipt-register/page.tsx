@@ -10,6 +10,8 @@ import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterFilterCard,
+  ReportRegisterFilterGrid,
+  ReportRegisterFilterGroup,
   ReportRegisterResultBar,
   ReportRegisterTableScroll,
   rr,
@@ -58,16 +60,21 @@ export default function ReceiptRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportReceiptRegister.loadError} />
 
       <ReportRegisterFilterCard>
-        <div className="flex w-full flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-          />
-          <ReportLimitInput value={limit} onChange={setLimit} />
-        </div>
+        <ReportRegisterFilterGrid cols={2}>
+          <ReportRegisterFilterGroup title="Period">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+          </ReportRegisterFilterGroup>
+          <ReportRegisterFilterGroup>
+            <ReportLimitInput value={limit} onChange={setLimit} stacked />
+          </ReportRegisterFilterGroup>
+        </ReportRegisterFilterGrid>
       </ReportRegisterFilterCard>
 
       {isPending ? (

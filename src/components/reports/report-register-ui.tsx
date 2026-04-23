@@ -18,6 +18,54 @@ export function ReportRegisterFilterCard({
   );
 }
 
+type ReportRegisterFilterGridProps = {
+  children: React.ReactNode;
+  cols?: 1 | 2 | 3;
+  className?: string;
+};
+
+/** Shared filter layout for all register pages. */
+export function ReportRegisterFilterGrid({
+  children,
+  cols = 2,
+  className,
+}: ReportRegisterFilterGridProps) {
+  return (
+    <div
+      className={cn(
+        "grid gap-3 sm:gap-4 xl:items-end",
+        cols === 1 && "xl:grid-cols-1",
+        cols === 2 && "xl:grid-cols-[minmax(0,1fr)_auto]",
+        cols === 3 && "xl:grid-cols-[minmax(0,1fr)_auto_auto]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ReportRegisterFilterGroup({
+  title,
+  children,
+  className,
+}: {
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("rounded-lg border border-border/70 bg-muted/15 p-3 sm:p-4", className)}>
+      {title ? (
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {title}
+        </p>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 /** Optional bar above the table: row count and truncation hint. */
 export function ReportRegisterResultBar({
   count,

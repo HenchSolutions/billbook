@@ -7,7 +7,11 @@ import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import { ReportCsvButton } from "@/components/reports/ReportCsvButton";
 import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
-import { ReportRegisterFilterCard } from "@/components/reports/report-register-ui";
+import {
+  ReportRegisterFilterCard,
+  ReportRegisterFilterGrid,
+  ReportRegisterFilterGroup,
+} from "@/components/reports/report-register-ui";
 import { ReceivablesAgingSection } from "@/components/reports/ReceivablesAgingSection";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { useReceivablesAging } from "@/hooks/use-reports";
@@ -42,21 +46,25 @@ export default function ReceivablesAgingPage() {
       <ErrorBanner error={error} fallbackMessage={reportInvoiceAging.loadError} />
 
       <ReportRegisterFilterCard>
-        <div className="flex w-full flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="as-of" className="text-sm text-muted-foreground">
-              As of date
-            </Label>
-            <Input
-              id="as-of"
-              type="date"
-              className="w-full sm:w-44"
-              value={asOf}
-              onChange={(e) => setAsOf(e.target.value)}
-            />
-          </div>
-          <ReportLimitInput value={limit} onChange={setLimit} />
-        </div>
+        <ReportRegisterFilterGrid cols={2} className="xl:grid-cols-[auto_auto]">
+          <ReportRegisterFilterGroup title="Period">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="as-of" className="text-xs font-medium text-muted-foreground">
+                As of date
+              </Label>
+              <Input
+                id="as-of"
+                type="date"
+                className="h-9 w-full sm:w-44"
+                value={asOf}
+                onChange={(e) => setAsOf(e.target.value)}
+              />
+            </div>
+          </ReportRegisterFilterGroup>
+          <ReportRegisterFilterGroup>
+            <ReportLimitInput value={limit} onChange={setLimit} stacked />
+          </ReportRegisterFilterGroup>
+        </ReportRegisterFilterGrid>
       </ReportRegisterFilterCard>
 
       {isPending ? (

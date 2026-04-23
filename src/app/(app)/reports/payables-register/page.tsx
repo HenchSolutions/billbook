@@ -9,6 +9,8 @@ import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterFilterCard,
+  ReportRegisterFilterGrid,
+  ReportRegisterFilterGroup,
   ReportRegisterResultBar,
   ReportRegisterSummaryCard,
   ReportRegisterTableScroll,
@@ -46,7 +48,11 @@ export default function PayablesRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportPayablesRegister.loadError} />
 
       <ReportRegisterFilterCard>
-        <ReportLimitInput value={limit} onChange={setLimit} />
+        <ReportRegisterFilterGrid cols={1}>
+          <ReportRegisterFilterGroup>
+            <ReportLimitInput value={limit} onChange={setLimit} stacked />
+          </ReportRegisterFilterGroup>
+        </ReportRegisterFilterGrid>
       </ReportRegisterFilterCard>
 
       {isPending ? (

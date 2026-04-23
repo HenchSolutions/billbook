@@ -12,6 +12,8 @@ import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterFilterCard,
+  ReportRegisterFilterGrid,
+  ReportRegisterFilterGroup,
   ReportRegisterResultBar,
   ReportRegisterTableScroll,
   rr,
@@ -62,27 +64,33 @@ export default function InvoiceRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportInvoiceRegister.loadError} />
 
       <ReportRegisterFilterCard>
-        <div className="flex w-full flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-          />
-          <div className="flex flex-wrap items-end gap-3">
-            <ReportLimitInput value={limit} onChange={setLimit} />
+        <ReportRegisterFilterGrid cols={3}>
+          <ReportRegisterFilterGroup title="Period">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+          </ReportRegisterFilterGroup>
+
+          <ReportRegisterFilterGroup>
+            <ReportLimitInput value={limit} onChange={setLimit} stacked />
+          </ReportRegisterFilterGroup>
+
+          <ReportRegisterFilterGroup title="Columns">
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="shrink-0 border-dashed text-muted-foreground"
+              className="h-9 w-full justify-start border-dashed px-3 text-sm text-muted-foreground"
               onClick={() => setShowConsignee((v) => !v)}
             >
               {showConsignee ? "Hide" : "Show"} ship-to / consignee
             </Button>
-          </div>
-        </div>
+          </ReportRegisterFilterGroup>
+        </ReportRegisterFilterGrid>
       </ReportRegisterFilterCard>
 
       {isPending ? (
