@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState, useMemo, useEffect } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 import { Package, Layers } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
@@ -15,7 +15,6 @@ import { StockAlertsBanner } from "@/components/items/StockAlertsBanner";
 import { StockEntryGrid } from "@/components/items/StockEntryGrid";
 import { StockReportTable } from "@/components/items/StockReportTable";
 import { StockEntriesTable } from "@/components/items/StockEntriesTable";
-import { StockEntryDetailSheet } from "@/components/items/StockEntryDetailSheet";
 import AdjustStockDialog from "@/components/dialogs/AdjustStockDialog";
 import EditStockEntryDialog from "@/components/dialogs/EditStockEntryDialog";
 import {
@@ -38,13 +37,13 @@ type ListViewMode = "item" | "stock";
 
 export default function Stock() {
   const { can } = usePermissions();
+  const canManageStock = can(P.item.stock.manage);
   const canAdjustStock = can(P.item.adjust_stock);
   const canSeeAlerts = can(P.alerts.view);
+  const canManageAlerts = can(P.alerts.manage);
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState("overview");
+  const stockView = searchParams.get("view");
   const [listViewMode, setListViewMode] = useState<ListViewMode>("stock");
-  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
-  const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [adjustItemId, setAdjustItemId] = useState<number | null>(null);
   const [adjustItemName, setAdjustItemName] = useState<string>("");
   const [adjustStockEntryId, setAdjustStockEntryId] = useState<number | undefined>(undefined);
@@ -76,18 +75,17 @@ export default function Stock() {
     limit: 200,
   });
 
-  const items = (itemsData?.items ?? []).filter((i) => i.isActive);
+  const items = useMemo(
+    () => (itemsData?.items ?? []).filter((i) => i.isActive),
+    [itemsData?.items],
+  );
   const prefillItemId = Number(searchParams.get("addItemId") ?? "");
   const prefillItem =
     Number.isFinite(prefillItemId) && prefillItemId > 0
       ? (items.find((item) => item.id === prefillItemId) ?? null)
       : null;
+  const showAddStockView = canManageStock && (stockView === "add" || prefillItemId > 0);
 
-  useEffect(() => {
-    if (prefillItemId > 0) {
-      setActiveTab("add");
-    }
-  }, [prefillItemId]);
   const stockEntries = useMemo(
     (): StockEntry[] => stockEntriesData?.entries ?? [],
     [stockEntriesData],
@@ -153,16 +151,7 @@ export default function Stock() {
   const lowStockQuantity = summary?.lowStock?.totalQuantity;
   const totalSellingValue = summary?.stockValue?.totalAmount ?? "0";
   const stockList = stockData?.stock ?? [];
-  const unreadAlerts = alertsData?.alerts ?? [];
-
-  const selectedEntry = useMemo(
-    () => stockEntries.find((e) => e.id === selectedEntryId),
-    [stockEntries, selectedEntryId],
-  );
-  const selectedSupplierName = useMemo(() => {
-    if (!selectedEntry?.supplierId) return null;
-    return allSuppliers.find((p) => p.id === selectedEntry.supplierId)?.name ?? null;
-  }, [allSuppliers, selectedEntry?.supplierId]);
+  const unreadAlerts = useMemo(() => alertsData?.alerts ?? [], [alertsData?.alerts]);
 
   const handleStockSubmit = useCallback(
     async (entries: CreateStockEntryRequest[]): Promise<StockEntry[]> => {
@@ -201,11 +190,6 @@ export default function Stock() {
     [updateStockEntry],
   );
 
-  const handleViewEntry = useCallback((entryId: number) => {
-    setSelectedEntryId(entryId);
-    setDetailSheetOpen(true);
-  }, []);
-
   const handleMarkAlertRead = useCallback(
     (id: number) => {
       markAlertRead.mutate(id);
@@ -233,7 +217,11 @@ export default function Stock() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Stock"
-        description="View stock by item or by stock entry, add purchases, and adjust quantities"
+        description={
+          showAddStockView
+            ? "Add new stock entries for your items"
+            : "View stock by item or by stock entry, add purchases, and adjust quantities"
+        }
       />
 
       <div className="mb-6">
@@ -255,31 +243,35 @@ export default function Stock() {
         )}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="add">Add Stock</TabsTrigger>
-        </TabsList>
+      {!showAddStockView && (
+        <section className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Overview</h2>
+            {canManageStock && (
+              <Button asChild>
+                <Link href="/stock?view=add">Add Stock</Link>
+              </Button>
+            )}
+          </div>
 
-        <TabsContent value="overview" className="space-y-6">
           <ErrorBanner error={stockError} fallbackMessage="Failed to load stock" />
           {/* Keep search and toolbar mounted so focus is not lost when list refetches */}
           <>
             {canSeeAlerts && unreadAlerts.length > 0 && (
               <StockAlertsBanner
                 alerts={unreadAlerts}
-                onMarkRead={handleMarkAlertRead}
-                markReadPending={markAlertRead.isPending}
+                onMarkRead={canManageAlerts ? handleMarkAlertRead : undefined}
+                markReadPending={canManageAlerts ? markAlertRead.isPending : false}
               />
             )}
             <div>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold">Stock list</h2>
+                  <h3 className="text-base font-semibold">Stock list</h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {listViewMode === "item"
                       ? "One row per item (total quantity and value)."
-                      : "One row per stock entry. Click a row to see details."}
+                      : "One row per stock entry."}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -343,17 +335,24 @@ export default function Stock() {
                 <StockEntriesTable
                   entries={stockEntries}
                   items={items}
-                  onView={handleViewEntry}
                   onAdjust={canAdjustStock ? openAdjustStock : undefined}
-                  onEditEntry={openEditStockEntry}
+                  onEditEntry={canManageStock ? openEditStockEntry : undefined}
                 />
               )}
             </div>
           </>
-        </TabsContent>
+        </section>
+      )}
 
-        <TabsContent value="add">
-          <p className="mb-4 text-sm text-muted-foreground">
+      {canManageStock && showAddStockView && (
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Add Stock</h2>
+            <Button variant="outline" asChild>
+              <Link href="/stock">Back to Overview</Link>
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
             Enter item details, then click &quot;Add row&quot; to save that stock entry and open a
             fresh row. Added entries are shown in the session grid below.
           </p>
@@ -370,19 +369,8 @@ export default function Stock() {
               isSubmitting={createStockEntry.isPending}
             />
           )}
-        </TabsContent>
-      </Tabs>
-
-      <StockEntryDetailSheet
-        entryId={selectedEntryId}
-        open={detailSheetOpen}
-        onOpenChange={(open) => {
-          setDetailSheetOpen(open);
-          if (!open) setSelectedEntryId(null);
-        }}
-        supplierName={selectedSupplierName}
-        items={items}
-      />
+        </section>
+      )}
 
       {adjustItemId != null && (
         <AdjustStockDialog

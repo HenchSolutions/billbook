@@ -19,7 +19,6 @@ import { isServiceType } from "@/types/item";
 interface StockEntriesTableProps {
   entries: StockEntry[];
   items: Item[];
-  onView: (entryId: number) => void;
   onAdjust?: (itemId: number, itemName: string, stockEntryId?: number) => void;
   onEditEntry?: (entry: StockEntry) => void;
 }
@@ -45,7 +44,6 @@ function getSupplierDisplay(entry: StockEntry): {
 export function StockEntriesTable({
   entries,
   items,
-  onView,
   onAdjust,
   onEditEntry,
 }: StockEntriesTableProps) {
@@ -132,19 +130,9 @@ export function StockEntriesTable({
                 <tr
                   key={entry.id}
                   className={cn(
-                    "cursor-pointer border-b border-border/80 transition-colors hover:bg-muted/30",
+                    "border-b border-border/80 transition-colors hover:bg-muted/30",
                     i % 2 === 1 && "bg-muted/10",
                   )}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onView(entry.id)}
-                  onKeyDown={(e) => {
-                    if (e.target !== e.currentTarget) return;
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      onView(entry.id);
-                    }
-                  }}
                 >
                   <td className={cn(stockTableTdClass, "px-3 text-left font-medium sm:px-4")}>
                     {itemName}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { SlidersHorizontal, Package } from "lucide-react";
+import { SlidersHorizontal, Package, History } from "lucide-react";
 import type { StockListItem } from "@/types/item";
 import type { Item } from "@/types/item";
 import { isServiceType } from "@/types/item";
@@ -63,11 +63,9 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
               <th className={cn(stockTableThRight, "hidden sm:table-cell")}>Total Value (sell)</th>
               <th className={cn(stockTableThRight, "hidden lg:table-cell")}>Total Value (cost)</th>
               <th className={cn(stockTableThClass, "hidden text-center md:table-cell")}>Status</th>
-              {onAdjust && (
-                <th className={cn(stockTableThClass, "min-w-[92px] px-2 text-left sm:px-4")}>
-                  Actions
-                </th>
-              )}
+              <th className={cn(stockTableThClass, "min-w-[132px] px-2 text-left sm:px-4")}>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -90,13 +88,7 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                   )}
                 >
                   <td className={cn(stockTableTdClass, "pl-3 text-left sm:pl-4")}>
-                    <Link
-                      href={`/items/${row.itemId}?from=stock`}
-                      className="font-medium text-foreground hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {row.itemName}
-                    </Link>
+                    <span className="font-medium text-foreground">{row.itemName}</span>
                     <span className="ml-1.5 text-xs font-normal text-muted-foreground">
                       ({service ? "service" : "stock"})
                     </span>
@@ -160,9 +152,22 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                       <span className="text-xs text-muted-foreground">OK</span>
                     )}
                   </td>
-                  {onAdjust && (
-                    <td className={cn(stockTableTdClass, "w-[92px] px-2 text-left sm:px-4")}>
-                      <div className="flex min-h-8 items-center">
+                  <td className={cn(stockTableTdClass, "w-[132px] px-2 text-left sm:px-4")}>
+                    <div className="inline-flex min-h-8 items-center gap-1 whitespace-nowrap">
+                      {!service ? (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                          <Link
+                            href={`/items/${row.itemId}?from=stock#stock-ledger`}
+                            title="Stock movement history"
+                            aria-label={`Stock movement history for ${row.itemName}`}
+                          >
+                            <History className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      ) : (
+                        <div className="h-8 w-8" aria-hidden />
+                      )}
+                      {onAdjust && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -178,9 +183,9 @@ export function StockReportTable({ rows, items, onAdjust }: StockReportTableProp
                         >
                           <SlidersHorizontal className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </td>
-                  )}
+                      )}
+                    </div>
+                  </td>
                 </tr>
               );
             })}

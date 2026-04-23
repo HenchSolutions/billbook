@@ -6,8 +6,8 @@ import { formatDate } from "@/lib/utils";
 
 interface StockAlertsBannerProps {
   alerts: Alert[];
-  onMarkRead: (id: number) => void;
-  markReadPending: boolean;
+  onMarkRead?: (id: number) => void;
+  markReadPending?: boolean;
 }
 
 export function StockAlertsBanner({ alerts, onMarkRead, markReadPending }: StockAlertsBannerProps) {
@@ -37,15 +37,17 @@ export function StockAlertsBanner({ alerts, onMarkRead, markReadPending }: Stock
                 </Link>
               )}
               <span className="text-xs text-muted-foreground">{formatDate(a.createdAt)}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-muted-foreground hover:text-foreground"
-                onClick={() => onMarkRead(a.id)}
-                disabled={markReadPending}
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
+              {onMarkRead && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                  onClick={() => onMarkRead(a.id)}
+                  disabled={markReadPending}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </div>
           </li>
         ))}

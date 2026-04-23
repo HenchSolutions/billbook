@@ -219,8 +219,9 @@ export default function CreditNoteDetailPage() {
 
             {creditNote.affectsInventory === true && (
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Legacy:</span> This note may have been
-                created with inventory flags. New credit notes do not change stock from this flow.
+                <span className="font-medium text-foreground">Note:</span> This credit note includes
+                inventory flags from an older record format. Credit notes created from this flow do
+                not change stock.
               </p>
             )}
           </div>

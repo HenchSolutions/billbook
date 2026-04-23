@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -22,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BusinessIdentity } from "@/components/BusinessIdentity";
-import { reportCreditNoteRegister, reportInvoiceAging } from "@/lib/report-labels";
 import { usePermissions } from "@/hooks/use-permissions";
 import { P } from "@/constants/permissions";
 import { TeamRolesSidebarBlock } from "@/components/layout/TeamRolesSidebarBlock";
@@ -57,29 +57,7 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Invoicing",
-    items: [{ label: "Invoices", path: "/invoices", icon: FileText, permission: P.invoice.view }],
-  },
-  {
-    title: "Money & credit",
-    items: [
-      { label: "Receipts", path: "/receipts", icon: Wallet, permission: P.receipt.view },
-      {
-        label: "Outbound payouts",
-        path: "/payments/outbound",
-        icon: ArrowDownLeft,
-        permission: P.payment.outbound.view,
-      },
-      {
-        label: "Credit notes",
-        path: "/credit-notes",
-        icon: FileMinus,
-        permission: P.credit_note.view,
-      },
-    ],
-  },
-  {
-    title: "Catalog",
+    title: "Master",
     items: [
       { label: "Items", path: "/items", icon: Package, permission: P.item.view },
       { label: "Stock", path: "/stock", icon: PackageCheck, permission: P.item.stock.view },
@@ -93,23 +71,72 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Reports & tax",
+    title: "Accounting",
     items: [
-      { label: "Reports", path: "/reports", icon: BarChart3, permission: P.reports.view },
-      { label: "Tax / GST", path: "/tax", icon: Receipt, permission: P.tax.view },
+      { label: "Invoices", path: "/invoices", icon: FileText, permission: P.invoice.view },
+      { label: "Receipts", path: "/receipts", icon: Wallet, permission: P.receipt.view },
+      {
+        label: "Credit Notes",
+        path: "/credit-notes",
+        icon: FileMinus,
+        permission: P.credit_note.view,
+      },
+      {
+        label: "Payments",
+        path: "/payments/outbound",
+        icon: ArrowDownLeft,
+        permission: P.payment.outbound.view,
+      },
     ],
   },
   {
-    title: "Organization",
+    title: "Reports",
     items: [
       {
-        label: "Business settings",
+        label: "Reports Dashboard",
+        path: "/reports",
+        icon: BarChart3,
+        permission: P.reports.view,
+        activeMatch: "exact",
+      },
+      {
+        label: "Sales Register",
+        path: "/reports/invoice-register",
+        icon: BarChart3,
+        permission: P.reports.view,
+      },
+      {
+        label: "Purchase Register",
+        path: "/reports/payables-register",
+        icon: BarChart3,
+        permission: P.reports.view,
+      },
+      {
+        label: "Receipt Register",
+        path: "/reports/receipt-register",
+        icon: BarChart3,
+        permission: P.reports.view,
+      },
+    ],
+  },
+  {
+    title: "Settings",
+    items: [
+      { label: "Profile", path: "/profile", icon: Users, permission: P.business.settings.view },
+      {
+        label: "Business Settings",
         path: "/settings",
         icon: Settings,
         permission: P.business.settings.view,
         activeMatch: "exact",
       },
-      { label: "Audit logs", path: "/audit-logs", icon: ScrollText, permission: P.audit.view },
+    ],
+  },
+  {
+    title: "More",
+    items: [
+      { label: "Tax / GST", path: "/tax", icon: Receipt, permission: P.tax.view },
+      { label: "Audit Logs", path: "/audit-logs", icon: ScrollText, permission: P.audit.view },
     ],
   },
 ];
@@ -126,11 +153,6 @@ const invoiceNavItems = [
   { label: "Purchase Return", path: "/invoices/purchase-return" },
 ];
 
-const reportNavItems = [
-  { label: reportCreditNoteRegister.title, path: "/reports/credit-note-register" },
-  { label: reportInvoiceAging.navLabel, path: "/reports/receivables-aging" },
-];
-
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -138,6 +160,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const { logout, user } = useAuth();
   const { can } = usePermissions();
   const safePathname = pathname ?? "";
+  const normalizedPathname = (safePathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
   const ledgerSource = searchParams.get("from");
   const isPartyLedgerRoute = /^\/parties\/[^/]+\/ledger\/?$/.test(safePathname);
 
@@ -147,26 +170,16 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
     await logout();
   };
 
-  const isActive = (path: string) => {
+  const isPathActive = (path: string, activeMatch: NavItem["activeMatch"] = "prefix") => {
     if (isPartyLedgerRoute && ledgerSource === "vendors") {
       if (path === "/vendors") return true;
       if (path === "/parties") return false;
     }
 
-    if (path === "/dashboard") return safePathname === "/dashboard";
-    return safePathname.startsWith(path);
-  };
-
-  const isNavItemActive = (item: NavItem) => {
-    if (isPartyLedgerRoute && ledgerSource === "vendors") {
-      if (item.path === "/vendors") return true;
-      if (item.path === "/parties") return false;
-    }
-    const p = (safePathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
-    const base = item.path.replace(/\/$/, "") || "/";
-    if (item.path === "/dashboard") return p === "/dashboard";
-    if (item.activeMatch === "exact") return p === base;
-    return p === base || p.startsWith(`${base}/`);
+    const base = path.replace(/\/$/, "") || "/";
+    if (base === "/dashboard") return normalizedPathname === "/dashboard";
+    if (activeMatch === "exact") return normalizedPathname === base;
+    return normalizedPathname === base || normalizedPathname.startsWith(`${base}/`);
   };
 
   const isInvoiceTypeActive = (path: string) => {
@@ -184,10 +197,9 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
     return typeToPath[type ?? ""] === path;
   };
 
-  const invoicesExpanded = safePathname.startsWith("/invoices");
-  const reportsExpanded = safePathname.startsWith("/reports");
-
-  const getVisibleSections = (): NavSection[] => {
+  const invoicesExpanded =
+    normalizedPathname === "/invoices" || normalizedPathname.startsWith("/invoices/");
+  const visibleSections = useMemo((): NavSection[] => {
     return navSections
       .map((section) => ({
         ...section,
@@ -201,7 +213,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         }),
       }))
       .filter((section) => section.items.length > 0);
-  };
+  }, [can]);
 
   return (
     <aside
@@ -232,16 +244,19 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
 
       <Separator className="bg-sidebar-border" />
 
-      <nav className="min-h-0 flex-1 space-y-6 overflow-y-auto px-2 py-4">
-        {getVisibleSections().map((section) => (
-          <div key={section.title}>
+      <nav className="min-h-0 flex-1 space-y-4 overflow-y-auto px-2 py-4">
+        {visibleSections.map((section) => (
+          <div
+            key={section.title}
+            className="rounded-lg border border-sidebar-border/50 bg-sidebar-accent/10 p-1.5"
+          >
             {!collapsed && (
-              <h3 className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/45">
+              <h3 className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/80">
                 {section.title}
               </h3>
             )}
-            <div className="space-y-0.5">
-              {section.title === "Organization" && (
+            <div className="space-y-1">
+              {section.title === "Settings" && (
                 <TeamRolesSidebarBlock
                   collapsed={collapsed}
                   safePathname={safePathname}
@@ -257,7 +272,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                       onClick={onNavigate}
                       className={cn(
                         "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                        isActive(item.path)
+                        isPathActive(item.path, item.activeMatch)
                           ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                           : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                       )}
@@ -291,47 +306,6 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                       </div>
                     )}
                   </div>
-                ) : item.path === "/reports" && !collapsed ? (
-                  <div key={item.path} className="space-y-0.5">
-                    <Link
-                      href={item.path}
-                      onClick={onNavigate}
-                      className={cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                        isActive(item.path)
-                          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span>Reports</span>
-                      <ChevronDown
-                        className={cn(
-                          "ml-auto h-3.5 w-3.5 transition-transform",
-                          reportsExpanded && "rotate-180",
-                        )}
-                      />
-                    </Link>
-                    {reportsExpanded && (
-                      <div className="ml-6 mt-1 space-y-1">
-                        {reportNavItems.map((reportItem) => (
-                          <Link
-                            key={reportItem.path}
-                            href={reportItem.path}
-                            onClick={onNavigate}
-                            className={cn(
-                              "block rounded-md px-3 py-2 text-sm transition-colors",
-                              isActive(reportItem.path)
-                                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                            )}
-                          >
-                            {reportItem.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
                 ) : (
                   <Link
                     key={item.path}
@@ -339,7 +313,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                     onClick={onNavigate}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                      isNavItemActive(item)
+                      isPathActive(item.path, item.activeMatch)
                         ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                         : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                     )}

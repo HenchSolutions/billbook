@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { P } from "@/constants/permissions";
+import { buildSidebarAlignedCatalog } from "@/lib/permission-catalog-presentation";
 
 interface RoleGroupEditorProps {
   roleGroupId?: number;
@@ -58,6 +59,14 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
   const [isActive, setIsActive] = useState(true);
   const [permissionKeys, setPermissionKeys] = useState<string[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const presentedCatalog = useMemo(
+    () =>
+      buildSidebarAlignedCatalog({
+        keys: catalogData?.keys,
+        catalog: catalogData?.catalog,
+      }),
+    [catalogData],
+  );
 
   useEffect(() => {
     if (!existing) return;
@@ -231,9 +240,9 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
                 <div className="flex min-h-[12rem] items-center justify-center rounded-lg border border-dashed border-border/80 bg-muted/10">
                   <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
                 </div>
-              ) : catalogData?.catalog?.length ? (
+              ) : presentedCatalog.length ? (
                 <PermissionCatalogTree
-                  catalog={catalogData.catalog}
+                  catalog={presentedCatalog}
                   value={permissionKeys}
                   onChange={setPermissionKeys}
                   disabled={readOnly}
