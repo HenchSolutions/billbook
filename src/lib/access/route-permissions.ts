@@ -23,7 +23,7 @@ export function getRequiredPermissions(
   const p = (pathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
   const q = parseSearchParams(search);
 
-  if (p.startsWith("/dashboard")) return [PAGE.dashboard];
+  if (p.startsWith("/dashboard")) return null;
   if (p.startsWith("/profile")) return [PAGE.profile];
 
   if (p.startsWith("/settings/role-groups/new")) return [PAGE.role_groups_manage];

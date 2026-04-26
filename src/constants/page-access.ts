@@ -7,7 +7,6 @@ import { P } from "@/constants/permissions";
  * Backend should store these in role group `permissionKeys` and include them in `user.permissions` for staff.
  *
  * Full list (copy for backend / OpenAPI):
- * - page.dashboard
  * - page.items
  * - page.stock
  * - page.stock.overview
@@ -41,7 +40,6 @@ import { P } from "@/constants/permissions";
  * Deprecated (still honored in `usePermissions`): `page.invoices` — treated as all four invoice lanes.
  */
 export const PAGE = {
-  dashboard: "page.dashboard",
   items: "page.items",
   stock: "page.stock",
   stock_overview: "page.stock.overview",
@@ -95,7 +93,6 @@ export const INVOICE_TYPE_TO_PAGE: Record<InvoiceType, PageAccessKey> = {
 
 /** All `page.*` keys — stable order for APIs and tests. */
 export const ALL_PAGE_ACCESS_KEYS: PageAccessKey[] = [
-  PAGE.dashboard,
   PAGE.items,
   PAGE.stock,
   PAGE.stock_overview,
@@ -143,7 +140,6 @@ const INVOICE_LEGACY_CAPS: readonly string[] = [
  * Each invoice lane currently maps to the same capability set; the backend can narrow per-type later.
  */
 export const PAGE_IMPLIES_LEGACY: Record<PageAccessKey, readonly string[]> = {
-  [PAGE.dashboard]: [P.business.dashboard.view],
   [PAGE.items]: [P.item.view, P.item.create, P.item.update, P.item.delete, P.item.unit.manage],
   [PAGE.stock]: [
     P.item.stock.view,
@@ -214,12 +210,6 @@ export const PAGE_IMPLIES_PAGE_KEYS: Partial<Record<PageAccessKey, readonly Page
 /** Catalog tree for role group editor — mirrors `AppSidebar` + team/roles block. */
 export function buildPageAccessCatalog(): PermissionCatalogNode[] {
   return [
-    {
-      type: "folder",
-      id: "pages-overview",
-      label: "Overview",
-      children: [{ type: "permission", key: PAGE.dashboard, label: "Dashboard" }],
-    },
     {
       type: "folder",
       id: "pages-master",

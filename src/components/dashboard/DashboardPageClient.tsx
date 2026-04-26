@@ -9,6 +9,7 @@ import {
   DashboardHighlightsSection,
   DashboardRecentInvoicesSection,
 } from "@/components/dashboard/DashboardSections";
+import { DashboardBalanceSplit } from "@/components/dashboard/DashboardBalanceSplit";
 
 const DashboardInsightsSection = dynamic(
   () =>
@@ -74,7 +75,7 @@ export default function DashboardPageClient() {
           dashboard={data}
           canCreateInvoice={canCreateInvoice}
         />
-        <DashboardQuickStatsSection dashboard={data} />
+        <DashboardBalanceSplit dashboard={data} topCustomers={data.topCustomers ?? []} />
         <DashboardInsightsSection
           revenueByMonth={data.revenueByMonth ?? []}
           paymentStatusData={paymentStatusData}
@@ -82,14 +83,12 @@ export default function DashboardPageClient() {
           invoiceStatusData={invoiceStatusData}
           totalInvoiceStatusAmount={totalInvoiceStatusAmount}
         />
-        <DashboardHighlightsSection
-          topItems={data.topItems ?? []}
-          topCustomers={data.topCustomers ?? []}
-        />
+        <DashboardQuickStatsSection dashboard={data} />
         <DashboardRecentInvoicesSection
           recentInvoices={data.recentInvoices ?? []}
           canCreateInvoice={canCreateInvoice}
         />
+        <DashboardHighlightsSection topItems={data.topItems ?? []} />
       </div>
     </div>
   );

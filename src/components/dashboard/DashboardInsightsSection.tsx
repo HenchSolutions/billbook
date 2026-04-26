@@ -87,8 +87,8 @@ export function DashboardInsightsSection({
   return (
     <section className="space-y-5">
       <DashboardSectionHeader
-        title="Sales insights"
-        description="Trends and breakdowns for sale-side activity. Purchase bills are tracked separately under purchases."
+        title="Trends & breakdown"
+        description="Revenue by month, then how bills are paid and how sale documents sit in draft vs final."
       />
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/20 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04] lg:col-span-2">

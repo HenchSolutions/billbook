@@ -17,7 +17,6 @@ export const P = {
       view: "business.industry_types.view",
       manage: "business.industry_types.manage",
     },
-    dashboard: { view: "business.dashboard.view" },
     team: {
       view: "business.team.view",
       invite: "business.team.invite",

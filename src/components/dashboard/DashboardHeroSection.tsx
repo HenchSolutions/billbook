@@ -1,16 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, Landmark, Scale, FileText } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { partyLedgerBalanceInlineParts } from "@/lib/party/party-ledger-display";
-import { formatCurrency } from "@/lib/core/utils";
-import { HeroCard } from "./dashboard-utils";
+import { cn, formatCurrency } from "@/lib/core/utils";
 import type { DashboardData } from "@/types/dashboard";
 
 interface DashboardHeroSectionProps {
   greeting: string;
   dashboard: DashboardData;
-  /** From GET /business/profile → profileCompletion.canCreateInvoice; false/undefined disables CTA. */
   canCreateInvoice?: boolean;
 }
 
@@ -51,6 +49,42 @@ function netOutstandingValueDisplay(outstanding: number): ReactNode {
   );
 }
 
+function KpiTile({
+  label,
+  value,
+  subtitle,
+  trend,
+}: {
+  label: string;
+  value: ReactNode;
+  subtitle?: string;
+  trend?: "up" | "down";
+}) {
+  return (
+    <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-2 flex flex-wrap items-baseline gap-2">
+        <div className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+          {value}
+        </div>
+        {trend ? (
+          <span
+            className={cn(
+              "text-[11px] font-medium",
+              trend === "up" ? "text-status-paid" : "text-status-overdue",
+            )}
+          >
+            {trend === "up" ? "Trend ↑" : "Trend ↓"}
+          </span>
+        ) : null}
+      </div>
+      {subtitle ? <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p> : null}
+    </div>
+  );
+}
+
 export function DashboardHeroSection({
   greeting,
   dashboard,
@@ -58,76 +92,51 @@ export function DashboardHeroSection({
 }: DashboardHeroSectionProps) {
   const allowNewSaleInvoice = canCreateInvoice === true;
   const netRevenue = toNumber(dashboard.totalRevenueNet ?? dashboard.totalRevenue);
-  const gross =
-    dashboard.totalInvoicedGross != null ? toNumber(dashboard.totalInvoicedGross) : undefined;
-  const credited = toNumber(dashboard.totalCredited ?? 0);
   const ledgerPaid = toNumber(dashboard.totalPaidFromLedger ?? dashboard.totalPaid);
-  const invoiceFieldPaid =
-    dashboard.totalPaidFromInvoiceField != null
-      ? toNumber(dashboard.totalPaidFromInvoiceField)
-      : undefined;
   const outstanding = netOutstandingAmount(dashboard);
-  const showPaymentReconcile =
-    invoiceFieldPaid != null && Math.abs(ledgerPaid - invoiceFieldPaid) > 0.01;
+  const months = dashboard.revenueByMonth ?? [];
+  const lastMonth = months.length > 0 ? months[months.length - 1] : null;
+  const latestMonthRevenue = lastMonth ? toNumber(lastMonth.revenue) : 0;
+  const latestMonthLabel = lastMonth?.month?.trim() ? lastMonth.month : "Latest period";
 
-  let revenueSubtitle: string | undefined;
-  if (credited > 0 && gross != null) {
-    revenueSubtitle = `Gross ${formatCurrency(gross)} · Credits ${formatCurrency(credited)}`;
-  } else if (gross != null && Math.abs(gross - netRevenue) > 0.01) {
-    revenueSubtitle = `Gross ${formatCurrency(gross)}`;
-  }
-
-  const paymentHint = showPaymentReconcile
-    ? `“Paid on invoices” (${formatCurrency(invoiceFieldPaid!)}) is only what you have matched to bills. “All payments recorded” (${formatCurrency(ledgerPaid)}) includes every receipt and similar credit—even amounts not yet applied to a specific invoice. They differ until you allocate receipts or record payments.`
-    : "This total is all customer money recorded in the system (receipts, advances, and similar). The Paid column on each invoice updates when you link a receipt or record a payment—not simply when you finalize the invoice.";
-
-  const outstandingHint =
-    outstanding < 0
-      ? "A negative figure means customers overall are in credit (for example advances or prepayments)—not that they owe you more."
-      : "A positive figure is roughly what customers still owe you after advances and credits.";
+  const asOf = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date());
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/25 p-6 shadow-sm ring-1 ring-black/[0.04] dark:from-card dark:to-muted/20 dark:ring-white/[0.06] sm:p-8">
-      <div
-        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/[0.06] blur-3xl"
-        aria-hidden
-      />
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Overview
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Sales Dashboard</h1>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>{greeting}</span>
-            <Link
-              href="/invoices/purchases"
-              className="inline-flex items-center rounded-full border border-border bg-background/90 px-3 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted/80"
-            >
-              Purchase Bills →
-            </Link>
-            <Link
-              href="/reports"
-              className="inline-flex items-center rounded-full border border-dashed border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-            >
-              Reports →
-            </Link>
-          </div>
+    <section className="space-y-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">{greeting}</p>
+          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground">
+            <CalendarDays className="h-3.5 w-3.5" aria-hidden />
+            As of {asOf}
+          </span>
         </div>
-        <div className="flex shrink-0 flex-col items-stretch gap-1 sm:items-end">
-          {allowNewSaleInvoice ? (
-            <Button asChild size="lg" className="h-11 rounded-full px-6 shadow-sm">
-              <Link href="/invoices/new?type=SALE_INVOICE">
-                <span className="mr-1">+</span> New Sales Invoice
-              </Link>
+        <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+          <div className="flex flex-wrap gap-2">
+            {allowNewSaleInvoice ? (
+              <Button asChild size="sm" className="rounded-md">
+                <Link href="/invoices/new?type=SALE_INVOICE">+ New sales invoice</Link>
+              </Button>
+            ) : (
+              <Button type="button" size="sm" className="rounded-md" disabled>
+                + New sales invoice
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="rounded-md" asChild>
+              <Link href="/invoices/purchases">Purchases</Link>
             </Button>
-          ) : (
-            <Button type="button" size="lg" className="h-11 rounded-full px-6 shadow-sm" disabled>
-              <span className="mr-1">+</span> New Sales Invoice
+            <Button variant="outline" size="sm" className="rounded-md" asChild>
+              <Link href="/reports">Reports</Link>
             </Button>
-          )}
+          </div>
           {!allowNewSaleInvoice ? (
-            <p className="max-w-[220px] text-right text-[11px] text-muted-foreground">
+            <p className="max-w-[260px] text-right text-[11px] text-muted-foreground">
               Finish your profile or renew access.{" "}
               <Link
                 href="/profile"
@@ -140,47 +149,33 @@ export function DashboardHeroSection({
         </div>
       </div>
 
-      <div className="relative mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-        <HeroCard
-          title="Net sales revenue"
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <KpiTile
+          label="Net sales revenue"
           value={formatCurrency(netRevenue)}
-          subtitle={revenueSubtitle}
-          icon={<IndianRupee className="h-5 w-5" />}
-          trend={computeRevenueTrend(dashboard.revenueByMonth)}
-          href="/reports"
+          subtitle="After returns, sale side"
         />
-        <HeroCard
-          title="Payments recorded"
-          value={formatCurrency(ledgerPaid)}
-          subtitle={
-            showPaymentReconcile
-              ? `Paid on invoices: ${formatCurrency(invoiceFieldPaid!)}`
-              : undefined
-          }
-          titleHint={paymentHint}
-          icon={<Landmark className="h-5 w-5" />}
-          variant="success"
+        <KpiTile
+          label="Latest month in trend"
+          value={months.length ? formatCurrency(latestMonthRevenue) : "—"}
+          subtitle={months.length ? latestMonthLabel : "Add invoices to see the chart"}
+          trend={months.length >= 2 ? computeRevenueTrend(months) : undefined}
         />
-        <HeroCard
-          title="Net balance outstanding"
+        <KpiTile
+          label="Net customer balance"
           value={netOutstandingValueDisplay(outstanding)}
           subtitle={
             outstanding < 0
-              ? "Party credit balance"
+              ? "Credit with customers"
               : outstanding > 0
-                ? "Net receivable"
-                : undefined
+                ? "Still to collect (net)"
+                : "Balanced"
           }
-          titleHint={outstanding !== 0 ? outstandingHint : undefined}
-          icon={<Scale className="h-5 w-5" />}
-          variant={outstanding > 0 ? "warning" : "default"}
         />
-        <HeroCard
-          title="Sale documents"
-          value={String(dashboard.totalInvoices)}
-          subtitle={`${dashboard.totalItems ?? 0} items · ${dashboard.totalParties ?? 0} parties`}
-          icon={<FileText className="h-5 w-5" />}
-          href="/invoices"
+        <KpiTile
+          label="Payments recorded"
+          value={formatCurrency(ledgerPaid)}
+          subtitle="Receipts & credits in ledger"
         />
       </div>
     </section>

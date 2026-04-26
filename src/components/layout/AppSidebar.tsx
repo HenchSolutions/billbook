@@ -61,7 +61,6 @@ const navSections: NavSection[] = [
         label: "Dashboard",
         path: "/dashboard",
         icon: LayoutDashboard,
-        pageKey: PAGE.dashboard,
       },
     ],
   },
