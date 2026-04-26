@@ -1,3 +1,37 @@
+export interface SalesPurchaseByMonth {
+  month: string;
+  sales: string | number;
+  purchase: string | number;
+  sale?: string | number;
+  purchases?: string | number;
+}
+
+export interface TopVendor {
+  partyId: number;
+  partyName: string;
+  totalPayable: string | number;
+  documentCount?: number;
+  totalAmount?: string | number;
+  payable?: string | number;
+  invoiceCount?: number;
+}
+
+export interface DashboardRecentLedgerRow {
+  id?: number | string;
+  occurredAt: string;
+  entryType: string;
+  partyName: string;
+  amount: string | number;
+  mode: string | null;
+}
+
+export interface DashboardStockPulse {
+  lowStockCount: number;
+  outOfStockCount: number;
+  deadStockCount: number;
+  fastMovingCount: number;
+}
+
 export interface DashboardData {
   business: DashboardBusiness;
   totalInvoices: number;
@@ -20,6 +54,23 @@ export interface DashboardData {
   invoiceStatusBreakdown: InvoiceStatusBreakdown[];
   paymentStatusBreakdown: PaymentStatusBreakdown[];
   recentInvoices: RecentInvoice[];
+
+  snapshotDate?: string | null;
+  todaySales?: string | number | null;
+  monthSales?: string | number | null;
+  totalPayables?: string | number | null;
+  overdueReceivables?: string | number | null;
+  overduePayables?: string | number | null;
+  cashAndBankBalance?: string | number | null;
+  monthProfit?: string | number | null;
+  salesVsPurchaseByMonth?: SalesPurchaseByMonth[];
+  topVendors?: TopVendor[];
+  recentLedgerActivity?: DashboardRecentLedgerRow[];
+  stockPulse?: DashboardStockPulse | null;
+  summaryRevenue?: string | number | null;
+  summaryPurchase?: string | number | null;
+  summaryProfit?: string | number | null;
+  grossMarginPercent?: string | number | null;
 }
 
 export interface DashboardBusiness {
@@ -47,6 +98,7 @@ export interface TopCustomer {
   partyName: string;
   totalRevenue: string | number;
   invoiceCount: number;
+  totalOutstanding?: string | number;
 }
 
 export interface InvoiceStatusBreakdown {

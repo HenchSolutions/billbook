@@ -3,39 +3,31 @@
 import dynamic from "next/dynamic";
 import ErrorBanner from "@/components/ErrorBanner";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import {
-  DashboardHeroSection,
-  DashboardQuickStatsSection,
-  DashboardHighlightsSection,
-  DashboardRecentInvoicesSection,
-} from "@/components/dashboard/DashboardSections";
-import { DashboardBalanceSplit } from "@/components/dashboard/DashboardBalanceSplit";
+import { EMPTY_DASHBOARD } from "@/lib/business/dashboard";
+import { useDashboard } from "@/hooks/use-business";
+import { useCanCreateInvoice } from "@/hooks/use-can-create-invoice";
+import { DashboardHomeHeader } from "@/components/dashboard/home/DashboardHomeHeader";
+import { DashboardHomeKpis } from "@/components/dashboard/home/DashboardHomeKpis";
+import { DashboardHomeReceivablesPayables } from "@/components/dashboard/home/DashboardHomeReceivablesPayables";
+import { DashboardHomeStockPulse } from "@/components/dashboard/home/DashboardHomeStockPulse";
+import { DashboardHomeLedgerTable } from "@/components/dashboard/home/DashboardHomeLedgerTable";
 
-const DashboardInsightsSection = dynamic(
+const DashboardHomeSalesPurchaseChart = dynamic(
   () =>
-    import("@/components/dashboard/DashboardInsightsSection").then((m) => ({
-      default: m.DashboardInsightsSection,
+    import("@/components/dashboard/home/DashboardHomeSalesPurchaseChart").then((m) => ({
+      default: m.DashboardHomeSalesPurchaseChart,
     })),
   {
     ssr: false,
     loading: () => (
-      <section className="space-y-5" aria-busy="true" aria-label="Loading charts">
-        <div className="h-10 max-w-sm animate-pulse rounded-lg bg-muted/60" />
-        <div className="grid gap-5 lg:grid-cols-3">
-          <div className="h-[min(320px,55vw)] min-h-[220px] animate-pulse rounded-2xl bg-muted/40 lg:col-span-2" />
-          <div className="h-[min(320px,55vw)] min-h-[220px] animate-pulse rounded-2xl bg-muted/40" />
-        </div>
-      </section>
+      <div
+        className="h-[min(320px,55vw)] min-h-[240px] animate-pulse rounded-2xl border border-border/80 bg-muted/40"
+        aria-busy="true"
+        aria-label="Loading chart"
+      />
     ),
   },
 );
-import {
-  buildPaymentStatusData,
-  buildInvoiceStatusData,
-  EMPTY_DASHBOARD,
-} from "@/lib/business/dashboard";
-import { useDashboard } from "@/hooks/use-business";
-import { useCanCreateInvoice } from "@/hooks/use-can-create-invoice";
 
 export default function DashboardPageClient() {
   const { data: dashboard, isPending, error } = useDashboard();
@@ -58,37 +50,21 @@ export default function DashboardPageClient() {
     ? `Welcome back, ${data.business.name}`
     : "Business overview";
 
-  const { data: paymentStatusData, total: totalPaymentAmount } = buildPaymentStatusData(
-    data.paymentStatusBreakdown,
-  );
-  const { data: invoiceStatusData, total: totalInvoiceStatusAmount } = buildInvoiceStatusData(
-    data.invoiceStatusBreakdown,
-  );
-
   return (
     <div className="page-container animate-fade-in">
       <ErrorBanner error={error} fallbackMessage="Failed to load dashboard data." />
 
       <div className="space-y-8 sm:space-y-10">
-        <DashboardHeroSection
-          greeting={greeting}
+        <DashboardHomeHeader
           dashboard={data}
+          greeting={greeting}
           canCreateInvoice={canCreateInvoice}
         />
-        <DashboardBalanceSplit dashboard={data} topCustomers={data.topCustomers ?? []} />
-        <DashboardInsightsSection
-          revenueByMonth={data.revenueByMonth ?? []}
-          paymentStatusData={paymentStatusData}
-          totalPaymentAmount={totalPaymentAmount}
-          invoiceStatusData={invoiceStatusData}
-          totalInvoiceStatusAmount={totalInvoiceStatusAmount}
-        />
-        <DashboardQuickStatsSection dashboard={data} />
-        <DashboardRecentInvoicesSection
-          recentInvoices={data.recentInvoices ?? []}
-          canCreateInvoice={canCreateInvoice}
-        />
-        <DashboardHighlightsSection topItems={data.topItems ?? []} />
+        <DashboardHomeKpis dashboard={data} />
+        <DashboardHomeSalesPurchaseChart dashboard={data} />
+        <DashboardHomeReceivablesPayables dashboard={data} />
+        <DashboardHomeStockPulse dashboard={data} />
+        <DashboardHomeLedgerTable dashboard={data} />
       </div>
     </div>
   );

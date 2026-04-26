@@ -28,7 +28,6 @@ import { PAGE } from "@/constants/page-access";
 type ModuleTutorial = {
   id: string;
   label: string;
-  /** Extra strings matched by the search box */
   keywords: string[];
   icon: ElementType;
   href: string;

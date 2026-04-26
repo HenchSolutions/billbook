@@ -141,6 +141,15 @@ export function formatMonthYear(dateString: string | undefined | null): string {
   }
 }
 
+/** Numeric calendar date for headers: DD/MM/YYYY (fixed separators, business-friendly). */
+export function formatDateNumericINFromDate(d: Date): string {
+  if (isNaN(d.getTime())) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 /** Compact numeric date for dense tables (e.g. DD/MM/YY). */
 export function formatDateCompact(dateString: string | undefined | null): string {
   if (!dateString) return "—";
