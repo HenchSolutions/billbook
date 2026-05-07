@@ -191,13 +191,17 @@ export function VendorAutocomplete({
       <PopoverContent
         id="vendor-listbox"
         role="listbox"
-        className={cn("w-[var(--radix-popover-trigger-width)] p-0", compact && "max-h-56")}
+        className={cn(
+          "w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none",
+          compact && "max-h-56",
+        )}
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <Command
           shouldFilter={false}
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md"
           value={
             highlightedOption === null
               ? NONE_VALUE

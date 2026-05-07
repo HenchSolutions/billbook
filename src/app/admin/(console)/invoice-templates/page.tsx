@@ -1395,7 +1395,7 @@ export default function AdminInvoiceTemplatesPage() {
               <DialogTitle>Selected template preview</DialogTitle>
             </DialogHeader>
             {uploadedFileHtml ? (
-              <div className="overflow-hidden rounded-md border border-border/60 bg-background">
+              <div className="overflow-hidden rounded-md bg-muted/15">
                 <iframe
                   title="Selected template large preview"
                   srcDoc={uploadedFileHtml}

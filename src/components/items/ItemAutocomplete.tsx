@@ -203,7 +203,7 @@ export function ItemAutocomplete({
         id="item-listbox"
         role="listbox"
         className={cn(
-          "w-[min(20rem,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] p-0",
+          "w-[min(20rem,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none",
           compact && "max-h-56",
         )}
         align="start"
@@ -212,6 +212,7 @@ export function ItemAutocomplete({
       >
         <Command
           shouldFilter={false}
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md"
           value={
             shouldShowAddItem && highlightedIndex === addItemIndex
               ? ADD_ITEM_VALUE

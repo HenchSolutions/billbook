@@ -845,7 +845,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
           <DialogTitle>{templatePreviewModal?.title ?? "Template preview"}</DialogTitle>
         </DialogHeader>
         {templatePreviewModal ? (
-          <div className="overflow-hidden rounded-md border border-border/60 bg-background">
+          <div className="overflow-hidden rounded-md bg-muted/15">
             <iframe
               title={`${templatePreviewModal.title} large preview`}
               srcDoc={templatePreviewModal.html}

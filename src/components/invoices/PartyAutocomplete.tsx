@@ -233,98 +233,101 @@ export function PartyAutocomplete({
         </PopoverAnchor>
         <PopoverContent
           className={cn(
-            "w-[min(24rem,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] p-0",
+            "w-[min(24rem,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none",
             inDialog && "z-[200]",
           )}
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          {serverSearch && (isFetching || typingAhead) && (
-            <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-xs text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />
-              {typingAhead ? "Searching…" : "Loading parties…"}
-            </div>
-          )}
-          <Command
-            shouldFilter={false}
-            value={
-              showAdd && highlightedIndex === addIndex
-                ? ADD_PARTY_VALUE
-                : filtered[highlightedIndex]
-                  ? String(filtered[highlightedIndex].id)
-                  : "__none__"
-            }
-          >
-            <CommandList ref={listRef}>
-              <CommandEmpty className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-                <Users className="h-9 w-9 text-muted-foreground/60" />
-                <p className="text-center text-sm font-medium text-foreground">
-                  {serverSearch && isFetching && filtered.length === 0
-                    ? "Loading parties…"
-                    : inputValue.trim()
-                      ? "No matching party"
-                      : "Type to search"}
-                </p>
-                {serverSearch &&
-                  !isFetching &&
-                  !typingAhead &&
-                  inputValue.trim() &&
-                  filtered.length === 0 && (
-                    <p className="text-center text-xs text-muted-foreground">
-                      Try phone, GSTIN, or part of the name
-                    </p>
+          <div className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md">
+            {serverSearch && (isFetching || typingAhead) && (
+              <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />
+                {typingAhead ? "Searching…" : "Loading parties…"}
+              </div>
+            )}
+            <Command
+              shouldFilter={false}
+              className="rounded-none border-0 bg-transparent shadow-none"
+              value={
+                showAdd && highlightedIndex === addIndex
+                  ? ADD_PARTY_VALUE
+                  : filtered[highlightedIndex]
+                    ? String(filtered[highlightedIndex].id)
+                    : "__none__"
+              }
+            >
+              <CommandList ref={listRef}>
+                <CommandEmpty className="flex flex-col items-center justify-center gap-2 px-4 py-8">
+                  <Users className="h-9 w-9 text-muted-foreground/60" />
+                  <p className="text-center text-sm font-medium text-foreground">
+                    {serverSearch && isFetching && filtered.length === 0
+                      ? "Loading parties…"
+                      : inputValue.trim()
+                        ? "No matching party"
+                        : "Type to search"}
+                  </p>
+                  {serverSearch &&
+                    !isFetching &&
+                    !typingAhead &&
+                    inputValue.trim() &&
+                    filtered.length === 0 && (
+                      <p className="text-center text-xs text-muted-foreground">
+                        Try phone, GSTIN, or part of the name
+                      </p>
+                    )}
+                </CommandEmpty>
+                <CommandGroup>
+                  {filtered.map((party, index) => (
+                    <CommandItem
+                      key={party.id}
+                      value={String(party.id)}
+                      onSelect={() => handleSelect(party)}
+                      data-highlight-index={index}
+                      className="group cursor-pointer"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate">{party.name}</div>
+                        {formatPartyCitySummary(party) && (
+                          <div className="truncate text-xs text-foreground/70 group-data-[selected=true]:text-accent-foreground/95">
+                            {formatPartyCitySummary(party)}
+                          </div>
+                        )}
+                      </div>
+                      <Check
+                        className={cn(
+                          "h-4 w-4 shrink-0",
+                          value?.id === party.id
+                            ? "text-foreground opacity-100 group-data-[selected=true]:text-accent-foreground"
+                            : "opacity-0",
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                  {showAdd && (
+                    <CommandItem
+                      value={ADD_PARTY_VALUE}
+                      onSelect={() => {
+                        onAddParty?.((party) => {
+                          onValueChange(party);
+                          setOpen(false);
+                        }, trimmedInput);
+                      }}
+                      data-highlight-index={addIndex}
+                      className="group mt-1 cursor-pointer border-t border-border pt-1"
+                    >
+                      <Plus className="mr-2 h-4 w-4 text-muted-foreground group-data-[selected=true]:text-accent-foreground" />
+                      <span className="truncate text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                        {addLabel}
+                        {trimmedInput ? ` "${trimmedInput}"` : ""}
+                      </span>
+                    </CommandItem>
                   )}
-              </CommandEmpty>
-              <CommandGroup>
-                {filtered.map((party, index) => (
-                  <CommandItem
-                    key={party.id}
-                    value={String(party.id)}
-                    onSelect={() => handleSelect(party)}
-                    data-highlight-index={index}
-                    className="group cursor-pointer"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate">{party.name}</div>
-                      {formatPartyCitySummary(party) && (
-                        <div className="truncate text-xs text-foreground/70 group-data-[selected=true]:text-accent-foreground/95">
-                          {formatPartyCitySummary(party)}
-                        </div>
-                      )}
-                    </div>
-                    <Check
-                      className={cn(
-                        "h-4 w-4 shrink-0",
-                        value?.id === party.id
-                          ? "text-foreground opacity-100 group-data-[selected=true]:text-accent-foreground"
-                          : "opacity-0",
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-                {showAdd && (
-                  <CommandItem
-                    value={ADD_PARTY_VALUE}
-                    onSelect={() => {
-                      onAddParty?.((party) => {
-                        onValueChange(party);
-                        setOpen(false);
-                      }, trimmedInput);
-                    }}
-                    data-highlight-index={addIndex}
-                    className="group mt-1 cursor-pointer border-t border-border pt-1"
-                  >
-                    <Plus className="mr-2 h-4 w-4 text-muted-foreground group-data-[selected=true]:text-accent-foreground" />
-                    <span className="truncate text-muted-foreground group-data-[selected=true]:text-accent-foreground">
-                      {addLabel}
-                      {trimmedInput ? ` "${trimmedInput}"` : ""}
-                    </span>
-                  </CommandItem>
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </div>
         </PopoverContent>
       </Popover>
       {errorText ? (

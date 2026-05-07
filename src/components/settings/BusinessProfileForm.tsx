@@ -121,10 +121,13 @@ function CreatableTypeInput({
       </PopoverAnchor>
       <PopoverContent
         align="start"
-        className="w-[var(--radix-popover-trigger-width)] p-0"
+        className="w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Command shouldFilter={false}>
+        <Command
+          shouldFilter={false}
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md"
+        >
           <CommandList id={`${id}-options`} className="max-h-64">
             <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">
               {emptyMessage}

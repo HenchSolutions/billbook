@@ -104,12 +104,12 @@ export function StockSearchPopover({
       )}
       <PopoverContent
         align="start"
-        className="w-[min(38rem,calc(100vw-1rem))] p-0"
+        className="w-[min(38rem,calc(100vw-1rem))] border-0 bg-transparent p-0 shadow-none"
         onOpenAutoFocus={useInputTrigger ? (e) => e.preventDefault() : undefined}
       >
         <Command
           shouldFilter={false}
-          className="[&_[cmdk-item]:hover]:!bg-muted/45 [&_[cmdk-item]:hover]:!text-foreground [&_[cmdk-item][data-selected=true]]:!bg-muted/55 [&_[cmdk-item][data-selected=true]]:!text-foreground [&_[cmdk-item]]:transition-colors"
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md [&_[cmdk-item]:hover]:!bg-muted/45 [&_[cmdk-item]:hover]:!text-foreground [&_[cmdk-item][data-selected=true]]:!bg-muted/55 [&_[cmdk-item][data-selected=true]]:!text-foreground [&_[cmdk-item]]:transition-colors"
         >
           {!useInputTrigger ? (
             <div className="border-b p-2">

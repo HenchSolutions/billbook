@@ -47,7 +47,7 @@ export default function AuthModal({ redirectTo }: AuthModalProps) {
       }}
     >
       <DialogContent
-        className="w-[calc(100%-2rem)] max-w-md gap-0 overflow-hidden border-border/60 bg-background p-0 shadow-xl ring-1 ring-black/[0.06] dark:ring-white/[0.08] sm:rounded-lg"
+        className="w-[calc(100%-2rem)] max-w-md gap-0 overflow-visible border-0 bg-transparent p-0 shadow-none ring-0 sm:rounded-none sm:p-0"
         onOpenAutoFocus={(e) => {
           const target = e.currentTarget;
           if (!target || !(target instanceof HTMLElement)) return;

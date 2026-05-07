@@ -26,9 +26,9 @@ type CommandDialogProps = DialogProps;
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="gap-0 overflow-hidden rounded-xl border-border/80 p-0 shadow-2xl sm:max-w-xl">
+      <DialogContent className="gap-0 overflow-hidden border-0 bg-transparent p-0 shadow-none ring-0 sm:max-w-xl sm:p-0">
         <DialogTitle className="sr-only">Command menu</DialogTitle>
-        <Command className="[&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-col [&_[cmdk-group-items]]:gap-1 [&_[cmdk-group-items]]:pb-1 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-[18px] [&_[cmdk-input-wrapper]_svg]:w-[18px] [&_[cmdk-input-wrapper]_svg]:text-muted-foreground [&_[cmdk-input]]:min-h-[44px] [&_[cmdk-input]]:py-2.5 [&_[cmdk-input]]:text-sm [&_[cmdk-item]_svg]:h-4 [&_[cmdk-item]_svg]:w-4">
+        <Command className="rounded-xl border border-border/80 shadow-2xl [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-col [&_[cmdk-group-items]]:gap-1 [&_[cmdk-group-items]]:pb-1 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-[18px] [&_[cmdk-input-wrapper]_svg]:w-[18px] [&_[cmdk-input-wrapper]_svg]:text-muted-foreground [&_[cmdk-input]]:min-h-[44px] [&_[cmdk-input]]:py-2.5 [&_[cmdk-input]]:text-sm [&_[cmdk-item]_svg]:h-4 [&_[cmdk-item]_svg]:w-4">
           {children}
         </Command>
       </DialogContent>
