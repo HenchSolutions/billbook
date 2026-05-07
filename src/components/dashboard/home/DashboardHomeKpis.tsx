@@ -52,18 +52,19 @@ type MetricKind =
   | "empty";
 
 /**
- * Today vs period sales must read at a glance: “today” = warm amber/day clock;
- * period total sales = brand peach/coral pipeline (distinct families).
+ * Today vs period sales: “today” = warm amber/day clock; period/month sales = primary-blue tint.
+ * Purchase uses accent orange (outflow) — not green — so it stays distinct from positive profit.
  */
 const CARD_SHELL: Record<KpiTone, string> = {
   "today-sales":
     "border-[hsl(38_50%_82%)] bg-[hsl(48_70%_96%)] shadow-sm ring-1 ring-amber-200/50 dark:border-amber-900/35 dark:bg-amber-950/25 dark:ring-amber-900/40",
   "period-sales":
-    "border-[hsl(14_42%_86%)] bg-[hsl(14_62%_97%)] shadow-sm ring-1 ring-primary/20 dark:border-primary/25 dark:bg-primary/10 dark:ring-primary/20",
-  purchase: "border-[hsl(142_32%_88%)] bg-[hsl(142_48%_96%)] shadow-sm dark:border-emerald-900/30",
+    "border-[hsl(210_42%_88%)] bg-[hsl(210_62%_97%)] shadow-sm ring-1 ring-primary/20 dark:border-primary/25 dark:bg-primary/10 dark:ring-primary/20",
+  purchase:
+    "border-[hsl(22_42%_88%)] bg-[hsl(28_52%_97%)] shadow-sm ring-1 ring-accent/25 dark:border-accent/30 dark:bg-accent/10 dark:ring-accent/20",
   margin: "border-[hsl(206_38%_88%)] bg-[hsl(206_52%_97%)] shadow-sm dark:border-sky-900/35",
   "profit-positive":
-    "border-emerald-600/35 bg-gradient-to-br from-emerald-50 via-teal-50/90 to-emerald-100/70 shadow-md ring-2 ring-emerald-200/80 dark:border-emerald-500/30 dark:from-emerald-950/50 dark:via-emerald-950/35 dark:to-teal-950/40 dark:ring-emerald-700/50",
+    "border-emerald-600/35 bg-gradient-to-br from-emerald-50 via-teal-50/90 to-emerald-100/70 shadow-md ring-1 ring-emerald-200/80 dark:border-emerald-500/30 dark:from-emerald-950/50 dark:via-emerald-950/35 dark:to-teal-950/40 dark:ring-emerald-700/40",
   "profit-negative":
     "border-[hsl(0_50%_82%)] bg-[hsl(0_85%_97%)] shadow-sm ring-1 ring-red-200/60 dark:border-red-900/40 dark:bg-red-950/25",
   "profit-neutral":
@@ -89,10 +90,10 @@ const ICON_SOLID: Record<KpiTone, string> = {
   "today-sales":
     "bg-gradient-to-br from-amber-500 to-amber-600 shadow-md ring-1 ring-amber-400/30 dark:from-amber-600 dark:to-amber-700",
   "period-sales": "bg-primary shadow-md ring-1 ring-primary/25",
-  purchase: "bg-[hsl(152_52%_38%)] dark:bg-emerald-700",
+  purchase: "bg-accent shadow-md ring-1 ring-accent/35 dark:ring-accent/40",
   margin: "bg-[hsl(206_62%_50%)] dark:bg-sky-600",
   "profit-positive":
-    "bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md ring-2 ring-emerald-400/40 dark:from-emerald-500 dark:to-teal-600",
+    "bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md ring-1 ring-emerald-400/35 dark:from-emerald-500 dark:to-teal-600",
   "profit-negative": "bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700",
   "profit-neutral": "bg-[hsl(215_22%_42%)] dark:bg-slate-600",
   cash: "bg-[hsl(38_88%_46%)]",
@@ -140,51 +141,56 @@ function Kpi({
     <div
       className={cn(
         fluidMetricShellClass,
-        "flex h-full min-h-[112px] flex-col justify-center rounded-lg border p-6 transition-shadow duration-200 hover:shadow-md sm:min-h-[120px]",
+        "flex h-full min-h-[124px] flex-col rounded-lg border p-5 transition-shadow duration-200 hover:shadow-md sm:min-h-[128px] sm:p-6",
         profitElevated && "hover:shadow-lg",
         CARD_SHELL[tone],
       )}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-lg shadow-sm ring-1 ring-black/[0.06]",
-            ICON_SOLID[tone],
-          )}
-          aria-hidden
-        >
-          <Icon className="h-[22px] w-[22px] text-white" strokeWidth={1.85} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex items-center gap-1.5">
-            <p className="text-base font-medium leading-snug text-muted-foreground">{label}</p>
-            {hint ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex shrink-0 rounded-sm text-muted-foreground outline-none ring-offset-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    aria-label={`About ${label}`}
-                  >
-                    <HelpCircle className="h-4 w-4" aria-hidden />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
-                  {hint}
-                </TooltipContent>
-              </Tooltip>
-            ) : null}
-          </div>
-          <p
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div
             className={cn(
-              fluidDashboardKpiValueClass,
-              VALUE_CLASS[tone],
-              profitElevated && "tracking-tight",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg shadow-sm ring-1 ring-black/[0.06] sm:h-12 sm:w-12",
+              ICON_SOLID[tone],
             )}
+            aria-hidden
           >
-            {value}
-          </p>
+            <Icon className="h-5 w-5 text-white sm:h-[22px] sm:w-[22px]" strokeWidth={1.85} />
+          </div>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex min-h-[1.375rem] items-center gap-1.5">
+              <p className="text-sm font-medium leading-snug text-muted-foreground sm:text-base">
+                {label}
+              </p>
+              {hint ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex shrink-0 rounded-sm text-muted-foreground outline-none ring-offset-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      aria-label={`About ${label}`}
+                    >
+                      <HelpCircle className="h-4 w-4" aria-hidden />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
+                    {hint}
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
+            </div>
+          </div>
         </div>
+        <p
+          className={cn(
+            fluidDashboardKpiValueClass,
+            "mt-auto min-h-[2.5rem] pt-3 tabular-nums sm:min-h-[2.75rem] sm:pt-4",
+            VALUE_CLASS[tone],
+            profitElevated && "tracking-tight",
+          )}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -301,7 +307,7 @@ export function DashboardHomeKpis({
         </div>
       </div>
 
-      <div className="grid auto-rows-fr grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5 [&>*]:min-w-0">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5 [&>*]:min-w-0">
         <Kpi label="Today sales" value={todayStr} tone={todayTone} metricKind={todayKind} />
         <Kpi
           label={salesLabel}
