@@ -21,7 +21,7 @@ export default function SettingsPage() {
         <section aria-labelledby="org-settings-heading">
           <div className="mb-5 flex items-center gap-3">
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md"
               aria-hidden
             >
               <Building2 className="h-5 w-5" />
@@ -43,7 +43,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+          <div className="rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
             <div className="p-6 sm:p-8">
               <DocumentNumberingCard embedded />
             </div>

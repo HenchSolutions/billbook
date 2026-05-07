@@ -15,10 +15,10 @@ export default function NewOutboundPaymentPage() {
         backLabel="Back to payments"
       />
 
-      <Card className="overflow-hidden rounded-2xl border-border/70 shadow-md ring-1 ring-border/50">
+      <Card className="overflow-hidden rounded-lg border-border/60 shadow-md ring-1 ring-border/50">
         <CardHeader className="border-b border-border/60 bg-gradient-to-br from-muted/40 via-card to-card pb-5 sm:pb-6">
           <div className="flex flex-wrap items-start gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
               <Wallet className="h-5 w-5" aria-hidden />
             </div>
             <div className="min-w-0 flex-1 space-y-1">

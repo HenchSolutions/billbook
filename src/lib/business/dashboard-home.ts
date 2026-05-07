@@ -1,4 +1,4 @@
-import { humanizeApiEnum } from "@/lib/core/utils";
+import { formatDate, formatDateNumericINFromDate, humanizeApiEnum } from "@/lib/core/utils";
 import type {
   DashboardData,
   DashboardRecentLedgerRow,
@@ -29,7 +29,34 @@ export function snapshotLabelDate(dashboard: DashboardData): Date {
     const d = new Date(dashboard.snapshotDate);
     if (!isNaN(d.getTime())) return d;
   }
+  if (dashboard.filter === "custom" && dashboard.periodEnd) {
+    const d = new Date(dashboard.periodEnd);
+    if (!isNaN(d.getTime())) return d;
+  }
   return new Date();
+}
+
+/** Header subtitle — period range for custom filter, else “as of” date. */
+export function dashboardSnapshotCaption(dashboard: DashboardData): string {
+  if (dashboard.filter === "custom" && dashboard.periodStart && dashboard.periodEnd) {
+    return `${formatDate(dashboard.periodStart)} – ${formatDate(dashboard.periodEnd)}`;
+  }
+  return formatDateNumericINFromDate(snapshotLabelDate(dashboard));
+}
+
+/** Chart footnote from API metadata so monthly vs overall vs custom windows are explicit. */
+export function dashboardChartScopeFootnote(dashboard: DashboardData): string | null {
+  const t = dashboard.chartTrailingMonths;
+  if (t === 36) {
+    return "Bars show the last 36 months of invoice activity — not your entire history.";
+  }
+  if (t === 12) {
+    return "Bars show the last 12 months.";
+  }
+  if (dashboard.filter === "custom" && dashboard.periodStart && dashboard.periodEnd) {
+    return `Each bar is a calendar month from ${formatDate(dashboard.periodStart)} through ${formatDate(dashboard.periodEnd)}.`;
+  }
+  return null;
 }
 
 type SalesPurchaseChartRow = {

@@ -1,6 +1,7 @@
 import { Pencil, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DataTableRoot } from "@/components/ui/data-table";
 import { cn } from "@/lib/core/utils";
 import type { Item } from "@/types/item";
 import { getItemCategoryDisplay, getItemTaxDisplay, isServiceType } from "@/types/item";
@@ -14,48 +15,32 @@ interface ItemsTableProps {
 
 export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
   return (
-    <div className="data-table-container">
-      <table className="w-full text-sm" role="table" aria-label="Items list">
-        <thead>
-          <tr className="border-b border-border bg-muted/40">
-            <th className="min-w-[140px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Name
-            </th>
-            <th className="min-w-[70px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Type
-            </th>
-            <th className="hidden min-w-[90px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground md:table-cell">
-              Category
-            </th>
-            <th className="min-w-[52px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Unit
-            </th>
-            <th className="hidden min-w-[100px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground md:table-cell">
-              Tax
-            </th>
-            <th className="hidden min-w-[80px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:table-cell">
-              HSN / SAC
-            </th>
-            <th className="min-w-[88px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Actions
-            </th>
+    <DataTableRoot density="default">
+      <table className="data-table" role="table" aria-label="Items list">
+        <thead className="data-table-head-sticky">
+          <tr>
+            <th className="data-table-th min-w-[140px] px-4">Name</th>
+            <th className="data-table-th min-w-[70px]">Type</th>
+            <th className="data-table-th hidden min-w-[90px] md:table-cell">Category</th>
+            <th className="data-table-th min-w-[52px]">Unit</th>
+            <th className="data-table-th hidden min-w-[100px] md:table-cell">Tax</th>
+            <th className="data-table-th hidden min-w-[80px] lg:table-cell">HSN / SAC</th>
+            <th className="data-table-th min-w-[88px] text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody>
           {items.map((item) => (
             <tr
               key={item.id}
               className={cn(
-                "group transition-colors",
-                isServiceType(item.type) || !onViewLedger
-                  ? "cursor-default"
-                  : "cursor-pointer hover:bg-muted/30",
+                "data-table-row group",
+                isServiceType(item.type) || !onViewLedger ? "cursor-default" : "cursor-pointer",
               )}
               onClick={
                 !isServiceType(item.type) && onViewLedger ? () => onViewLedger(item.id) : undefined
               }
             >
-              <td className="px-4 py-3.5">
+              <td className="data-table-td px-4">
                 <span className="truncate font-medium text-foreground" title={item.name}>
                   {item.name}
                 </span>
@@ -73,24 +58,26 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                   </p>
                 )}
               </td>
-              <td className="px-3 py-3.5 align-middle">
+              <td className="data-table-td align-middle">
                 <Badge variant="secondary" className="text-xs font-medium">
                   {item.type}
                 </Badge>
               </td>
-              <td className="hidden px-3 py-3.5 align-middle text-muted-foreground md:table-cell">
+              <td className="data-table-td hidden align-middle text-muted-foreground md:table-cell">
                 <span className="truncate" title={getItemCategoryDisplay(item)}>
                   {getItemCategoryDisplay(item)}
                 </span>
               </td>
-              <td className="px-3 py-3.5 align-middle text-muted-foreground">{item.unit || "—"}</td>
-              <td className="hidden px-3 py-3.5 align-middle text-muted-foreground md:table-cell">
+              <td className="data-table-td align-middle text-muted-foreground">
+                {item.unit || "—"}
+              </td>
+              <td className="data-table-td hidden align-middle text-muted-foreground md:table-cell">
                 <span className="text-xs">{getItemTaxDisplay(item)}</span>
               </td>
-              <td className="hidden px-3 py-3.5 align-middle font-mono text-xs text-muted-foreground lg:table-cell">
+              <td className="data-table-td hidden align-middle font-mono text-xs text-muted-foreground lg:table-cell">
                 {item.hsnCode || item.sacCode || "—"}
               </td>
-              <td className="px-3 py-3.5 text-right align-middle">
+              <td className="data-table-td text-right align-middle">
                 <div
                   className={cn(
                     "grid items-center justify-end gap-1.5",
@@ -128,6 +115,6 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
           ))}
         </tbody>
       </table>
-    </div>
+    </DataTableRoot>
   );
 }

@@ -244,7 +244,7 @@ export function OutboundPaymentCreateForm() {
             </span>
             Type
           </div>
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-4 shadow-sm ring-1 ring-border/30">
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-4 shadow-sm ring-1 ring-border/30">
             <Label htmlFor="payment-type" className="mb-2 block">
               Payment type
             </Label>
@@ -318,7 +318,7 @@ export function OutboundPaymentCreateForm() {
                 />
               </div>
 
-              <div className="space-y-3 rounded-xl border border-dashed border-primary/25 bg-gradient-to-br from-primary/[0.06] to-transparent px-4 py-4 ring-1 ring-primary/10">
+              <div className="space-y-3 rounded-lg border border-dashed border-primary/25 bg-gradient-to-br from-primary/[0.06] to-transparent px-4 py-4 ring-1 ring-primary/10">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary/90">
                   {category === "SALE_RETURN_REFUND"
                     ? "Link sales returns"

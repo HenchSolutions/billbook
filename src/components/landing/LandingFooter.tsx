@@ -5,8 +5,8 @@ import Logo from "@/components/Logo";
 
 export function LandingFooter() {
   return (
-    <footer className="border-t bg-muted/10">
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+    <footer className="border-t border-border/60 bg-muted/10">
+      <div className="marketing-container py-12">
         <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <Logo className="h-9 w-9" />

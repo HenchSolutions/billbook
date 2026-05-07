@@ -2,6 +2,8 @@
 
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AUTH_CARD_SURFACE_CLASS } from "@/lib/ui/auth-card-classes";
+import { cn } from "@/lib/core/utils";
 
 interface RoleGroupBlockedOverlayProps {
   message: string;
@@ -24,7 +26,7 @@ export function RoleGroupBlockedOverlay({
       aria-labelledby="role-group-blocked-title"
       aria-describedby="role-group-blocked-desc"
     >
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-lg">
+      <div className={cn("w-full max-w-md rounded-lg p-8", AUTH_CARD_SURFACE_CLASS)}>
         <h2 id="role-group-blocked-title" className="text-lg font-semibold tracking-tight">
           Access paused
         </h2>

@@ -14,8 +14,8 @@ const TAB_ITEMS = [
 
 export function LandingFeatureTabs() {
   return (
-    <section id="features" className="scroll-mt-24 bg-muted/30">
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+    <section id="features" className="scroll-mt-24 border-t border-border/60 bg-muted/30">
+      <div className="marketing-container py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
             Everything in one place
@@ -32,12 +32,12 @@ export function LandingFeatureTabs() {
         <div className="mt-12">
           <Tabs defaultValue="invoicing" className="w-full">
             <div className="flex justify-center">
-              <TabsList className="h-auto gap-0 rounded-2xl bg-background p-1.5 shadow-sm ring-1 ring-border">
+              <TabsList className="h-auto gap-0 rounded-lg bg-background p-1 shadow-sm ring-1 ring-border/60">
                 {TAB_ITEMS.map(({ value, label, Icon }) => (
                   <TabsTrigger
                     key={value}
                     value={value}
-                    className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all data-[state=active]:shadow-sm"
+                    className="flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-sidebar-accent data-[state=active]:text-sidebar-accent-foreground data-[state=active]:shadow-sm"
                   >
                     <Icon className="h-4 w-4" />
                     <span className="hidden sm:inline">{label}</span>

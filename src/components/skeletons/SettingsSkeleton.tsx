@@ -24,13 +24,13 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
           <section className="space-y-5">
             <div className="flex items-center gap-3">
-              <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
+              <Skeleton className="h-11 w-11 shrink-0 rounded-lg" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-6 w-56" />
                 <Skeleton className="h-4 w-full max-w-lg" />
               </div>
             </div>
-            <div className="rounded-2xl border border-border/80 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+            <div className="rounded-lg border border-border/60 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
               <div className="space-y-4 p-6 sm:p-8">
                 <Skeleton className="h-5 w-48" />
                 <Skeleton className="h-10 w-full" />
@@ -48,7 +48,7 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
 
           <section className="space-y-4">
             <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-40 rounded-xl border" />
+            <Skeleton className="h-40 rounded-lg border" />
           </section>
         </div>
       </div>
@@ -70,14 +70,14 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
         </div>
 
         <div className="mx-auto max-w-3xl space-y-6">
-          <Skeleton className="h-36 w-full rounded-xl border" />
-          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-36 w-full rounded-lg border" />
+          <Skeleton className="h-14 w-full rounded-lg" />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
           </div>
-          <Skeleton className="h-64 rounded-xl border" />
-          <Skeleton className="h-48 rounded-xl border" />
+          <Skeleton className="h-64 rounded-lg border" />
+          <Skeleton className="h-48 rounded-lg border" />
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
         <Skeleton className="h-8 w-48" />
         <Skeleton className="mt-2 h-4 w-64" />
       </div>
-      <Skeleton className="h-96 max-w-2xl rounded-xl" />
+      <Skeleton className="h-96 max-w-2xl rounded-lg" />
     </div>
   );
 }

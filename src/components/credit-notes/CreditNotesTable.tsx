@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LinkedInvoiceLink } from "@/components/invoices/LinkedInvoiceLink";
 import { Button } from "@/components/ui/button";
+import { DataTableRoot } from "@/components/ui/data-table";
 import { formatCurrency } from "@/lib/core/utils";
 import {
   creditNotePartyNameDisplay,
@@ -35,47 +36,29 @@ function canAllocateCreditNote(cn: CreditNoteSummary): boolean {
 
 export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps) {
   return (
-    <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
-      <table className="w-full text-sm" role="table" aria-label="Credit notes list">
-        <thead>
-          <tr className="border-b bg-muted/30">
-            <th
-              scope="col"
-              className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-6"
-            >
+    <DataTableRoot density="default" className="-mx-1 px-1 sm:mx-0 sm:px-0">
+      <table className="data-table" role="table" aria-label="Credit notes list">
+        <thead className="data-table-head-sticky">
+          <tr>
+            <th scope="col" className="data-table-th px-4 sm:px-6">
               Credit note
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-left font-medium text-muted-foreground md:table-cell"
-            >
+            <th scope="col" className="data-table-th hidden md:table-cell">
               Customer
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-left font-medium text-muted-foreground md:table-cell"
-            >
+            <th scope="col" className="data-table-th hidden md:table-cell">
               Linked invoice
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-left font-medium text-muted-foreground lg:table-cell"
-            >
+            <th scope="col" className="data-table-th hidden lg:table-cell">
               Reason
             </th>
-            <th scope="col" className="px-3 py-3 text-right font-medium text-muted-foreground">
+            <th scope="col" className="data-table-th data-table-col-numeric">
               Amount
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-right font-medium text-muted-foreground sm:table-cell"
-            >
+            <th scope="col" className="data-table-th data-table-col-numeric hidden sm:table-cell">
               Unallocated
             </th>
-            <th
-              scope="col"
-              className="px-2 py-3 text-right font-medium text-muted-foreground sm:px-3"
-            >
+            <th scope="col" className="data-table-th data-table-col-numeric px-2 sm:px-3">
               Actions
             </th>
           </tr>
@@ -89,13 +72,13 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
             return (
               <tr
                 key={cn.id}
-                className="border-b transition-colors last:border-0 hover:bg-muted/20"
+                className="data-table-row last:border-0"
                 role="button"
                 tabIndex={0}
                 onClick={() => onView(cn.id)}
                 onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onView(cn.id)}
               >
-                <td className="min-w-0 max-w-[min(100vw-4rem,28rem)] px-4 py-3 font-medium sm:max-w-none sm:px-6">
+                <td className="data-table-td min-w-0 max-w-[min(100vw-4rem,28rem)] px-4 font-medium sm:max-w-none sm:px-6">
                   <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2 md:block">
                     <button
                       type="button"
@@ -119,21 +102,21 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                   </div>
                 </td>
                 <td
-                  className="hidden max-w-[200px] truncate px-3 py-3 text-muted-foreground md:table-cell"
+                  className="data-table-td hidden max-w-[200px] truncate text-muted-foreground md:table-cell"
                   title={partyLabel}
                 >
                   {partyLabel}
                 </td>
-                <td className="hidden px-3 py-3 md:table-cell">
+                <td className="data-table-td hidden md:table-cell">
                   <LinkedInvoiceLink {...sourceInvoiceProps} onClick={(e) => e.stopPropagation()} />
                 </td>
-                <td className="hidden max-w-[200px] truncate px-3 py-3 text-muted-foreground lg:table-cell">
+                <td className="data-table-td hidden max-w-[200px] truncate text-muted-foreground lg:table-cell">
                   {cn.reason ?? "—"}
                 </td>
-                <td className="px-3 py-3 text-right font-medium tabular-nums">
+                <td className="data-table-td data-table-col-numeric font-medium">
                   {formatCurrency(cn.amount)}
                 </td>
-                <td className="hidden px-3 py-3 text-right tabular-nums sm:table-cell">
+                <td className="data-table-td data-table-col-numeric hidden sm:table-cell">
                   {unalloc != null ? (
                     unalloc > 0.001 ? (
                       <span className="font-medium text-amber-800 dark:text-amber-200">
@@ -146,7 +129,7 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-2 py-3 text-right sm:px-3">
+                <td className="data-table-td data-table-col-numeric px-2 sm:px-3">
                   <div
                     className="flex flex-wrap items-center justify-end gap-1 sm:justify-end sm:gap-1.5"
                     onClick={(e) => e.stopPropagation()}
@@ -173,6 +156,6 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
           })}
         </tbody>
       </table>
-    </div>
+    </DataTableRoot>
   );
 }

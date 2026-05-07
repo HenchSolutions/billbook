@@ -3,6 +3,7 @@ import { ExternalLink, ListOrdered } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataTableRoot } from "@/components/ui/data-table";
 import TablePagination from "@/components/TablePagination";
 import { formatCurrency, formatDate } from "@/lib/core/utils";
 import { openSignedPdfFromApiPath } from "@/lib/ui/signed-pdf";
@@ -54,7 +55,7 @@ export function OutboundPaymentsTable({
   partyNamesById,
 }: OutboundPaymentsTableProps) {
   return (
-    <Card className="overflow-hidden rounded-xl border-border/70 shadow-md ring-1 ring-border/40">
+    <Card className="overflow-hidden rounded-lg border-border/60 shadow-md ring-1 ring-border/40">
       <CardContent className="p-0">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 bg-muted/20 px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -70,49 +71,40 @@ export function OutboundPaymentsTable({
             of {total}
           </p>
         </div>
-        <div className="data-table-container overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="border-b border-border/60 bg-muted/35">
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Voucher
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Type
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <DataTableRoot density="default" className="overflow-x-auto border-0 shadow-none">
+          <table className="data-table min-w-[720px]">
+            <thead className="data-table-head-sticky">
+              <tr>
+                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Voucher</th>
+                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Type</th>
+                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Date</th>
+                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">
                   Party / payee
                 </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Method
-                </th>
-                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Method</th>
+                <th className="data-table-th data-table-col-numeric px-4 text-[11px] uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="data-table-th data-table-col-numeric px-4 text-[11px] uppercase tracking-wider">
                   PDF
                 </th>
               </tr>
             </thead>
             <tbody className="[&_tr:nth-child(even)]:bg-muted/15">
               {payments.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-b border-border/50 transition-colors last:border-0 hover:bg-muted/40"
-                >
-                  <td className="px-4 py-3.5 font-medium tabular-nums text-foreground">
+                <tr key={p.id} className="data-table-row last:border-0">
+                  <td className="data-table-td px-4 font-medium tabular-nums text-foreground">
                     {p.paymentNumber}
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="data-table-td px-4">
                     <Badge variant="outline" className="whitespace-nowrap shadow-sm">
                       {OUTBOUND_CATEGORY_LABELS[p.category] ?? p.category}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3.5 text-muted-foreground">{formatDate(p.createdAt)}</td>
-                  <td className="max-w-[200px] px-4 py-3.5">
+                  <td className="data-table-td px-4 text-muted-foreground">
+                    {formatDate(p.createdAt)}
+                  </td>
+                  <td className="data-table-td max-w-[200px] px-4">
                     <span className="truncate">{outboundPartyDisplayName(p, partyNamesById)}</span>
                     {p.invoiceId != null && p.category === "SALE_RETURN_REFUND" && (
                       <div className="mt-0.5 text-xs">
@@ -135,15 +127,15 @@ export function OutboundPaymentsTable({
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="data-table-td px-4">
                     <Badge variant="outline" className="font-normal shadow-sm">
                       {PAYMENT_METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3.5 text-right font-semibold tabular-nums text-rose-700 dark:text-rose-400">
+                  <td className="data-table-td data-table-col-numeric px-4 font-semibold text-rose-700 dark:text-rose-400">
                     {formatCurrency(p.amount)}
                   </td>
-                  <td className="px-4 py-3.5 text-right">
+                  <td className="data-table-td data-table-col-numeric px-4">
                     <Button
                       type="button"
                       variant="outline"
@@ -164,7 +156,7 @@ export function OutboundPaymentsTable({
               ))}
             </tbody>
           </table>
-        </div>
+        </DataTableRoot>
         {totalPages > 1 ? (
           <div className="border-t border-border/60 bg-muted/15 px-4 py-3 sm:px-5">
             <TablePagination

@@ -10,17 +10,21 @@ const NotFound = () => {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 p-4">
-      <div className="animate-fade-in text-center">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.07),_transparent_55%)]"
+      />
+      <div className="relative animate-fade-in text-center">
         <div className="mb-8 flex justify-center">
           <Logo className="h-16 w-16" showText={false} />
         </div>
 
         <div className="mb-6">
           <h1 className="mb-2 text-8xl font-extrabold tracking-tight">
-            <span className="gradient-text">404</span>
+            <span className="text-primary">404</span>
           </h1>
-          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-primary to-accent"></div>
+          <div className="mx-auto h-1 w-24 rounded-full bg-primary/60"></div>
         </div>
 
         <h2 className="mb-3 text-2xl font-bold text-foreground">Page not found</h2>
@@ -42,9 +46,9 @@ const NotFound = () => {
         </div>
 
         <div className="mt-12 flex justify-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-primary/60"></div>
-          <div className="animation-delay-200 h-2 w-2 animate-pulse rounded-full bg-accent/60"></div>
-          <div className="animation-delay-400 h-2 w-2 animate-pulse rounded-full bg-primary/60"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-primary/50"></div>
+          <div className="animation-delay-200 h-2 w-2 animate-pulse rounded-full bg-chart-1/50"></div>
+          <div className="animation-delay-400 h-2 w-2 animate-pulse rounded-full bg-chart-3/45"></div>
         </div>
       </div>
     </div>

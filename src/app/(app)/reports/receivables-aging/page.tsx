@@ -122,7 +122,7 @@ export default function ReceivablesAgingPage() {
           />
         </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
           Enter a valid as-of date.
         </p>
       )}

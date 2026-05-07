@@ -11,12 +11,12 @@ export const reportHub = {
 export const reportDashboard = {
   sectionActivity: "In this period",
   sectionActivityDescription:
-    "Receipt register, sales & purchase invoices, and payment register totals for the date range above.",
+    "Receipt register, posted (final-only) sales & purchase invoices, and payment register totals for the date range above.",
   sectionBalances: "Money owed",
   sectionBalancesDescription:
     "Debt register and Payables register use each party’s current balance — independent of the date range above.",
   kpiReceipts: "Receipt register",
-  kpiInvoices: "Invoices",
+  kpiInvoices: "Posted invoices",
   kpiInvoicesSalesCta: "Sales register",
   kpiInvoicesPurchaseCta: "Purchase register",
   kpiPayouts: "Payment register",
@@ -49,7 +49,8 @@ export const reportItemRegister = {
 
 export const reportInvoiceRegister = {
   title: "Sales register",
-  description: "Sales invoices and sales returns in the selected period.",
+  description:
+    "Posted (final) sales invoices and sales returns in the selected period — drafts appear here after you finalize them.",
   loadError: "Failed to load sales register",
   csvFilename: "sales-register.csv",
   pdfFilename: "sales-register.pdf",
@@ -58,7 +59,8 @@ export const reportInvoiceRegister = {
 
 export const reportPurchaseRegister = {
   title: "Purchase register",
-  description: "Purchase invoices and purchase returns in the selected period.",
+  description:
+    "Posted (final) purchase invoices and purchase returns in the selected period — drafts appear here after you finalize them.",
   loadError: "Failed to load purchase register",
   csvFilename: "purchase-register.csv",
   pdfFilename: "purchase-register.pdf",

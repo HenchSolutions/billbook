@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import ErrorBanner from "@/components/ErrorBanner";
+import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import DateRangePicker from "@/components/DateRangePicker";
 import { TaxItemizedTable, TaxSummaryTable } from "@/components/tax/TaxSections";
@@ -124,9 +125,12 @@ export default function Tax() {
               invoiceCount={invoiceCountAllMonths}
             />
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No GST data for this period.
-            </p>
+            <EmptyState
+              icon={<FileSpreadsheet className="h-5 w-5" />}
+              title="No GST summary data"
+              description="No GST summary records are available for this date range."
+              secondaryDescription="Is period mein GST summary entries nahi mili."
+            />
           )}
         </TabsContent>
 
@@ -136,9 +140,12 @@ export default function Tax() {
           ) : gstItemized && (gstItemized.data ?? []).length > 0 ? (
             <TaxItemizedTable rows={gstItemized.data ?? []} />
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No itemized tax data for this period.
-            </p>
+            <EmptyState
+              icon={<FileSpreadsheet className="h-5 w-5" />}
+              title="No itemized tax data"
+              description="No itemized GST rows are available for this date range."
+              secondaryDescription="Is period ke liye item-wise tax rows available nahi hain."
+            />
           )}
         </TabsContent>
       </Tabs>

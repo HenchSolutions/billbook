@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AUTH_CARD_SURFACE_CLASS } from "@/lib/ui/auth-card-classes";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
@@ -182,7 +183,7 @@ export default function LoginCard({
   const adminOrgHint = isReservedAdminOrganizationCode(organizationCode?.trim() ?? "");
 
   return (
-    <Card className="border-border/50 shadow-lg backdrop-blur-sm">
+    <Card className={AUTH_CARD_SURFACE_CLASS}>
       <CardHeader className="pb-4 text-center">
         <CardTitle className="text-xl">Welcome back</CardTitle>
         <CardDescription>
@@ -206,7 +207,7 @@ export default function LoginCard({
             </div>
           )}
           {info && (
-            <div className="whitespace-pre-line rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+            <div className="whitespace-pre-line rounded-md border border-border/60 bg-muted/25 p-3 text-sm text-muted-foreground">
               {info}
             </div>
           )}
@@ -372,12 +373,15 @@ export default function LoginCard({
               <button
                 type="button"
                 onClick={onRequestSignup}
-                className="font-medium text-accent hover:underline"
+                className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
               >
                 Sign up
               </button>
             ) : (
-              <Link href="/?auth=signup" className="font-medium text-accent hover:underline">
+              <Link
+                href="/?auth=signup"
+                className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
+              >
                 Sign up
               </Link>
             )}

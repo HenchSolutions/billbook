@@ -206,6 +206,11 @@ export function InvoicesByTypePage({
               ? `No invoices match "${debouncedSearch}". Try a different search or clear filters.`
               : `Create your first ${title.toLowerCase()} to get started.`
           }
+          secondaryDescription={
+            debouncedSearch
+              ? "Koi record match nahi hua. Filter clear karke dobara try karein."
+              : "Apna pehla bill banaiye - invoice workflow yahin se start hota hai."
+          }
           action={
             !debouncedSearch && allowCreate ? (
               <Button size="sm" asChild>

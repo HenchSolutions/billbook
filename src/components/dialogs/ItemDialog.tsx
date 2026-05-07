@@ -64,6 +64,7 @@ import {
 import { queryKeys } from "@/lib/query/keys";
 import { capitaliseWords } from "@/lib/core/utils";
 import type { Item, Category, CreateItemRequest, ItemListResponse, Unit } from "@/types/item";
+import { isValidHsnCode } from "@/lib/india/validators";
 
 function defaultUnitForType(type: "STOCK" | "SERVICE"): string {
   return type === "SERVICE" ? "hr" : "nos";
@@ -241,6 +242,7 @@ export default function ItemDialog({
   });
 
   const productType = watch("type");
+  const hsnCodeValue = watch("hsnCode");
   const cgstRateW = watch("cgstRate");
   const sgstRateW = watch("sgstRate");
   const taxTypeW = watch("taxType");
@@ -253,6 +255,8 @@ export default function ItemDialog({
   const [showCategoryError, setShowCategoryError] = useState(false);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
   const isItemActive = watch("isActive");
+  const normalizedHsn = (hsnCodeValue ?? "").trim();
+  const hsnFormatInvalid = normalizedHsn.length > 0 && !isValidHsnCode(normalizedHsn);
 
   // Reset form when dialog opens or edited item changes. Omit `categories` from deps so that
   // adding a category (which refetches categories) does not reset the form or clear selection.
@@ -663,9 +667,19 @@ export default function ItemDialog({
                     <Input
                       className="placeholder:opacity-80"
                       maxLength={8}
-                      {...register("hsnCode")}
+                      aria-invalid={!!errors.hsnCode || hsnFormatInvalid}
+                      {...register("hsnCode", {
+                        onChange: (e) => {
+                          e.target.value = String(e.target.value ?? "")
+                            .replace(/\D/g, "")
+                            .slice(0, 8);
+                        },
+                      })}
                       placeholder="e.g. 998314"
                     />
+                    {!errors.hsnCode && hsnFormatInvalid ? (
+                      <FieldError>HSN should be 4, 6, or 8 digits.</FieldError>
+                    ) : null}
                   </div>
                   <div className="space-y-2">
                     <Label>SAC Code</Label>

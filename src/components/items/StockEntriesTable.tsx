@@ -138,7 +138,7 @@ export function StockEntriesTable({
                 <tr
                   key={entry.id}
                   className={cn(
-                    "border-b border-border/80 transition-colors hover:bg-muted/30",
+                    "border-b border-border/60 transition-colors hover:bg-muted/30",
                     i % 2 === 1 && "bg-muted/10",
                   )}
                 >

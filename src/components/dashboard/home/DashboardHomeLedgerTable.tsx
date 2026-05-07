@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import {
   ledgerTypeLabel,
   type ActivityTabFilter,
 } from "@/lib/business/dashboard-home";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PAGE } from "@/constants/page-access";
 
 const PAGE_SIZE = 8;
 
@@ -28,6 +31,8 @@ const ACTIVITY_TABS: { value: ActivityTabFilter; label: string }[] = [
 ];
 
 export function DashboardHomeLedgerTable({ dashboard }: DashboardHomeLedgerTableProps) {
+  const { can } = usePermissions();
+  const canReports = can(PAGE.reports);
   const allRows = useMemo(() => buildRecentActivityRows(dashboard), [dashboard]);
   const [tab, setTab] = useState<ActivityTabFilter>("all");
   const [page, setPage] = useState(1);
@@ -46,18 +51,27 @@ export function DashboardHomeLedgerTable({ dashboard }: DashboardHomeLedgerTable
 
   return (
     <section>
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-sm">
-        <CardHeader className="pb-3 sm:pb-4">
-          <div className="min-w-0">
-            <CardTitle className="text-base font-semibold">Recent activity</CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-              Latest movements. Use the tabs to filter by type.
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 pb-3">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-lg font-semibold tracking-tight">Recent activity</CardTitle>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Latest movements. Use the tabs to filter by type — open Reports for full registers and
+              exports.
             </p>
           </div>
+          {canReports ? (
+            <Link
+              href="/reports"
+              className="shrink-0 text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
+            >
+              All reports
+            </Link>
+          ) : null}
         </CardHeader>
         <CardContent className="pt-0">
           <Tabs value={tab} onValueChange={onTabChange} className="w-full">
-            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-lg bg-muted/50 p-1 sm:w-auto">
+            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5 sm:w-auto">
               {ACTIVITY_TABS.map((t) => (
                 <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">
                   {t.label}
@@ -97,7 +111,7 @@ function PaginatedActivityTable({
   const end = start + pageRows.length;
 
   return (
-    <div className="rounded-xl border border-border/70 bg-background/80">
+    <div className="rounded-lg border border-border/60 bg-muted/15">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] text-sm" aria-label="Recent activity">
           <thead className="sticky top-0 z-[1] bg-muted/60 backdrop-blur-sm">

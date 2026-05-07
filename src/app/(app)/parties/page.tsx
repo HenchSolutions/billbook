@@ -89,6 +89,11 @@ export default function Parties() {
               ? `No customers match "${debouncedSearch}". Try a different search or add a new customer.`
               : "Add your first customer to get started."
           }
+          secondaryDescription={
+            debouncedSearch
+              ? "Customer nahi mila. Search text badal kar dekhein."
+              : "Pehla customer add karke billing aur collection track karna shuru karein."
+          }
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />

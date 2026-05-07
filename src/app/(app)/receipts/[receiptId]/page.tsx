@@ -86,7 +86,7 @@ export default function ReceiptDetailPage() {
     <div className="page-container max-w-5xl animate-fade-in space-y-8 pb-10">
       <PageBackLink href="/receipts">Back to receipts</PageBackLink>
 
-      <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm">
         <div className="grid lg:grid-cols-[1fr_minmax(280px,340px)] lg:items-stretch">
           <div className="flex flex-col gap-6 border-b border-border/60 p-6 sm:p-8 lg:border-b-0 lg:border-r lg:border-border/60">
             <div className="flex flex-wrap items-center gap-2">
@@ -158,7 +158,7 @@ export default function ReceiptDetailPage() {
             </div>
 
             {receipt.notes?.trim() && (
-              <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-4 text-sm">
+              <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-4 text-sm">
                 <span className="font-medium text-foreground">Notes</span>
                 <p className="mt-1.5 whitespace-pre-wrap text-muted-foreground">{receipt.notes}</p>
               </div>
@@ -255,7 +255,7 @@ export default function ReceiptDetailPage() {
       <ErrorBanner error={error} />
 
       {(appliedAllocations.length > 0 || openingSettled > 0.001) && (
-        <Card className="overflow-hidden rounded-2xl border-border/80 shadow-sm">
+        <Card className="overflow-hidden rounded-lg border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/15 px-6 py-4 sm:px-8">
             <CardTitle className="text-lg font-semibold tracking-tight">
               Where this receipt is tagged
@@ -265,7 +265,7 @@ export default function ReceiptDetailPage() {
             </p>
           </CardHeader>
           <CardContent className="px-6 py-4 sm:px-8 sm:py-6">
-            <div className="overflow-x-auto rounded-lg border border-border/80">
+            <div className="overflow-x-auto rounded-lg border border-border/60">
               <table className="w-full min-w-[320px] text-sm">
                 <thead>
                   <tr className="border-b bg-muted/40 text-left">

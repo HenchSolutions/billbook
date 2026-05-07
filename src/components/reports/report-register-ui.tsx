@@ -12,11 +12,11 @@ export function ReportRegisterSearchCard({
   return (
     <div
       className={cn(
-        "mb-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm",
+        "mb-4 overflow-hidden rounded-lg border border-border bg-card shadow-sm",
         className,
       )}
     >
-      <div className="flex items-center gap-2 border-b border-border/70 bg-muted/30 px-4 py-2">
+      <div className="flex items-center gap-2 border-b border-border/60 bg-muted/30 px-4 py-2">
         <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
         <span className="text-xs font-semibold text-foreground">Search</span>
       </div>
@@ -36,7 +36,7 @@ export function ReportRegisterFilterCard({
   return (
     <div
       className={cn(
-        "mb-4 rounded-xl border border-border bg-card px-3 py-3 shadow-sm sm:px-4",
+        "mb-4 rounded-lg border border-border bg-card px-3 py-3 shadow-sm sm:px-4",
         className,
       )}
     >
@@ -82,7 +82,7 @@ export function ReportRegisterFilterGroup({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-lg border border-border/70 bg-muted/15 p-2.5 sm:p-3", className)}>
+    <div className={cn("rounded-lg border border-border/60 bg-muted/15 p-2.5 sm:p-3", className)}>
       {title ? (
         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {title}
@@ -98,13 +98,17 @@ export function ReportRegisterResultBar({
   count,
   rowLabel,
   limit,
+  /** API row count before client-side filters — used only for the truncation hint. */
+  truncationHintCount,
 }: {
   count: number;
   /** e.g. "receipts", "invoices" — plural, lowercase */
   rowLabel: string;
   limit?: number;
+  truncationHintCount?: number;
 }) {
-  const maybeTruncated = limit !== undefined && count > 0 && count >= limit;
+  const trunc = truncationHintCount ?? count;
+  const maybeTruncated = limit !== undefined && trunc > 0 && trunc >= limit;
 
   return (
     <div className="border-b border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
@@ -142,7 +146,7 @@ export function ReportRegisterSummaryCard({
   return (
     <div
       className={cn(
-        "rounded-xl border px-5 py-4 text-sm shadow-sm",
+        "rounded-lg border px-5 py-4 text-sm shadow-sm",
         variant === "emerald" &&
           "border-emerald-500/20 bg-emerald-500/[0.06] dark:bg-emerald-500/10",
         variant === "rose" && "border-rose-500/20 bg-rose-500/[0.06] dark:bg-rose-500/10",
@@ -155,23 +159,19 @@ export function ReportRegisterSummaryCard({
 
 /** Scroll + card shell; put thead sticky inside. */
 export function ReportRegisterTableScroll({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-      {children}
-    </div>
-  );
+  return <div className="data-table-container">{children}</div>;
 }
 
 export const rr = {
-  table: "w-full min-w-[880px] border-collapse text-sm",
-  thead: "sticky top-0 z-[1] border-b border-border bg-muted/70 backdrop-blur-sm dark:bg-muted/80",
-  th: "whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+  table: "data-table min-w-[880px] border-collapse",
+  thead: "data-table-head-sticky",
+  th: "data-table-th whitespace-nowrap px-4 text-xs uppercase tracking-wide",
   thRight:
-    "whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground",
-  td: "px-4 py-3 align-middle text-foreground",
-  tdMuted: "px-4 py-3 align-middle text-sm text-muted-foreground",
-  tdRight: "px-4 py-3 text-right align-middle tabular-nums text-foreground",
-  tdRightMuted: "px-4 py-3 text-right align-middle tabular-nums text-muted-foreground",
-  tr: "border-b border-border/70 transition-colors last:border-b-0 hover:bg-muted/35",
+    "data-table-th data-table-col-numeric whitespace-nowrap px-4 text-xs uppercase tracking-wide",
+  td: "data-table-td px-4 align-middle text-foreground",
+  tdMuted: "data-table-td px-4 align-middle text-sm text-muted-foreground",
+  tdRight: "data-table-td data-table-col-numeric px-4 align-middle text-foreground",
+  tdRightMuted: "data-table-td data-table-col-numeric px-4 align-middle text-muted-foreground",
+  tr: "data-table-row last:border-b-0",
   link: "font-medium text-primary underline-offset-4 hover:underline",
 } as const;

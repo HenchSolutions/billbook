@@ -140,7 +140,7 @@ export default function AdminBusinessesPage() {
         </div>
       )}
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="overflow-hidden border-border/60 shadow-sm">
         <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>

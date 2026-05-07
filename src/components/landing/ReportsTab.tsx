@@ -62,7 +62,7 @@ const CAPTIONS = [
 export function ReportsTab() {
   return (
     <TabsContent value="reports" className="mt-8 motion-safe:animate-fade-in">
-      <div className="overflow-hidden rounded-3xl border bg-background shadow-lg ring-1 ring-border/60">
+      <div className="overflow-hidden rounded-lg border bg-background shadow-lg ring-1 ring-border/60">
         <div className="flex items-center justify-between border-b bg-muted/40 px-6 py-4">
           <div>
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Reports</p>
@@ -81,7 +81,7 @@ export function ReportsTab() {
         <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4">
           {KPI_ITEMS.map(({ label, value, sub, Icon, color }) => (
             <div key={label} className="flex items-center gap-4 bg-background px-5 py-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted/60">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/60">
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>

@@ -15,10 +15,10 @@ import {
 
 const METHOD_STYLES: Record<string, string> = {
   CASH: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  UPI: "bg-blue-50 text-blue-700 border-blue-200",
+  UPI: "bg-primary/10 text-primary border-primary/25",
   CHEQUE: "bg-amber-50 text-amber-700 border-amber-200",
   BANK_TRANSFER: "bg-purple-50 text-purple-700 border-purple-200",
-  CARD: "bg-sky-50 text-sky-700 border-sky-200",
+  CARD: "bg-secondary text-secondary-foreground border-border",
 };
 
 function sourceLabel(line: InvoicePaymentLine): string {
@@ -35,7 +35,7 @@ function sourceLabel(line: InvoicePaymentLine): string {
 function sourceBadgeClass(line: InvoicePaymentLine): string {
   switch (line.source) {
     case "RECEIPT_ALLOCATION":
-      return "bg-violet-50 text-violet-800 border-violet-200";
+      return "border-primary/25 bg-primary/[0.07] text-foreground";
     case "OUTBOUND_REFUND":
       return "bg-rose-50 text-rose-800 border-rose-200";
     default:

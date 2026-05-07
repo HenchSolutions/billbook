@@ -18,7 +18,7 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <div className="mb-6 overflow-hidden rounded-xl border">
+      <div className="mb-6 overflow-hidden rounded-lg border">
         <Skeleton className="h-1.5 w-full rounded-none" />
         <div className="space-y-5 p-6">
           <div className="flex items-start justify-between gap-4">
@@ -48,13 +48,13 @@ export default function InvoiceDetailSkeleton() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+          <Skeleton key={i} className="h-28 rounded-lg" />
         ))}
       </div>
 
       <div className="mb-6 space-y-2">
         <Skeleton className="h-5 w-32" />
-        <div className="rounded-xl border p-4">
+        <div className="rounded-lg border p-4">
           <div className="mb-3 flex gap-4 border-b pb-3">
             <Skeleton className="h-4 flex-1" />
             <Skeleton className="h-4 w-16" />
@@ -67,8 +67,8 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <Skeleton className="mb-6 h-36 rounded-xl" />
-      <Skeleton className="h-48 rounded-xl" />
+      <Skeleton className="mb-6 h-36 rounded-lg" />
+      <Skeleton className="h-48 rounded-lg" />
     </div>
   );
 }

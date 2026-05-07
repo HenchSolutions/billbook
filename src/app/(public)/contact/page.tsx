@@ -19,12 +19,12 @@ export default function ContactPage() {
 
   return (
     <PublicMarketingShell>
-      <div className="relative overflow-hidden border-b bg-gradient-to-br from-muted/40 via-background to-background">
+      <div className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-muted/40 via-background to-background">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
         />
-        <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
+        <div className="marketing-container relative py-16 lg:py-20">
           <h1 className="max-w-2xl text-balance text-4xl font-semibold tracking-tight text-foreground">
             Let&apos;s talk
           </h1>
@@ -35,7 +35,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-12 lg:px-8 lg:py-20">
+      <div className="marketing-container grid gap-10 py-16 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-5">
           <h2 className="text-lg font-semibold text-foreground">Before you write</h2>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
@@ -63,7 +63,7 @@ export default function ContactPage() {
         </div>
 
         <div className="lg:col-span-7">
-          <Card className="overflow-hidden border-border/80 shadow-lg ring-1 ring-black/[0.04]">
+          <Card className="overflow-hidden border-border/60 shadow-lg ring-1 ring-black/[0.04]">
             <CardHeader className="border-b bg-muted/30">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MessageCircle className="h-5 w-5 text-primary" />

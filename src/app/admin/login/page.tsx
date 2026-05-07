@@ -84,9 +84,9 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-muted/40 via-background to-muted/30 px-4 py-12">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12">
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.06),_transparent_55%)]"
         aria-hidden
       />
 
@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
           <p className="text-sm text-muted-foreground">Administrator sign-in</p>
         </div>
 
-        <Card className="border-border/80 shadow-xl">
+        <Card className="border-border/60 shadow-xl">
           <CardHeader className="space-y-1 pb-4 text-center sm:text-left">
             <CardTitle className="text-xl font-semibold">Sign in</CardTitle>
             <CardDescription>

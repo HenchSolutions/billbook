@@ -33,7 +33,7 @@ export function StockOverviewCards({
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <Card className="rounded-2xl border bg-background/70">
+      <Card className="rounded-lg border bg-background/70">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -47,7 +47,7 @@ export function StockOverviewCards({
                 Total items: {totalItems} · Total quantity: {formatStockQuantity(totalQuantity)}
               </p>
             </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <IndianRupee className="h-5 w-5" />
             </div>
           </div>
@@ -55,7 +55,7 @@ export function StockOverviewCards({
       </Card>
 
       <Card
-        className={`rounded-2xl border ${lowStockCount > 0 ? "border-amber-500/50 bg-amber-500/5" : "bg-background/70"}`}
+        className={`rounded-lg border ${lowStockCount > 0 ? "border-amber-500/50 bg-amber-500/5" : "bg-background/70"}`}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -83,7 +83,7 @@ export function StockOverviewCards({
               )}
             </div>
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${lowStockCount > 0 ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground"}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${lowStockCount > 0 ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground"}`}
             >
               <AlertTriangle className="h-5 w-5" />
             </div>
@@ -91,7 +91,7 @@ export function StockOverviewCards({
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border bg-background/70">
+      <Card className="rounded-lg border bg-background/70">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -103,7 +103,7 @@ export function StockOverviewCards({
               </p>
               <p className="mt-2 text-xs text-muted-foreground">Potential revenue</p>
             </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
+import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
@@ -203,7 +204,7 @@ export default function ReceiptRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit] = useState(DEFAULT_REPORT_LIMIT);
+  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
   const [allocDialogReceiptId, setAllocDialogReceiptId] = useState<number | null>(null);
 
   const { data, isPending, error } = useReceiptRegister(validStartDate, validEndDate, limit);
@@ -310,21 +311,24 @@ export default function ReceiptRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportReceiptRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Date range
-          </p>
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-            compact
-          />
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-          </p>
+        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Date range
+            </p>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+              Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
+            </p>
+          </div>
+          <ReportLimitInput value={limit} onChange={setLimit} stacked />
         </div>
 
         <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
@@ -440,7 +444,7 @@ export default function ReceiptRegisterPage() {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Clear filters
@@ -459,7 +463,12 @@ export default function ReceiptRegisterPage() {
           </div>
 
           <ReportRegisterTableScroll>
-            <ReportRegisterResultBar count={rows.length} rowLabel="records shown" limit={limit} />
+            <ReportRegisterResultBar
+              count={rows.length}
+              rowLabel="records shown"
+              limit={limit}
+              truncationHintCount={(data?.receipts ?? []).length}
+            />
             <table className={cn(rr.table, "min-w-[900px]")}>
               <thead className={rr.thead}>
                 <tr>
@@ -562,7 +571,7 @@ export default function ReceiptRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-border bg-muted/10 py-14 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-muted/10 py-14 text-center">
           <Search className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" aria-hidden />
           <p className="text-sm font-medium text-muted-foreground">
             Select a date range and click{" "}

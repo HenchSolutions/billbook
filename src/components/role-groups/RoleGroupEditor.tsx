@@ -153,8 +153,8 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
       />
 
       <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-5xl flex-col gap-10 pb-8">
-        <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
-          <div className="border-b border-border/70 bg-muted/20 px-5 py-4 sm:px-6">
+        <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+          <div className="border-b border-border/60 bg-muted/20 px-5 py-4 sm:px-6">
             <h2 className="text-lg font-semibold tracking-tight">Details</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Name and status apply everywhere this group is assigned.
@@ -205,7 +205,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
             </div>
           </div>
 
-          <div className="border-t border-border/70">
+          <div className="border-t border-border/60">
             <div className="border-b border-border/60 bg-muted/15 px-5 py-4 sm:px-6">
               <h2 className="text-lg font-semibold tracking-tight">What they can open</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -226,7 +226,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
         </div>
 
         {canManage ? (
-          <div className="flex flex-col gap-4 border-t border-border/70 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-t border-border/60 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -243,7 +243,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
             )}
           </div>
         ) : (
-          <p className="border-t border-border/70 pt-8 text-sm text-muted-foreground">
+          <p className="border-t border-border/60 pt-8 text-sm text-muted-foreground">
             You have read-only access to this role group.
           </p>
         )}

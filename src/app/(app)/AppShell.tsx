@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import AppSidebar from "@/components/layout/AppSidebar";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import TopBar from "@/components/layout/TopBar";
 import { TrialBanner } from "@/components/trial/TrialBanner";
 import { TrialExpiredOverlay } from "@/components/trial/TrialExpiredOverlay";
@@ -164,11 +165,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
         <main
           ref={mainRef}
-          className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden"
+          className={cn(
+            "relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden",
+            isMobile && "pb-20",
+          )}
         >
           <RoutePermissionGate>{children}</RoutePermissionGate>
         </main>
       </div>
+      {isMobile ? <MobileBottomNav onMoreClick={() => setMobileNavOpen(true)} /> : null}
       <TrialExpiredOverlay validityEnd={user.validityEnd} />
       {accessBlockedMessage && (
         <RoleGroupBlockedOverlay

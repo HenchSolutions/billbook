@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function LandingValueGrid() {
   return (
     <section className="bg-muted/20">
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+      <div className="marketing-container py-14">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground">
             More than billing — operational clarity
@@ -14,7 +14,7 @@ export function LandingValueGrid() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border/60 bg-border sm:grid-cols-4">
           {[
             { value: "₹0", label: "Free to start" },
             { value: "< 2 min", label: "First invoice" },
@@ -66,7 +66,7 @@ export function LandingValueGrid() {
           ].map((item) => (
             <Card key={item.title} className="hover-lift">
               <CardHeader className="space-y-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent/10 text-accent">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <item.icon className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base">{item.title}</CardTitle>

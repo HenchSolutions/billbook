@@ -31,6 +31,7 @@ import { lookupIfscCode } from "@/lib/india/ifsc";
 import type { BusinessClassificationOption } from "@/types/auth";
 import { ApiClientError } from "@/api/error";
 import { cn } from "@/lib/core/utils";
+import { isValidGstin, isValidIndianPincode, isValidPan } from "@/lib/india/validators";
 
 const LOGO_MAX_SIZE_MB = 5;
 
@@ -231,6 +232,8 @@ export function BusinessProfileForm({
   const countryName = watch("country");
   const city = watch("city");
   const state = watch("state");
+  const gstin = watch("gstin");
+  const pan = watch("pan");
   const ifscCode = watch("ifscCode");
   const bankAccountNumberValue = watch("bankAccountNumber");
   const confirmAccountNumberValue = watch("confirmAccountNumber");
@@ -239,6 +242,15 @@ export function BusinessProfileForm({
   const ifscDerivedLocked = isEditingBankDetails && ifscLookupOk;
 
   const pincodeDigits = (pincode ?? "").toString().replace(/\D/g, "");
+  const normalizedPincode = (pincode ?? "").trim();
+  const normalizedGstin = (gstin ?? "").trim();
+  const normalizedPan = (pan ?? "").trim();
+  const gstinFormatInvalid = normalizedGstin.length > 0 && !isValidGstin(normalizedGstin);
+  const panFormatInvalid = normalizedPan.length > 0 && !isValidPan(normalizedPan);
+  const pincodeFormatInvalid =
+    normalizedPincode.length > 0 &&
+    normalizedPincode.replace(/\D/g, "").length === 6 &&
+    !isValidIndianPincode(normalizedPincode.replace(/\D/g, ""));
   const lockCityState = pincodeDigits.length === 6 && Boolean(city || state);
   const selectedPhoneCountry = COUNTRIES.find((c) => c.code === phoneCountryCode) ??
     COUNTRIES[0] ?? { code: "IN", dialCode: "+91", label: "India" };
@@ -498,7 +510,7 @@ export function BusinessProfileForm({
         >
           <fieldset disabled={readOnly} className="min-w-0 space-y-6 border-0 p-0">
             {!readOnly && (
-              <div className="rounded-lg border border-border/70 bg-muted/25 p-4">
+              <div className="rounded-lg border border-border/60 bg-muted/25 p-4">
                 <p className="text-sm font-medium text-foreground">Quick setup</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Start with business name and address, then complete bank details for payouts.
@@ -580,7 +592,7 @@ export function BusinessProfileForm({
                     onChange={handleLogoChange}
                   />
                 </div>
-                <div className="rounded-lg border border-border/70 bg-muted/30 p-3 text-xs text-muted-foreground">
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
                   Your logo appears on invoices, reports, and client-facing documents.
                 </div>
 
@@ -943,10 +955,17 @@ export function BusinessProfileForm({
                           placeholder="560034"
                           {...register("pincode")}
                           maxLength={10}
+                          inputMode="numeric"
+                          aria-invalid={!!errors.pincode || pincodeFormatInvalid}
                         />
                         <p className="text-xs text-muted-foreground">
                           Enter pincode to auto-fill city, state, and area
                         </p>
+                        {pincodeFormatInvalid ? (
+                          <p className="text-xs text-destructive" role="alert">
+                            Enter a valid 6-digit Indian pincode.
+                          </p>
+                        ) : null}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="area">Area / Locality</Label>
@@ -1026,7 +1045,7 @@ export function BusinessProfileForm({
                         "grid gap-4 sm:grid-cols-2",
                         !readOnly &&
                           !isEditingBankDetails &&
-                          "rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 sm:p-5",
+                          "rounded-lg border border-dashed border-border/60 bg-muted/20 p-4 sm:p-5",
                       )}
                     >
                       <div className="space-y-2 sm:col-span-2">
@@ -1128,7 +1147,7 @@ export function BusinessProfileForm({
                           </p>
                         ) : null}
                       </div>
-                      <div className="space-y-3 rounded-lg border border-dashed border-border/80 bg-muted/15 p-4 dark:bg-muted/10 sm:col-span-2">
+                      <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-muted/15 p-4 dark:bg-muted/10 sm:col-span-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div className="min-w-0 space-y-0.5">
                             <p className="text-sm font-medium leading-tight">
@@ -1377,9 +1396,16 @@ export function BusinessProfileForm({
                         <Input
                           id="gstin"
                           placeholder="29ABCDE1234F1Z5"
-                          {...register("gstin")}
+                          {...register("gstin", {
+                            onChange: (e) => {
+                              e.target.value = String(e.target.value ?? "")
+                                .toUpperCase()
+                                .replace(/\s+/g, "")
+                                .slice(0, 15);
+                            },
+                          })}
                           maxLength={15}
-                          aria-invalid={!!errors.gstin}
+                          aria-invalid={!!errors.gstin || gstinFormatInvalid}
                           aria-describedby={errors.gstin ? "gstin-error" : undefined}
                         />
                         {errors.gstin && (
@@ -1387,6 +1413,11 @@ export function BusinessProfileForm({
                             {errors.gstin.message}
                           </p>
                         )}
+                        {!errors.gstin && gstinFormatInvalid ? (
+                          <p className="text-xs text-destructive" role="alert">
+                            GSTIN must be 15 characters (e.g. 29ABCDE1234F1Z5).
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="space-y-2">
@@ -1394,9 +1425,16 @@ export function BusinessProfileForm({
                         <Input
                           id="pan"
                           placeholder="ABCDE1234F"
-                          {...register("pan")}
+                          {...register("pan", {
+                            onChange: (e) => {
+                              e.target.value = String(e.target.value ?? "")
+                                .toUpperCase()
+                                .replace(/\s+/g, "")
+                                .slice(0, 10);
+                            },
+                          })}
                           maxLength={10}
-                          aria-invalid={!!errors.pan}
+                          aria-invalid={!!errors.pan || panFormatInvalid}
                           aria-describedby={errors.pan ? "pan-error" : undefined}
                         />
                         {errors.pan && (
@@ -1404,6 +1442,11 @@ export function BusinessProfileForm({
                             {errors.pan.message}
                           </p>
                         )}
+                        {!errors.pan && panFormatInvalid ? (
+                          <p className="text-xs text-destructive" role="alert">
+                            PAN format should be 5 letters, 4 digits, 1 letter.
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </CardContent>
@@ -1411,7 +1454,7 @@ export function BusinessProfileForm({
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-4">
+            <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-4">
               <p className="text-sm text-muted-foreground">
                 {readOnly
                   ? "Only the owner can update this profile."

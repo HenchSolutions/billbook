@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronDown, Shield, UserCog } from "lucide-react";
 import { cn } from "@/lib/core/utils";
 import { PAGE } from "@/constants/page-access";
+import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
 
 type CanFn = (key: string) => boolean;
 
@@ -32,18 +33,18 @@ export function TeamRolesSidebarBlock({
 
   const linkClass = (active: boolean) =>
     cn(
-      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
       active
-        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+        ? SIDEBAR_NAV_ACTIVE
+        : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
     );
 
   const subLinkClass = (active: boolean) =>
     cn(
-      "block rounded-md px-3 py-2 text-sm transition-colors",
+      "block rounded-lg px-3 py-2 text-sm transition-colors",
       active
-        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+        ? SIDEBAR_NAV_ACTIVE
+        : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
     );
 
   /** Both areas: parent + expandable subs (mirrors Invoices). */

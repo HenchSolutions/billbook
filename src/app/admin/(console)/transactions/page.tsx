@@ -65,10 +65,10 @@ function kindBadgeClass(kind: string): string {
       return "border-emerald-500/35 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100";
     case "SALE_INVOICE":
     case "SALE_RETURN":
-      return "border-sky-500/35 bg-sky-500/10 text-sky-950 dark:text-sky-100";
+      return "border-primary/35 bg-primary/10 text-primary dark:text-primary";
     case "PURCHASE_INVOICE":
     case "PURCHASE_RETURN":
-      return "border-violet-500/35 bg-violet-500/10 text-violet-950 dark:text-violet-100";
+      return "border-chart-3/40 bg-chart-3/12 text-foreground dark:bg-chart-3/15";
     case "OPENING_BALANCE":
       return "border-border bg-muted/60 text-muted-foreground";
     case "OUTBOUND_PAYMENT":
@@ -165,9 +165,9 @@ export default function AdminTransactionsPage() {
         description="Party ledger entries across organizations (invoices, receipts, payments, opening balances)."
       />
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="overflow-hidden border-border/60 shadow-sm">
         <CardContent className="p-0">
-          <div className="border-b border-border/70 bg-gradient-to-br from-muted/45 via-muted/20 to-background px-4 py-5 sm:px-6 sm:py-6">
+          <div className="border-b border-border/60 bg-gradient-to-br from-muted/45 via-muted/20 to-background px-4 py-5 sm:px-6 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
               <div className="min-w-0 space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -192,7 +192,7 @@ export default function AdminTransactionsPage() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:mt-6 lg:grid-cols-12 lg:gap-4">
-              <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm sm:col-span-2 lg:col-span-6 xl:col-span-5">
+              <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm sm:col-span-2 lg:col-span-6 xl:col-span-5">
                 <p className="mb-3 text-xs font-semibold text-foreground">Date range</p>
                 <DateRangePicker
                   compact
@@ -213,7 +213,7 @@ export default function AdminTransactionsPage() {
               </div>
 
               <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2 lg:col-span-6 xl:col-span-7">
-                <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm">
+                <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm">
                   <ReportLimitInput
                     stacked
                     id="admin-tx-limit"
@@ -224,7 +224,7 @@ export default function AdminTransactionsPage() {
                     }}
                   />
                 </div>
-                <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm">
+                <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm">
                   <Label
                     htmlFor="admin-business-id"
                     className="text-xs font-medium text-muted-foreground"
@@ -301,7 +301,7 @@ export default function AdminTransactionsPage() {
               />
             ) : (
               <>
-                <div className="overflow-x-auto rounded-md border border-border/70">
+                <div className="overflow-x-auto rounded-md border border-border/60">
                   <div className="max-h-[min(70vh,40rem)] overflow-y-auto">
                     <table className="w-full min-w-[860px] border-collapse text-left text-sm">
                       <thead>

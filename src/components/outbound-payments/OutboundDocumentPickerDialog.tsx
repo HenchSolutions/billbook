@@ -126,7 +126,7 @@ export function OutboundDocumentPickerDialog({
               No finalized documents with an outstanding balance for this party.
             </p>
           ) : (
-            <div className="rounded-lg border border-border/80">
+            <div className="rounded-lg border border-border/60">
               <div className="data-table-container max-h-[min(52vh,420px)] overflow-auto">
                 <table className="w-full min-w-[520px] text-sm">
                   <thead>

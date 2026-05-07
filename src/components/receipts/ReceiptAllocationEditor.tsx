@@ -220,7 +220,7 @@ export function ReceiptAllocationEditor({
   const openingDueDisplay = fmtOpening(openingLedger.due);
 
   return (
-    <Card id="allocate" className="overflow-hidden rounded-2xl border-border/80 shadow-sm">
+    <Card id="allocate" className="overflow-hidden rounded-lg border-border/60 shadow-sm">
       <CardHeader className="space-y-1 border-b border-border/60 bg-muted/15 px-6 py-5 sm:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-1">
@@ -253,7 +253,7 @@ export function ReceiptAllocationEditor({
         </div>
       </CardHeader>
       <CardContent className="space-y-6 px-6 py-6 sm:px-8 sm:py-8">
-        <div className="grid grid-cols-1 gap-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border/60 sm:p-0">
+        <div className="grid grid-cols-1 gap-4 rounded-lg border border-border/60 bg-muted/20 p-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border/60 sm:p-0">
           <div className="flex flex-col justify-center px-4 py-3 sm:py-4">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Receipt total
@@ -286,8 +286,8 @@ export function ReceiptAllocationEditor({
         </div>
 
         {!hasTableRows ? (
-          <div className="flex gap-4 rounded-xl border border-border/60 bg-muted/10 p-4 sm:p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/80 text-muted-foreground">
+          <div className="flex gap-4 rounded-lg border border-border/60 bg-muted/10 p-4 sm:p-5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/80 text-muted-foreground">
               <FileStack className="h-5 w-5" aria-hidden />
             </div>
             <div className="min-w-0 space-y-2 text-sm leading-relaxed text-muted-foreground">
@@ -300,11 +300,11 @@ export function ReceiptAllocationEditor({
             </div>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border/80">
+          <div className="overflow-hidden rounded-lg border border-border/60">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-border/80 bg-muted/40 text-left">
+                  <tr className="border-b border-border/60 bg-muted/40 text-left">
                     <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Target
                     </th>
