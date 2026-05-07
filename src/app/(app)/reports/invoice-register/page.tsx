@@ -357,7 +357,10 @@ export default function InvoiceRegisterPage() {
                       <tr key={inv.id} className={rr.tr}>
                         <td className={rr.tdMuted}>{formatDate(inv.invoiceDate)}</td>
                         <td className={rr.td}>
-                          <Link href={`/invoices/${inv.id}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${inv.id}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             {inv.invoiceNumber}
                           </Link>
                         </td>

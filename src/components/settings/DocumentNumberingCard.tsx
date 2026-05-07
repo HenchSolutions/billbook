@@ -377,11 +377,11 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h4 className="text-sm font-semibold">Invoice template</h4>
           {data.selectedInvoiceTemplateVersionId != null ? (
-            <Badge variant="secondary" className="font-normal">
+            <Badge variant="secondary" shape="tag" className="font-normal">
               Custom template selected
             </Badge>
           ) : (
-            <Badge variant="outline" className="font-normal">
+            <Badge variant="outline" shape="tag" className="font-normal">
               Using platform default
             </Badge>
           )}
@@ -486,12 +486,20 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
                       {isExplicitPick || (isCurrent && !isExplicitPick) || isSaving ? (
                         <div className="flex flex-wrap items-center gap-1">
                           {isExplicitPick ? (
-                            <Badge variant="secondary" className="text-[10px] font-normal">
+                            <Badge
+                              variant="secondary"
+                              shape="tag"
+                              className="text-[10px] font-normal"
+                            >
                               Selected
                             </Badge>
                           ) : null}
                           {isCurrent && !isExplicitPick ? (
-                            <Badge variant="outline" className="text-[10px] font-normal">
+                            <Badge
+                              variant="outline"
+                              shape="tag"
+                              className="text-[10px] font-normal"
+                            >
                               Active default
                             </Badge>
                           ) : null}

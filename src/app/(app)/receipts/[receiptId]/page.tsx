@@ -90,7 +90,7 @@ export default function ReceiptDetailPage() {
         <div className="grid lg:grid-cols-[1fr_minmax(280px,340px)] lg:items-stretch">
           <div className="flex flex-col gap-6 border-b border-border/60 p-6 sm:p-8 lg:border-b-0 lg:border-r lg:border-border/60">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="font-normal">
+              <Badge variant="secondary" shape="tag" className="font-normal">
                 Money in
               </Badge>
               {remaining > 0.001 && (
@@ -104,7 +104,7 @@ export default function ReceiptDetailPage() {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="financial-id text-2xl font-semibold tracking-tight sm:text-3xl">
                 {receipt.receiptNumber}
               </h1>
               <div className="mt-3 flex flex-col gap-2.5 text-sm text-muted-foreground">
@@ -142,6 +142,7 @@ export default function ReceiptDetailPage() {
                   <span>
                     <Badge
                       variant="outline"
+                      shape="tag"
                       className={cn("mr-2 align-middle", methodBadge.className)}
                       title={methodBadge.title}
                     >

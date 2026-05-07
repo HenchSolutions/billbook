@@ -319,6 +319,7 @@ export default function PartyDialog({
           <div className="space-y-2 sm:max-w-md">
             <Label>GSTIN</Label>
             <Input
+              className="financial-id"
               placeholder="22AAAAA0000A1Z5"
               aria-invalid={!!errors.gstin || gstinFormatInvalid}
               {...register("gstin", {

@@ -13,6 +13,7 @@ import {
   dashboardChartScopeFootnote,
 } from "@/lib/business/dashboard-home";
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
+import { useResolvedCssHsl } from "@/hooks/use-resolved-css-hsl";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
 import { MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
@@ -44,12 +45,16 @@ function SalesPurchaseTooltip({
   label,
   showPurchaseSeries,
   purchaseEstimated,
+  salesColor,
+  purchaseColor,
 }: {
   active?: boolean;
   payload?: ReadonlyArray<{ payload?: unknown }>;
   label?: string | number;
   showPurchaseSeries: boolean;
   purchaseEstimated: boolean;
+  salesColor: string;
+  purchaseColor: string;
 }) {
   if (!active || !payload?.length) return null;
   const raw = payload[0]?.payload;
@@ -74,7 +79,7 @@ function SalesPurchaseTooltip({
           <dt className="flex items-center gap-2 text-muted-foreground">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-sm"
-              style={{ backgroundColor: "hsl(var(--chart-1))" }}
+              style={{ backgroundColor: salesColor }}
               aria-hidden
             />
             Sales
@@ -86,7 +91,7 @@ function SalesPurchaseTooltip({
             <dt className="flex items-center gap-2 text-muted-foreground">
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                style={{ backgroundColor: "hsl(var(--chart-3))" }}
+                style={{ backgroundColor: purchaseColor }}
                 aria-hidden
               />
               Purchase
@@ -134,6 +139,8 @@ export function DashboardHomeSalesPurchaseChart({
 
   const { can } = usePermissions();
   const canReports = can(PAGE.reports);
+  const salesColor = useResolvedCssHsl("--chart-1");
+  const purchaseColor = useResolvedCssHsl("--chart-3");
   const { rows, purchaseIsEstimated } = buildSalesPurchaseChartData(dashboard);
   const data = rows.length > 0 ? rows : PLACEHOLDER;
   const maxPurchase = data.reduce((m, r) => Math.max(m, r.purchase), 0);
@@ -194,8 +201,8 @@ export function DashboardHomeSalesPurchaseChart({
       <CardContent className="pt-0">
         <ChartContainer
           config={{
-            sales: { label: "Sales", color: "hsl(var(--chart-1))" },
-            purchase: { label: "Purchase", color: "hsl(var(--chart-3))" },
+            sales: { label: "Sales", color: salesColor },
+            purchase: { label: "Purchase", color: purchaseColor },
           }}
           className={cn(
             "h-[min(320px,55vw)] min-h-[260px] w-full cursor-pointer",
@@ -235,6 +242,8 @@ export function DashboardHomeSalesPurchaseChart({
                   {...props}
                   showPurchaseSeries={showPurchaseSeries}
                   purchaseEstimated={purchaseIsEstimated}
+                  salesColor={salesColor}
+                  purchaseColor={purchaseColor}
                 />
               )}
             />
@@ -242,7 +251,7 @@ export function DashboardHomeSalesPurchaseChart({
             <Bar
               dataKey="sales"
               name="Sales"
-              fill="hsl(var(--chart-1))"
+              fill={salesColor}
               radius={[6, 6, 0, 0]}
               maxBarSize={56}
             />
@@ -250,7 +259,7 @@ export function DashboardHomeSalesPurchaseChart({
               <Bar
                 dataKey="purchase"
                 name="Purchase"
-                fill="hsl(var(--chart-3))"
+                fill={purchaseColor}
                 radius={[6, 6, 0, 0]}
                 maxBarSize={56}
               />

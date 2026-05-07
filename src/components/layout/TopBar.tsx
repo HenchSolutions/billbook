@@ -94,9 +94,10 @@ export default function TopBar({
   );
 
   useEffect(() => {
-    const platform = typeof window !== "undefined" ? window.navigator.platform : "";
     const ua = typeof window !== "undefined" ? window.navigator.userAgent : "";
-    const appleLike = /Mac|iPhone|iPad|iPod/i.test(platform) || /Mac OS|iPhone|iPad/i.test(ua);
+    const platform = typeof window !== "undefined" ? window.navigator.platform : "";
+    /** Prefer `userAgent` — `platform` is deprecated and unreliable on some mobile browsers. */
+    const appleLike = /Mac OS|iPhone|iPad|iPod/i.test(ua) || /Mac|iPhone|iPad|iPod/i.test(platform);
     setModifierKeyLabel(appleLike ? "⌘" : "Ctrl");
   }, []);
 
@@ -187,7 +188,7 @@ export default function TopBar({
         <div className="flex min-w-0 items-center gap-2">
           {desktopSidebarExpanded ? (
             organizationCode ? (
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-medium">
+              <Badge variant="secondary" shape="tag" className="px-2 py-0.5 text-xs">
                 {organizationCode}
               </Badge>
             ) : null
@@ -206,12 +207,12 @@ export default function TopBar({
                   {businessName}
                 </p>
               ) : organizationCode ? (
-                <Badge variant="secondary" className="px-2 py-0.5 text-xs font-medium">
+                <Badge variant="secondary" shape="tag" className="px-2 py-0.5 text-xs">
                   {organizationCode}
                 </Badge>
               ) : null}
               {organizationCode && businessName ? (
-                <Badge variant="secondary" className="shrink-0 px-2 py-0.5 text-xs font-medium">
+                <Badge variant="secondary" shape="tag" className="shrink-0 px-2 py-0.5 text-xs">
                   {organizationCode}
                 </Badge>
               ) : null}
@@ -259,6 +260,7 @@ export default function TopBar({
             <p className="text-sm font-medium leading-none">{displayName}</p>
             <Badge
               variant="secondary"
+              shape="tag"
               className="mt-0.5 max-w-[11rem] truncate px-1.5 py-0 text-[10px]"
               title={roleBadgeLabel}
             >

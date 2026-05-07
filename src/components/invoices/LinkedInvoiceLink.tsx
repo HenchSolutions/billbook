@@ -44,11 +44,19 @@ export function LinkedInvoiceLink({
         : "—";
 
   const content = children ?? defaultLabel;
+  const codeLike =
+    Boolean(number && number !== "" && number !== "—") &&
+    defaultLabel !== "Loading…" &&
+    defaultLabel !== "Invoice";
 
   if (numericId === undefined) {
     return (
       <span
-        className={cn(embedded ? "text-foreground" : "text-muted-foreground", className)}
+        className={cn(
+          embedded ? "text-foreground" : "text-muted-foreground",
+          codeLike && "financial-id",
+          className,
+        )}
         onClick={onClick}
       >
         {content}
@@ -59,7 +67,7 @@ export function LinkedInvoiceLink({
   return (
     <Link
       href={`/invoices/${numericId}`}
-      className={cn("text-primary hover:underline", className)}
+      className={cn("text-primary hover:underline", codeLike && "financial-id", className)}
       onClick={onClick}
     >
       {content}

@@ -232,7 +232,7 @@ export default function CreditNoteDialog({
                   <p className="text-muted-foreground">Loading…</p>
                 ) : invoiceDetail && invoiceDetail.id === lockedInvoiceId ? (
                   <p>
-                    <span className="font-medium text-foreground">
+                    <span className="financial-id font-medium text-foreground">
                       {invoiceDetail.invoiceNumber}
                     </span>
                     <span className="text-muted-foreground"> · </span>

@@ -126,7 +126,7 @@ export function ReportRegisterResultBar({
 export function ReportRegisterEmptyRow({ colSpan, message }: { colSpan: number; message: string }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-4 py-14 text-center">
+      <td colSpan={colSpan} className="px-5 py-14 text-center sm:px-6">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Table2 className="h-9 w-9 opacity-35" aria-hidden />
           <p className="max-w-sm text-sm leading-relaxed">{message}</p>
@@ -163,15 +163,14 @@ export function ReportRegisterTableScroll({ children }: { children: React.ReactN
 }
 
 export const rr = {
-  table: "data-table min-w-[880px] border-collapse",
+  table: "data-table register-report-table min-w-[880px] border-collapse",
   thead: "data-table-head-sticky",
-  th: "data-table-th whitespace-nowrap px-4 text-xs uppercase tracking-wide",
-  thRight:
-    "data-table-th data-table-col-numeric whitespace-nowrap px-4 text-xs uppercase tracking-wide",
-  td: "data-table-td px-4 align-middle text-foreground",
-  tdMuted: "data-table-td px-4 align-middle text-sm text-muted-foreground",
-  tdRight: "data-table-td data-table-col-numeric px-4 align-middle text-foreground",
-  tdRightMuted: "data-table-td data-table-col-numeric px-4 align-middle text-muted-foreground",
+  th: "data-table-th whitespace-nowrap text-xs uppercase tracking-wide",
+  thRight: "data-table-th data-table-col-numeric whitespace-nowrap text-xs uppercase tracking-wide",
+  td: "data-table-td align-middle text-foreground",
+  tdMuted: "data-table-td align-middle text-sm text-muted-foreground",
+  tdRight: "data-table-td data-table-col-numeric align-middle text-foreground",
+  tdRightMuted: "data-table-td data-table-col-numeric align-middle text-muted-foreground",
   tr: "data-table-row last:border-b-0",
   link: "font-medium text-primary underline-offset-4 hover:underline",
 } as const;

@@ -280,7 +280,7 @@ export function CreditNoteAllocationEditor({
                         <td className="px-3 py-2.5 align-middle font-medium">
                           <Link
                             href={`/invoices/${r.invoiceId}`}
-                            className="text-primary hover:underline"
+                            className="financial-id text-primary hover:underline"
                           >
                             {r.invoiceNumber}
                           </Link>

@@ -82,7 +82,7 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                   <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2 md:block">
                     <button
                       type="button"
-                      className="shrink-0 text-left text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="financial-id shrink-0 text-left text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-ring"
                       onClick={(e) => {
                         e.stopPropagation();
                         onView(cn.id);

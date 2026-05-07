@@ -513,7 +513,7 @@ export default function ReceiptRegisterPage() {
                             onClick={() => setAllocDialogReceiptId(r.id)}
                             className={cn(
                               rr.link,
-                              "cursor-pointer border-0 bg-transparent p-0 text-left font-medium",
+                              "financial-id cursor-pointer border-0 bg-transparent p-0 text-left font-medium",
                             )}
                             title="View allocated invoices"
                           >
@@ -587,7 +587,7 @@ export default function ReceiptRegisterPage() {
         <DialogContent className="max-h-[80vh] w-[min(100%,36rem)] gap-4 p-5 sm:max-w-[36rem]">
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-base">
-              {allocDetail?.receiptNumber ?? "Receipt"}
+              <span className="financial-id">{allocDetail?.receiptNumber ?? "Receipt"}</span>
             </DialogTitle>
             <p className="text-xs text-muted-foreground">Allocated invoices</p>
           </DialogHeader>
@@ -616,8 +616,8 @@ export default function ReceiptRegisterPage() {
                 <tbody>
                   {openingSettlementOnDetail > MONEY_EPS ? (
                     <tr className="border-t border-border first:border-t-0">
-                      <td className="px-3 py-2.5 tabular-nums text-foreground">
-                        {allocDetail?.receiptNumber ?? "—"}
+                      <td className="px-3 py-2.5 text-foreground">
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
                       </td>
                       <td className="px-3 py-2.5 text-muted-foreground">Opening balance</td>
                       <td className="px-3 py-2.5 text-right font-medium tabular-nums text-foreground">
@@ -630,13 +630,13 @@ export default function ReceiptRegisterPage() {
                       key={`${a.invoiceId}-${a.id ?? ""}`}
                       className="border-t border-border first:border-t-0"
                     >
-                      <td className="px-3 py-2.5 tabular-nums text-foreground">
-                        {allocDetail?.receiptNumber ?? "—"}
+                      <td className="px-3 py-2.5 text-foreground">
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
                       </td>
                       <td className="px-3 py-2.5">
                         <Link
                           href={`/invoices/${a.invoiceId}`}
-                          className="font-medium text-primary underline-offset-4 hover:underline"
+                          className="financial-id font-medium text-primary underline-offset-4 hover:underline"
                         >
                           {a.invoiceNumber ?? `#${a.invoiceId}`}
                         </Link>

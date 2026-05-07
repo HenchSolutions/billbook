@@ -977,7 +977,7 @@ export default function AdminInvoiceTemplatesPage() {
         {/* ── Template library ─────────────────────────────────────── */}
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20">
-            <CardTitle>Template library</CardTitle>
+            <CardTitle className="text-lg font-semibold">Template library</CardTitle>
             <CardDescription>
               Load a preview, review AI diagnostics, publish, and assign — all in one place.
             </CardDescription>

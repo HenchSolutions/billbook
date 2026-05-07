@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AUTH_CARD_SURFACE_CLASS } from "@/lib/ui/auth-card-classes";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
+import { cn } from "@/lib/core/utils";
 import type {
   PasswordResetOtpResponse,
   PasswordResetVerifyResponse,
@@ -244,7 +245,7 @@ export default function ForgotPasswordCard({ onBackToLogin }: ForgotPasswordCard
               placeholder="ABC123"
               disabled={stage !== "request"}
               maxLength={6}
-              className="uppercase"
+              className={cn("financial-id uppercase")}
               aria-invalid={!!errors.organizationCode}
               autoCapitalize="characters"
               autoCorrect="off"

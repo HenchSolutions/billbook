@@ -209,7 +209,7 @@ function ReturnSourceTable({
               <td className="px-4 py-3 font-medium sm:px-6">
                 <Link
                   href={`/invoices/${inv.id}`}
-                  className="text-primary hover:underline"
+                  className="financial-id text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {inv.invoiceNumber}
@@ -218,7 +218,7 @@ function ReturnSourceTable({
               <td className="px-3 py-3 text-muted-foreground">{inv.partyName ?? "—"}</td>
               {showVendorBill ? (
                 <td className="hidden px-3 py-3 text-xs text-muted-foreground lg:table-cell">
-                  {inv.originalBillNumber?.trim() || "—"}
+                  <span className="financial-id">{inv.originalBillNumber?.trim() || "—"}</span>
                 </td>
               ) : null}
               <td className="hidden px-3 py-3 tabular-nums text-muted-foreground sm:table-cell">

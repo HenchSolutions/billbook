@@ -432,7 +432,10 @@ export default function DebtRegisterPage() {
                           )}
                         </td>
                         <td className={rr.td}>
-                          <Link href={`/invoices/${line.invoiceId}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${line.invoiceId}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             {line.invoiceNumber}
                           </Link>
                         </td>

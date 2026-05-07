@@ -166,8 +166,8 @@ export function OutboundDocumentPickerDialog({
                               className="border-border"
                             />
                           </td>
-                          <td className="px-3 py-2.5 font-medium tabular-nums">
-                            {inv.invoiceNumber}
+                          <td className="px-3 py-2.5 font-medium">
+                            <span className="financial-id">{inv.invoiceNumber}</span>
                           </td>
                           <td className="px-3 py-2.5 text-muted-foreground">
                             {formatDate(inv.invoiceDate)}

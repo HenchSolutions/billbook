@@ -57,7 +57,7 @@ export function ReceiptsTable({
                     <td className="data-table-td px-4">
                       <Link
                         href={`/receipts/${r.id}`}
-                        className="font-medium tabular-nums text-primary hover:underline"
+                        className="financial-id font-medium text-primary hover:underline"
                       >
                         {r.receiptNumber}
                       </Link>

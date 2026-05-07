@@ -33,7 +33,7 @@ export function TaxItemizedTable({ rows }: { rows: ItemizedTaxRow[] }) {
           {rows.map((row) => (
             <tr key={row.invoiceId} className="data-table-row last:border-0">
               <td className="data-table-td px-4 font-medium text-primary sm:px-6">
-                {row.invoiceNumber}
+                <span className="financial-id">{row.invoiceNumber}</span>
               </td>
               <td className="data-table-td">{row.partyName}</td>
               <td className="data-table-td hidden text-muted-foreground md:table-cell">

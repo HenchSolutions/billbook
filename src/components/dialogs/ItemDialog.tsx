@@ -665,7 +665,7 @@ export default function ItemDialog({
                   <div className="space-y-2">
                     <Label>HSN Code</Label>
                     <Input
-                      className="placeholder:opacity-80"
+                      className="financial-id placeholder:opacity-80"
                       maxLength={8}
                       aria-invalid={!!errors.hsnCode || hsnFormatInvalid}
                       {...register("hsnCode", {
@@ -684,7 +684,7 @@ export default function ItemDialog({
                   <div className="space-y-2">
                     <Label>SAC Code</Label>
                     <Input
-                      className="placeholder:opacity-80"
+                      className="financial-id placeholder:opacity-80"
                       maxLength={6}
                       {...register("sacCode")}
                       placeholder="e.g. 998313"

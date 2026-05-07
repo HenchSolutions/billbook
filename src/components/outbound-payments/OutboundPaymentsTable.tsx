@@ -93,8 +93,8 @@ export function OutboundPaymentsTable({
             <tbody className="[&_tr:nth-child(even)]:bg-muted/15">
               {payments.map((p) => (
                 <tr key={p.id} className="data-table-row last:border-0">
-                  <td className="data-table-td px-4 font-medium tabular-nums text-foreground">
-                    {p.paymentNumber}
+                  <td className="data-table-td px-4 font-medium text-foreground">
+                    <span className="financial-id">{p.paymentNumber}</span>
                   </td>
                   <td className="data-table-td px-4">
                     <Badge variant="outline" className="whitespace-nowrap shadow-sm">

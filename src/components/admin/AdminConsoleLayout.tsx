@@ -107,7 +107,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-3 border-b border-border/50 bg-background px-4 sm:gap-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-3 border-b border-border/50 bg-background pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:gap-4 sm:pl-[max(1.5rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.5rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))]">
         <div className="flex h-full w-full items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -208,7 +208,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
           )}
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-12 pt-6 sm:px-6 sm:py-10 lg:px-8">
+        <main className="admin-main-shell min-w-0 flex-1 pb-12 pt-6 sm:py-10">
           <div className="mx-auto w-full min-w-0 max-w-[min(100%,1600px)]">{children}</div>
         </main>
       </div>

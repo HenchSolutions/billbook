@@ -82,6 +82,7 @@ function KindBadge({ kind }: { kind: string }) {
   return (
     <Badge
       variant="outline"
+      shape="tag"
       className={cn("max-w-full truncate text-xs font-medium", kindBadgeClass(kind))}
       title={kind}
     >
@@ -240,7 +241,7 @@ export default function AdminTransactionsPage() {
                       setBusinessIdRaw(e.target.value);
                       setOffset(0);
                     }}
-                    className="mt-2 h-9 font-mono"
+                    className="financial-id mt-2 h-9"
                   />
                   {businessIdFilterInvalid ? (
                     <p className="mt-1.5 text-xs text-destructive">
@@ -259,7 +260,7 @@ export default function AdminTransactionsPage() {
 
           {showResultsStrip ? (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-border/60 bg-muted/20 px-4 py-3 sm:px-6">
-              <Badge variant="secondary" className="font-mono text-xs font-medium tabular-nums">
+              <Badge variant="secondary" className="financial-id text-xs font-medium tabular-nums">
                 {total.toLocaleString()} {total === 1 ? "row" : "rows"}
               </Badge>
               {periodLabel ? (
@@ -348,7 +349,7 @@ export default function AdminTransactionsPage() {
                               {formatAppDateTimeFromIso(row.createdAt)}
                             </td>
                             <td className="whitespace-nowrap px-3 py-2 align-middle">
-                              <code className="rounded bg-muted/80 px-1.5 py-0.5 font-mono text-xs">
+                              <code className="financial-id rounded bg-muted/80 px-1.5 py-0.5 text-xs">
                                 {row.organizationCode}
                               </code>
                             </td>
@@ -371,8 +372,11 @@ export default function AdminTransactionsPage() {
                                 {row.partyName}
                               </span>
                             </td>
-                            <td className="max-w-[9rem] px-3 py-2 align-middle font-mono text-xs text-foreground">
-                              <span className="block truncate" title={emptyDash(row.invoiceNumber)}>
+                            <td className="max-w-[9rem] px-3 py-2 align-middle text-xs text-foreground">
+                              <span
+                                className="financial-id block truncate"
+                                title={emptyDash(row.invoiceNumber)}
+                              >
                                 {emptyDash(row.invoiceNumber)}
                               </span>
                             </td>

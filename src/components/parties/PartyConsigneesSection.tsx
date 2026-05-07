@@ -431,7 +431,7 @@ export function PartyConsigneesSection({
                     <span className="text-muted-foreground">No label</span>
                   )}
                   {c.isDefault && (
-                    <Badge variant="secondary" className="text-[10px] font-medium">
+                    <Badge variant="secondary" shape="tag" className="text-[10px] font-medium">
                       Default
                     </Badge>
                   )}

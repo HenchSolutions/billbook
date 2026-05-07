@@ -123,12 +123,12 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
                     {p.source === "RECEIPT_ALLOCATION" && p.receiptNumber ? (
                       <Link
                         href={`/receipts/${p.receiptId}`}
-                        className="text-primary hover:underline"
+                        className="financial-id text-primary hover:underline"
                       >
                         {p.receiptNumber}
                       </Link>
                     ) : p.source === "OUTBOUND_REFUND" ? (
-                      <span className="tabular-nums">{p.outboundPaymentNumber}</span>
+                      <span className="financial-id">{p.outboundPaymentNumber}</span>
                     ) : (
                       (p.referenceNumber ?? "—")
                     )}

@@ -129,7 +129,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetContent
             side="left"
-            className="w-[18rem] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[18rem] bg-sidebar p-0 pb-[env(safe-area-inset-bottom,0px)] pt-[env(safe-area-inset-top,0px)] text-sidebar-foreground [&>button]:hidden"
           >
             <AppSidebar collapsed={false} onNavigate={() => setMobileNavOpen(false)} />
           </SheetContent>
@@ -150,7 +150,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+        <div className="shrink-0 pt-[env(safe-area-inset-top,0px)]">
           <TopBar
             onMenuClick={isMobile ? () => setMobileNavOpen(true) : undefined}
             onSidebarToggle={() => setCollapsed((c) => !c)}

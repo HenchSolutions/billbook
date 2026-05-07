@@ -124,7 +124,8 @@ export default function RoleGroupsListPage() {
                             )}
                             <Badge
                               variant="outline"
-                              className="font-mono text-xs font-normal tabular-nums"
+                              shape="tag"
+                              className="financial-id text-xs font-normal tabular-nums"
                             >
                               {permCount} permission{permCount === 1 ? "" : "s"}
                             </Badge>

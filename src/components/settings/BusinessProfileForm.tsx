@@ -516,13 +516,13 @@ export function BusinessProfileForm({
                   Start with business name and address, then complete bank details for payouts.
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <Badge variant="secondary" className="font-normal">
+                  <Badge variant="secondary" shape="tag" className="font-normal">
                     1. Business & contact
                   </Badge>
-                  <Badge variant="secondary" className="font-normal">
+                  <Badge variant="secondary" shape="tag" className="font-normal">
                     2. Address
                   </Badge>
-                  <Badge variant="secondary" className="font-normal">
+                  <Badge variant="secondary" shape="tag" className="font-normal">
                     3. Bank details
                   </Badge>
                   <span>Save changes from the top-right button.</span>
@@ -952,6 +952,7 @@ export function BusinessProfileForm({
                         <Label htmlFor="pincode">Pincode</Label>
                         <Input
                           id="pincode"
+                          className="financial-id"
                           placeholder="560034"
                           {...register("pincode")}
                           maxLength={10}
@@ -1074,7 +1075,10 @@ export function BusinessProfileForm({
                           inputMode="numeric"
                           placeholder="Enter account number"
                           readOnly={!isEditingBankDetails}
-                          className={cn(!isEditingBankDetails && bankInputLockedClass)}
+                          className={cn(
+                            "financial-id",
+                            !isEditingBankDetails && bankInputLockedClass,
+                          )}
                           {...register("bankAccountNumber")}
                           aria-invalid={!!errors.bankAccountNumber}
                           aria-describedby={
@@ -1092,6 +1096,7 @@ export function BusinessProfileForm({
                           <Label htmlFor="confirmAccountNumber">Confirm Account Number</Label>
                           <Input
                             id="confirmAccountNumber"
+                            className="financial-id"
                             inputMode="numeric"
                             placeholder="Re-enter account number"
                             {...register("confirmAccountNumber")}
@@ -1117,7 +1122,10 @@ export function BusinessProfileForm({
                           inputMode="text"
                           maxLength={11}
                           readOnly={!isEditingBankDetails}
-                          className={cn(!isEditingBankDetails && bankInputLockedClass)}
+                          className={cn(
+                            "financial-id",
+                            !isEditingBankDetails && bankInputLockedClass,
+                          )}
                           {...register("ifscCode", {
                             onChange: (e) => {
                               e.target.value = String(e.target.value ?? "")
@@ -1162,7 +1170,7 @@ export function BusinessProfileForm({
                             </p>
                           </div>
                           {ifscDerivedLocked ? (
-                            <Badge variant="secondary" className="shrink-0 font-normal">
+                            <Badge variant="secondary" shape="tag" className="shrink-0 font-normal">
                               Auto-filled
                             </Badge>
                           ) : null}
@@ -1319,7 +1327,12 @@ export function BusinessProfileForm({
                               </span>
                             ) : ifscSupportedModes.length > 0 ? (
                               ifscSupportedModes.map((mode) => (
-                                <Badge key={mode} variant="secondary" className="font-medium">
+                                <Badge
+                                  key={mode}
+                                  variant="secondary"
+                                  shape="tag"
+                                  className="font-medium"
+                                >
                                   {mode}
                                 </Badge>
                               ))
@@ -1395,6 +1408,7 @@ export function BusinessProfileForm({
                         <Label htmlFor="gstin">GSTIN (optional)</Label>
                         <Input
                           id="gstin"
+                          className="financial-id"
                           placeholder="29ABCDE1234F1Z5"
                           {...register("gstin", {
                             onChange: (e) => {
@@ -1424,6 +1438,7 @@ export function BusinessProfileForm({
                         <Label htmlFor="pan">PAN (optional)</Label>
                         <Input
                           id="pan"
+                          className="financial-id"
                           placeholder="ABCDE1234F"
                           {...register("pan", {
                             onChange: (e) => {

@@ -138,7 +138,7 @@ export function LandingHeader() {
   const contactActive = pathname === "/contact";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur supports-[backdrop-filter]:bg-background/85">
       <div className="marketing-container flex h-14 items-center justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-4 lg:gap-8">
           <Link

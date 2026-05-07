@@ -151,8 +151,8 @@ export default function CreditNoteRegisterPage() {
                 ) : (
                   rows.map((cnRow) => (
                     <tr key={cnRow.id} className={rr.tr}>
-                      <td className={cn(rr.td, "font-medium tabular-nums")}>
-                        {cnRow.creditNoteNumber}
+                      <td className={rr.td}>
+                        <span className="financial-id font-medium">{cnRow.creditNoteNumber}</span>
                       </td>
                       <td className={rr.td}>
                         <StatusBadge status={cnRow.status} />

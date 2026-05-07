@@ -149,7 +149,7 @@ export default function CreditNoteDetailPage() {
             </div>
 
             <div className="min-w-0">
-              <h1 className="break-words text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl">
+              <h1 className="financial-id break-words text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl">
                 {creditNote.creditNoteNumber}
               </h1>
               <div className="mt-3 flex flex-col gap-2.5 text-sm text-muted-foreground">

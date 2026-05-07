@@ -522,9 +522,15 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold leading-snug text-foreground">{displayName}</p>
                       {u.role === "OWNER" ? (
-                        <Badge className="font-normal">Owner</Badge>
+                        <Badge shape="tag" className="font-normal">
+                          Owner
+                        </Badge>
                       ) : (
-                        <Badge variant="outline" className="max-w-[12rem] truncate font-normal">
+                        <Badge
+                          variant="outline"
+                          shape="tag"
+                          className="max-w-[12rem] truncate font-normal"
+                        >
                           {u.roleGroupName ?? "Staff"}
                         </Badge>
                       )}

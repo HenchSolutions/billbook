@@ -63,6 +63,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#2970a3",
+  /** Enables `env(safe-area-inset-*)` on notched devices / PWAs. */
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

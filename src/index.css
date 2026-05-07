@@ -161,6 +161,17 @@
     font-feature-settings: "cv11", "ss01", "tnum";
   }
 
+  /** Reduce stray horizontal scroll from occasional overflow (nested tables use their own scroll). */
+  html {
+    overflow-x: clip;
+  }
+
+  @supports not (overflow: clip) {
+    html {
+      overflow-x: hidden;
+    }
+  }
+
   h1,
   h2,
   h3,
@@ -178,12 +189,41 @@
    */
   .page-container {
     /* min-w-0: nested overflow-x-auto tables can scroll inside flex main */
-    @apply mx-auto w-full min-w-0 max-w-[min(100%,1600px)] px-4 py-8 sm:px-6 sm:py-10 lg:px-8;
+    @apply mx-auto w-full min-w-0 max-w-[min(100%,1600px)] py-8 sm:py-10;
   }
 
   /** Marketing / legal chrome — same horizontal rhythm as `.page-container`, vertical spacing per section. */
   .marketing-container {
-    @apply mx-auto w-full max-w-[min(100%,1600px)] px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[min(100%,1600px)];
+  }
+
+  /**
+   * Horizontal padding respects notch / home-indicator safe areas on phones.
+   * Shared by app pages, marketing, and admin console main.
+   */
+  .page-container,
+  .marketing-container,
+  .admin-main-shell {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 640px) {
+    .page-container,
+    .marketing-container,
+    .admin-main-shell {
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-container,
+    .marketing-container,
+    .admin-main-shell {
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
+    }
   }
 
   .page-header {
@@ -191,13 +231,17 @@
   }
 
   .page-title {
-    @apply text-2xl font-bold;
+    @apply break-words text-2xl font-bold;
   }
 
   .page-description {
     @apply text-sm text-muted-foreground;
   }
 
+  /**
+   * Marketing / landing-only: hover gradient on KPI-style surfaces.
+   * Avoid in authenticated ledger UI — financial KPI affordance is the number, not motion on the shell.
+   */
   .stat-card {
     @apply relative overflow-hidden rounded-lg border bg-card p-6 transition-shadow hover:shadow-md;
   }
@@ -208,6 +252,11 @@
 
   .stat-card:hover::before {
     @apply opacity-100;
+  }
+
+  /** Codes & identifiers: GSTIN, PAN, invoice numbers, HSN, IFSC, bank refs — monospace + tabular for scan/copy. */
+  .financial-id {
+    @apply font-mono text-sm tabular-nums tracking-tight;
   }
 
   .stat-value {
@@ -236,6 +285,16 @@
 
   .data-table-td {
     @apply border-b px-3 align-middle text-sm;
+  }
+
+  /** Report register pages — extra cell spacing (uses `register-report-table` on `<table>`). */
+  .register-report-table.data-table .data-table-th,
+  .register-report-table.data-table .data-table-td {
+    @apply px-5 py-3 sm:px-6;
+  }
+
+  .register-report-table.data-table .data-table-th {
+    @apply h-auto min-h-[3rem];
   }
 
   .data-table-row {
@@ -350,6 +409,23 @@
     animation: float-slow 12s ease-in-out infinite;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-slide-in-right,
+    .animate-scale-in,
+    .animate-float-slow,
+    .animate-float-slower {
+      animation: none !important;
+    }
+
+    /** Radix / tailwindcss-animate entrance utilities used on dialogs, sheets, popovers, tooltips */
+    .animate-in,
+    .animate-out {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
   /* Animation delays */
   .animation-delay-200 {
     animation-delay: 0.2s;
@@ -386,6 +462,10 @@
     background: #fff !important;
   }
 
+  html {
+    overflow: visible !important;
+  }
+
   aside,
   header,
   nav,
@@ -394,7 +474,8 @@
   }
 
   .page-container,
-  .marketing-container {
+  .marketing-container,
+  .admin-main-shell {
     max-width: 100% !important;
     padding: 0 !important;
   }

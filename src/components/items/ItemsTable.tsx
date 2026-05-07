@@ -59,7 +59,7 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                 )}
               </td>
               <td className="data-table-td align-middle">
-                <Badge variant="secondary" className="text-xs font-medium">
+                <Badge variant="secondary" shape="tag" className="text-xs font-medium">
                   {item.type}
                 </Badge>
               </td>
@@ -74,8 +74,8 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
               <td className="data-table-td hidden align-middle text-muted-foreground md:table-cell">
                 <span className="text-xs">{getItemTaxDisplay(item)}</span>
               </td>
-              <td className="data-table-td hidden align-middle font-mono text-xs text-muted-foreground lg:table-cell">
-                {item.hsnCode || item.sacCode || "—"}
+              <td className="data-table-td hidden align-middle text-xs text-muted-foreground lg:table-cell">
+                <span className="financial-id">{item.hsnCode || item.sacCode || "—"}</span>
               </td>
               <td className="data-table-td text-right align-middle">
                 <div

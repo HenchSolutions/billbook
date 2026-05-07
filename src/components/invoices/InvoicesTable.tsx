@@ -79,7 +79,9 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-primary">{inv.invoiceNumber}</span>
+                        <span className="financial-id font-medium text-primary">
+                          {inv.invoiceNumber}
+                        </span>
                         <StatusBadge status={inv.status} />
                       </div>
                       <div className="mt-0.5 truncate text-sm text-muted-foreground">
@@ -126,7 +128,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 </td>
 
                 <td className="data-table-td hidden px-4 sm:table-cell sm:px-6">
-                  <span className="font-medium text-primary group-hover:underline">
+                  <span className="financial-id font-medium text-primary group-hover:underline">
                     {inv.invoiceNumber}
                   </span>
                 </td>

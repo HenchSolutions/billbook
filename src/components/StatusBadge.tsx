@@ -68,6 +68,7 @@ const StatusBadge = memo(function StatusBadge({ status, className, title }: Stat
   return (
     <Badge
       variant="outline"
+      shape="pill"
       title={title}
       className={cn(
         "px-2 py-0.5 text-xs font-medium",

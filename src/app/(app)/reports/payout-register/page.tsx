@@ -165,14 +165,17 @@ export default function PayoutRegisterPage() {
                 ) : (
                   rows.map((p) => (
                     <tr key={p.id} className={rr.tr}>
-                      <td className={cn(rr.td, "font-medium tabular-nums")}>
-                        {payoutDisplayNumber(p)}
+                      <td className={rr.td}>
+                        <span className="financial-id font-medium">{payoutDisplayNumber(p)}</span>
                       </td>
                       <td className={rr.td}>{payoutCategoryLabel(p)}</td>
                       <td className={rr.td}>{p.partyName ?? p.payeeName ?? "—"}</td>
                       <td className={rr.td}>
                         {p.invoiceId ? (
-                          <Link href={`/invoices/${p.invoiceId}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${p.invoiceId}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             #{p.invoiceId}
                           </Link>
                         ) : (
