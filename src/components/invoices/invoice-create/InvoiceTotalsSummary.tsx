@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +53,7 @@ export function InvoiceTotalsSummary({
   submitLabel,
   submitBlockedHint,
 }: InvoiceTotalsSummaryProps) {
+  const totalsTitleId = useId();
   const {
     subTotal,
     lineDiscountTotal,
@@ -86,48 +88,58 @@ export function InvoiceTotalsSummary({
         )}
         <Card className="lg:sticky lg:top-4">
           <CardHeader>
-            <CardTitle className="text-base">{summaryTitle}</CardTitle>
+            <CardTitle id={totalsTitleId} className="text-base">
+              {summaryTitle}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {!isReturnTotal && (
-              <>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">Gross amount</span>
-                  <span className="tabular-nums">{formatCurrency(subTotal)}</span>
-                </div>
-                {showLineDiscount && (
-                  <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                    <span>Item discount</span>
-                    <span className="tabular-nums">−{formatCurrency(lineDiscountTotal)}</span>
+            <div
+              role="region"
+              aria-labelledby={totalsTitleId}
+              aria-live="polite"
+              aria-atomic="true"
+              className="space-y-2"
+            >
+              {!isReturnTotal && (
+                <>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">Gross amount</span>
+                    <span className="tabular-nums">{formatCurrency(subTotal)}</span>
                   </div>
-                )}
-                <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2">
-                  <span className="font-medium text-foreground">Taxable amount</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(taxableTotal)}</span>
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">{taxLabel}</span>
-                  <span className="shrink-0 tabular-nums">{formatCurrency(taxTotal)}</span>
-                </div>
-                {showInvoiceDiscount && (
-                  <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                    <span>Invoice discount</span>
-                    <span className="tabular-nums">−{formatCurrency(invoiceDiscount)}</span>
+                  {showLineDiscount && (
+                    <div className="flex items-center justify-between gap-2 text-muted-foreground">
+                      <span>Item discount</span>
+                      <span className="tabular-nums">−{formatCurrency(lineDiscountTotal)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2">
+                    <span className="font-medium text-foreground">Taxable amount</span>
+                    <span className="font-medium tabular-nums">{formatCurrency(taxableTotal)}</span>
                   </div>
-                )}
-                <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2 text-muted-foreground">
-                  <span>Subtotal (before round-off)</span>
-                  <span className="tabular-nums">{formatCurrency(subtotalBeforeRoundOff)}</span>
-                </div>
-              </>
-            )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">{taxLabel}</span>
+                    <span className="shrink-0 tabular-nums">{formatCurrency(taxTotal)}</span>
+                  </div>
+                  {showInvoiceDiscount && (
+                    <div className="flex items-center justify-between gap-2 text-muted-foreground">
+                      <span>Invoice discount</span>
+                      <span className="tabular-nums">−{formatCurrency(invoiceDiscount)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2 text-muted-foreground">
+                    <span>Subtotal (before round-off)</span>
+                    <span className="tabular-nums">{formatCurrency(subtotalBeforeRoundOff)}</span>
+                  </div>
+                </>
+              )}
 
-            {isReturnTotal && (
-              <p className="text-xs text-muted-foreground">
-                Amount is based on return quantities and the same rates/discounts as on the sale
-                line.
-              </p>
-            )}
+              {isReturnTotal && (
+                <p className="text-xs text-muted-foreground">
+                  Amount is based on return quantities and the same rates/discounts as on the sale
+                  line.
+                </p>
+              )}
+            </div>
 
             <div className="space-y-2 rounded-md border bg-muted/20 p-2">
               <div className="flex items-center gap-2">
@@ -169,17 +181,27 @@ export function InvoiceTotalsSummary({
               </div>
             </div>
 
-            {showRoundOffLine && (
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Round-off applied</span>
-                <span className="tabular-nums">{formatSignedCurrency(roundOff)}</span>
-              </div>
-            )}
+            <div
+              role="region"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={
+                isReturnTotal ? "Total return and final amount" : "Round-off and payable amount"
+              }
+              className="space-y-2"
+            >
+              {showRoundOffLine && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Round-off applied</span>
+                  <span className="tabular-nums">{formatSignedCurrency(roundOff)}</span>
+                </div>
+              )}
 
-            <div className="my-2 border-t" />
-            <div className="flex items-center justify-between text-base font-semibold">
-              <span>{isReturnTotal ? "Total return amount" : "Payable Amount"}</span>
-              <span className="tabular-nums">{formatCurrency(grandTotal)}</span>
+              <div className="my-2 border-t" />
+              <div className="flex items-center justify-between text-base font-semibold">
+                <span>{isReturnTotal ? "Total return amount" : "Payable Amount"}</span>
+                <span className="tabular-nums">{formatCurrency(grandTotal)}</span>
+              </div>
             </div>
             {submitBlockedHint ? (
               <p className="text-xs text-destructive">{submitBlockedHint}</p>
