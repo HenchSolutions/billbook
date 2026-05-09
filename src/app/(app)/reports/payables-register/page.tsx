@@ -104,7 +104,6 @@ export default function PayablesRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPayablesRegister.title}
-        description={reportPayablesRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

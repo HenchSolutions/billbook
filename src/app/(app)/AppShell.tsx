@@ -166,7 +166,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <main
           ref={mainRef}
           className={cn(
-            "relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden",
+            "relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background",
             isMobile && "pb-20",
           )}
         >

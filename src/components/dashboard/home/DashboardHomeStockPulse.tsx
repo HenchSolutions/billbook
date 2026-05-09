@@ -10,24 +10,24 @@ import type { DashboardData } from "@/types/dashboard";
 type PulseKind = "low" | "out" | "dead" | "fast";
 
 const SHELL: Record<PulseKind, string> = {
-  low: "border-[hsl(38_45%_84%)] bg-[hsl(48_65%_96%)] shadow-sm ring-1 ring-amber-200/45 dark:border-amber-900/35 dark:bg-amber-950/20 dark:ring-amber-900/35",
-  out: "border-[hsl(0_45%_86%)] bg-[hsl(0_75%_97%)] shadow-sm ring-1 ring-red-200/50 dark:border-red-900/40 dark:bg-red-950/25 dark:ring-red-900/40",
-  dead: "border-[hsl(222_16%_88%)] bg-[hsl(222_25%_97%)] shadow-sm ring-1 ring-slate-200/50 dark:border-slate-800/40 dark:bg-slate-950/30 dark:ring-slate-800/40",
-  fast: "border-[hsl(152_35%_85%)] bg-[hsl(152_48%_96%)] shadow-sm ring-1 ring-emerald-200/55 dark:border-emerald-900/35 dark:bg-emerald-950/25 dark:ring-emerald-900/35",
+  low: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-status-pending",
+  out: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-destructive",
+  dead: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
+  fast: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-status-paid",
 };
 
 const ICON_TILE: Record<PulseKind, string> = {
-  low: "bg-gradient-to-br from-amber-500 to-amber-600 shadow-md ring-1 ring-amber-400/30 dark:from-amber-600 dark:to-amber-700",
-  out: "bg-gradient-to-br from-red-500 to-red-600 shadow-md ring-1 ring-red-400/25 dark:from-red-600 dark:to-red-700",
-  dead: "bg-gradient-to-br from-slate-500 to-slate-700 shadow-md ring-1 ring-slate-400/30 dark:from-slate-600 dark:to-slate-800",
-  fast: "bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md ring-1 ring-emerald-400/35 dark:from-emerald-600 dark:to-teal-700",
+  low: "bg-chart-3 shadow-md ring-1 ring-chart-3/30",
+  out: "bg-destructive shadow-md ring-1 ring-destructive/30",
+  dead: "bg-muted-foreground shadow-md ring-1 ring-muted-foreground/25",
+  fast: "bg-status-paid shadow-md ring-1 ring-status-paid/35",
 };
 
 const VALUE_CLASS: Record<PulseKind, string> = {
-  low: "text-amber-950 dark:text-amber-100",
-  out: "text-red-800 dark:text-red-200",
-  dead: "text-slate-900 dark:text-slate-100",
-  fast: "text-emerald-900 dark:text-emerald-200",
+  low: "text-foreground",
+  out: "text-destructive",
+  dead: "text-foreground",
+  fast: "text-status-paid",
 };
 
 const ICON: Record<PulseKind, LucideIcon> = {
@@ -102,9 +102,6 @@ export function DashboardHomeStockPulse({ dashboard }: DashboardHomeStockPulsePr
     <section className="space-y-6">
       <div className="space-y-1.5">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">Inventory pulse</h2>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Quick counts for stock health. Open Stock or Items for full detail.
-        </p>
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 [&>*]:min-w-0">
         <StatCard label="Low stock" value={formatStockQuantity(low)} href="/stock" kind="low" />

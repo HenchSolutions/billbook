@@ -77,7 +77,6 @@ export default function Tax() {
       />
       <PageHeader
         title="GST / Tax"
-        description="Tax summaries and itemized reports"
         action={
           <Button
             variant="outline"
@@ -95,7 +94,7 @@ export default function Tax() {
         }
       />
 
-      <div className="mb-6">
+      <div className="mb-4">
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
@@ -105,7 +104,7 @@ export default function Tax() {
         />
       </div>
 
-      <Tabs defaultValue="summary" className="mt-6">
+      <Tabs defaultValue="summary" className="mt-4">
         <TabsList className="mb-4 w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
           <TabsTrigger value="summary">Monthly Summary</TabsTrigger>
           <TabsTrigger value="itemized">Itemized</TabsTrigger>
@@ -128,8 +127,6 @@ export default function Tax() {
             <EmptyState
               icon={<FileSpreadsheet className="h-5 w-5" />}
               title="No GST summary data"
-              description="No GST summary records are available for this date range."
-              secondaryDescription="Is period mein GST summary entries nahi mili."
             />
           )}
         </TabsContent>
@@ -143,8 +140,6 @@ export default function Tax() {
             <EmptyState
               icon={<FileSpreadsheet className="h-5 w-5" />}
               title="No itemized tax data"
-              description="No itemized GST rows are available for this date range."
-              secondaryDescription="Is period ke liye item-wise tax rows available nahi hain."
             />
           )}
         </TabsContent>

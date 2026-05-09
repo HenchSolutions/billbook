@@ -303,7 +303,6 @@ export default function ReceiptRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportReceiptRegister.title}
-        description={reportReceiptRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

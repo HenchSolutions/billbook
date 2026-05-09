@@ -37,7 +37,6 @@ export default function RoleGroupsListPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Role groups"
-        description="Each group holds a set of permissions. Staff are assigned one group per business."
         action={
           canManage ? (
             <Button asChild size="sm">

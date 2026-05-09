@@ -71,7 +71,6 @@ export default function ReceivablesAgingPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportInvoiceAging.title}
-        description={reportInvoiceAging.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

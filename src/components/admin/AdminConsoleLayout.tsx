@@ -33,7 +33,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 active
                   ? cn(SIDEBAR_NAV_ACTIVE, "border-transparent shadow-sm")
-                  : "border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/40 hover:text-foreground",
+                  : "border-transparent text-sidebar-foreground/75 hover:border-sidebar-border/50 hover:bg-sidebar-hover hover:text-sidebar-foreground",
               )}
             >
               <span
@@ -41,7 +41,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border shadow-sm transition-colors",
                   active
                     ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "border-border/60 bg-background/80 text-muted-foreground group-hover:text-foreground",
+                    : "border-sidebar-border/40 bg-sidebar-accent/30 text-sidebar-foreground/80 group-hover:text-sidebar-foreground",
                 )}
                 aria-hidden
               >
@@ -81,7 +81,7 @@ function NavIconRail() {
                 "flex h-9 w-9 items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 active
                   ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                  : "border-border/60 bg-background/80 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                  : "border-sidebar-border/40 bg-sidebar-accent/30 text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
               )}
             >
               <Icon className="h-4 w-4" />

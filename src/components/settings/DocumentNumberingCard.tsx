@@ -364,7 +364,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
         </p>
       </div>
 
-      <Alert className="border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/25 dark:text-amber-100">
+      <Alert className="border-status-pending/35 bg-status-pending-bg text-foreground dark:border-status-pending/30 dark:bg-status-pending-bg/40">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle className="text-sm">Duplicate numbers</AlertTitle>
         <AlertDescription className="text-xs">

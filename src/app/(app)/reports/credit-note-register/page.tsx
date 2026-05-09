@@ -84,7 +84,6 @@ export default function CreditNoteRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportCreditNoteRegister.title}
-        description={reportCreditNoteRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

@@ -335,13 +335,13 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
       "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
       active
         ? "text-sidebar-foreground"
-        : "text-sidebar-muted hover:bg-muted/70 hover:text-sidebar-foreground",
+        : "text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-foreground",
     );
 
   return (
     <aside
       className={cn(
-        "flex h-full min-h-0 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[2px_0_24px_-12px_hsl(220_14%_36%/0.12)] transition-all duration-200",
+        "flex h-full min-h-0 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[2px_0_24px_-12px_hsl(var(--sidebar-foreground)_/_0.12)] transition-all duration-200",
         collapsed ? "w-16" : "w-64",
       )}
     >
@@ -409,7 +409,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                           isPathActive(item.path, item.activeMatch)
                             ? SIDEBAR_NAV_ACTIVE
-                            : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
+                            : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                         )}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
@@ -434,7 +434,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                                   "block rounded-lg px-3 py-2 text-sm transition-colors",
                                   isInvoiceTypeActive(invoiceItem.path)
                                     ? SIDEBAR_NAV_ACTIVE
-                                    : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
+                                    : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                                 )}
                               >
                                 {invoiceItem.label}
@@ -452,7 +452,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         isPathActive(item.path, item.activeMatch)
                           ? SIDEBAR_NAV_ACTIVE
-                          : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                       )}
                       title={collapsed ? item.label : undefined}
                     >
@@ -473,7 +473,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start rounded-lg text-sidebar-foreground/75 hover:bg-muted/70 hover:text-sidebar-foreground"
+          className="w-full justify-start rounded-lg text-sidebar-foreground/75 hover:bg-sidebar-hover hover:text-sidebar-foreground"
           onClick={handleLogout}
           title="Log out"
         >

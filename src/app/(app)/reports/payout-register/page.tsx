@@ -98,7 +98,6 @@ export default function PayoutRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPayoutRegister.title}
-        description={reportPayoutRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

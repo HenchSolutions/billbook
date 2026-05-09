@@ -3,11 +3,11 @@ import type { InvoiceRegisterPayStatus } from "@/lib/reports/invoice-register-fi
 
 export function RegisterInvoicePayStatusBadge({ status }: { status: InvoiceRegisterPayStatus }) {
   const cfg = {
-    PAID: "bg-emerald-100 text-emerald-800 border-emerald-200/80 dark:bg-emerald-900/35 dark:text-emerald-300 dark:border-emerald-700/50",
+    PAID: "bg-status-paid-bg text-status-paid border-status-paid/35 dark:border-status-paid/40",
     PARTIAL:
-      "bg-amber-100 text-amber-800 border-amber-200/80 dark:bg-amber-900/35 dark:text-amber-300 dark:border-amber-700/50",
+      "bg-status-pending-bg text-status-pending border-status-pending/35 dark:border-status-pending/40",
     UNPAID:
-      "bg-rose-100 text-rose-800 border-rose-200/80 dark:bg-rose-900/35 dark:text-rose-300 dark:border-rose-700/50",
+      "bg-destructive/10 text-destructive border-destructive/35 dark:bg-destructive/15 dark:border-destructive/40",
   }[status];
   const label = { PAID: "Paid", PARTIAL: "Partial", UNPAID: "Unpaid" }[status];
   return (

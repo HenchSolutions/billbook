@@ -86,12 +86,7 @@ export default function PartyLedgerPage() {
     const isLoadError = partyQuery.isError;
     return (
       <div className="page-container">
-        <PageHeader
-          title="Party account"
-          description="View balance and activity"
-          backHref={fallbackBackTo}
-          backLabel={fallbackBackLabel}
-        />
+        <PageHeader title="Party account" backHref={fallbackBackTo} backLabel={fallbackBackLabel} />
         <ErrorBanner
           error={isLoadError ? partyQuery.error : { message: "Record not found" }}
           fallbackMessage={
@@ -105,7 +100,6 @@ export default function PartyLedgerPage() {
   }
 
   const partyLabelTitle = party.type === "SUPPLIER" ? "Vendor" : "Customer";
-  const partyLabel = party.type === "SUPPLIER" ? "vendor" : "customer";
   const backTo = party.type === "SUPPLIER" ? "/vendors" : "/parties";
   const backLabel = party.type === "SUPPLIER" ? "Back to Vendors" : "Back to Customers";
 
@@ -117,7 +111,6 @@ export default function PartyLedgerPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={`${partyLabelTitle} account — ${party.name}`}
-        description={`Bills, receipts, and balance for this ${partyLabel}`}
         backHref={backTo}
         backLabel={backLabel}
       />

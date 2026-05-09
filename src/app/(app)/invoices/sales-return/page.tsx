@@ -5,7 +5,6 @@ export default function SalesReturnPage() {
     <InvoicesByTypePage
       invoiceType="SALE_RETURN"
       title="Sales Returns"
-      description="Manage sales return documents and adjustments"
       createLabel="New Sales Return"
     />
   );

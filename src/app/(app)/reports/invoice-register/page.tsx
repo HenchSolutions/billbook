@@ -167,7 +167,6 @@ export default function InvoiceRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportInvoiceRegister.title}
-        description={reportInvoiceRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

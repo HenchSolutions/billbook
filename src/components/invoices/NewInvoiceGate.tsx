@@ -48,10 +48,7 @@ export function NewInvoiceGate({ initialType, initialSourceInvoiceId }: NewInvoi
   if (!canCreateInvoice) {
     return (
       <div className="page-container animate-fade-in pb-10">
-        <PageHeader
-          title="Create invoice"
-          description="Your business profile must be complete and your access period must still be active."
-        />
+        <PageHeader title="Create invoice" />
         <div className="mx-auto max-w-2xl space-y-6">
           <BusinessProfileGateAlert businessProfile={businessProfile} />
           <div className="flex flex-wrap gap-2">

@@ -22,6 +22,8 @@ interface DashboardCustomRangePopoverProps {
   isCustomPeriod: boolean;
   /** Called when the popover opens — typically switch dashboard to custom scope */
   onActivateCustom: () => void;
+  /** Applied when the popover opens (e.g. prefill FY start → today if dates are empty) */
+  seedOnOpen?: () => void;
   align?: "start" | "center" | "end";
   /** Optional class on the icon trigger for layout (e.g. chart vs KPI toolbar) */
   triggerClassName?: string;
@@ -33,6 +35,7 @@ export function DashboardCustomRangePopover({
   customRange,
   isCustomPeriod,
   onActivateCustom,
+  seedOnOpen,
   align = "end",
   triggerClassName,
 }: DashboardCustomRangePopoverProps) {
@@ -41,7 +44,10 @@ export function DashboardCustomRangePopover({
       open={open}
       onOpenChange={(next) => {
         onOpenChange(next);
-        if (next) onActivateCustom();
+        if (next) {
+          seedOnOpen?.();
+          onActivateCustom();
+        }
       }}
     >
       <PopoverTrigger asChild>

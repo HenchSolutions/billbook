@@ -161,10 +161,7 @@ export default function AdminTransactionsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader
-        title="Transactions"
-        description="Party ledger entries across organizations (invoices, receipts, payments, opening balances)."
-      />
+      <PageHeader title="Transactions" />
 
       <Card className="overflow-hidden border-border/60 shadow-sm">
         <CardContent className="p-0">
@@ -173,10 +170,6 @@ export default function AdminTransactionsPage() {
               <div className="min-w-0 space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Query
-                </p>
-                <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
-                  Set the period and page size, optionally narrow to one business. Export downloads
-                  exactly what is shown in the table.
                 </p>
               </div>
               <Button
@@ -251,11 +244,6 @@ export default function AdminTransactionsPage() {
                 </div>
               </div>
             </div>
-
-            <p className="mt-4 border-t border-border/50 pt-4 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-              Maximum range {MAX_REPORT_DATE_RANGE_MONTHS} months (same as other reports). CSV
-              columns match the table; only rows loaded on this page are included.
-            </p>
           </div>
 
           {showResultsStrip ? (
@@ -295,11 +283,7 @@ export default function AdminTransactionsPage() {
                 <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
               </div>
             ) : rows.length === 0 ? (
-              <EmptyState
-                icon={<ListOrdered className="h-8 w-8" />}
-                title="No transactions"
-                description="Try a wider date range or clear the business ID filter."
-              />
+              <EmptyState icon={<ListOrdered className="h-8 w-8" />} title="No transactions" />
             ) : (
               <>
                 <div className="overflow-x-auto rounded-md border border-border/60">

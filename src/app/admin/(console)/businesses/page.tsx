@@ -126,10 +126,7 @@ export default function AdminBusinessesPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader
-        title="Organizations"
-        description="Review businesses on the platform and extend access when needed."
-      />
+      <PageHeader title="Organizations" />
 
       {errMessage && (
         <div
@@ -157,11 +154,7 @@ export default function AdminBusinessesPage() {
               <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
             </div>
           ) : items.length === 0 ? (
-            <EmptyState
-              icon={<Building2 className="h-8 w-8" />}
-              title="No businesses yet"
-              description="When organizations sign up, they will appear in this list."
-            />
+            <EmptyState icon={<Building2 className="h-8 w-8" />} title="No businesses yet" />
           ) : (
             <>
               <div className="overflow-x-auto">

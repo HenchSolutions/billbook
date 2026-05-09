@@ -61,7 +61,7 @@ export default function ReceiptDetailPage() {
     return (
       <div className="page-container max-w-2xl">
         <PageBackLink href="/receipts">Back to receipts</PageBackLink>
-        <PageHeader title="Receipt" description="" />
+        <PageHeader title="Receipt" />
         <ErrorBanner error={error} fallbackMessage="Receipt not found." />
       </div>
     );

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { ProfileCompletion, ProfileCompletionSection } from "@/types/auth";
 import { CheckCircle2, CircleDashed } from "lucide-react";
@@ -57,9 +57,9 @@ function ChecklistRow({
           <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         )}
         <div className="min-w-0">
-          <p className="font-medium">{label}</p>
+          <p className="font-medium text-foreground">{label}</p>
           {!complete && missing.length > 0 ? (
-            <p className="text-xs text-muted-foreground">{missing.join(" · ")}</p>
+            <p className="text-xs text-foreground">{missing.join(" · ")}</p>
           ) : null}
         </div>
       </div>
@@ -119,38 +119,36 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
   ] as const;
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Invoices and your profile</CardTitle>
-        <CardDescription>
-          Invoices need enough overall completion (including name and country), a full address, and
-          full bank details. Fill anything still open below.
-        </CardDescription>
+    <Card className="w-full border-border bg-card shadow-sm ring-1 ring-border/40">
+      <CardHeader className="border-b border-border bg-muted/45 pb-3 pt-4">
+        <CardTitle className="text-base font-semibold tracking-tight text-foreground">
+          Invoices and your profile
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0">
-        <div className="flex items-center gap-4">
-          <Progress value={percentage} className="h-2 flex-1" />
-          <span className="text-sm font-medium tabular-nums">{percentage}%</span>
+      <CardContent className="space-y-3 bg-card pt-4">
+        <div className="flex items-center gap-3">
+          <Progress
+            value={percentage}
+            className="h-2 flex-1 rounded-full border border-border bg-muted/30 [&>div]:!bg-foreground"
+          />
+          <span className="text-sm font-semibold tabular-nums text-foreground">{percentage}%</span>
         </div>
 
-        <div className="flex items-start gap-2 rounded-md border bg-muted/20 px-3 py-2.5">
+        <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/25 px-3 py-2.5">
           {canCreateInvoice ? (
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
           ) : (
             <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
           )}
           <div>
-            <p className="text-sm font-medium">
+            <p className="text-sm font-semibold text-foreground">
               {canCreateInvoice ? "You can create invoices" : "You cannot create invoices yet"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Use the checklist below for score, address, and bank.
             </p>
           </div>
         </div>
 
-        <div className="rounded-md border bg-muted/30 p-3">
-          <p className="mb-2 text-sm font-medium text-foreground">Checklist</p>
+        <div className="border-foreground/12 rounded-lg border bg-background p-3">
+          <p className="mb-2 text-sm font-semibold text-foreground">Checklist</p>
           <ul className="space-y-2">
             {gateRows.map((item) => (
               <ChecklistRow key={item.label} {...item} />

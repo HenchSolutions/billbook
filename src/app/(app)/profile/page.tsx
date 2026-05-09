@@ -226,11 +226,6 @@ function ProfileEditor({
     <>
       <PageHeader
         title="My Profile"
-        description={
-          canEditProfile
-            ? "Manage your business settings and profile details"
-            : "Business profile (read-only for team members)"
-        }
         action={
           canEditProfile ? (
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -250,7 +245,7 @@ function ProfileEditor({
         }
       />
 
-      <div className="w-full space-y-6">
+      <div className="w-full space-y-3">
         {business?.profileCompletion && (
           <ProfileCompletionCard
             profileCompletion={business.profileCompletion}
@@ -261,7 +256,6 @@ function ProfileEditor({
           form={form}
           onSubmit={onSubmit}
           isDirty={isDirty}
-          isSaving={updateProfile.isPending}
           businessTypeOptions={businessTypeOptions}
           industryTypeOptions={industryTypeOptions}
           canManageTypeOptions={canManageTypeOptions}
@@ -318,10 +312,7 @@ export default function Profile() {
           canEditProfile={can(P.business.profile.update)}
         />
       ) : (
-        <PageHeader
-          title="My Profile"
-          description="Manage your business settings and profile details"
-        />
+        <PageHeader title="My Profile" />
       )}
     </div>
   );

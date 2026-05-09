@@ -14,11 +14,11 @@ import {
 } from "@/types/invoice";
 
 const METHOD_STYLES: Record<string, string> = {
-  CASH: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  UPI: "bg-primary/10 text-primary border-primary/25",
-  CHEQUE: "bg-amber-50 text-amber-700 border-amber-200",
-  BANK_TRANSFER: "bg-purple-50 text-purple-700 border-purple-200",
-  CARD: "bg-secondary text-secondary-foreground border-border",
+  CASH: "border-status-paid/30 bg-status-paid-bg text-status-paid",
+  UPI: "border-primary/25 bg-primary/10 text-primary",
+  CHEQUE: "border-status-pending/30 bg-status-pending-bg text-status-pending",
+  BANK_TRANSFER: "border-chart-4/30 bg-chart-4/10 text-chart-4",
+  CARD: "border-border bg-secondary text-secondary-foreground",
 };
 
 function sourceLabel(line: InvoicePaymentLine): string {
@@ -37,9 +37,9 @@ function sourceBadgeClass(line: InvoicePaymentLine): string {
     case "RECEIPT_ALLOCATION":
       return "border-primary/25 bg-primary/[0.07] text-foreground";
     case "OUTBOUND_REFUND":
-      return "bg-rose-50 text-rose-800 border-rose-200";
+      return "border-destructive/30 bg-destructive/10 text-destructive";
     default:
-      return "bg-slate-50 text-slate-700 border-slate-200";
+      return "border-border bg-muted text-foreground";
   }
 }
 
@@ -67,11 +67,11 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
           </CardTitle>
           {lines.length > 1 && (
             <div className="flex flex-wrap gap-3 text-sm">
-              <span className="font-semibold tabular-nums text-emerald-600">
+              <span className="font-semibold tabular-nums text-status-paid">
                 Applied {formatCurrency(applied)}
               </span>
               {refunded > 0 && (
-                <span className="font-semibold tabular-nums text-rose-600">
+                <span className="font-semibold tabular-nums text-destructive">
                   Refunded {formatCurrency(refunded)}
                 </span>
               )}
@@ -113,7 +113,7 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
                   </td>
                   <td
                     className={`px-3 py-3 text-right font-semibold tabular-nums ${
-                      p.source === "OUTBOUND_REFUND" ? "text-rose-600" : "text-emerald-600"
+                      p.source === "OUTBOUND_REFUND" ? "text-destructive" : "text-status-paid"
                     }`}
                   >
                     {p.source === "OUTBOUND_REFUND" ? "−" : ""}

@@ -2,7 +2,7 @@
 
 import { Wallet } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OutboundPaymentCreateForm } from "@/components/outbound-payments/OutboundPaymentCreateForm";
 
 export default function NewOutboundPaymentPage() {
@@ -10,7 +10,6 @@ export default function NewOutboundPaymentPage() {
     <div className="page-container max-w-3xl animate-fade-in pb-10">
       <PageHeader
         title="Record payment"
-        description="Pick payment type, customer or vendor, then link returns or bills if needed. Each save creates a voucher you can open as PDF."
         backHref="/payments/outbound"
         backLabel="Back to payments"
       />
@@ -23,10 +22,6 @@ export default function NewOutboundPaymentPage() {
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <CardTitle className="text-xl tracking-tight">Payment details</CardTitle>
-              <CardDescription className="text-sm leading-relaxed">
-                Amount updates when you pick documents in the popup. Choosing several rows creates
-                one payment per document (same method, reference, and notes).
-              </CardDescription>
             </div>
           </div>
         </CardHeader>

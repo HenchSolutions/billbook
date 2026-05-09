@@ -31,7 +31,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -669,10 +669,7 @@ export default function AdminInvoiceTemplatesPage() {
   return (
     <TooltipProvider>
       <div className="relative animate-fade-in space-y-6">
-        <PageHeader
-          title="Invoice template library"
-          description="Upload custom invoice designs — AI converts, validates, and previews them instantly."
-        />
+        <PageHeader title="Invoice template library" />
 
         {/* ── Upload card ─────────────────────────────────────────── */}
         <Card className="border-border/60 shadow-sm">
@@ -685,21 +682,6 @@ export default function AdminInvoiceTemplatesPage() {
                 AI-powered
               </span>
             </CardTitle>
-            <CardDescription>
-              Upload any HTML invoice design. AI transforms it into a safe, reusable Handlebars
-              template and renders a live preview.
-            </CardDescription>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="rounded-full border border-border/60 bg-background px-2 py-0.5">
-                1. Upload HTML
-              </span>
-              <span className="rounded-full border border-border/60 bg-background px-2 py-0.5">
-                2. AI optimize
-              </span>
-              <span className="rounded-full border border-border/60 bg-background px-2 py-0.5">
-                3. Preview and publish
-              </span>
-            </div>
             {isOptimizing && <AiProcessingPanel stepIndex={aiStepIndex} />}
           </CardHeader>
 
@@ -978,9 +960,6 @@ export default function AdminInvoiceTemplatesPage() {
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20">
             <CardTitle className="text-lg font-semibold">Template library</CardTitle>
-            <CardDescription>
-              Load a preview, review AI diagnostics, publish, and assign — all in one place.
-            </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-3 p-4 sm:p-6">
@@ -989,11 +968,7 @@ export default function AdminInvoiceTemplatesPage() {
                 <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
               </div>
             ) : templates.length === 0 ? (
-              <EmptyState
-                icon={<Sparkles className="h-8 w-8" />}
-                title="No templates yet"
-                description="Upload your first HTML template above to start the AI optimization flow."
-              />
+              <EmptyState icon={<Sparkles className="h-8 w-8" />} title="No templates yet" />
             ) : (
               templates.map((template) => {
                 const versions = templateVersionsSorted(template);

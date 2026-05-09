@@ -3,7 +3,6 @@ import { PageBackLink } from "@/components/PageBackLink";
 
 interface PageHeaderProps {
   title: string;
-  description?: string;
   action?: ReactNode;
   /** Renders above the title row, left-aligned (same position as `PageBackLink` on detail pages). */
   backHref?: string;
@@ -12,7 +11,6 @@ interface PageHeaderProps {
 
 const PageHeader = memo(function PageHeader({
   title,
-  description,
   action,
   backHref,
   backLabel,
@@ -24,12 +22,11 @@ const PageHeader = memo(function PageHeader({
     return (
       <>
         {back}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="page-header mb-0">
             <h1 className="page-title bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
               {title}
             </h1>
-            {description && <p className="page-description">{description}</p>}
           </div>
           <div className="shrink-0">{action}</div>
         </div>
@@ -44,7 +41,6 @@ const PageHeader = memo(function PageHeader({
         <h1 className="page-title bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
           {title}
         </h1>
-        {description && <p className="page-description">{description}</p>}
       </div>
     </>
   );

@@ -28,16 +28,10 @@ import type { InvoiceType } from "@/types/invoice";
 interface InvoicesByTypePageProps {
   invoiceType: InvoiceType;
   title: string;
-  description: string;
   createLabel: string;
 }
 
-export function InvoicesByTypePage({
-  invoiceType,
-  title,
-  description,
-  createLabel,
-}: InvoicesByTypePageProps) {
+export function InvoicesByTypePage({ invoiceType, title, createLabel }: InvoicesByTypePageProps) {
   const {
     page,
     pageSize,
@@ -105,7 +99,6 @@ export function InvoicesByTypePage({
     <div className="page-container max-w-[96rem] animate-fade-in">
       <PageHeader
         title={title}
-        description={description}
         action={
           allowCreate ? (
             <Button asChild>
@@ -156,7 +149,7 @@ export function InvoicesByTypePage({
           <Card>
             <CardContent className="pt-4">
               <p className="text-xs text-muted-foreground">{statLabels.paidHeading}</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-emerald-600">
+              <p className="mt-1 text-xl font-semibold tabular-nums text-status-paid">
                 {formatCurrency(stats.collected)}
               </p>
             </CardContent>
@@ -201,16 +194,6 @@ export function InvoicesByTypePage({
         <EmptyState
           icon={<FileText className="h-5 w-5" />}
           title={`No ${title.toLowerCase()} found`}
-          description={
-            debouncedSearch
-              ? `No invoices match "${debouncedSearch}". Try a different search or clear filters.`
-              : `Create your first ${title.toLowerCase()} to get started.`
-          }
-          secondaryDescription={
-            debouncedSearch
-              ? "Koi record match nahi hua. Filter clear karke dobara try karein."
-              : "Apna pehla bill banaiye - invoice workflow yahin se start hota hai."
-          }
           action={
             !debouncedSearch && allowCreate ? (
               <Button size="sm" asChild>

@@ -1,5 +1,5 @@
 /**
- * Active nav row: peach tint + primary left bar (dashboard / InApp reference).
+ * Active nav row: sidebar accent surface + primary left bar (`--sidebar-active-bar`).
  * Shared by app sidebar, team/roles block, and admin console nav.
  */
 export const SIDEBAR_NAV_ACTIVE =

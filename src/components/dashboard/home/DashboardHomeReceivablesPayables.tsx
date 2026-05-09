@@ -60,9 +60,7 @@ export function DashboardHomeReceivablesPayables({
           <div className="flex flex-wrap gap-8">
             <div className={cn(fluidMetricShellClass, "min-w-[8rem] flex-1")}>
               <p className="text-sm font-medium text-muted-foreground">Total</p>
-              <p
-                className={cn(fluidSectionStatClass, "mt-2 text-emerald-800 dark:text-emerald-400")}
-              >
+              <p className={cn(fluidSectionStatClass, "mt-2 text-status-paid")}>
                 {formatCurrency(receivables)}
               </p>
             </div>
@@ -132,7 +130,7 @@ export function DashboardHomeReceivablesPayables({
           <div className="flex flex-wrap gap-8">
             <div className={cn(fluidMetricShellClass, "min-w-[8rem] flex-1")}>
               <p className="text-sm font-medium text-muted-foreground">Total</p>
-              <p className={cn(fluidSectionStatClass, "mt-2 text-amber-900 dark:text-amber-400")}>
+              <p className={cn(fluidSectionStatClass, "mt-2 text-status-pending")}>
                 {formatOptionalCurrency(payables)}
               </p>
             </div>

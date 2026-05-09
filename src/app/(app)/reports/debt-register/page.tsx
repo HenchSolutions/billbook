@@ -220,7 +220,6 @@ export default function DebtRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportDebtRegister.title}
-        description={reportDebtRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

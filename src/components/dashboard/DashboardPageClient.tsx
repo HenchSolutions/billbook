@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import ErrorBanner from "@/components/ErrorBanner";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { EMPTY_DASHBOARD } from "@/lib/business/dashboard";
+import { getDashboardCustomRangeSeedIso } from "@/lib/business/dashboard-home";
 import { useDashboard } from "@/hooks/use-business";
 import { useDateRange } from "@/hooks/use-date-range";
 import { useCanCreateInvoice } from "@/hooks/use-can-create-invoice";
@@ -40,12 +41,21 @@ const DashboardHomeSalesPurchaseChart = dynamic(
 export default function DashboardPageClient() {
   const [periodMode, setPeriodMode] = useState<DashboardPeriodMode>("monthly");
 
-  /** Empty until the user picks dates — avoids auto-filled FY / today on the dashboard. */
+  /** Empty until the user opens the custom calendar; then we seed FY 1 Apr → today (clamped). */
   const customRange = useDateRange({
     maxMonths: MAX_REPORT_DATE_RANGE_MONTHS,
     defaultStartDate: "",
     defaultEndDate: "",
   });
+
+  const seedCustomRangeIfEmpty = useCallback(() => {
+    const start = customRange.startDate?.trim() ?? "";
+    const end = customRange.endDate?.trim() ?? "";
+    if (start && end) return;
+    const { startDate, endDate } = getDashboardCustomRangeSeedIso(MAX_REPORT_DATE_RANGE_MONTHS);
+    customRange.setStartDate(startDate);
+    customRange.setEndDate(endDate);
+  }, [customRange]);
 
   const dashboardParams = useMemo((): BusinessDashboardQueryParams => {
     if (periodMode === "custom") {
@@ -102,53 +112,38 @@ export default function DashboardPageClient() {
     );
   }
 
-  const greeting = displayDashboard.business?.name
-    ? `Welcome back, ${displayDashboard.business.name}`
-    : "Business overview";
-
   return (
     <div className="page-container animate-fade-in">
       <ErrorBanner error={error} fallbackMessage="Failed to load dashboard data." />
 
       {periodMode === "custom" && !customRange.isValid ? (
-        <p className="mb-6 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-          Choose a <span className="font-medium text-foreground">From</span> date and a{" "}
-          <span className="font-medium text-foreground">To</span> date in the calendar (max{" "}
-          {MAX_REPORT_DATE_RANGE_MONTHS} months). Figures below stay on your last loaded period
-          until both dates are set.
+        <p className="mb-3 rounded-md border border-border/60 bg-muted/30 px-2.5 py-1.5 text-xs text-muted-foreground sm:text-sm">
+          Pick <span className="font-medium text-foreground">From</span> and{" "}
+          <span className="font-medium text-foreground">To</span> (max{" "}
+          {MAX_REPORT_DATE_RANGE_MONTHS} months). Numbers below use your last loaded period until
+          both dates are set.
         </p>
       ) : null}
 
-      <div className="space-y-10 lg:space-y-12">
-        <DashboardHomeHeader
-          dashboard={displayDashboard}
-          greeting={greeting}
-          canCreateInvoice={canCreateInvoice}
-        />
-        <DashboardHomeKpis
-          dashboard={displayDashboard}
-          periodMode={periodMode}
-          onPeriodModeChange={setPeriodMode}
-          customRange={{
-            startDate: customRange.startDate,
-            endDate: customRange.endDate,
-            setStartDate: customRange.setStartDate,
-            setEndDate: customRange.setEndDate,
-            error: customRange.error,
-          }}
-        />
-        <DashboardHomeSalesPurchaseChart
-          dashboard={displayDashboard}
-          periodMode={periodMode}
-          customRange={{
-            startDate: customRange.startDate,
-            endDate: customRange.endDate,
-            setStartDate: customRange.setStartDate,
-            setEndDate: customRange.setEndDate,
-            error: customRange.error,
-          }}
-          onPeriodModeChange={setPeriodMode}
-        />
+      <div className="space-y-5 lg:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
+          <DashboardHomeHeader
+            dashboard={displayDashboard}
+            canCreateInvoice={canCreateInvoice}
+            periodMode={periodMode}
+            onPeriodModeChange={setPeriodMode}
+            onSeedCustomRangeIfEmpty={seedCustomRangeIfEmpty}
+            customRange={{
+              startDate: customRange.startDate,
+              endDate: customRange.endDate,
+              setStartDate: customRange.setStartDate,
+              setEndDate: customRange.setEndDate,
+              error: customRange.error,
+            }}
+          />
+          <DashboardHomeKpis dashboard={displayDashboard} periodMode={periodMode} />
+        </div>
+        <DashboardHomeSalesPurchaseChart dashboard={displayDashboard} periodMode={periodMode} />
         <DashboardHomeReceivablesPayables dashboard={displayDashboard} />
         <DashboardHomeStockPulse dashboard={displayDashboard} />
         <DashboardHomeLedgerTable dashboard={displayDashboard} />

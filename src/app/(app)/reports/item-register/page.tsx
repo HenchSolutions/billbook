@@ -69,7 +69,6 @@ export default function ItemRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportItemRegister.title}
-        description={reportItemRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

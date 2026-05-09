@@ -77,7 +77,6 @@ export default function OutboundPaymentsPage() {
     <div className="page-container max-w-[96rem] animate-fade-in">
       <PageHeader
         title="Payments"
-        description="Outgoing payments — refunds, supplier settlements, and expenses. Each row is a voucher you can open as PDF."
         action={
           <Button asChild className="shadow-sm">
             <Link href="/payments/outbound/new">
@@ -219,8 +218,6 @@ export default function OutboundPaymentsPage() {
         <EmptyState
           icon={<ArrowDownLeft className="h-8 w-8" />}
           title="No payments yet"
-          description="Record a customer refund on a sale return, pay a supplier, or log an expense — each one appears here with a PDF voucher."
-          secondaryDescription="Abhi koi payout record nahi hai. Pehla payment add karke voucher trail shuru karein."
           action={
             <Button asChild>
               <Link href="/payments/outbound/new">Record payment</Link>

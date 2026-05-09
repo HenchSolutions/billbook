@@ -114,7 +114,7 @@ export function ReportRegisterResultBar({
     <div className="border-b border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
       <span className="font-medium text-foreground">{count}</span> {rowLabel}
       {maybeTruncated ? (
-        <span className="text-amber-800/90 dark:text-amber-400/85">
+        <span className="text-status-pending">
           {" "}
           · Showing up to {limit} rows — raise the limit if you need more.
         </span>
@@ -148,8 +148,8 @@ export function ReportRegisterSummaryCard({
       className={cn(
         "rounded-lg border px-5 py-4 text-sm shadow-sm",
         variant === "emerald" &&
-          "border-emerald-500/20 bg-emerald-500/[0.06] dark:bg-emerald-500/10",
-        variant === "rose" && "border-rose-500/20 bg-rose-500/[0.06] dark:bg-rose-500/10",
+          "border-status-paid/25 bg-status-paid/[0.06] dark:bg-status-paid/10",
+        variant === "rose" && "border-destructive/25 bg-destructive/[0.06] dark:bg-destructive/10",
       )}
     >
       {children}

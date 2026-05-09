@@ -1,3 +1,9 @@
+import { max, subMonths } from "date-fns";
+import {
+  getIndianFinancialYearStartIsoDate,
+  parseISODateString,
+  toISODateString,
+} from "@/lib/core/date";
 import { formatDate, formatDateNumericINFromDate, humanizeApiEnum } from "@/lib/core/utils";
 import type {
   DashboardData,
@@ -22,6 +28,26 @@ function formatMarginPercent(v: string | number | null | undefined): string {
   if (!Number.isFinite(n)) return "—";
   const pct = n > 0 && n <= 1 ? n * 100 : n;
   return `${Math.round(pct)}%`;
+}
+
+/**
+ * Default dashboard custom range: 1 Apr (Indian FY containing “today”) through today,
+ * clamped so the span never exceeds `maxMonths` (same cap as report / dashboard API).
+ */
+export function getDashboardCustomRangeSeedIso(maxMonths: number): {
+  startDate: string;
+  endDate: string;
+} {
+  const end = new Date();
+  const endIso = toISODateString(end);
+  const fyStartStr = getIndianFinancialYearStartIsoDate(end);
+  const fyStart = parseISODateString(fyStartStr);
+  if (!fyStart) {
+    return { startDate: fyStartStr || toISODateString(subMonths(end, maxMonths)), endDate: endIso };
+  }
+  const earliestAllowedStart = subMonths(end, maxMonths);
+  const start = max([fyStart, earliestAllowedStart]);
+  return { startDate: toISODateString(start), endDate: endIso };
 }
 
 export function snapshotLabelDate(dashboard: DashboardData): Date {

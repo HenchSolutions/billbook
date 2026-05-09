@@ -42,8 +42,8 @@ export function InvoiceSummaryCards({
         <div
           className={cn(
             "h-1.5",
-            invoice.status === "DRAFT" && "bg-amber-400",
-            invoice.status === "FINAL" && (isFullyPaid ? "bg-emerald-500" : "bg-primary"),
+            invoice.status === "DRAFT" && "bg-status-pending",
+            invoice.status === "FINAL" && (isFullyPaid ? "bg-status-paid" : "bg-primary"),
             invoice.status === "CANCELLED" && "bg-muted-foreground/30",
           )}
         />
@@ -156,7 +156,7 @@ export function InvoiceSummaryCards({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Paid</p>
-              <p className="text-base font-semibold tabular-nums text-emerald-600">
+              <p className="text-base font-semibold tabular-nums text-status-paid">
                 {formatCurrency(invoice.paidAmount ?? "0")}
               </p>
             </div>
@@ -165,7 +165,7 @@ export function InvoiceSummaryCards({
               <p
                 className={cn(
                   "text-base font-semibold tabular-nums",
-                  isFullyPaid ? "text-emerald-600" : "",
+                  isFullyPaid ? "text-status-paid" : "",
                   !isCancelled && !isFullyPaid && invoice.isOverdue ? "text-destructive" : "",
                   isCancelled && "font-medium text-muted-foreground",
                 )}

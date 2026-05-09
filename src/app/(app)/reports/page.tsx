@@ -40,11 +40,11 @@ export default function ReportsPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <PageHeader title={reportHub.title} description={reportHub.description} />
+      <PageHeader title={reportHub.title} />
 
       <ErrorBanner error={error} fallbackMessage="Failed to load reports summary" />
 
-      <div className="mb-5 space-y-4 border-b border-border/50 pb-4 sm:mb-6 sm:pb-4">
+      <div className="mb-4 space-y-3 border-b border-border/50 pb-3 sm:mb-5 sm:space-y-4 sm:pb-4">
         <Tabs
           value={periodTab}
           onValueChange={(v) => setPeriodTab(v as DashboardPeriodTab)}
@@ -73,18 +73,8 @@ export default function ReportsPage() {
               onEndDateChange={setEndDate}
               error={dateRangeError}
             />
-            <p className="text-pretty text-[11px] leading-relaxed text-muted-foreground sm:min-w-0 sm:max-w-[20rem] sm:flex-1 sm:self-center lg:max-w-md">
-              Activity totals use your selected range (max {MAX_REPORT_DATE_RANGE_MONTHS} months).
-              Money owed below uses each party’s current balance (always up to date).
-            </p>
           </div>
-        ) : (
-          <p className="max-w-2xl text-pretty text-[11px] leading-relaxed text-muted-foreground">
-            {periodTab === "monthly"
-              ? "Activity totals are for the current calendar month. Money owed uses each party’s current balance."
-              : "Activity totals are all-time. Money owed uses each party’s current balance."}
-          </p>
-        )}
+        ) : null}
       </div>
 
       {isPending ? (

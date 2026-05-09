@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2970a3",
+  themeColor: "#3b82f6",
   /** Enables `env(safe-area-inset-*)` on notched devices / PWAs. */
   viewportFit: "cover",
 };

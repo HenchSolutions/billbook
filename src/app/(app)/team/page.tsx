@@ -22,7 +22,6 @@ export default function TeamPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Team"
-        description="Invite staff with your organization code, assign a role group for permissions, and manage who can access this business."
         action={
           canRoleGroups ? (
             <Button variant="outline" size="sm" asChild>

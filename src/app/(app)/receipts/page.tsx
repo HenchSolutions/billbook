@@ -35,7 +35,6 @@ export default function ReceiptsPage() {
     <div className="page-container max-w-[96rem] animate-fade-in">
       <PageHeader
         title="Receipts"
-        description="Receipts from customers (cash, bank, UPI, etc.) and opening-advance receipts — allocate unapplied amounts to invoices when ready."
         action={
           <Button type="button" onClick={() => setNewReceiptOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -54,7 +53,6 @@ export default function ReceiptsPage() {
         <EmptyState
           icon={<Wallet className="h-8 w-8" />}
           title="No receipts yet"
-          description="Create a receipt, record payment on an invoice, or open a customer with credit opening — their opening receipt appears here for allocation."
           action={
             <Button type="button" onClick={() => setNewReceiptOpen(true)}>
               New receipt

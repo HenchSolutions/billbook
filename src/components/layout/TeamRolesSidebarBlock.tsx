@@ -36,7 +36,7 @@ export function TeamRolesSidebarBlock({
       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
       active
         ? SIDEBAR_NAV_ACTIVE
-        : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
+        : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
     );
 
   const subLinkClass = (active: boolean) =>
@@ -44,7 +44,7 @@ export function TeamRolesSidebarBlock({
       "block rounded-lg px-3 py-2 text-sm transition-colors",
       active
         ? SIDEBAR_NAV_ACTIVE
-        : "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-sidebar-foreground",
+        : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
     );
 
   /** Both areas: parent + expandable subs (mirrors Invoices). */

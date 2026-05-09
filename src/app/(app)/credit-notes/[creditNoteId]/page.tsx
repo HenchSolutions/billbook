@@ -101,7 +101,7 @@ export default function CreditNoteDetailPage() {
     return (
       <div className="page-container w-full min-w-0 max-w-5xl">
         <PageBackLink href="/credit-notes">Back to credit notes</PageBackLink>
-        <PageHeader title="Credit note" description="" />
+        <PageHeader title="Credit note" />
         <ErrorBanner error={error} fallbackMessage="Credit note not found." />
       </div>
     );

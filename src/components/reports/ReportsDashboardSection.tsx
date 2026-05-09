@@ -22,14 +22,9 @@ export function ReportsDashboardSection({ data }: ReportsDashboardSectionProps) 
   const { receipts, invoices, payouts, debt, payables } = data;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-5 sm:space-y-6">
       <section aria-labelledby="activity-heading">
-        <DashboardSectionHeader
-          id="activity-heading"
-          title={reportDashboard.sectionActivity}
-          description={reportDashboard.sectionActivityDescription}
-          className="mb-4 sm:mb-5"
-        />
+        <DashboardSectionHeader id="activity-heading" title={reportDashboard.sectionActivity} />
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4 [&>*]:min-w-0">
           <KpiLinkCard
             href="/reports/receipt-register"
@@ -59,12 +54,7 @@ export function ReportsDashboardSection({ data }: ReportsDashboardSectionProps) 
       </section>
 
       <section aria-labelledby="balances-heading">
-        <DashboardSectionHeader
-          id="balances-heading"
-          title={reportDashboard.sectionBalances}
-          description={reportDashboard.sectionBalancesDescription}
-          className="mb-4 sm:mb-5"
-        />
+        <DashboardSectionHeader id="balances-heading" title={reportDashboard.sectionBalances} />
         <div className="grid gap-3 md:grid-cols-2 md:gap-4 [&>*]:min-w-0">
           <BalanceLinkCard
             href="/reports/debt-register"
@@ -208,8 +198,8 @@ function BalanceLinkCard({
 }) {
   const shell =
     accent === "emerald"
-      ? "border-l-[3px] border-l-emerald-600/80 hover:border-l-emerald-600 bg-gradient-to-r from-emerald-500/[0.06] to-transparent dark:from-emerald-500/10"
-      : "border-l-[3px] border-l-rose-600/80 hover:border-l-rose-600 bg-gradient-to-r from-rose-500/[0.06] to-transparent dark:from-rose-500/10";
+      ? "border-l-[3px] border-l-status-paid/90 hover:border-l-status-paid bg-gradient-to-r from-status-paid/[0.08] to-transparent dark:from-status-paid/12"
+      : "border-l-[3px] border-l-destructive/90 hover:border-l-destructive bg-gradient-to-r from-destructive/[0.08] to-transparent dark:from-destructive/12";
 
   return (
     <div
@@ -239,8 +229,8 @@ function BalanceLinkCard({
           className={cn(
             "mt-2",
             fluidSnapshotValueClass,
-            accent === "emerald" && "text-emerald-950 dark:text-emerald-100",
-            accent === "rose" && "text-rose-950 dark:text-rose-100",
+            accent === "emerald" && "text-status-paid",
+            accent === "rose" && "text-destructive",
           )}
         >
           {formatCurrency(amount)}

@@ -167,7 +167,6 @@ export default function PurchaseRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPurchaseRegister.title}
-        description={reportPurchaseRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />

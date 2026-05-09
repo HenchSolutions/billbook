@@ -62,6 +62,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
           muted: "hsl(var(--sidebar-muted))",
+          hover: "hsl(var(--sidebar-hover))",
         },
         status: {
           paid: "hsl(var(--status-paid))",

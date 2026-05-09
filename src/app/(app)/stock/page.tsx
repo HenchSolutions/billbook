@@ -224,14 +224,7 @@ export default function Stock() {
 
   return (
     <div className="page-container animate-fade-in">
-      <PageHeader
-        title="Stock"
-        description={
-          showAddStockView
-            ? "Add new stock entries for your items"
-            : "View stock entries, add purchases, and adjust quantities. Summarize by item in Reports → Item register."
-        }
-      />
+      <PageHeader title="Stock" />
 
       {canStockOverview ? (
         <div className="mb-6">

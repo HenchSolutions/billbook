@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  CalendarDays,
+  CalendarClock,
   ChartColumnIncreasing,
   CircleDashed,
   HelpCircle,
   Percent,
-  Repeat2,
   Scale,
+  ShoppingCart,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
@@ -18,11 +17,9 @@ import {
   fluidMetricShellClass,
 } from "@/components/dashboard/dashboard-utils";
 import { cn, formatCurrency } from "@/lib/core/utils";
-import type { DashboardCustomRangeFields } from "@/components/dashboard/DashboardCustomRangePopover";
 import type { DashboardData, DashboardPeriodMode } from "@/types/dashboard";
 import { dashboardToNumber, resolveDashboardMarginDisplay } from "@/lib/business/dashboard-home";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { DashboardCustomRangePopover } from "@/components/dashboard/DashboardCustomRangePopover";
 
 const MARGIN_HINT =
   "Gross margin from finalized sale and purchase invoices (and expenses as returned by the API) for the selected scope — this month, all time, or a custom date range.";
@@ -51,63 +48,59 @@ type MetricKind =
   | "profit-neutral"
   | "empty";
 
-/**
- * Today vs period sales: “today” = warm amber/day clock; period/month sales = primary-blue tint.
- * Purchase uses accent orange (outflow) — not green — so it stays distinct from positive profit.
- */
+/** Card surfaces stay `bg-card`; metric hue is a top accent only (reads cleanly on the dashboard canvas). */
 const CARD_SHELL: Record<KpiTone, string> = {
   "today-sales":
-    "border-[hsl(38_50%_82%)] bg-[hsl(48_70%_96%)] shadow-sm ring-1 ring-amber-200/50 dark:border-amber-900/35 dark:bg-amber-950/25 dark:ring-amber-900/40",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-accent",
   "period-sales":
-    "border-[hsl(210_42%_88%)] bg-[hsl(210_62%_97%)] shadow-sm ring-1 ring-primary/20 dark:border-primary/25 dark:bg-primary/10 dark:ring-primary/20",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-primary",
   purchase:
-    "border-[hsl(22_42%_88%)] bg-[hsl(28_52%_97%)] shadow-sm ring-1 ring-accent/25 dark:border-accent/30 dark:bg-accent/10 dark:ring-accent/20",
-  margin: "border-[hsl(206_38%_88%)] bg-[hsl(206_52%_97%)] shadow-sm dark:border-sky-900/35",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-3",
+  margin:
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-2",
   "profit-positive":
-    "border-emerald-600/35 bg-gradient-to-br from-emerald-50 via-teal-50/90 to-emerald-100/70 shadow-md ring-1 ring-emerald-200/80 dark:border-emerald-500/30 dark:from-emerald-950/50 dark:via-emerald-950/35 dark:to-teal-950/40 dark:ring-emerald-700/40",
+    "border border-border/90 bg-card shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06] border-t-[3px] border-t-status-paid",
   "profit-negative":
-    "border-[hsl(0_50%_82%)] bg-[hsl(0_85%_97%)] shadow-sm ring-1 ring-red-200/60 dark:border-red-900/40 dark:bg-red-950/25",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-destructive",
   "profit-neutral":
-    "border-[hsl(215_28%_88%)] bg-[hsl(215_35%_96%)] shadow-sm dark:border-slate-700 dark:bg-slate-900/40",
-  cash: "border-[hsl(38_42%_88%)] bg-[hsl(45_90%_96%)] shadow-sm",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
+  cash: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-3",
   default:
-    "border-[hsl(43_30%_90%)] bg-[hsl(48_40%_97%)] shadow-sm dark:border-border dark:bg-muted/30",
+    "border border-border/90 bg-muted/20 shadow-sm ring-1 ring-black/[0.02] dark:bg-muted/15 dark:ring-white/[0.04]",
 };
 
 const VALUE_CLASS: Record<KpiTone, string> = {
-  "today-sales": "text-[hsl(28_45%_22%)] dark:text-amber-100",
+  "today-sales": "text-foreground",
   "period-sales": "text-foreground",
   purchase: "text-foreground",
   margin: "text-foreground",
-  "profit-positive": "text-emerald-900 dark:text-emerald-200",
-  "profit-negative": "text-red-700 dark:text-red-300",
+  "profit-positive": "text-status-paid dark:text-status-paid",
+  "profit-negative": "text-destructive dark:text-destructive",
   "profit-neutral": "text-foreground",
   cash: "text-foreground",
   default: "text-muted-foreground",
 };
 
 const ICON_SOLID: Record<KpiTone, string> = {
-  "today-sales":
-    "bg-gradient-to-br from-amber-500 to-amber-600 shadow-md ring-1 ring-amber-400/30 dark:from-amber-600 dark:to-amber-700",
+  "today-sales": "bg-accent shadow-md ring-1 ring-accent/30",
   "period-sales": "bg-primary shadow-md ring-1 ring-primary/25",
-  purchase: "bg-accent shadow-md ring-1 ring-accent/35 dark:ring-accent/40",
-  margin: "bg-[hsl(206_62%_50%)] dark:bg-sky-600",
-  "profit-positive":
-    "bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md ring-1 ring-emerald-400/35 dark:from-emerald-500 dark:to-teal-600",
-  "profit-negative": "bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700",
-  "profit-neutral": "bg-[hsl(215_22%_42%)] dark:bg-slate-600",
-  cash: "bg-[hsl(38_88%_46%)]",
-  default: "bg-[hsl(35_12%_52%)] dark:bg-muted-foreground/60",
+  purchase: "bg-chart-3 shadow-md ring-1 ring-chart-3/35",
+  margin: "bg-chart-2 shadow-md ring-1 ring-chart-2/30",
+  "profit-positive": "bg-status-paid shadow-md ring-1 ring-status-paid/35",
+  "profit-negative": "bg-destructive shadow-md ring-1 ring-destructive/30",
+  "profit-neutral": "bg-muted-foreground shadow-md ring-1 ring-muted-foreground/25",
+  cash: "bg-chart-3 shadow-md ring-1 ring-chart-3/25",
+  default: "bg-muted-foreground/70 shadow-md ring-1 ring-muted-foreground/20",
 };
 
 function iconForMetric(kind: MetricKind): LucideIcon {
   switch (kind) {
     case "today-sales":
-      return CalendarDays;
+      return CalendarClock;
     case "period-sales":
       return ChartColumnIncreasing;
     case "purchase":
-      return Repeat2;
+      return ShoppingCart;
     case "margin":
       return Percent;
     case "profit-positive":
@@ -141,7 +134,7 @@ function Kpi({
     <div
       className={cn(
         fluidMetricShellClass,
-        "flex h-full min-h-[124px] flex-col rounded-lg border p-5 transition-shadow duration-200 hover:shadow-md sm:min-h-[128px] sm:p-6",
+        "flex h-full min-h-[108px] flex-col rounded-lg border p-4 transition-shadow duration-200 hover:shadow-md sm:min-h-[112px] sm:p-5",
         profitElevated && "hover:shadow-lg",
         CARD_SHELL[tone],
       )}
@@ -184,7 +177,7 @@ function Kpi({
         <p
           className={cn(
             fluidDashboardKpiValueClass,
-            "mt-auto min-h-[2.5rem] pt-3 tabular-nums sm:min-h-[2.75rem] sm:pt-4",
+            "mt-auto min-h-[2.25rem] pt-2 tabular-nums sm:min-h-[2.5rem] sm:pt-3",
             VALUE_CLASS[tone],
             profitElevated && "tracking-tight",
           )}
@@ -199,22 +192,9 @@ function Kpi({
 interface DashboardHomeKpisProps {
   dashboard: DashboardData;
   periodMode: DashboardPeriodMode;
-  onPeriodModeChange: (mode: DashboardPeriodMode) => void;
-  customRange: DashboardCustomRangeFields;
 }
 
-export function DashboardHomeKpis({
-  dashboard,
-  periodMode,
-  onPeriodModeChange,
-  customRange,
-}: DashboardHomeKpisProps) {
-  const [rangePopoverOpen, setRangePopoverOpen] = useState(false);
-
-  useEffect(() => {
-    if (periodMode !== "custom") setRangePopoverOpen(false);
-  }, [periodMode]);
-
+export function DashboardHomeKpis({ dashboard, periodMode }: DashboardHomeKpisProps) {
   const isOverall = periodMode === "overall";
   const isCustom = periodMode === "custom";
 
@@ -259,54 +239,6 @@ export function DashboardHomeKpis({
 
   return (
     <section>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">
-          Performance snapshot
-        </h2>
-        <div className="flex w-full min-w-0 flex-col items-stretch gap-3 sm:w-auto sm:items-end">
-          <div className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setRangePopoverOpen(false);
-                onPeriodModeChange("monthly");
-              }}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                periodMode === "monthly"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              This month
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRangePopoverOpen(false);
-                onPeriodModeChange("overall");
-              }}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                periodMode === "overall"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              All time
-            </button>
-            <DashboardCustomRangePopover
-              open={rangePopoverOpen}
-              onOpenChange={setRangePopoverOpen}
-              customRange={customRange}
-              isCustomPeriod={periodMode === "custom"}
-              onActivateCustom={() => onPeriodModeChange("custom")}
-              align="end"
-            />
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5 [&>*]:min-w-0">
         <Kpi label="Today sales" value={todayStr} tone={todayTone} metricKind={todayKind} />
         <Kpi

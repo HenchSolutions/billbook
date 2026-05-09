@@ -71,7 +71,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 onClick={() => router.push(`/invoices/${inv.id}`)}
                 className={cn(
                   "data-table-row group cursor-pointer last:border-0",
-                  showOverdueChrome && "border-l-2 border-l-amber-400",
+                  showOverdueChrome && "border-l-2 border-l-status-pending",
                   isCancelled && "opacity-90",
                 )}
               >
@@ -122,7 +122,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                       {isCancelled && (
                         <div className="mt-0.5 text-xs text-muted-foreground">Cancelled</div>
                       )}
-                      {isFullyPaid && <div className="mt-0.5 text-xs text-emerald-600">Paid</div>}
+                      {isFullyPaid && <div className="mt-0.5 text-xs text-status-paid">Paid</div>}
                     </div>
                   </div>
                 </td>
@@ -165,7 +165,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 <td
                   className={cn(
                     "data-table-td data-table-col-numeric hidden font-medium md:table-cell",
-                    isFullyPaid && "text-emerald-600",
+                    isFullyPaid && "text-status-paid",
                     showOverdueChrome && "text-destructive",
                     isCancelled && "text-muted-foreground",
                   )}

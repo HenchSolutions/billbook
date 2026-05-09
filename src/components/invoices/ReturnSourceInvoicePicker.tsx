@@ -87,10 +87,7 @@ export function ReturnSourceInvoicePicker({ returnType }: ReturnSourceInvoicePic
         </Button>
       </div>
 
-      <PageHeader
-        title={`New ${meta.shortLabel}`}
-        description={`Choose a finalised ${sourceLabel} to record a return. Only finalised bills can be returned against.`}
-      />
+      <PageHeader title={`New ${meta.shortLabel}`} />
 
       {canCreateInvoice === false ? (
         <div className="mb-4">
@@ -119,11 +116,6 @@ export function ReturnSourceInvoicePicker({ returnType }: ReturnSourceInvoicePic
         <EmptyState
           icon={<FileText className="h-5 w-5" />}
           title={`No finalised ${sourceLabel}s found`}
-          description={
-            debouncedSearch || partyId != null || (startDate && endDate)
-              ? "Try different search or filters, or clear the date range."
-              : `Create and finalise a ${sourceLabel} first, then you can record a return here.`
-          }
         />
       ) : (
         <>
