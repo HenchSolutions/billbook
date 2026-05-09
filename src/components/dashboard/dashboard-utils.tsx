@@ -32,6 +32,18 @@ export const fluidReportsTotalLineClass =
 export const fluidInventoryPulseValueClass =
   "font-semibold tabular-nums text-[clamp(1rem,calc(0.42rem+5cqi),1.5rem)]";
 
+/**
+ * Reports shortcuts on dashboard cards — same footprint as `TabsTrigger` so they read as controls
+ * (plain `text-primary` links looked inert next to highlighted tabs).
+ */
+export const dashboardReportsNavLinkClass = cn(
+  "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5",
+  "text-xs font-medium sm:text-sm",
+  "border border-border/60 bg-background text-foreground shadow-sm",
+  "transition-colors hover:border-primary/30 hover:bg-primary hover:text-primary-foreground",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+);
+
 export function DashboardSectionHeader({
   id,
   title,

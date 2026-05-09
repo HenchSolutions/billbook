@@ -84,11 +84,8 @@ function getAuthErrorCode(error: ApiClientError): string | null {
 function toAuthError(error: unknown, fallbackMessage: string): Error {
   if (error instanceof ApiClientError) {
     const code = getAuthErrorCode(error);
-    const idNote = error.requestId
-      ? `\n\nSupport reference: ${error.requestId}\n(Share this if you contact support.)`
-      : "";
-    if (code) return new Error(AUTH_ERROR_MESSAGES[code] + idNote);
-    return new Error((error.message || fallbackMessage) + idNote);
+    if (code) return new Error(AUTH_ERROR_MESSAGES[code]);
+    return new Error(error.message || fallbackMessage);
   }
 
   if (error instanceof Error && error.message) {
@@ -252,8 +249,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isInactiveRoleGroupAccessMessage(e.message)
         ) {
           const snap = readCachedSessionUser();
+          const blockedDetail = e.message.trim();
           if (snap) setUser(snap);
-          setAccessBlockedMessage((prev) => prev ?? e.message.trim());
+          setAccessBlockedMessage((prev) => prev ?? blockedDetail);
           return;
         }
 

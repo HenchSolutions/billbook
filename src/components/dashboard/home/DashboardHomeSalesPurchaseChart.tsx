@@ -6,6 +6,7 @@ import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { cn, formatCurrency, formatDate } from "@/lib/core/utils";
 import type { DashboardData, DashboardPeriodMode } from "@/types/dashboard";
 import { buildSalesPurchaseChartData } from "@/lib/business/dashboard-home";
+import { dashboardReportsNavLinkClass } from "@/components/dashboard/dashboard-utils";
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
 import { useResolvedCssHsl } from "@/hooks/use-resolved-css-hsl";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -142,10 +143,7 @@ export function DashboardHomeSalesPurchaseChart({
             </div>
           </div>
           {canReports ? (
-            <Link
-              href="/reports"
-              className="shrink-0 text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
-            >
+            <Link href="/reports" className={dashboardReportsNavLinkClass}>
               All reports
             </Link>
           ) : null}
