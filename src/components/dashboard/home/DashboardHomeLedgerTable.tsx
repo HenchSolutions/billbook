@@ -14,6 +14,7 @@ import {
   ledgerTypeLabel,
   type ActivityTabFilter,
 } from "@/lib/business/dashboard-home";
+import { dashboardReportsNavLinkClass } from "@/components/dashboard/dashboard-utils";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
 
@@ -52,28 +53,25 @@ export function DashboardHomeLedgerTable({ dashboard }: DashboardHomeLedgerTable
   return (
     <section>
       <Card className="border-border/60 shadow-sm">
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 pb-3">
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-lg font-semibold tracking-tight">Recent activity</CardTitle>
-          </div>
-          {canReports ? (
-            <Link
-              href="/reports"
-              className="shrink-0 text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
-            >
-              All reports
-            </Link>
-          ) : null}
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold tracking-tight">Recent activity</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <Tabs value={tab} onValueChange={onTabChange} className="w-full">
-            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5 sm:w-auto">
-              {ACTIVITY_TABS.map((t) => (
-                <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">
-                  {t.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <TabsList className="h-auto w-full flex-1 flex-wrap justify-start gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5 sm:w-auto sm:flex-initial">
+                {ACTIVITY_TABS.map((t) => (
+                  <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">
+                    {t.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {canReports ? (
+                <Link href="/reports" className={dashboardReportsNavLinkClass}>
+                  All reports
+                </Link>
+              ) : null}
+            </div>
             <TabsContent value={tab} className="mt-5 outline-none focus-visible:ring-offset-0">
               <PaginatedActivityTable
                 rows={filteredRows}
