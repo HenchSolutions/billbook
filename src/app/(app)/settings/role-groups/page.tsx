@@ -37,7 +37,6 @@ export default function RoleGroupsListPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Role groups"
-        description="Each group holds a set of permissions. Staff are assigned one group per business."
         action={
           canManage ? (
             <Button asChild size="sm">
@@ -62,8 +61,8 @@ export default function RoleGroupsListPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : !sortedGroups.length ? (
-          <div className="rounded-2xl border border-dashed border-border/80 bg-muted/15 px-6 py-14 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="rounded-lg border border-dashed border-border/60 bg-muted/15 px-6 py-14 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Shield className="h-7 w-7" aria-hidden />
             </div>
             <h2 className="mt-5 text-lg font-semibold tracking-tight">No role groups yet</h2>
@@ -101,12 +100,12 @@ export default function RoleGroupsListPage() {
                     <Link
                       href={`/settings/role-groups/${g.id}`}
                       className={cn(
-                        "group flex items-stretch gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors sm:gap-4 sm:p-5",
+                        "group flex items-stretch gap-3 rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors sm:gap-4 sm:p-5",
                         "hover:border-primary/25 hover:bg-muted/20 dark:ring-white/10",
                       )}
                     >
                       <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
                         aria-hidden
                       >
                         <KeyRound className="h-6 w-6" />
@@ -124,7 +123,8 @@ export default function RoleGroupsListPage() {
                             )}
                             <Badge
                               variant="outline"
-                              className="font-mono text-xs font-normal tabular-nums"
+                              shape="tag"
+                              className="financial-id text-xs font-normal tabular-nums"
                             >
                               {permCount} permission{permCount === 1 ? "" : "s"}
                             </Badge>

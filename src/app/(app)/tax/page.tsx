@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import ErrorBanner from "@/components/ErrorBanner";
+import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import DateRangePicker from "@/components/DateRangePicker";
 import { TaxItemizedTable, TaxSummaryTable } from "@/components/tax/TaxSections";
@@ -76,7 +77,6 @@ export default function Tax() {
       />
       <PageHeader
         title="GST / Tax"
-        description="Tax summaries and itemized reports"
         action={
           <Button
             variant="outline"
@@ -94,7 +94,7 @@ export default function Tax() {
         }
       />
 
-      <div className="mb-6">
+      <div className="mb-4">
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
@@ -104,7 +104,7 @@ export default function Tax() {
         />
       </div>
 
-      <Tabs defaultValue="summary" className="mt-6">
+      <Tabs defaultValue="summary" className="mt-4">
         <TabsList className="mb-4 w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
           <TabsTrigger value="summary">Monthly Summary</TabsTrigger>
           <TabsTrigger value="itemized">Itemized</TabsTrigger>
@@ -124,9 +124,10 @@ export default function Tax() {
               invoiceCount={invoiceCountAllMonths}
             />
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No GST data for this period.
-            </p>
+            <EmptyState
+              icon={<FileSpreadsheet className="h-5 w-5" />}
+              title="No GST summary data"
+            />
           )}
         </TabsContent>
 
@@ -136,9 +137,10 @@ export default function Tax() {
           ) : gstItemized && (gstItemized.data ?? []).length > 0 ? (
             <TaxItemizedTable rows={gstItemized.data ?? []} />
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No itemized tax data for this period.
-            </p>
+            <EmptyState
+              icon={<FileSpreadsheet className="h-5 w-5" />}
+              title="No itemized tax data"
+            />
           )}
         </TabsContent>
       </Tabs>

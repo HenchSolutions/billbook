@@ -123,7 +123,7 @@ export function ItemDetailView({ id }: { id: number }) {
                   Type
                 </p>
                 <div className="mt-2">
-                  <Badge variant="secondary" className="font-medium">
+                  <Badge variant="secondary" shape="tag" className="font-medium">
                     {item.type}
                   </Badge>
                 </div>
@@ -150,7 +150,7 @@ export function ItemDetailView({ id }: { id: number }) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   HSN / SAC
                 </p>
-                <p className="mt-2 font-mono text-sm font-medium text-foreground">
+                <p className="financial-id mt-2 text-sm font-medium text-foreground">
                   {item.hsnCode || item.sacCode || "—"}
                 </p>
               </CardContent>

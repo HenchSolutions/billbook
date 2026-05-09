@@ -143,22 +143,12 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
 
   return (
     <div className="page-container animate-fade-in">
-      <PageHeader
-        title={isCreate ? "New role group" : (existing?.name ?? "Role group")}
-        description={
-          isCreate
-            ? "Name the role and choose which areas of Billbook it may use. People in this group only see what you allow."
-            : "Update access for this group. Changes apply to everyone currently assigned to it."
-        }
-      />
+      <PageHeader title={isCreate ? "New role group" : (existing?.name ?? "Role group")} />
 
       <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-5xl flex-col gap-10 pb-8">
-        <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
-          <div className="border-b border-border/70 bg-muted/20 px-5 py-4 sm:px-6">
+        <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+          <div className="border-b border-border/60 bg-muted/20 px-5 py-4 sm:px-6">
             <h2 className="text-lg font-semibold tracking-tight">Details</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Name and status apply everywhere this group is assigned.
-            </p>
           </div>
           <div className="space-y-6 p-5 sm:p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-8">
@@ -189,10 +179,6 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
                 <div className="flex flex-col justify-between gap-3 rounded-lg border border-border/60 bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium">Active</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Inactive groups cannot be assigned; deactivated staff lose access until
-                      reassigned.
-                    </p>
                   </div>
                   <Switch
                     checked={isActive}
@@ -205,13 +191,9 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
             </div>
           </div>
 
-          <div className="border-t border-border/70">
+          <div className="border-t border-border/60">
             <div className="border-b border-border/60 bg-muted/15 px-5 py-4 sm:px-6">
               <h2 className="text-lg font-semibold tracking-tight">What they can open</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Pick the parts of Billbook this role may use. Team members only see sidebar items
-                for areas you allow here.
-              </p>
             </div>
             <div className="p-4 sm:p-5">
               <PermissionCatalogTree
@@ -226,7 +208,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
         </div>
 
         {canManage ? (
-          <div className="flex flex-col gap-4 border-t border-border/70 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-t border-border/60 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -243,7 +225,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
             )}
           </div>
         ) : (
-          <p className="border-t border-border/70 pt-8 text-sm text-muted-foreground">
+          <p className="border-t border-border/60 pt-8 text-sm text-muted-foreground">
             You have read-only access to this role group.
           </p>
         )}

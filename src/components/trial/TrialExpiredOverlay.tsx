@@ -22,7 +22,7 @@ export function TrialExpiredOverlay({ validityEnd }: TrialExpiredOverlayProps) {
       aria-labelledby="trial-expired-title"
       aria-describedby="trial-expired-desc"
     >
-      <div className="max-w-md rounded-xl border border-border bg-card p-8 text-center shadow-lg">
+      <div className="max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-lg">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <Lock className="h-6 w-6 text-muted-foreground" aria-hidden />
         </div>

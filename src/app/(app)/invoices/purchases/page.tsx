@@ -5,7 +5,6 @@ export default function PurchaseInvoicesPage() {
     <InvoicesByTypePage
       invoiceType="PURCHASE_INVOICE"
       title="Purchase Invoices"
-      description="Track purchase bills from vendors"
       createLabel="New Purchase Invoice"
     />
   );

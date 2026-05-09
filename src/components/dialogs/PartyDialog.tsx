@@ -48,6 +48,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/ui/toast-helpers";
 import { capitaliseWords } from "@/lib/core/utils";
 import { fetchPostalOffice } from "@/lib/india/pincode";
 import { PartyConsigneesSection } from "@/components/parties/PartyConsigneesSection";
+import { isValidGstin, isValidIndianPincode } from "@/lib/india/validators";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required"),
@@ -118,6 +119,14 @@ export default function PartyDialog({
   const partyLabel = partyMeta.label;
   const partyLabelTitle = partyMeta.title;
   const postalCode = watch("postalCode");
+  const gstin = watch("gstin");
+  const normalizedGstin = (gstin ?? "").trim();
+  const gstinFormatInvalid = normalizedGstin.length > 0 && !isValidGstin(normalizedGstin);
+  const normalizedPostalCode = (postalCode ?? "").trim().replace(/\D/g, "");
+  const postalCodeFormatInvalid =
+    normalizedPostalCode.length > 0 &&
+    normalizedPostalCode.length === 6 &&
+    !isValidIndianPincode(normalizedPostalCode);
   const pincodeInitialMountRef = useRef(true);
 
   // Fetch address from postal code (same API as business profile)
@@ -309,8 +318,23 @@ export default function PartyDialog({
 
           <div className="space-y-2 sm:max-w-md">
             <Label>GSTIN</Label>
-            <Input placeholder="22AAAAA0000A1Z5" {...register("gstin")} />
+            <Input
+              className="financial-id"
+              placeholder="22AAAAA0000A1Z5"
+              aria-invalid={!!errors.gstin || gstinFormatInvalid}
+              {...register("gstin", {
+                onChange: (e) => {
+                  e.target.value = String(e.target.value ?? "")
+                    .toUpperCase()
+                    .replace(/\s+/g, "")
+                    .slice(0, 15);
+                },
+              })}
+            />
             {errors.gstin && <FieldError>{errors.gstin.message}</FieldError>}
+            {!errors.gstin && gstinFormatInvalid ? (
+              <FieldError>GSTIN must be 15 characters (e.g. 22AAAAA0000A1Z5).</FieldError>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -364,10 +388,19 @@ export default function PartyDialog({
 
           <div className="space-y-2">
             <Label>Postal Code</Label>
-            <Input {...register("postalCode")} placeholder="e.g. 560034" maxLength={10} />
+            <Input
+              {...register("postalCode")}
+              placeholder="e.g. 560034"
+              maxLength={10}
+              inputMode="numeric"
+              aria-invalid={postalCodeFormatInvalid}
+            />
             <p className="text-xs text-muted-foreground">
               Enter 6-digit pincode to auto-fill address, city and state
             </p>
+            {postalCodeFormatInvalid ? (
+              <FieldError>Enter a valid 6-digit Indian pincode.</FieldError>
+            ) : null}
           </div>
 
           <div className="space-y-2">

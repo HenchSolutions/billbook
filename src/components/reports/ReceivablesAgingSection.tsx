@@ -98,7 +98,7 @@ export function ReceivablesAgingSection({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground shadow-sm">
+      <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground shadow-sm">
         As of <span className="font-medium text-foreground">{formatISODateDisplay(data.asOf)}</span>
         {" · "}
         {reportInvoiceAging.asOfLineOutstandingPrefix}{" "}
@@ -107,7 +107,7 @@ export function ReceivablesAgingSection({
         </span>
       </div>
 
-      <Card className="rounded-xl border shadow-sm">
+      <Card className="rounded-lg border shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">{reportInvoiceAging.chartTitle}</CardTitle>
         </CardHeader>
@@ -116,7 +116,7 @@ export function ReceivablesAgingSection({
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-2 rounded-xl border border-border bg-card p-3 shadow-sm">
+      <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-card p-3 shadow-sm">
         {BUCKET_CHIPS.map((c) => (
           <button
             key={c.id}

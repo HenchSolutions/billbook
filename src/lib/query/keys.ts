@@ -3,6 +3,7 @@ import type { ItemType } from "@/types/item";
 import type { PartyType } from "@/types/party";
 import type { OutboundPaymentCategory } from "@/types/outbound-payment";
 import type { ReportsDashboardQuery } from "@/types/report";
+import type { BusinessDashboardQueryParams } from "@/types/dashboard";
 
 /**
  * Central query key factories for TanStack Query — use for useQuery and invalidateQueries
@@ -214,7 +215,12 @@ export const queryKeys = {
   },
 
   business: {
-    dashboard: (filter?: "monthly" | "overall") => ["dashboard", filter ?? "monthly"] as const,
+    dashboard: (params: BusinessDashboardQueryParams) => {
+      if (params.filter === "custom") {
+        return ["dashboard", "custom", params.startDate, params.endDate] as const;
+      }
+      return ["dashboard", params.filter] as const;
+    },
     profile: () => ["business-profile"] as const,
     businessTypes: () => ["business-type-options"] as const,
     industryTypes: () => ["industry-type-options"] as const,

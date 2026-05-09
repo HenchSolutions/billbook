@@ -1,3 +1,4 @@
+import { DataTableRoot } from "@/components/ui/data-table";
 import { formatDate } from "@/lib/core/utils";
 
 interface ItemizedTaxRow {
@@ -14,49 +15,47 @@ interface ItemizedTaxRow {
 
 export function TaxItemizedTable({ rows }: { rows: ItemizedTaxRow[] }) {
   return (
-    <div className="data-table-container">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b bg-muted/30">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-6">
-              Invoice
-            </th>
-            <th className="px-3 py-3 text-left font-medium text-muted-foreground">Party</th>
-            <th className="hidden px-3 py-3 text-left font-medium text-muted-foreground md:table-cell">
-              Date
-            </th>
-            <th className="px-3 py-3 text-right font-medium text-muted-foreground">Taxable</th>
-            <th className="hidden px-3 py-3 text-right font-medium text-muted-foreground lg:table-cell">
-              CGST
-            </th>
-            <th className="hidden px-3 py-3 text-right font-medium text-muted-foreground lg:table-cell">
-              SGST
-            </th>
-            <th className="hidden px-3 py-3 text-right font-medium text-muted-foreground lg:table-cell">
-              IGST
-            </th>
-            <th className="px-3 py-3 text-right font-medium text-muted-foreground sm:px-6">
-              Total Tax
-            </th>
+    <DataTableRoot density="default">
+      <table className="data-table">
+        <thead className="data-table-head-sticky">
+          <tr>
+            <th className="data-table-th px-4 sm:px-6">Invoice</th>
+            <th className="data-table-th">Party</th>
+            <th className="data-table-th hidden md:table-cell">Date</th>
+            <th className="data-table-th data-table-col-numeric">Taxable</th>
+            <th className="data-table-th data-table-col-numeric hidden lg:table-cell">CGST</th>
+            <th className="data-table-th data-table-col-numeric hidden lg:table-cell">SGST</th>
+            <th className="data-table-th data-table-col-numeric hidden lg:table-cell">IGST</th>
+            <th className="data-table-th data-table-col-numeric sm:px-6">Total Tax</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.invoiceId} className="border-b last:border-0 hover:bg-muted/20">
-              <td className="px-4 py-3 font-medium text-accent sm:px-6">{row.invoiceNumber}</td>
-              <td className="px-3 py-3">{row.partyName}</td>
-              <td className="hidden px-3 py-3 text-muted-foreground md:table-cell">
+            <tr key={row.invoiceId} className="data-table-row last:border-0">
+              <td className="data-table-td px-4 font-medium text-primary sm:px-6">
+                <span className="financial-id">{row.invoiceNumber}</span>
+              </td>
+              <td className="data-table-td">{row.partyName}</td>
+              <td className="data-table-td hidden text-muted-foreground md:table-cell">
                 {formatDate(row.invoiceDate)}
               </td>
-              <td className="px-3 py-3 text-right">₹{row.taxableAmount}</td>
-              <td className="hidden px-3 py-3 text-right lg:table-cell">₹{row.cgst}</td>
-              <td className="hidden px-3 py-3 text-right lg:table-cell">₹{row.sgst}</td>
-              <td className="hidden px-3 py-3 text-right lg:table-cell">₹{row.igst}</td>
-              <td className="px-3 py-3 text-right font-medium sm:px-6">₹{row.totalTax}</td>
+              <td className="data-table-td data-table-col-numeric">₹{row.taxableAmount}</td>
+              <td className="data-table-td data-table-col-numeric hidden lg:table-cell">
+                ₹{row.cgst}
+              </td>
+              <td className="data-table-td data-table-col-numeric hidden lg:table-cell">
+                ₹{row.sgst}
+              </td>
+              <td className="data-table-td data-table-col-numeric hidden lg:table-cell">
+                ₹{row.igst}
+              </td>
+              <td className="data-table-td data-table-col-numeric font-medium sm:px-6">
+                ₹{row.totalTax}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </DataTableRoot>
   );
 }

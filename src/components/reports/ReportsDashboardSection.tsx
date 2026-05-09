@@ -22,14 +22,9 @@ export function ReportsDashboardSection({ data }: ReportsDashboardSectionProps) 
   const { receipts, invoices, payouts, debt, payables } = data;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-5 sm:space-y-6">
       <section aria-labelledby="activity-heading">
-        <DashboardSectionHeader
-          id="activity-heading"
-          title={reportDashboard.sectionActivity}
-          description={reportDashboard.sectionActivityDescription}
-          className="mb-4 sm:mb-5"
-        />
+        <DashboardSectionHeader id="activity-heading" title={reportDashboard.sectionActivity} />
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4 [&>*]:min-w-0">
           <KpiLinkCard
             href="/reports/receipt-register"
@@ -59,12 +54,7 @@ export function ReportsDashboardSection({ data }: ReportsDashboardSectionProps) 
       </section>
 
       <section aria-labelledby="balances-heading">
-        <DashboardSectionHeader
-          id="balances-heading"
-          title={reportDashboard.sectionBalances}
-          description={reportDashboard.sectionBalancesDescription}
-          className="mb-4 sm:mb-5"
-        />
+        <DashboardSectionHeader id="balances-heading" title={reportDashboard.sectionBalances} />
         <div className="grid gap-3 md:grid-cols-2 md:gap-4 [&>*]:min-w-0">
           <BalanceLinkCard
             href="/reports/debt-register"
@@ -106,7 +96,7 @@ function KpiLinkCard({
       href={href}
       className={cn(
         fluidMetricShellClass,
-        "group relative block h-full rounded-xl border border-border/80 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03] transition-all",
+        "group relative block h-full rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03] transition-all",
         "hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "dark:bg-card/80 dark:ring-white/[0.04]",
@@ -121,7 +111,7 @@ function KpiLinkCard({
           <p className={cn(fluidReportsCountClass, "text-foreground")}>{count}</p>
           <p className={fluidReportsTotalLineClass}>Total {formatCurrency(totalAmount)}</p>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/40 text-muted-foreground transition-colors group-hover:border-border group-hover:bg-muted/60">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-muted-foreground transition-colors group-hover:border-border group-hover:bg-muted/60">
           <Icon className="h-5 w-5" aria-hidden />
         </div>
       </div>
@@ -155,7 +145,7 @@ function KpiSplitCard({
     <div
       className={cn(
         fluidMetricShellClass,
-        "group relative block h-full rounded-xl border border-border/80 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03]",
+        "group relative block h-full rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03]",
         "dark:bg-card/80 dark:ring-white/[0.04]",
         "sm:p-5",
       )}
@@ -168,7 +158,7 @@ function KpiSplitCard({
           <p className={cn(fluidReportsCountClass, "text-foreground")}>{count}</p>
           <p className={fluidReportsTotalLineClass}>Total {formatCurrency(totalAmount)}</p>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/40 text-muted-foreground">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-muted-foreground">
           <Icon className="h-5 w-5" aria-hidden />
         </div>
       </div>
@@ -208,13 +198,13 @@ function BalanceLinkCard({
 }) {
   const shell =
     accent === "emerald"
-      ? "border-l-[3px] border-l-emerald-600/80 hover:border-l-emerald-600 bg-gradient-to-r from-emerald-500/[0.06] to-transparent dark:from-emerald-500/10"
-      : "border-l-[3px] border-l-rose-600/80 hover:border-l-rose-600 bg-gradient-to-r from-rose-500/[0.06] to-transparent dark:from-rose-500/10";
+      ? "border-l-[3px] border-l-status-paid/90 hover:border-l-status-paid bg-gradient-to-r from-status-paid/[0.08] to-transparent dark:from-status-paid/12"
+      : "border-l-[3px] border-l-destructive/90 hover:border-l-destructive bg-gradient-to-r from-destructive/[0.08] to-transparent dark:from-destructive/12";
 
   return (
     <div
       className={cn(
-        "flex overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-sm ring-1 ring-black/[0.03] transition-colors hover:bg-muted/15 dark:ring-white/[0.04]",
+        "flex overflow-hidden rounded-lg border border-border/60 bg-card/90 shadow-sm ring-1 ring-black/[0.03] transition-colors hover:bg-muted/15 dark:ring-white/[0.04]",
         shell,
       )}
     >
@@ -239,8 +229,8 @@ function BalanceLinkCard({
           className={cn(
             "mt-2",
             fluidSnapshotValueClass,
-            accent === "emerald" && "text-emerald-950 dark:text-emerald-100",
-            accent === "rose" && "text-rose-950 dark:text-rose-100",
+            accent === "emerald" && "text-status-paid",
+            accent === "rose" && "text-destructive",
           )}
         >
           {formatCurrency(amount)}
@@ -250,7 +240,7 @@ function BalanceLinkCard({
           {reportDashboard.viewReportCta} <span aria-hidden>→</span>
         </p>
       </Link>
-      <div className="flex shrink-0 flex-col border-l border-border/70 bg-muted/20">
+      <div className="flex shrink-0 flex-col border-l border-border/60 bg-muted/20">
         <Tooltip>
           <TooltipTrigger asChild>
             <button

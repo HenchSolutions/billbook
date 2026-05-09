@@ -79,7 +79,6 @@ export default function ItemsPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Items"
-        description="Products and services for invoices. Set category and tax."
         action={
           canCreateItem ? (
             <Button onClick={openCreate}>
@@ -131,7 +130,6 @@ export default function ItemsPage() {
         <EmptyState
           icon={<Package className="h-5 w-5" />}
           title="No items found"
-          description="Add your first item or service. You can set category while adding—search existing or add a new one on the go."
           action={
             canCreateItem ? (
               <Button size="sm" onClick={openCreate}>

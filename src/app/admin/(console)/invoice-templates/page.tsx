@@ -31,7 +31,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -132,12 +132,10 @@ function formatModelLabel(selectedModel: string | null | undefined): string | nu
 
 function AiProcessingPanel({ stepIndex }: { stepIndex: number }) {
   return (
-    <div className="mt-3 rounded-lg border border-sky-200/70 bg-gradient-to-br from-sky-50 to-violet-50 p-4 dark:border-sky-800/40 dark:from-sky-950/30 dark:to-violet-950/30">
+    <div className="mt-3 rounded-lg border border-border/60 bg-gradient-to-br from-primary/[0.07] to-muted/40 p-4 dark:border-border dark:from-primary/10 dark:to-muted/25">
       <div className="mb-3 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 animate-pulse text-sky-600 dark:text-sky-400" />
-        <p className="text-sm font-semibold text-sky-900 dark:text-sky-100">
-          AI is transforming your template…
-        </p>
+        <Sparkles className="h-4 w-4 animate-pulse text-primary" />
+        <p className="text-sm font-semibold text-foreground">AI is transforming your template…</p>
       </div>
       <div className="space-y-2">
         {AI_PROCESS_STEPS.map((step, i) => {
@@ -149,7 +147,7 @@ function AiProcessingPanel({ stepIndex }: { stepIndex: number }) {
               className={cn(
                 "flex items-center gap-2 text-xs transition-all duration-300",
                 isDone && "text-emerald-700 dark:text-emerald-400",
-                isCurrent && "font-medium text-sky-700 dark:text-sky-300",
+                isCurrent && "font-medium text-primary",
                 i > stepIndex && "text-muted-foreground/40",
               )}
             >
@@ -168,7 +166,7 @@ function AiProcessingPanel({ stepIndex }: { stepIndex: number }) {
       <div className="mt-3">
         <Progress
           value={Math.round(((stepIndex + 1) / AI_PROCESS_STEPS.length) * 100)}
-          className="h-1 bg-sky-100 dark:bg-sky-900/40"
+          className="h-1 bg-muted"
         />
       </div>
     </div>
@@ -187,11 +185,11 @@ function AiResultPanel({
   const hasFallback = result.selectedModel === "default-fallback";
 
   return (
-    <div className="rounded-lg border border-violet-200/70 bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:border-violet-800/40 dark:from-violet-950/30 dark:to-sky-950/30">
+    <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-sidebar-accent to-primary/[0.06] p-4 dark:border-primary/25 dark:from-sidebar-accent dark:to-primary/5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <BrainCircuit className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-          <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+          <BrainCircuit className="h-4 w-4 text-primary" />
+          <p className="text-sm font-semibold text-foreground">
             AI Analysis Complete — v{result.version} created
           </p>
         </div>
@@ -251,7 +249,7 @@ function AiResultPanel({
       )}
 
       {result.aiNotes && (
-        <div className="mt-2.5 border-t border-violet-100/60 pt-2.5 dark:border-violet-900/30">
+        <div className="mt-2.5 border-t border-border/60 pt-2.5">
           {result.aiNotes.length <= 120 ? (
             <p className="text-xs italic leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
               {result.aiNotes}
@@ -671,37 +669,19 @@ export default function AdminInvoiceTemplatesPage() {
   return (
     <TooltipProvider>
       <div className="relative animate-fade-in space-y-6">
-        <PageHeader
-          title="Invoice template library"
-          description="Upload custom invoice designs — AI converts, validates, and previews them instantly."
-        />
+        <PageHeader title="Invoice template library" />
 
         {/* ── Upload card ─────────────────────────────────────────── */}
-        <Card className="border-border/80 shadow-sm">
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Upload className="h-4 w-4" />
               Upload or add new version
-              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-400">
+              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-0.5 text-xs font-medium text-primary dark:bg-primary/15">
                 <Sparkles className="h-3 w-3" />
                 AI-powered
               </span>
             </CardTitle>
-            <CardDescription>
-              Upload any HTML invoice design. AI transforms it into a safe, reusable Handlebars
-              template and renders a live preview.
-            </CardDescription>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="rounded-full border border-border/70 bg-background px-2 py-0.5">
-                1. Upload HTML
-              </span>
-              <span className="rounded-full border border-border/70 bg-background px-2 py-0.5">
-                2. AI optimize
-              </span>
-              <span className="rounded-full border border-border/70 bg-background px-2 py-0.5">
-                3. Preview and publish
-              </span>
-            </div>
             {isOptimizing && <AiProcessingPanel stepIndex={aiStepIndex} />}
           </CardHeader>
 
@@ -716,7 +696,7 @@ export default function AdminInvoiceTemplatesPage() {
                     <>
                       <div
                         className={cn(
-                          "relative flex min-h-[18.5rem] items-center justify-center rounded-xl border border-dashed border-border/80 bg-gradient-to-br from-muted/30 via-background to-muted/20 p-6 transition-colors",
+                          "relative flex min-h-[18.5rem] items-center justify-center rounded-lg border border-dashed border-border/60 bg-gradient-to-br from-muted/30 via-background to-muted/20 p-6 transition-colors",
                           "cursor-pointer hover:border-primary/50 hover:from-primary/5 hover:to-muted/30",
                           isDraggingFile && "border-primary bg-primary/10",
                         )}
@@ -743,7 +723,7 @@ export default function AdminInvoiceTemplatesPage() {
                           onChange={(e) => onFileSelected(e.target.files?.[0] ?? null)}
                         />
                         <div className="pointer-events-none mx-auto flex w-full max-w-md flex-col items-center justify-center text-center">
-                          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-border/70 bg-background shadow-sm">
+                          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-lg border border-border/60 bg-background shadow-sm">
                             <FileUp className="h-7 w-7 text-primary" />
                           </div>
                           <p className="text-base font-semibold tracking-tight">
@@ -760,7 +740,7 @@ export default function AdminInvoiceTemplatesPage() {
                       <p className="text-xs text-muted-foreground">No file selected · max 2 MB</p>
                     </>
                   ) : (
-                    <div className="min-h-[18.5rem] rounded-xl border border-border/70 bg-muted/20 p-4">
+                    <div className="min-h-[18.5rem] rounded-lg border border-border/60 bg-muted/20 p-4">
                       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_250px] md:items-stretch">
                         <div className="min-w-0 space-y-3">
                           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -805,7 +785,7 @@ export default function AdminInvoiceTemplatesPage() {
                             </div>
                           </div>
 
-                          <div className="rounded-lg border border-border/70 bg-background/70 p-3">
+                          <div className="rounded-lg border border-border/60 bg-background/70 p-3">
                             <p className="truncate text-sm font-medium">{file.name}</p>
                             <p className="mt-1 text-xs text-muted-foreground">
                               {(file.size / 1024).toFixed(1)} KB · HTML template
@@ -817,10 +797,10 @@ export default function AdminInvoiceTemplatesPage() {
                           </p>
                         </div>
 
-                        <div className="relative overflow-hidden rounded-lg border border-border/70 bg-muted/20">
+                        <div className="relative overflow-hidden rounded-lg border border-border/60 bg-muted/20">
                           {uploadedFileHtml ? (
                             <div className="flex h-72 items-center justify-center p-3">
-                              <div className="pointer-events-none h-full w-[205px] overflow-hidden rounded border border-border/70 bg-background shadow-sm">
+                              <div className="pointer-events-none h-full w-[205px] overflow-hidden rounded border border-border/60 bg-background shadow-sm">
                                 <iframe
                                   title="Selected template thumbnail"
                                   srcDoc={uploadedFileHtml}
@@ -977,12 +957,9 @@ export default function AdminInvoiceTemplatesPage() {
         </Card>
 
         {/* ── Template library ─────────────────────────────────────── */}
-        <Card className="border-border/80 shadow-sm">
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20">
-            <CardTitle>Template library</CardTitle>
-            <CardDescription>
-              Load a preview, review AI diagnostics, publish, and assign — all in one place.
-            </CardDescription>
+            <CardTitle className="text-lg font-semibold">Template library</CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-3 p-4 sm:p-6">
@@ -991,18 +968,14 @@ export default function AdminInvoiceTemplatesPage() {
                 <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
               </div>
             ) : templates.length === 0 ? (
-              <EmptyState
-                icon={<Sparkles className="h-8 w-8" />}
-                title="No templates yet"
-                description="Upload your first HTML template above to start the AI optimization flow."
-              />
+              <EmptyState icon={<Sparkles className="h-8 w-8" />} title="No templates yet" />
             ) : (
               templates.map((template) => {
                 const versions = templateVersionsSorted(template);
                 return (
                   <details
                     key={template.id}
-                    className="rounded-lg border border-border/70 bg-card shadow-sm open:border-primary/30"
+                    className="rounded-lg border border-border/60 bg-card shadow-sm open:border-primary/30"
                     open
                   >
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
@@ -1209,7 +1182,7 @@ export default function AdminInvoiceTemplatesPage() {
                                       <p className="mb-1 text-xs font-medium text-muted-foreground">
                                         Original upload
                                       </p>
-                                      <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+                                      <div className="overflow-hidden rounded-md border border-border/60 bg-background">
                                         {isLoadingOriginal ? (
                                           <div className="flex h-64 items-center justify-center">
                                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -1234,7 +1207,7 @@ export default function AdminInvoiceTemplatesPage() {
                                       <p className="mb-1 text-xs font-medium text-muted-foreground">
                                         AI-converted preview
                                       </p>
-                                      <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+                                      <div className="overflow-hidden rounded-md border border-border/60 bg-background">
                                         {renderedPreviewHtml ? (
                                           <div className="overflow-x-auto">
                                             <iframe
@@ -1252,7 +1225,7 @@ export default function AdminInvoiceTemplatesPage() {
                                     </div>
                                   </div>
                                 ) : previewView === "original" ? (
-                                  <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+                                  <div className="overflow-hidden rounded-md border border-border/60 bg-background">
                                     {isLoadingOriginal ? (
                                       <div className="flex h-64 items-center justify-center">
                                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -1270,7 +1243,7 @@ export default function AdminInvoiceTemplatesPage() {
                                     )}
                                   </div>
                                 ) : /* converted */ renderedPreviewHtml ? (
-                                  <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+                                  <div className="overflow-hidden rounded-md border border-border/60 bg-background">
                                     <iframe
                                       title="AI-converted invoice preview"
                                       srcDoc={renderedPreviewHtml}
@@ -1278,7 +1251,7 @@ export default function AdminInvoiceTemplatesPage() {
                                     />
                                   </div>
                                 ) : (
-                                  <p className="rounded-md border border-border/70 p-6 text-center text-sm text-muted-foreground">
+                                  <p className="rounded-md border border-border/60 p-6 text-center text-sm text-muted-foreground">
                                     Preview unavailable — click Load preview to retry.
                                   </p>
                                 )}
@@ -1397,7 +1370,7 @@ export default function AdminInvoiceTemplatesPage() {
               <DialogTitle>Selected template preview</DialogTitle>
             </DialogHeader>
             {uploadedFileHtml ? (
-              <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+              <div className="overflow-hidden rounded-md bg-muted/15">
                 <iframe
                   title="Selected template large preview"
                   srcDoc={uploadedFileHtml}

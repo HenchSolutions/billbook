@@ -9,6 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   SessionUser,
   LoginOtpRequest,
@@ -170,6 +171,7 @@ function clearSession() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [accessBlockedMessage, setAccessBlockedMessage] = useState<string | null>(null);
@@ -184,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function onAuthExpired() {
       clearSession();
+      queryClient.clear();
       setUser(null);
       setIsLoading(false);
       setAccessBlockedMessage(null);
@@ -193,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener(AUTH_EXPIRED_EVENT, onAuthExpired);
     };
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     function onAccessBlocked(e: Event) {
@@ -221,6 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!creds) {
       clearSession();
+      queryClient.clear();
       setUser(null);
       setIsLoading(false);
       return () => {
@@ -259,6 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         clearSession();
+        queryClient.clear();
         setUser(null);
       } finally {
         if (!cancelled && !cached) {
@@ -272,24 +277,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [queryClient]);
 
-  const handleAuthSuccess = useCallback(async (auth: AuthResponse) => {
-    setAccessToken(auth.tokens.accessToken);
-    setRefreshToken(auth.tokens.refreshToken);
+  const handleAuthSuccess = useCallback(
+    async (auth: AuthResponse) => {
+      /** Keys are not scoped by tenant — wipe cache so the next user never reads the previous account's data. */
+      queryClient.clear();
+      setAccessToken(auth.tokens.accessToken);
+      setRefreshToken(auth.tokens.refreshToken);
 
-    // Fetch /auth/me to get accurate role, validity, and branding (retries transient failures).
-    try {
-      const me = await fetchAuthMeValidated();
-      setUser(commitSessionFromMe(me));
-    } catch {
-      const sessionUser = toSessionUser(auth);
-      persistSession(sessionUser);
-      persistLastOrganizationCode(sessionUser.organizationCode);
-      setUser(sessionUser);
-    }
-    setIsLoading(false);
-  }, []);
+      // Fetch /auth/me to get accurate role, validity, and branding (retries transient failures).
+      try {
+        const me = await fetchAuthMeValidated();
+        setUser(commitSessionFromMe(me));
+      } catch {
+        const sessionUser = toSessionUser(auth);
+        persistSession(sessionUser);
+        persistLastOrganizationCode(sessionUser.organizationCode);
+        setUser(sessionUser);
+      }
+      setIsLoading(false);
+    },
+    [queryClient],
+  );
 
   const requestLoginOtp = useCallback(
     async (data: LoginOtpRequest): Promise<OtpRequestResponse> => {
@@ -375,9 +385,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       clearSession();
+      queryClient.clear();
       setUser(null);
     }
-  }, []);
+  }, [queryClient]);
 
   const refreshSessionRef = useRef(refreshSession);
   refreshSessionRef.current = refreshSession;
@@ -405,11 +416,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ignore logout errors — clear locally regardless
     } finally {
       clearSession();
+      queryClient.clear();
       setUser(null);
       setIsLoading(false);
       setAccessBlockedMessage(null);
     }
-  }, []);
+  }, [queryClient]);
 
   const contextValue = useMemo<AuthContextValue>(
     () => ({

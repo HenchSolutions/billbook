@@ -77,7 +77,6 @@ export default function OutboundPaymentsPage() {
     <div className="page-container max-w-[96rem] animate-fade-in">
       <PageHeader
         title="Payments"
-        description="Outgoing payments — refunds, supplier settlements, and expenses. Each row is a voucher you can open as PDF."
         action={
           <Button asChild className="shadow-sm">
             <Link href="/payments/outbound/new">
@@ -92,7 +91,7 @@ export default function OutboundPaymentsPage() {
 
       {!isPending && payments.length > 0 && (
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+          <div className="rounded-lg border border-border/60 bg-card p-4 shadow-sm">
             <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <BarChart3 className="h-3.5 w-3.5" aria-hidden />
               Matching payments
@@ -104,7 +103,7 @@ export default function OutboundPaymentsPage() {
               {filtersActive ? "With current filters" : "All vouchers"}
             </p>
           </div>
-          <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+          <div className="rounded-lg border border-border/60 bg-card p-4 shadow-sm">
             <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <ArrowDownLeft className="h-3.5 w-3.5" aria-hidden />
               This page total
@@ -116,7 +115,7 @@ export default function OutboundPaymentsPage() {
               {payments.length} row{payments.length === 1 ? "" : "s"} on page {page}
             </p>
           </div>
-          <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div className="rounded-lg border border-border/60 bg-card p-4 shadow-sm sm:col-span-2 lg:col-span-1">
             <div className="mb-1 text-xs font-medium text-muted-foreground">Visible range</div>
             <p className="text-lg font-semibold tabular-nums text-foreground">
               {rangeStart}–{rangeEnd}
@@ -127,7 +126,7 @@ export default function OutboundPaymentsPage() {
         </div>
       )}
 
-      <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm ring-1 ring-border/50">
+      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm ring-1 ring-border/50">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 bg-muted/25 px-4 py-3 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden />
@@ -219,7 +218,6 @@ export default function OutboundPaymentsPage() {
         <EmptyState
           icon={<ArrowDownLeft className="h-8 w-8" />}
           title="No payments yet"
-          description="Record a customer refund on a sale return, pay a supplier, or log an expense — each one appears here with a PDF voucher."
           action={
             <Button asChild>
               <Link href="/payments/outbound/new">Record payment</Link>

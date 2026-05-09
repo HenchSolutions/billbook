@@ -65,9 +65,9 @@ export default function StaffWelcomeDashboard() {
 
   return (
     <div className="flex w-full flex-col gap-7 px-4 py-6 md:px-6 md:py-8">
-      <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 via-background to-background p-5 md:p-7">
+      <section className="relative overflow-hidden rounded-lg border border-border/60 bg-gradient-to-r from-primary/[0.08] via-background to-background p-5 md:p-7">
         <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-primary/[0.07] blur-2xl" />
         <p className="mb-2 inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground">
           <CirclePlay className="h-3.5 w-3.5" />
           Quick guides
@@ -249,7 +249,7 @@ function ModuleTutorialCard({
   const watchUrl = getStaffTutorialWatchUrl(moduleId);
 
   return (
-    <article className="flex h-full flex-col rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <article className="flex h-full flex-col rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-1 flex-col items-center gap-3 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <Icon className="h-6 w-6 text-foreground" aria-hidden />

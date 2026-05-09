@@ -16,13 +16,13 @@ export default function RouteTransitionSkeleton() {
         <Skeleton className="h-px w-full max-w-2xl bg-muted" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32 rounded-xl sm:h-36" />
+            <Skeleton key={i} className="h-32 rounded-lg sm:h-36" />
           ))}
         </div>
         <div className="space-y-3">
           <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-24 w-full max-w-4xl rounded-xl" />
-          <Skeleton className="h-24 w-full max-w-4xl rounded-xl" />
+          <Skeleton className="h-24 w-full max-w-4xl rounded-lg" />
+          <Skeleton className="h-24 w-full max-w-4xl rounded-lg" />
         </div>
       </div>
     </div>

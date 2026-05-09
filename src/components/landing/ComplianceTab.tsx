@@ -71,7 +71,7 @@ const CAPTIONS = [
 export function ComplianceTab() {
   return (
     <TabsContent value="compliance" className="mt-8 motion-safe:animate-fade-in">
-      <div className="overflow-hidden rounded-3xl border bg-background shadow-lg ring-1 ring-border/60">
+      <div className="overflow-hidden rounded-lg border bg-background shadow-lg ring-1 ring-border/60">
         <div className="flex flex-col gap-4 border-b bg-muted/40 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground">GST / Tax</p>
@@ -93,7 +93,7 @@ export function ComplianceTab() {
         <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4">
           {KPI_ITEMS.map(({ label, value, sub, Icon, color }) => (
             <div key={label} className="flex items-center gap-4 bg-background px-5 py-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted/60">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/60">
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
@@ -107,7 +107,7 @@ export function ComplianceTab() {
 
         <div className="px-6 pb-6 pt-5">
           <Tabs defaultValue="summary" className="w-full">
-            <TabsList className="mb-4 h-auto w-full flex-wrap justify-start gap-1 rounded-xl bg-muted/50 p-1 sm:w-auto">
+            <TabsList className="mb-4 h-auto w-full flex-wrap justify-start gap-1 rounded-lg bg-muted/50 p-1 sm:w-auto">
               <TabsTrigger value="summary" className="rounded-lg px-4">
                 Monthly Summary
               </TabsTrigger>
@@ -117,7 +117,7 @@ export function ComplianceTab() {
             </TabsList>
 
             <TabsContent value="summary" className="mt-0 outline-none">
-              <div className="overflow-x-auto rounded-xl border border-border/80">
+              <div className="overflow-x-auto rounded-lg border border-border/60">
                 <table className="w-full min-w-[640px] text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
@@ -165,7 +165,7 @@ export function ComplianceTab() {
             </TabsContent>
 
             <TabsContent value="itemized" className="mt-0 outline-none">
-              <div className="overflow-x-auto rounded-xl border border-border/80">
+              <div className="overflow-x-auto rounded-lg border border-border/60">
                 <table className="w-full min-w-[560px] text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
@@ -237,7 +237,7 @@ export function ComplianceTab() {
             },
           ].map(({ title, desc, Icon }) => (
             <div key={title} className="flex gap-3 bg-muted/10 px-5 py-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background shadow-sm ring-1 ring-border/60">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background shadow-sm ring-1 ring-border/60">
                 <Icon className="h-5 w-5 text-primary" />
               </div>
               <div>

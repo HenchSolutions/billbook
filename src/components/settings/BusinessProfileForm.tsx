@@ -1,6 +1,5 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, type ReactNode } from "react";
 import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -31,12 +30,13 @@ import { lookupIfscCode } from "@/lib/india/ifsc";
 import type { BusinessClassificationOption } from "@/types/auth";
 import { ApiClientError } from "@/api/error";
 import { cn } from "@/lib/core/utils";
+import { isValidGstin, isValidIndianPincode, isValidPan } from "@/lib/india/validators";
 
 const LOGO_MAX_SIZE_MB = 5;
 
 /** Visual cue that bank inputs are locked until “Edit bank details” is used. */
 const bankInputLockedClass =
-  "cursor-default border-input/80 bg-muted/70 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0";
+  "cursor-default border-input bg-background text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0";
 const SIGNATURE_MAX_SIZE_MB = 2;
 
 function toCapitalizedLabel(value: string): string {
@@ -51,7 +51,6 @@ interface BusinessProfileFormProps {
   form: UseFormReturn<ProfileForm>;
   onSubmit: (data: ProfileForm) => void | Promise<void>;
   isDirty: boolean;
-  isSaving: boolean;
   businessTypeOptions: BusinessClassificationOption[];
   industryTypeOptions: BusinessClassificationOption[];
   canManageTypeOptions: boolean;
@@ -120,12 +119,15 @@ function CreatableTypeInput({
       </PopoverAnchor>
       <PopoverContent
         align="start"
-        className="w-[var(--radix-popover-trigger-width)] p-0"
+        className="w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Command shouldFilter={false}>
+        <Command
+          shouldFilter={false}
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md"
+        >
           <CommandList id={`${id}-options`} className="max-h-64">
-            <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">
+            <CommandEmpty className="py-4 text-center text-sm text-foreground">
               {emptyMessage}
             </CommandEmpty>
             <CommandGroup>
@@ -171,11 +173,35 @@ function CreatableTypeInput({
   );
 }
 
+function FormSection({
+  title,
+  children,
+  contentClassName,
+  headerRight,
+}: {
+  title: string;
+  children: ReactNode;
+  contentClassName?: string;
+  headerRight?: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm ring-1 ring-border/40">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/45 px-4 py-3 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="h-6 w-1 shrink-0 rounded-full bg-primary" aria-hidden />
+          <h3 className="text-base font-semibold tracking-tight text-foreground">{title}</h3>
+        </div>
+        {headerRight}
+      </header>
+      <div className={cn("bg-card px-4 py-4 sm:px-5 sm:py-5", contentClassName)}>{children}</div>
+    </section>
+  );
+}
+
 export function BusinessProfileForm({
   form,
   onSubmit,
   isDirty,
-  isSaving,
   businessTypeOptions,
   industryTypeOptions,
   canManageTypeOptions,
@@ -231,14 +257,31 @@ export function BusinessProfileForm({
   const countryName = watch("country");
   const city = watch("city");
   const state = watch("state");
+  const gstin = watch("gstin");
+  const pan = watch("pan");
   const ifscCode = watch("ifscCode");
   const bankAccountNumberValue = watch("bankAccountNumber");
   const confirmAccountNumberValue = watch("confirmAccountNumber");
+  const bankNameW = watch("bankName");
+  const branchNameW = watch("branchName");
+  const bankCityW = watch("bankCity");
+  const bankStateW = watch("bankState");
   const normalizedIfscInput = (ifscCode ?? "").trim().toUpperCase();
   const ifsc11Valid = /^[A-Z0-9]{11}$/.test(normalizedIfscInput);
   const ifscDerivedLocked = isEditingBankDetails && ifscLookupOk;
+  /** Show compact read-only lines instead of input boxes (view mode or IFSC lookup succeeded). */
+  const showIfscDerivedAsText = !isEditingBankDetails || ifscDerivedLocked;
 
   const pincodeDigits = (pincode ?? "").toString().replace(/\D/g, "");
+  const normalizedPincode = (pincode ?? "").trim();
+  const normalizedGstin = (gstin ?? "").trim();
+  const normalizedPan = (pan ?? "").trim();
+  const gstinFormatInvalid = normalizedGstin.length > 0 && !isValidGstin(normalizedGstin);
+  const panFormatInvalid = normalizedPan.length > 0 && !isValidPan(normalizedPan);
+  const pincodeFormatInvalid =
+    normalizedPincode.length > 0 &&
+    normalizedPincode.replace(/\D/g, "").length === 6 &&
+    !isValidIndianPincode(normalizedPincode.replace(/\D/g, ""));
   const lockCityState = pincodeDigits.length === 6 && Boolean(city || state);
   const selectedPhoneCountry = COUNTRIES.find((c) => c.code === phoneCountryCode) ??
     COUNTRIES[0] ?? { code: "IN", dialCode: "+91", label: "India" };
@@ -481,951 +524,802 @@ export function BusinessProfileForm({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg">Business Information</CardTitle>
-        <CardDescription>
-          {readOnly
-            ? "View-only for team members. Ask the business owner to change these details."
-            : "Update your business details used on invoices, payments, and compliance records."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <form
-          id="profile-form"
-          onSubmit={readOnly ? (e) => e.preventDefault() : handleSubmit(onSubmit)}
-          className="min-w-0"
-        >
-          <fieldset disabled={readOnly} className="min-w-0 space-y-6 border-0 p-0">
-            {!readOnly && (
-              <div className="rounded-lg border border-border/70 bg-muted/25 p-4">
-                <p className="text-sm font-medium text-foreground">Quick setup</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Start with business name and address, then complete bank details for payouts.
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <Badge variant="secondary" className="font-normal">
-                    1. Business & contact
-                  </Badge>
-                  <Badge variant="secondary" className="font-normal">
-                    2. Address
-                  </Badge>
-                  <Badge variant="secondary" className="font-normal">
-                    3. Bank details
-                  </Badge>
-                  <span>Save changes from the top-right button.</span>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-              <div className="space-y-4">
-                <div className="rounded-lg border-2 border-dashed border-border/60 p-4 text-center">
-                  {displayLogoUrl ? (
-                    <div className="relative mx-auto inline-block">
-                      <img
-                        src={displayLogoUrl}
-                        alt="Business logo"
-                        className="h-24 w-24 rounded-lg bg-muted object-contain"
-                      />
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="absolute bottom-0 right-0 h-6 w-6 rounded-full shadow-sm"
-                        onClick={handleLogoClick}
-                        disabled={isUploadingLogo}
-                        aria-label="Edit logo"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
+    <form
+      id="profile-form"
+      onSubmit={readOnly ? (e) => e.preventDefault() : handleSubmit(onSubmit)}
+      className="w-full min-w-0"
+    >
+      <fieldset disabled={readOnly} className="min-w-0 space-y-6 border-0 p-0">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] lg:items-start">
+          <div className="flex flex-col gap-6">
+            <FormSection title="Logo">
+              <div className="rounded-lg border border-border bg-muted/25 p-3 text-center">
+                {displayLogoUrl ? (
+                  <div className="relative mx-auto inline-block">
+                    <img
+                      src={displayLogoUrl}
+                      alt="Business logo"
+                      className="h-24 w-24 rounded-lg border border-border bg-card object-contain"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      className="absolute bottom-0 right-0 h-6 w-6 rounded-full shadow-sm"
+                      onClick={handleLogoClick}
+                      disabled={isUploadingLogo}
+                      aria-label="Edit logo"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-foreground">
+                      <Upload className="h-5 w-5" />
                     </div>
-                  ) : (
-                    <>
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <Upload className="h-5 w-5" />
-                      </div>
-                      <p className="text-sm font-medium">Upload Logo</p>
-                      <p className="text-xs text-muted-foreground">
-                        PNG/JPG, max {LOGO_MAX_SIZE_MB} MB
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={handleLogoClick}
-                        disabled={isUploadingLogo}
-                      >
-                        {isUploadingLogo ? "Uploading…" : "Choose file"}
-                      </Button>
-                    </>
+                    <p className="text-sm font-medium text-foreground">Upload Logo</p>
+                    <p className="text-xs text-foreground">PNG/JPG, max {LOGO_MAX_SIZE_MB} MB</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={handleLogoClick}
+                      disabled={isUploadingLogo}
+                    >
+                      {isUploadingLogo ? "Uploading…" : "Choose file"}
+                    </Button>
+                  </>
+                )}
+                {displayLogoUrl && (
+                  <p className="mt-2 text-xs text-foreground">
+                    <button
+                      type="button"
+                      className="underline hover:no-underline"
+                      onClick={handleRemoveLogo}
+                    >
+                      Remove logo
+                    </button>
+                  </p>
+                )}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  onChange={handleLogoChange}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Registration & signature" contentClassName="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="registrationType">Business Registration Type</Label>
+                <Controller
+                  name="registrationType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value?.trim() ? field.value : undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="registrationType">
+                        <SelectValue placeholder="Select registration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGISTRATION_TYPES.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
-                  {displayLogoUrl && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      <button
-                        type="button"
-                        className="underline hover:no-underline"
-                        onClick={handleRemoveLogo}
-                      >
-                        Remove logo
-                      </button>
-                    </p>
-                  )}
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    className="hidden"
-                    onChange={handleLogoChange}
+                />
+              </div>
+              <div className="rounded-lg border border-border bg-muted/25 px-4 py-5 text-center">
+                {displaySignatureUrl ? (
+                  <div className="relative mx-auto mt-3 inline-block">
+                    <img
+                      src={displaySignatureUrl}
+                      alt="Signature"
+                      className="max-h-16 w-auto max-w-[200px] object-contain"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
+                      onClick={handleRemoveSignature}
+                      aria-label="Remove signature"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : null}
+                <input
+                  ref={signatureInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleSignatureChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={handleSignatureClick}
+                  disabled={isUploadingSignature}
+                >
+                  {isUploadingSignature
+                    ? "Uploading…"
+                    : displaySignatureUrl
+                      ? "Change signature"
+                      : "Add Signature"}
+                </Button>
+              </div>
+            </FormSection>
+
+            <FormSection title="Additional business details">
+              <div className="space-y-3">
+                {extraDetailFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2">
+                    <Input
+                      placeholder="Key (e.g. TAN)"
+                      {...register(`extraDetails.${index}.key`)}
+                      className="flex-1"
+                    />
+                    <Input
+                      placeholder="Value"
+                      {...register(`extraDetails.${index}.value`)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeExtraDetail(index)}
+                      aria-label="Remove"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => appendExtraDetail({ key: "", value: "" })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add detail
+                </Button>
+              </div>
+            </FormSection>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <FormSection title="Business & contact" contentClassName="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name" required>
+                    Business Name
+                  </Label>
+                  <Input
+                    id="name"
+                    {...register("name")}
+                    aria-required="true"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
                   />
+                  {errors.name && <FieldError id="name-error">{errors.name.message}</FieldError>}
                 </div>
-                <div className="rounded-lg border border-border/70 bg-muted/30 p-3 text-xs text-muted-foreground">
-                  Your logo appears on invoices, reports, and client-facing documents.
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Registration and Signature</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="registrationType">Business Registration Type</Label>
-                      <Controller
-                        name="registrationType"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            value={field.value?.trim() ? field.value : undefined}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger id="registrationType">
-                              <SelectValue placeholder="Select registration" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {REGISTRATION_TYPES.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
-                                  {item.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </div>
-                    <div className="rounded-lg border-2 border-dashed border-border/60 px-4 py-6 text-center">
-                      <p className="text-xs text-muted-foreground">Add signature for invoices</p>
-                      {displaySignatureUrl ? (
-                        <div className="relative mx-auto mt-3 inline-block">
-                          <img
-                            src={displaySignatureUrl}
-                            alt="Signature"
-                            className="max-h-16 w-auto max-w-[200px] object-contain"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
-                            onClick={handleRemoveSignature}
-                            aria-label="Remove signature"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : null}
-                      <input
-                        ref={signatureInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleSignatureChange}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={handleSignatureClick}
-                        disabled={isUploadingSignature}
-                      >
-                        {isUploadingSignature
-                          ? "Uploading…"
-                          : displaySignatureUrl
-                            ? "Change signature"
-                            : "Add Signature"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Additional business details</CardTitle>
-                    <CardDescription>
-                      MSME, TAN, website, or any extra key-value identifiers
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {extraDetailFields.map((field, index) => (
-                        <div key={field.id} className="flex gap-2">
-                          <Input
-                            placeholder="Key (e.g. TAN)"
-                            {...register(`extraDetails.${index}.key`)}
-                            className="flex-1"
-                          />
-                          <Input
-                            placeholder="Value"
-                            {...register(`extraDetails.${index}.value`)}
-                            className="flex-1"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeExtraDetail(index)}
-                            aria-label="Remove"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => appendExtraDetail({ key: "", value: "" })}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add detail
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Business & contact</CardTitle>
-                    <CardDescription>
-                      Key details used across invoices and reports. Fields marked required should be
-                      completed first.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name" required>
-                          Business Name
-                        </Label>
-                        <Input
-                          id="name"
-                          {...register("name")}
-                          aria-required="true"
-                          aria-invalid={!!errors.name}
-                          aria-describedby={errors.name ? "name-error" : undefined}
-                        />
-                        {errors.name && (
-                          <FieldError id="name-error">{errors.name.message}</FieldError>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="country">Country</Label>
-                        <Controller
-                          name="country"
-                          control={control}
-                          render={({ field }) => {
-                            const v = (field.value ?? "").trim();
-                            const selected =
-                              COUNTRIES.find((c) => c.label.toLowerCase() === v.toLowerCase()) ??
-                              selectedPhoneCountry;
-                            return (
-                              <Select
-                                value={selected.code}
-                                onValueChange={(code) => {
-                                  const country = COUNTRIES.find((c) => c.code === code);
-                                  field.onChange(country?.label ?? "");
-                                  setPhoneCountryCode(code);
-                                }}
-                              >
-                                <SelectTrigger id="country">
-                                  <SelectValue placeholder="Select country" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {COUNTRIES.map((item) => (
-                                    <SelectItem key={item.code} value={item.code}>
-                                      <span className="flex items-center gap-2">
-                                        <span aria-hidden className="text-base leading-none">
-                                          {countryCodeToFlagEmoji(item.code)}
-                                        </span>
-                                        <span className="truncate">{item.label}</span>
-                                      </span>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            );
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Controller
+                    name="country"
+                    control={control}
+                    render={({ field }) => {
+                      const v = (field.value ?? "").trim();
+                      const selected =
+                        COUNTRIES.find((c) => c.label.toLowerCase() === v.toLowerCase()) ??
+                        selectedPhoneCountry;
+                      return (
+                        <Select
+                          value={selected.code}
+                          onValueChange={(code) => {
+                            const country = COUNTRIES.find((c) => c.code === code);
+                            field.onChange(country?.label ?? "");
+                            setPhoneCountryCode(code);
                           }}
-                        />
-                      </div>
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="email">Company Email</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          {...register("email")}
-                          placeholder="billing@acme.com"
-                          aria-invalid={!!errors.email}
-                          aria-describedby={errors.email ? "email-error" : undefined}
-                        />
-                        {errors.email && (
-                          <p id="email-error" className="text-xs text-destructive" role="alert">
-                            {errors.email.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="businessType">
-                          Business Type{" "}
-                          <span className="text-xs text-muted-foreground">(optional)</span>
-                        </Label>
-                        <Controller
-                          name="businessType"
-                          control={control}
-                          render={({ field }) => (
-                            <CreatableTypeInput
-                              id="businessType"
-                              value={field.value ?? ""}
-                              onChange={field.onChange}
-                              options={businessTypeOptions}
-                              placeholder="e.g. Retail"
-                              emptyMessage="No matching business types"
-                              canManageTypeOptions={canManageTypeOptions}
-                              createLabel="Add business type"
-                              isCreating={isCreatingBusinessType}
-                              onCreate={async (name) => {
-                                await handleCreateOption(
-                                  "business",
-                                  onCreateBusinessType,
-                                  "businessType",
-                                  name,
-                                );
-                              }}
-                            />
-                          )}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="industryType">
-                          Industry Type{" "}
-                          <span className="text-xs text-muted-foreground">(optional)</span>
-                        </Label>
-                        <Controller
-                          name="industryType"
-                          control={control}
-                          render={({ field }) => (
-                            <CreatableTypeInput
-                              id="industryType"
-                              value={field.value ?? ""}
-                              onChange={field.onChange}
-                              options={industryTypeOptions}
-                              placeholder="e.g. IT Services"
-                              emptyMessage="No matching industry types"
-                              canManageTypeOptions={canManageTypeOptions}
-                              createLabel="Add industry type"
-                              isCreating={isCreatingIndustryType}
-                              onCreate={async (name) => {
-                                await handleCreateOption(
-                                  "industry",
-                                  onCreateIndustryType,
-                                  "industryType",
-                                  name,
-                                );
-                              }}
-                            />
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone number</Label>
-                      <div className="grid grid-cols-[120px_1fr] gap-2 sm:grid-cols-[140px_1fr]">
-                        <Select value={phoneCountryCode} onValueChange={handlePhoneCountryChange}>
-                          <SelectTrigger
-                            id="phoneCountry"
-                            aria-label="Phone country code"
-                            className="h-10"
-                          >
-                            <span className="flex items-center gap-1">
-                              <span aria-hidden className="text-base leading-none">
-                                {countryCodeToFlagEmoji(selectedPhoneCountry.code)}
-                              </span>{" "}
-                              <span className="pl-1 tabular-nums">
-                                {selectedPhoneCountry.dialCode}
-                              </span>
-                            </span>
+                        >
+                          <SelectTrigger id="country">
+                            <SelectValue placeholder="Select country" />
                           </SelectTrigger>
                           <SelectContent>
                             {COUNTRIES.map((item) => (
                               <SelectItem key={item.code} value={item.code}>
-                                <span className="flex items-center gap-3">
+                                <span className="flex items-center gap-2">
                                   <span aria-hidden className="text-base leading-none">
                                     {countryCodeToFlagEmoji(item.code)}
                                   </span>
                                   <span className="truncate">{item.label}</span>
-                                  <span className="ml-auto tabular-nums">{item.dialCode}</span>
                                 </span>
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input
-                          id="phone"
-                          placeholder="9876543210"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={10}
-                          aria-invalid={!!errors.phone}
-                          {...register("phone", {
-                            onChange: (e) => {
-                              e.target.value = String(e.target.value ?? "")
-                                .replace(/\D/g, "")
-                                .slice(0, 10);
-                            },
-                          })}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Enter digits only. Country code is selected separately.
-                      </p>
-                      {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
-                    </div>
-                  </CardContent>
-                </Card>
+                      );
+                    }}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="email">Company Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...register("email")}
+                    placeholder="billing@acme.com"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                  />
+                  {errors.email && (
+                    <p id="email-error" className="text-xs text-destructive" role="alert">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Address</CardTitle>
-                    <CardDescription>
-                      Used for compliance and document headers. Pincode can auto-fill city and
-                      state.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="street">Address line 1</Label>
-                      <Textarea
-                        id="street"
-                        placeholder="123 Main Street"
-                        className="min-h-[88px]"
-                        aria-invalid={!!errors.street}
-                        aria-describedby={errors.street ? "street-error" : undefined}
-                        {...register("street")}
-                        maxLength={500}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="businessType">
+                    Business Type{" "}
+                    <span className="text-xs font-normal text-foreground">(optional)</span>
+                  </Label>
+                  <Controller
+                    name="businessType"
+                    control={control}
+                    render={({ field }) => (
+                      <CreatableTypeInput
+                        id="businessType"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        options={businessTypeOptions}
+                        placeholder="e.g. Retail"
+                        emptyMessage="No matching business types"
+                        canManageTypeOptions={canManageTypeOptions}
+                        createLabel="Add business type"
+                        isCreating={isCreatingBusinessType}
+                        onCreate={async (name) => {
+                          await handleCreateOption(
+                            "business",
+                            onCreateBusinessType,
+                            "businessType",
+                            name,
+                          );
+                        }}
                       />
-                      {errors.street && (
-                        <FieldError id="street-error">{errors.street.message}</FieldError>
-                      )}
-                    </div>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="industryType">
+                    Industry Type{" "}
+                    <span className="text-xs font-normal text-foreground">(optional)</span>
+                  </Label>
+                  <Controller
+                    name="industryType"
+                    control={control}
+                    render={({ field }) => (
+                      <CreatableTypeInput
+                        id="industryType"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        options={industryTypeOptions}
+                        placeholder="e.g. IT Services"
+                        emptyMessage="No matching industry types"
+                        canManageTypeOptions={canManageTypeOptions}
+                        createLabel="Add industry type"
+                        isCreating={isCreatingIndustryType}
+                        onCreate={async (name) => {
+                          await handleCreateOption(
+                            "industry",
+                            onCreateIndustryType,
+                            "industryType",
+                            name,
+                          );
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="pincode">Pincode</Label>
-                        <Input
-                          id="pincode"
-                          placeholder="560034"
-                          {...register("pincode")}
-                          maxLength={10}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Enter pincode to auto-fill city, state, and area
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="area">Area / Locality</Label>
-                        <Input id="area" {...register("area")} placeholder="Koramangala" />
-                      </div>
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <div className="grid grid-cols-[120px_1fr] gap-2 sm:grid-cols-[140px_1fr]">
+                  <Select value={phoneCountryCode} onValueChange={handlePhoneCountryChange}>
+                    <SelectTrigger
+                      id="phoneCountry"
+                      aria-label="Phone country code"
+                      className="h-10"
+                    >
+                      <span className="flex items-center gap-1">
+                        <span aria-hidden className="text-base leading-none">
+                          {countryCodeToFlagEmoji(selectedPhoneCountry.code)}
+                        </span>{" "}
+                        <span className="pl-1 tabular-nums">{selectedPhoneCountry.dialCode}</span>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((item) => (
+                        <SelectItem key={item.code} value={item.code}>
+                          <span className="flex items-center gap-3">
+                            <span aria-hidden className="text-base leading-none">
+                              {countryCodeToFlagEmoji(item.code)}
+                            </span>
+                            <span className="truncate">{item.label}</span>
+                            <span className="ml-auto tabular-nums">{item.dialCode}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="phone"
+                    placeholder="9876543210"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={10}
+                    aria-invalid={!!errors.phone}
+                    {...register("phone", {
+                      onChange: (e) => {
+                        e.target.value = String(e.target.value ?? "")
+                          .replace(/\D/g, "")
+                          .slice(0, 10);
+                      },
+                    })}
+                  />
+                </div>
+                {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
+              </div>
+            </FormSection>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          {...register("city")}
-                          placeholder="Bangalore"
-                          disabled={lockCityState}
-                        />
-                        {lockCityState && (
-                          <p className="text-xs text-muted-foreground">Auto-filled from pincode</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="state">State / Province</Label>
-                        <Input
-                          id="state"
-                          {...register("state")}
-                          placeholder="Karnataka"
-                          disabled={lockCityState}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <FormSection title="Address" contentClassName="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="street">Address line 1</Label>
+                <Textarea
+                  id="street"
+                  placeholder="123 Main Street"
+                  className="min-h-[88px]"
+                  aria-invalid={!!errors.street}
+                  aria-describedby={errors.street ? "street-error" : undefined}
+                  {...register("street")}
+                  maxLength={500}
+                />
+                {errors.street && (
+                  <FieldError id="street-error">{errors.street.message}</FieldError>
+                )}
+              </div>
 
-                <Card>
-                  <CardHeader className="space-y-4 pb-3">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                      <div className="min-w-0 space-y-1">
-                        <CardTitle className="text-sm">Bank details</CardTitle>
-                        <CardDescription>
-                          Add beneficiary and account details for payouts. IFSC auto-fills bank and
-                          branch fields.
-                        </CardDescription>
-                        {!readOnly && !isEditingBankDetails && (
-                          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                            These fields are read-only. Use{" "}
-                            <span className="text-foreground">Edit bank details</span> when you want
-                            to add or change them.
-                          </p>
-                        )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="pincode">Pincode</Label>
+                  <Input
+                    id="pincode"
+                    className="financial-id"
+                    placeholder="560034"
+                    {...register("pincode")}
+                    maxLength={10}
+                    inputMode="numeric"
+                    aria-invalid={!!errors.pincode || pincodeFormatInvalid}
+                  />
+                  <p className="text-xs text-foreground">
+                    Enter pincode to auto-fill city, state, and area
+                  </p>
+                  {pincodeFormatInvalid ? (
+                    <p className="text-xs text-destructive" role="alert">
+                      Enter a valid 6-digit Indian pincode.
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="area">Area / Locality</Label>
+                  <Input id="area" {...register("area")} placeholder="Koramangala" />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    {...register("city")}
+                    placeholder="Bangalore"
+                    disabled={lockCityState}
+                  />
+                  {lockCityState && (
+                    <p className="text-xs text-foreground">Auto-filled from pincode</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State / Province</Label>
+                  <Input
+                    id="state"
+                    {...register("state")}
+                    placeholder="Karnataka"
+                    disabled={lockCityState}
+                  />
+                </div>
+              </div>
+            </FormSection>
+
+            <FormSection
+              title="Bank details"
+              contentClassName="space-y-5"
+              headerRight={
+                !readOnly ? (
+                  <Button
+                    type="button"
+                    variant={isEditingBankDetails ? "outline" : "default"}
+                    size="default"
+                    className="h-10 w-full shrink-0 gap-2 sm:w-auto"
+                    onClick={() => setIsEditingBankDetails((prev) => !prev)}
+                  >
+                    {isEditingBankDetails ? (
+                      <>
+                        <Check className="h-4 w-4 shrink-0" aria-hidden />
+                        Done editing
+                      </>
+                    ) : (
+                      <>
+                        <Pencil className="h-4 w-4 shrink-0" aria-hidden />
+                        Edit bank details
+                      </>
+                    )}
+                  </Button>
+                ) : undefined
+              }
+            >
+              <div
+                className={cn(
+                  "grid gap-4 sm:grid-cols-2",
+                  !readOnly &&
+                    !isEditingBankDetails &&
+                    "rounded-lg border border-border bg-muted/30 p-4 sm:p-5",
+                )}
+              >
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="accountHolderName">Account Holder Name</Label>
+                  <Input
+                    id="accountHolderName"
+                    placeholder="Name as per bank account"
+                    readOnly={!isEditingBankDetails}
+                    className={cn(!isEditingBankDetails && bankInputLockedClass)}
+                    {...register("accountHolderName")}
+                    aria-invalid={!!errors.accountHolderName}
+                    aria-describedby={
+                      errors.accountHolderName ? "account-holder-name-error" : undefined
+                    }
+                  />
+                  {errors.accountHolderName && (
+                    <FieldError id="account-holder-name-error">
+                      {errors.accountHolderName.message}
+                    </FieldError>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankAccountNumber">Bank Account Number</Label>
+                  <Input
+                    id="bankAccountNumber"
+                    inputMode="numeric"
+                    placeholder="Enter account number"
+                    readOnly={!isEditingBankDetails}
+                    className={cn("financial-id", !isEditingBankDetails && bankInputLockedClass)}
+                    {...register("bankAccountNumber")}
+                    aria-invalid={!!errors.bankAccountNumber}
+                    aria-describedby={
+                      errors.bankAccountNumber ? "bank-account-number-error" : undefined
+                    }
+                  />
+                  {errors.bankAccountNumber && (
+                    <FieldError id="bank-account-number-error">
+                      {errors.bankAccountNumber.message}
+                    </FieldError>
+                  )}
+                </div>
+                {isEditingBankDetails && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmAccountNumber">Confirm Account Number</Label>
+                    <Input
+                      id="confirmAccountNumber"
+                      className="financial-id"
+                      inputMode="numeric"
+                      placeholder="Re-enter account number"
+                      {...register("confirmAccountNumber")}
+                      aria-invalid={!!errors.confirmAccountNumber}
+                      aria-describedby={
+                        errors.confirmAccountNumber ? "confirm-account-number-error" : undefined
+                      }
+                    />
+                    {errors.confirmAccountNumber && (
+                      <FieldError id="confirm-account-number-error">
+                        {errors.confirmAccountNumber.message}
+                      </FieldError>
+                    )}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="ifscCode">IFSC Code</Label>
+                  <Input
+                    id="ifscCode"
+                    placeholder="e.g. HDFC0000467"
+                    inputMode="text"
+                    maxLength={11}
+                    readOnly={!isEditingBankDetails}
+                    className={cn("financial-id", !isEditingBankDetails && bankInputLockedClass)}
+                    {...register("ifscCode", {
+                      onChange: (e) => {
+                        e.target.value = String(e.target.value ?? "")
+                          .toUpperCase()
+                          .replace(/\s+/g, "")
+                          .slice(0, 11);
+                      },
+                    })}
+                    aria-invalid={!!errors.ifscCode || !!ifscLookupError}
+                    aria-describedby={
+                      errors.ifscCode
+                        ? "ifsc-code-error"
+                        : ifscLookupError
+                          ? "ifsc-lookup-error"
+                          : undefined
+                    }
+                  />
+                  {errors.ifscCode ? (
+                    <FieldError id="ifsc-code-error">{errors.ifscCode.message}</FieldError>
+                  ) : ifscLookupError ? (
+                    <p id="ifsc-lookup-error" className="text-xs text-destructive" role="alert">
+                      {ifscLookupError}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2 rounded-lg border border-border bg-muted/25 p-3 sm:col-span-2">
+                  <input type="hidden" {...register("bankName")} />
+                  <input type="hidden" {...register("branchName")} />
+                  <input type="hidden" {...register("bankCity")} />
+                  <input type="hidden" {...register("bankState")} />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p
+                      id="ifsc-derived-hint"
+                      className="text-sm font-medium leading-tight text-foreground"
+                    >
+                      Bank & branch (from IFSC)
+                    </p>
+                    {ifscDerivedLocked ? (
+                      <Badge variant="secondary" shape="tag" className="shrink-0 font-normal">
+                        Auto-filled
+                      </Badge>
+                    ) : null}
+                  </div>
+                  {showIfscDerivedAsText ? (
+                    <dl
+                      className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
+                      aria-describedby="ifsc-derived-hint"
+                    >
+                      <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2">
+                        <dt className="w-20 shrink-0 text-xs font-medium text-foreground sm:w-24">
+                          Bank
+                        </dt>
+                        <dd className="min-w-0 text-sm font-medium text-foreground">
+                          {(bankNameW ?? "").trim() || "—"}
+                        </dd>
                       </div>
-                      {!readOnly && (
-                        <Button
-                          type="button"
-                          variant={isEditingBankDetails ? "outline" : "default"}
-                          size="default"
-                          className="h-10 w-full shrink-0 gap-2 sm:w-auto sm:self-start"
-                          onClick={() => setIsEditingBankDetails((prev) => !prev)}
-                        >
-                          {isEditingBankDetails ? (
-                            <>
-                              <Check className="h-4 w-4 shrink-0" aria-hidden />
-                              Done editing
-                            </>
-                          ) : (
-                            <>
-                              <Pencil className="h-4 w-4 shrink-0" aria-hidden />
-                              Edit bank details
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
+                      <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2">
+                        <dt className="w-20 shrink-0 text-xs font-medium text-foreground sm:w-24">
+                          Branch
+                        </dt>
+                        <dd className="min-w-0 text-sm font-medium text-foreground">
+                          {(branchNameW ?? "").trim() || "—"}
+                        </dd>
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2">
+                        <dt className="w-20 shrink-0 text-xs font-medium text-foreground sm:w-24">
+                          City
+                        </dt>
+                        <dd className="min-w-0 text-sm font-medium text-foreground">
+                          {(bankCityW ?? "").trim() || "—"}
+                        </dd>
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2">
+                        <dt className="w-20 shrink-0 text-xs font-medium text-foreground sm:w-24">
+                          State
+                        </dt>
+                        <dd className="min-w-0 text-sm font-medium text-foreground">
+                          {(bankStateW ?? "").trim() || "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  ) : (
+                    <p className="text-sm text-foreground">
+                      {ifscLookupPending && ifsc11Valid
+                        ? "Looking up IFSC…"
+                        : "Enter a valid 11-character IFSC above — bank and branch appear here automatically."}
+                    </p>
+                  )}
+                  {errors.bankName ? (
+                    <FieldError id="bank-name-error">{errors.bankName.message}</FieldError>
+                  ) : null}
+                  {errors.branchName ? (
+                    <FieldError id="branch-name-error">{errors.branchName.message}</FieldError>
+                  ) : null}
+                  {errors.bankCity ? (
+                    <FieldError id="bank-city-error">{errors.bankCity.message}</FieldError>
+                  ) : null}
+                  {errors.bankState ? (
+                    <FieldError id="bank-state-error">{errors.bankState.message}</FieldError>
+                  ) : null}
+                  <div className="space-y-1.5 border-t border-foreground/10 pt-3">
+                    <p className="text-xs font-medium text-foreground">Supported transfer types</p>
                     <div
+                      id="supportedTransferModes"
                       className={cn(
-                        "grid gap-4 sm:grid-cols-2",
-                        !readOnly &&
-                          !isEditingBankDetails &&
-                          "rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 sm:p-5",
+                        "flex flex-wrap items-center gap-2 rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground",
                       )}
                     >
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="accountHolderName">Account Holder Name</Label>
-                        <Input
-                          id="accountHolderName"
-                          placeholder="Name as per bank account"
-                          readOnly={!isEditingBankDetails}
-                          className={cn(!isEditingBankDetails && bankInputLockedClass)}
-                          {...register("accountHolderName")}
-                          aria-invalid={!!errors.accountHolderName}
-                          aria-describedby={
-                            errors.accountHolderName ? "account-holder-name-error" : undefined
-                          }
-                        />
-                        {errors.accountHolderName && (
-                          <FieldError id="account-holder-name-error">
-                            {errors.accountHolderName.message}
-                          </FieldError>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="bankAccountNumber">Bank Account Number</Label>
-                        <Input
-                          id="bankAccountNumber"
-                          inputMode="numeric"
-                          placeholder="Enter account number"
-                          readOnly={!isEditingBankDetails}
-                          className={cn(!isEditingBankDetails && bankInputLockedClass)}
-                          {...register("bankAccountNumber")}
-                          aria-invalid={!!errors.bankAccountNumber}
-                          aria-describedby={
-                            errors.bankAccountNumber ? "bank-account-number-error" : undefined
-                          }
-                        />
-                        {errors.bankAccountNumber && (
-                          <FieldError id="bank-account-number-error">
-                            {errors.bankAccountNumber.message}
-                          </FieldError>
-                        )}
-                      </div>
-                      {isEditingBankDetails && (
-                        <div className="space-y-2">
-                          <Label htmlFor="confirmAccountNumber">Confirm Account Number</Label>
-                          <Input
-                            id="confirmAccountNumber"
-                            inputMode="numeric"
-                            placeholder="Re-enter account number"
-                            {...register("confirmAccountNumber")}
-                            aria-invalid={!!errors.confirmAccountNumber}
-                            aria-describedby={
-                              errors.confirmAccountNumber
-                                ? "confirm-account-number-error"
-                                : undefined
-                            }
-                          />
-                          {errors.confirmAccountNumber && (
-                            <FieldError id="confirm-account-number-error">
-                              {errors.confirmAccountNumber.message}
-                            </FieldError>
-                          )}
-                        </div>
+                      {ifscLookupPending ? (
+                        <span className="inline-flex items-center gap-2 text-foreground">
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          Checking IFSC…
+                        </span>
+                      ) : !ifsc11Valid ? (
+                        <span className="text-foreground">
+                          Enter an 11-character IFSC above to see which transfer types this branch
+                          supports.
+                        </span>
+                      ) : ifscLookupError ? (
+                        <span className="text-foreground">
+                          Fix the IFSC to load supported transfer types.
+                        </span>
+                      ) : ifscSupportedModes.length > 0 ? (
+                        ifscSupportedModes.map((mode) => (
+                          <Badge key={mode} variant="secondary" shape="tag" className="font-medium">
+                            {mode}
+                          </Badge>
+                        ))
+                      ) : ifscLookupOk ? (
+                        <span className="text-foreground">
+                          No transfer-type flags were returned for this IFSC.
+                        </span>
+                      ) : (
+                        <span className="text-foreground">Waiting for a valid IFSC lookup…</span>
                       )}
-                      <div className="space-y-2">
-                        <Label htmlFor="ifscCode">IFSC Code</Label>
-                        <Input
-                          id="ifscCode"
-                          placeholder="e.g. HDFC0000467"
-                          inputMode="text"
-                          maxLength={11}
-                          readOnly={!isEditingBankDetails}
-                          className={cn(!isEditingBankDetails && bankInputLockedClass)}
-                          {...register("ifscCode", {
-                            onChange: (e) => {
-                              e.target.value = String(e.target.value ?? "")
-                                .toUpperCase()
-                                .replace(/\s+/g, "")
-                                .slice(0, 11);
-                            },
-                          })}
-                          aria-invalid={!!errors.ifscCode || !!ifscLookupError}
-                          aria-describedby={
-                            errors.ifscCode
-                              ? "ifsc-code-error"
-                              : ifscLookupError
-                                ? "ifsc-lookup-error"
-                                : undefined
-                          }
-                        />
-                        {errors.ifscCode ? (
-                          <FieldError id="ifsc-code-error">{errors.ifscCode.message}</FieldError>
-                        ) : ifscLookupError ? (
-                          <p
-                            id="ifsc-lookup-error"
-                            className="text-xs text-destructive"
-                            role="alert"
-                          >
-                            {ifscLookupError}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="space-y-3 rounded-lg border border-dashed border-border/80 bg-muted/15 p-4 dark:bg-muted/10 sm:col-span-2">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0 space-y-0.5">
-                            <p className="text-sm font-medium leading-tight">
-                              Branch & bank from IFSC
-                            </p>
-                            <p id="ifsc-derived-hint" className="text-xs text-muted-foreground">
-                              {ifscDerivedLocked
-                                ? "These values were filled from your IFSC. Change the IFSC above if you need a different branch."
-                                : isEditingBankDetails
-                                  ? "Enter a valid 11-character IFSC above to load bank, branch, and supported transfer types."
-                                  : "Shown from your saved IFSC when you edit bank details."}
-                            </p>
-                          </div>
-                          {ifscDerivedLocked ? (
-                            <Badge variant="secondary" className="shrink-0 font-normal">
-                              Auto-filled
-                            </Badge>
-                          ) : null}
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor="bankName">Bank name</Label>
-                            <Input
-                              id="bankName"
-                              placeholder="e.g. HDFC Bank"
-                              readOnly
-                              tabIndex={ifscDerivedLocked ? -1 : undefined}
-                              aria-disabled={ifscDerivedLocked}
-                              aria-describedby={
-                                errors.bankName
-                                  ? "bank-name-error"
-                                  : ifscDerivedLocked
-                                    ? "ifsc-derived-hint"
-                                    : undefined
-                              }
-                              className={cn(
-                                !isEditingBankDetails && bankInputLockedClass,
-                                isEditingBankDetails && !ifscDerivedLocked && "bg-background",
-                                ifscDerivedLocked &&
-                                  "pointer-events-none cursor-not-allowed bg-muted/70 text-foreground opacity-95",
-                              )}
-                              {...register("bankName")}
-                              aria-invalid={!!errors.bankName}
-                            />
-                            {errors.bankName && (
-                              <FieldError id="bank-name-error">
-                                {errors.bankName.message}
-                              </FieldError>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="branchName">Branch name</Label>
-                            <Input
-                              id="branchName"
-                              placeholder="e.g. Hauz Khas"
-                              readOnly
-                              tabIndex={ifscDerivedLocked ? -1 : undefined}
-                              aria-disabled={ifscDerivedLocked}
-                              aria-describedby={
-                                errors.branchName
-                                  ? "branch-name-error"
-                                  : ifscDerivedLocked
-                                    ? "ifsc-derived-hint"
-                                    : undefined
-                              }
-                              className={cn(
-                                !isEditingBankDetails && bankInputLockedClass,
-                                isEditingBankDetails && !ifscDerivedLocked && "bg-background",
-                                ifscDerivedLocked &&
-                                  "pointer-events-none cursor-not-allowed bg-muted/70 text-foreground opacity-95",
-                              )}
-                              {...register("branchName")}
-                              aria-invalid={!!errors.branchName}
-                            />
-                            {errors.branchName && (
-                              <FieldError id="branch-name-error">
-                                {errors.branchName.message}
-                              </FieldError>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="bankCity">Bank branch city</Label>
-                            <Input
-                              id="bankCity"
-                              placeholder="e.g. New Delhi"
-                              readOnly
-                              tabIndex={ifscDerivedLocked ? -1 : undefined}
-                              aria-disabled={ifscDerivedLocked}
-                              aria-describedby={
-                                errors.bankCity
-                                  ? "bank-city-error"
-                                  : ifscDerivedLocked
-                                    ? "ifsc-derived-hint"
-                                    : undefined
-                              }
-                              className={cn(
-                                !isEditingBankDetails && bankInputLockedClass,
-                                isEditingBankDetails && !ifscDerivedLocked && "bg-background",
-                                ifscDerivedLocked &&
-                                  "pointer-events-none cursor-not-allowed bg-muted/70 text-foreground opacity-95",
-                              )}
-                              {...register("bankCity")}
-                              aria-invalid={!!errors.bankCity}
-                            />
-                            {errors.bankCity && (
-                              <FieldError id="bank-city-error">
-                                {errors.bankCity.message}
-                              </FieldError>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="bankState">Bank branch state</Label>
-                            <Input
-                              id="bankState"
-                              placeholder="e.g. Delhi"
-                              readOnly
-                              tabIndex={ifscDerivedLocked ? -1 : undefined}
-                              aria-disabled={ifscDerivedLocked}
-                              aria-describedby={
-                                errors.bankState
-                                  ? "bank-state-error"
-                                  : ifscDerivedLocked
-                                    ? "ifsc-derived-hint"
-                                    : undefined
-                              }
-                              className={cn(
-                                !isEditingBankDetails && bankInputLockedClass,
-                                isEditingBankDetails && !ifscDerivedLocked && "bg-background",
-                                ifscDerivedLocked &&
-                                  "pointer-events-none cursor-not-allowed bg-muted/70 text-foreground opacity-95",
-                              )}
-                              {...register("bankState")}
-                              aria-invalid={!!errors.bankState}
-                            />
-                            {errors.bankState && (
-                              <FieldError id="bank-state-error">
-                                {errors.bankState.message}
-                              </FieldError>
-                            )}
-                          </div>
-                        </div>
-                        <div className="space-y-2 border-t border-border/60 pt-4">
-                          <Label htmlFor="supportedTransferModes" className="text-foreground">
-                            Supported transfer types
-                          </Label>
-                          <p className="text-xs text-muted-foreground">
-                            From the IFSC registry for this branch (informational).
-                          </p>
-                          <div
-                            id="supportedTransferModes"
-                            className={cn(
-                              "flex min-h-[2.75rem] flex-wrap items-center gap-2 rounded-md border border-input px-3 py-2.5 text-sm",
-                              isEditingBankDetails ? "bg-background" : "bg-muted/80",
-                            )}
-                          >
-                            {ifscLookupPending ? (
-                              <span className="inline-flex items-center gap-2 text-muted-foreground">
-                                <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                                Checking IFSC…
-                              </span>
-                            ) : !ifsc11Valid ? (
-                              <span className="text-muted-foreground">
-                                Enter an 11-character IFSC above to see which transfer types this
-                                branch supports.
-                              </span>
-                            ) : ifscLookupError ? (
-                              <span className="text-muted-foreground">
-                                Fix the IFSC to load supported transfer types.
-                              </span>
-                            ) : ifscSupportedModes.length > 0 ? (
-                              ifscSupportedModes.map((mode) => (
-                                <Badge key={mode} variant="secondary" className="font-medium">
-                                  {mode}
-                                </Badge>
-                              ))
-                            ) : ifscLookupOk ? (
-                              <span className="text-muted-foreground">
-                                No transfer-type flags were returned for this IFSC.
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground">
-                                Waiting for a valid IFSC lookup…
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Tax & compliance</CardTitle>
-                    <CardDescription>Optional, but recommended for invoices</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="taxType">Tax type</Label>
-                        <Controller
-                          name="taxType"
-                          control={control}
-                          render={({ field }) => (
-                            <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger id="taxType">
-                                <SelectValue placeholder="Select tax type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="GST">GST</SelectItem>
-                                <SelectItem value="NON_GST">Non-GST</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="financialYearStart">Financial Year Start</Label>
-                        <Controller
-                          name="financialYearStart"
-                          control={control}
-                          render={({ field }) => (
-                            <Select
-                              value={String(field.value)}
-                              onValueChange={(v) => field.onChange(Number(v))}
-                            >
-                              <SelectTrigger id="financialYearStart">
-                                <SelectValue placeholder="Select month" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {MONTHS.map((month, i) => (
-                                  <SelectItem key={month} value={String(i + 1)}>
-                                    {month}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="gstin">GSTIN (optional)</Label>
-                        <Input
-                          id="gstin"
-                          placeholder="29ABCDE1234F1Z5"
-                          {...register("gstin")}
-                          maxLength={15}
-                          aria-invalid={!!errors.gstin}
-                          aria-describedby={errors.gstin ? "gstin-error" : undefined}
-                        />
-                        {errors.gstin && (
-                          <p id="gstin-error" className="text-xs text-destructive" role="alert">
-                            {errors.gstin.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="pan">PAN (optional)</Label>
-                        <Input
-                          id="pan"
-                          placeholder="ABCDE1234F"
-                          {...register("pan")}
-                          maxLength={10}
-                          aria-invalid={!!errors.pan}
-                          aria-describedby={errors.pan ? "pan-error" : undefined}
-                        />
-                        {errors.pan && (
-                          <p id="pan-error" className="text-xs text-destructive" role="alert">
-                            {errors.pan.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
-            </div>
+            </FormSection>
 
-            <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-4">
-              <p className="text-sm text-muted-foreground">
-                {readOnly
-                  ? "Only the owner can update this profile."
-                  : isSaving
-                    ? "Saving changes..."
-                    : "Make sure your business details are accurate"}
-              </p>
-              {!readOnly && isDirty && (
-                <span className="text-xs text-muted-foreground">Unsaved changes</span>
-              )}
-            </div>
-          </fieldset>
-        </form>
-      </CardContent>
-    </Card>
+            <FormSection title="Tax & compliance" contentClassName="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="taxType">Tax type</Label>
+                  <Controller
+                    name="taxType"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger id="taxType">
+                          <SelectValue placeholder="Select tax type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GST">GST</SelectItem>
+                          <SelectItem value="NON_GST">Non-GST</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="financialYearStart">Financial Year Start</Label>
+                  <Controller
+                    name="financialYearStart"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={String(field.value)}
+                        onValueChange={(v) => field.onChange(Number(v))}
+                      >
+                        <SelectTrigger id="financialYearStart">
+                          <SelectValue placeholder="Select month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MONTHS.map((month, i) => (
+                            <SelectItem key={month} value={String(i + 1)}>
+                              {month}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="gstin">GSTIN (optional)</Label>
+                  <Input
+                    id="gstin"
+                    className="financial-id"
+                    placeholder="29ABCDE1234F1Z5"
+                    {...register("gstin", {
+                      onChange: (e) => {
+                        e.target.value = String(e.target.value ?? "")
+                          .toUpperCase()
+                          .replace(/\s+/g, "")
+                          .slice(0, 15);
+                      },
+                    })}
+                    maxLength={15}
+                    aria-invalid={!!errors.gstin || gstinFormatInvalid}
+                    aria-describedby={errors.gstin ? "gstin-error" : undefined}
+                  />
+                  {errors.gstin && (
+                    <p id="gstin-error" className="text-xs text-destructive" role="alert">
+                      {errors.gstin.message}
+                    </p>
+                  )}
+                  {!errors.gstin && gstinFormatInvalid ? (
+                    <p className="text-xs text-destructive" role="alert">
+                      GSTIN must be 15 characters (e.g. 29ABCDE1234F1Z5).
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pan">PAN (optional)</Label>
+                  <Input
+                    id="pan"
+                    className="financial-id"
+                    placeholder="ABCDE1234F"
+                    {...register("pan", {
+                      onChange: (e) => {
+                        e.target.value = String(e.target.value ?? "")
+                          .toUpperCase()
+                          .replace(/\s+/g, "")
+                          .slice(0, 10);
+                      },
+                    })}
+                    maxLength={10}
+                    aria-invalid={!!errors.pan || panFormatInvalid}
+                    aria-describedby={errors.pan ? "pan-error" : undefined}
+                  />
+                  {errors.pan && (
+                    <p id="pan-error" className="text-xs text-destructive" role="alert">
+                      {errors.pan.message}
+                    </p>
+                  )}
+                  {!errors.pan && panFormatInvalid ? (
+                    <p className="text-xs text-destructive" role="alert">
+                      PAN format should be 5 letters, 4 digits, 1 letter.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </FormSection>
+          </div>
+        </div>
+
+        {!readOnly && isDirty ? (
+          <div className="mt-3 flex justify-end border-t border-foreground/10 pt-3">
+            <span className="text-xs font-medium text-foreground">Unsaved changes</span>
+          </div>
+        ) : null}
+      </fieldset>
+    </form>
   );
 }

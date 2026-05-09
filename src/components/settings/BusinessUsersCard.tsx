@@ -330,7 +330,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
   ) : null;
 
   const addSection = canInvite ? (
-    <div className="border-b border-border/70">
+    <div className="border-b border-border/60">
       <div className="border-b border-border/60 bg-muted/20 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -353,7 +353,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
               )}
             </p>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <UserPlus className="h-5 w-5" aria-hidden />
           </div>
         </div>
@@ -476,8 +476,8 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
     }
     if (!users || users.length === 0) {
       return (
-        <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 px-6 py-12 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-6 py-12 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Users className="h-7 w-7" aria-hidden />
           </div>
           <h4 className="mt-4 text-base font-semibold tracking-tight">No team members yet</h4>
@@ -506,14 +506,14 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
             <li key={u.id} role="listitem">
               <div
                 className={cn(
-                  "flex flex-col gap-4 rounded-2xl border border-border/80 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors",
+                  "flex flex-col gap-4 rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors",
                   "dark:ring-white/10 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
                   "hover:border-primary/20 hover:bg-muted/15",
                 )}
               >
                 <div className="flex min-w-0 flex-1 gap-3 sm:gap-4">
                   <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-semibold text-primary"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary"
                     aria-hidden
                   >
                     {memberInitials(u)}
@@ -522,9 +522,15 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold leading-snug text-foreground">{displayName}</p>
                       {u.role === "OWNER" ? (
-                        <Badge className="font-normal">Owner</Badge>
+                        <Badge shape="tag" className="font-normal">
+                          Owner
+                        </Badge>
                       ) : (
-                        <Badge variant="outline" className="max-w-[12rem] truncate font-normal">
+                        <Badge
+                          variant="outline"
+                          shape="tag"
+                          className="max-w-[12rem] truncate font-normal"
+                        >
                           {u.roleGroupName ?? "Staff"}
                         </Badge>
                       )}
@@ -574,9 +580,9 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
       <div className="p-4 sm:p-5">
         {isPending ? (
           <div className="space-y-3" aria-label="Loading team members">
-            <Skeleton className="h-[5.25rem] rounded-2xl" />
-            <Skeleton className="h-[5.25rem] rounded-2xl" />
-            <Skeleton className="h-[5.25rem] rounded-2xl" />
+            <Skeleton className="h-[5.25rem] rounded-lg" />
+            <Skeleton className="h-[5.25rem] rounded-lg" />
+            <Skeleton className="h-[5.25rem] rounded-lg" />
           </div>
         ) : (
           listContent()
@@ -598,7 +604,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
       {shellInner}
     </div>
   ) : (
-    <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+    <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
       {shellInner}
     </div>
   );

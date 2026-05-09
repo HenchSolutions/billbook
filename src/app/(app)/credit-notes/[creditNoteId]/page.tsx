@@ -101,7 +101,7 @@ export default function CreditNoteDetailPage() {
     return (
       <div className="page-container w-full min-w-0 max-w-5xl">
         <PageBackLink href="/credit-notes">Back to credit notes</PageBackLink>
-        <PageHeader title="Credit note" description="" />
+        <PageHeader title="Credit note" />
         <ErrorBanner error={error} fallbackMessage="Credit note not found." />
       </div>
     );
@@ -130,7 +130,7 @@ export default function CreditNoteDetailPage() {
     <div className="page-container w-full min-w-0 max-w-5xl animate-fade-in space-y-6 pb-8 sm:space-y-8 sm:pb-10">
       <PageBackLink href="/credit-notes">Back to credit notes</PageBackLink>
 
-      <div className="min-w-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+      <div className="min-w-0 overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm">
         <div className="grid min-w-0 lg:grid-cols-[1fr_minmax(260px,340px)] lg:items-stretch">
           <div className="flex min-w-0 flex-col gap-5 border-b border-border/60 p-4 sm:gap-6 sm:p-8 lg:border-b-0 lg:border-r lg:border-border/60">
             <div className="flex flex-wrap items-center gap-2">
@@ -149,7 +149,7 @@ export default function CreditNoteDetailPage() {
             </div>
 
             <div className="min-w-0">
-              <h1 className="break-words text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl">
+              <h1 className="financial-id break-words text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl">
                 {creditNote.creditNoteNumber}
               </h1>
               <div className="mt-3 flex flex-col gap-2.5 text-sm text-muted-foreground">
@@ -209,7 +209,7 @@ export default function CreditNoteDetailPage() {
             </div>
 
             {creditNote.reason?.trim() && (
-              <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-4 text-sm">
+              <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-4 text-sm">
                 <span className="font-medium text-foreground">Reason</span>
                 <p className="mt-1.5 whitespace-pre-wrap text-muted-foreground">
                   {creditNote.reason}
@@ -292,7 +292,7 @@ export default function CreditNoteDetailPage() {
       <ErrorBanner error={error} />
 
       {appliedAllocations.length > 0 && (
-        <Card className="min-w-0 overflow-hidden rounded-2xl border-border/80 shadow-sm">
+        <Card className="min-w-0 overflow-hidden rounded-lg border-border/60 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/15 px-4 py-4 sm:px-8">
             <CardTitle className="text-lg font-semibold tracking-tight">
               Applied to invoices
@@ -345,7 +345,7 @@ export default function CreditNoteDetailPage() {
       />
 
       {can(P.credit_note.delete) && (
-        <div className="min-w-0 rounded-xl border border-border/60 bg-muted/10 p-4 sm:p-6">
+        <div className="min-w-0 rounded-lg border border-border/60 bg-muted/10 p-4 sm:p-6">
           <p className="text-sm leading-relaxed text-muted-foreground">
             Deleting removes this credit from the customer’s account and archives the note. You can
             only delete when it isn’t applied to invoices — clear allocations first if needed.

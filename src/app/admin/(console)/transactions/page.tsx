@@ -65,10 +65,10 @@ function kindBadgeClass(kind: string): string {
       return "border-emerald-500/35 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100";
     case "SALE_INVOICE":
     case "SALE_RETURN":
-      return "border-sky-500/35 bg-sky-500/10 text-sky-950 dark:text-sky-100";
+      return "border-primary/35 bg-primary/10 text-primary dark:text-primary";
     case "PURCHASE_INVOICE":
     case "PURCHASE_RETURN":
-      return "border-violet-500/35 bg-violet-500/10 text-violet-950 dark:text-violet-100";
+      return "border-chart-3/40 bg-chart-3/12 text-foreground dark:bg-chart-3/15";
     case "OPENING_BALANCE":
       return "border-border bg-muted/60 text-muted-foreground";
     case "OUTBOUND_PAYMENT":
@@ -82,6 +82,7 @@ function KindBadge({ kind }: { kind: string }) {
   return (
     <Badge
       variant="outline"
+      shape="tag"
       className={cn("max-w-full truncate text-xs font-medium", kindBadgeClass(kind))}
       title={kind}
     >
@@ -160,22 +161,15 @@ export default function AdminTransactionsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader
-        title="Transactions"
-        description="Party ledger entries across organizations (invoices, receipts, payments, opening balances)."
-      />
+      <PageHeader title="Transactions" />
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="overflow-hidden border-border/60 shadow-sm">
         <CardContent className="p-0">
-          <div className="border-b border-border/70 bg-gradient-to-br from-muted/45 via-muted/20 to-background px-4 py-5 sm:px-6 sm:py-6">
+          <div className="border-b border-border/60 bg-gradient-to-br from-muted/45 via-muted/20 to-background px-4 py-5 sm:px-6 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
               <div className="min-w-0 space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Query
-                </p>
-                <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
-                  Set the period and page size, optionally narrow to one business. Export downloads
-                  exactly what is shown in the table.
                 </p>
               </div>
               <Button
@@ -192,7 +186,7 @@ export default function AdminTransactionsPage() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:mt-6 lg:grid-cols-12 lg:gap-4">
-              <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm sm:col-span-2 lg:col-span-6 xl:col-span-5">
+              <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm sm:col-span-2 lg:col-span-6 xl:col-span-5">
                 <p className="mb-3 text-xs font-semibold text-foreground">Date range</p>
                 <DateRangePicker
                   compact
@@ -213,7 +207,7 @@ export default function AdminTransactionsPage() {
               </div>
 
               <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2 lg:col-span-6 xl:col-span-7">
-                <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm">
+                <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm">
                   <ReportLimitInput
                     stacked
                     id="admin-tx-limit"
@@ -224,7 +218,7 @@ export default function AdminTransactionsPage() {
                     }}
                   />
                 </div>
-                <div className="rounded-lg border border-border/70 bg-card/90 p-4 shadow-sm">
+                <div className="rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm">
                   <Label
                     htmlFor="admin-business-id"
                     className="text-xs font-medium text-muted-foreground"
@@ -240,7 +234,7 @@ export default function AdminTransactionsPage() {
                       setBusinessIdRaw(e.target.value);
                       setOffset(0);
                     }}
-                    className="mt-2 h-9 font-mono"
+                    className="financial-id mt-2 h-9"
                   />
                   {businessIdFilterInvalid ? (
                     <p className="mt-1.5 text-xs text-destructive">
@@ -250,16 +244,11 @@ export default function AdminTransactionsPage() {
                 </div>
               </div>
             </div>
-
-            <p className="mt-4 border-t border-border/50 pt-4 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-              Maximum range {MAX_REPORT_DATE_RANGE_MONTHS} months (same as other reports). CSV
-              columns match the table; only rows loaded on this page are included.
-            </p>
           </div>
 
           {showResultsStrip ? (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-border/60 bg-muted/20 px-4 py-3 sm:px-6">
-              <Badge variant="secondary" className="font-mono text-xs font-medium tabular-nums">
+              <Badge variant="secondary" className="financial-id text-xs font-medium tabular-nums">
                 {total.toLocaleString()} {total === 1 ? "row" : "rows"}
               </Badge>
               {periodLabel ? (
@@ -294,14 +283,10 @@ export default function AdminTransactionsPage() {
                 <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
               </div>
             ) : rows.length === 0 ? (
-              <EmptyState
-                icon={<ListOrdered className="h-8 w-8" />}
-                title="No transactions"
-                description="Try a wider date range or clear the business ID filter."
-              />
+              <EmptyState icon={<ListOrdered className="h-8 w-8" />} title="No transactions" />
             ) : (
               <>
-                <div className="overflow-x-auto rounded-md border border-border/70">
+                <div className="overflow-x-auto rounded-md border border-border/60">
                   <div className="max-h-[min(70vh,40rem)] overflow-y-auto">
                     <table className="w-full min-w-[860px] border-collapse text-left text-sm">
                       <thead>
@@ -348,7 +333,7 @@ export default function AdminTransactionsPage() {
                               {formatAppDateTimeFromIso(row.createdAt)}
                             </td>
                             <td className="whitespace-nowrap px-3 py-2 align-middle">
-                              <code className="rounded bg-muted/80 px-1.5 py-0.5 font-mono text-xs">
+                              <code className="financial-id rounded bg-muted/80 px-1.5 py-0.5 text-xs">
                                 {row.organizationCode}
                               </code>
                             </td>
@@ -371,8 +356,11 @@ export default function AdminTransactionsPage() {
                                 {row.partyName}
                               </span>
                             </td>
-                            <td className="max-w-[9rem] px-3 py-2 align-middle font-mono text-xs text-foreground">
-                              <span className="block truncate" title={emptyDash(row.invoiceNumber)}>
+                            <td className="max-w-[9rem] px-3 py-2 align-middle text-xs text-foreground">
+                              <span
+                                className="financial-id block truncate"
+                                title={emptyDash(row.invoiceNumber)}
+                              >
                                 {emptyDash(row.invoiceNumber)}
                               </span>
                             </td>

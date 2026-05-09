@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
+import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
@@ -203,7 +204,7 @@ export default function ReceiptRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit] = useState(DEFAULT_REPORT_LIMIT);
+  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
   const [allocDialogReceiptId, setAllocDialogReceiptId] = useState<number | null>(null);
 
   const { data, isPending, error } = useReceiptRegister(validStartDate, validEndDate, limit);
@@ -302,7 +303,6 @@ export default function ReceiptRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportReceiptRegister.title}
-        description={reportReceiptRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -310,21 +310,24 @@ export default function ReceiptRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportReceiptRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Date range
-          </p>
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-            compact
-          />
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-          </p>
+        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Date range
+            </p>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+              Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
+            </p>
+          </div>
+          <ReportLimitInput value={limit} onChange={setLimit} stacked />
         </div>
 
         <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
@@ -440,7 +443,7 @@ export default function ReceiptRegisterPage() {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Clear filters
@@ -459,7 +462,12 @@ export default function ReceiptRegisterPage() {
           </div>
 
           <ReportRegisterTableScroll>
-            <ReportRegisterResultBar count={rows.length} rowLabel="records shown" limit={limit} />
+            <ReportRegisterResultBar
+              count={rows.length}
+              rowLabel="records shown"
+              limit={limit}
+              truncationHintCount={(data?.receipts ?? []).length}
+            />
             <table className={cn(rr.table, "min-w-[900px]")}>
               <thead className={rr.thead}>
                 <tr>
@@ -504,7 +512,7 @@ export default function ReceiptRegisterPage() {
                             onClick={() => setAllocDialogReceiptId(r.id)}
                             className={cn(
                               rr.link,
-                              "cursor-pointer border-0 bg-transparent p-0 text-left font-medium",
+                              "financial-id cursor-pointer border-0 bg-transparent p-0 text-left font-medium",
                             )}
                             title="View allocated invoices"
                           >
@@ -562,7 +570,7 @@ export default function ReceiptRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-border bg-muted/10 py-14 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-muted/10 py-14 text-center">
           <Search className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" aria-hidden />
           <p className="text-sm font-medium text-muted-foreground">
             Select a date range and click{" "}
@@ -578,7 +586,7 @@ export default function ReceiptRegisterPage() {
         <DialogContent className="max-h-[80vh] w-[min(100%,36rem)] gap-4 p-5 sm:max-w-[36rem]">
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-base">
-              {allocDetail?.receiptNumber ?? "Receipt"}
+              <span className="financial-id">{allocDetail?.receiptNumber ?? "Receipt"}</span>
             </DialogTitle>
             <p className="text-xs text-muted-foreground">Allocated invoices</p>
           </DialogHeader>
@@ -607,8 +615,8 @@ export default function ReceiptRegisterPage() {
                 <tbody>
                   {openingSettlementOnDetail > MONEY_EPS ? (
                     <tr className="border-t border-border first:border-t-0">
-                      <td className="px-3 py-2.5 tabular-nums text-foreground">
-                        {allocDetail?.receiptNumber ?? "—"}
+                      <td className="px-3 py-2.5 text-foreground">
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
                       </td>
                       <td className="px-3 py-2.5 text-muted-foreground">Opening balance</td>
                       <td className="px-3 py-2.5 text-right font-medium tabular-nums text-foreground">
@@ -621,13 +629,13 @@ export default function ReceiptRegisterPage() {
                       key={`${a.invoiceId}-${a.id ?? ""}`}
                       className="border-t border-border first:border-t-0"
                     >
-                      <td className="px-3 py-2.5 tabular-nums text-foreground">
-                        {allocDetail?.receiptNumber ?? "—"}
+                      <td className="px-3 py-2.5 text-foreground">
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
                       </td>
                       <td className="px-3 py-2.5">
                         <Link
                           href={`/invoices/${a.invoiceId}`}
-                          className="font-medium text-primary underline-offset-4 hover:underline"
+                          className="financial-id font-medium text-primary underline-offset-4 hover:underline"
                         >
                           {a.invoiceNumber ?? `#${a.invoiceId}`}
                         </Link>

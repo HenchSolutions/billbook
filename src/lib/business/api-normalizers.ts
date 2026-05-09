@@ -1,11 +1,24 @@
 import type { BusinessProfile } from "@/types/auth";
 import type {
   DashboardData,
+  DashboardFilterKind,
   DashboardRecentLedgerRow,
   SalesPurchaseByMonth,
   TopCustomer,
   TopVendor,
 } from "@/types/dashboard";
+
+function parseDashboardFilter(v: unknown): DashboardFilterKind | null {
+  if (v === "monthly" || v === "overall" || v === "custom") return v;
+  return null;
+}
+
+function parseChartTrailingMonths(v: unknown): 12 | 36 | null | undefined {
+  if (v === null) return null;
+  const n = typeof v === "string" ? Number(v) : typeof v === "number" ? v : NaN;
+  if (n === 12 || n === 36) return n as 12 | 36;
+  return undefined;
+}
 
 export function normalizeDashboard(raw: Record<string, unknown>): DashboardData {
   const toTopCustomerList = (input: unknown): TopCustomer[] => {
@@ -93,8 +106,22 @@ export function normalizeDashboard(raw: Record<string, unknown>): DashboardData 
     (d as { topCustomersByReceivable?: unknown }).topCustomersByReceivable,
   );
 
+  const periodStart = typeof raw.periodStart === "string" ? raw.periodStart : null;
+  const periodEnd = typeof raw.periodEnd === "string" ? raw.periodEnd : null;
+  const chartSeriesKind =
+    typeof raw.chartSeriesKind === "string"
+      ? raw.chartSeriesKind
+      : raw.chartSeriesKind == null
+        ? null
+        : undefined;
+
   return {
     ...d,
+    filter: parseDashboardFilter(raw.filter) ?? parseDashboardFilter(d.filter),
+    periodStart,
+    periodEnd,
+    chartSeriesKind,
+    chartTrailingMonths: parseChartTrailingMonths(raw.chartTrailingMonths),
     todaySales: d.todaySales ?? 0,
     topCustomers,
     topCustomersByReceivable: topCustomers,

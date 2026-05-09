@@ -6,8 +6,10 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { api } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AUTH_CARD_SURFACE_CLASS } from "@/lib/ui/auth-card-classes";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
+import { cn } from "@/lib/core/utils";
 import type {
   PasswordResetOtpResponse,
   PasswordResetVerifyResponse,
@@ -190,7 +192,7 @@ export default function ForgotPasswordCard({ onBackToLogin }: ForgotPasswordCard
   };
 
   return (
-    <Card className="border-border/50 shadow-lg backdrop-blur-sm">
+    <Card className={AUTH_CARD_SURFACE_CLASS}>
       <CardHeader className="pb-4 text-center">
         <CardTitle className="text-xl">Reset your password</CardTitle>
         <CardDescription>{subtitle}</CardDescription>
@@ -209,7 +211,7 @@ export default function ForgotPasswordCard({ onBackToLogin }: ForgotPasswordCard
             </div>
           )}
           {info && (
-            <div className="whitespace-pre-line rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+            <div className="whitespace-pre-line rounded-md border border-border/60 bg-muted/25 p-3 text-sm text-muted-foreground">
               {info}
             </div>
           )}
@@ -243,7 +245,7 @@ export default function ForgotPasswordCard({ onBackToLogin }: ForgotPasswordCard
               placeholder="ABC123"
               disabled={stage !== "request"}
               maxLength={6}
-              className="uppercase"
+              className={cn("financial-id uppercase")}
               aria-invalid={!!errors.organizationCode}
               autoCapitalize="characters"
               autoCorrect="off"

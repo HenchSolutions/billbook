@@ -342,7 +342,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
 
   const body = (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border/70 bg-muted/25 p-4">
+      <div className="rounded-lg border border-border/60 bg-muted/25 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-foreground">Settings overview</p>
           {readOnly ? (
@@ -364,7 +364,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
         </p>
       </div>
 
-      <Alert className="border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/25 dark:text-amber-100">
+      <Alert className="border-status-pending/35 bg-status-pending-bg text-foreground dark:border-status-pending/30 dark:bg-status-pending-bg/40">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle className="text-sm">Duplicate numbers</AlertTitle>
         <AlertDescription className="text-xs">
@@ -377,11 +377,11 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h4 className="text-sm font-semibold">Invoice template</h4>
           {data.selectedInvoiceTemplateVersionId != null ? (
-            <Badge variant="secondary" className="font-normal">
+            <Badge variant="secondary" shape="tag" className="font-normal">
               Custom template selected
             </Badge>
           ) : (
-            <Badge variant="outline" className="font-normal">
+            <Badge variant="outline" shape="tag" className="font-normal">
               Using platform default
             </Badge>
           )}
@@ -411,13 +411,13 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
                     type="button"
                     disabled={readOnly || isSaving || update.isPending}
                     onClick={() => void selectInvoiceTemplate(optionVersionId)}
-                    className={`group w-[min(280px,calc(100vw-2.5rem))] shrink-0 snap-start overflow-hidden rounded-xl border bg-card text-left transition-all sm:w-[240px] lg:w-[260px] ${
+                    className={`group w-[min(280px,calc(100vw-2.5rem))] shrink-0 snap-start overflow-hidden rounded-lg border bg-card text-left transition-all sm:w-[240px] lg:w-[260px] ${
                       isCurrent
                         ? "border-primary shadow-sm ring-2 ring-primary/25"
-                        : "border-border/80 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+                        : "border-border/60 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
                     } ${readOnly ? "cursor-not-allowed opacity-80" : ""}`}
                   >
-                    <div className="relative aspect-square w-full border-b border-border/70 bg-muted/30">
+                    <div className="relative aspect-square w-full border-b border-border/60 bg-muted/30">
                       {previewHtml ? (
                         <div className="flex h-full items-center justify-center p-2">
                           <div
@@ -448,7 +448,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
                         <span
                           role="button"
                           tabIndex={readOnly ? -1 : 0}
-                          className="absolute bottom-2 right-2 inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-border/70 bg-background/90 shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                          className="absolute bottom-2 right-2 inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-border/60 bg-background/90 shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -486,12 +486,20 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
                       {isExplicitPick || (isCurrent && !isExplicitPick) || isSaving ? (
                         <div className="flex flex-wrap items-center gap-1">
                           {isExplicitPick ? (
-                            <Badge variant="secondary" className="text-[10px] font-normal">
+                            <Badge
+                              variant="secondary"
+                              shape="tag"
+                              className="text-[10px] font-normal"
+                            >
                               Selected
                             </Badge>
                           ) : null}
                           {isCurrent && !isExplicitPick ? (
-                            <Badge variant="outline" className="text-[10px] font-normal">
+                            <Badge
+                              variant="outline"
+                              shape="tag"
+                              className="text-[10px] font-normal"
+                            >
                               Active default
                             </Badge>
                           ) : null}
@@ -800,7 +808,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
           Only the business <strong>owner</strong> can change document numbering.
         </p>
       ) : (
-        <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-border/70 bg-background/95 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-background/95 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <Button
             type="button"
             variant="outline"
@@ -837,7 +845,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
           <DialogTitle>{templatePreviewModal?.title ?? "Template preview"}</DialogTitle>
         </DialogHeader>
         {templatePreviewModal ? (
-          <div className="overflow-hidden rounded-md border border-border/70 bg-background">
+          <div className="overflow-hidden rounded-md bg-muted/15">
             <iframe
               title={`${templatePreviewModal.title} large preview`}
               srcDoc={templatePreviewModal.html}

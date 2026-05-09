@@ -38,7 +38,6 @@ export default function CreditNotes() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Credit Notes"
-        description="Issue credit notes for final sale invoices or sales returns. The customer’s account is updated right away; open a note when you want to apply it to unpaid bills."
         action={
           allowNewCreditNote ? (
             <Button onClick={() => setDialogOpen(true)}>
@@ -68,7 +67,6 @@ export default function CreditNotes() {
         <EmptyState
           icon={<FileMinus className="h-5 w-5" />}
           title="No credit notes"
-          description="Create a credit note from a final sale invoice or sales return, then open it to allocate to the customer’s open sale invoices if needed."
           action={
             allowNewCreditNote ? (
               <Button size="sm" onClick={() => setDialogOpen(true)}>

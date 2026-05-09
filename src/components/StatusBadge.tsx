@@ -14,6 +14,15 @@ const statusLabels: Record<string, string> = {
   UNPAID: "Unpaid",
   PENDING: "Pending",
   OVERDUE: "Overdue",
+  E_INVOICED: "E-invoiced",
+  IRN_GENERATED: "IRN generated",
+  GSTR_1_FILED: "GSTR-1 filed",
+  GSTR_3B_FILED: "GSTR-3B filed",
+  B2B: "B2B",
+  B2C: "B2C",
+  RCM: "RCM",
+  EXEMPT: "Exempt",
+  NIL_RATED: "Nil rated",
 };
 
 const statusStyles: Record<string, string> = {
@@ -25,6 +34,15 @@ const statusStyles: Record<string, string> = {
   UNPAID: "bg-status-overdue-bg text-status-overdue border-transparent",
   PENDING: "bg-status-pending-bg text-status-pending border-transparent",
   OVERDUE: "bg-status-overdue-bg text-status-overdue border-transparent",
+  E_INVOICED: "bg-status-einvoiced-bg text-status-einvoiced border-transparent",
+  IRN_GENERATED: "bg-status-einvoiced-bg text-status-einvoiced border-transparent",
+  GSTR_1_FILED: "bg-status-filed-bg text-status-filed border-transparent",
+  GSTR_3B_FILED: "bg-status-filed-bg text-status-filed border-transparent",
+  B2B: "bg-status-b2b-bg text-status-b2b border-transparent",
+  B2C: "bg-status-b2c-bg text-status-b2c border-transparent",
+  RCM: "bg-status-rcm-bg text-status-rcm border-transparent",
+  EXEMPT: "bg-status-exempt-bg text-status-exempt border-transparent",
+  NIL_RATED: "bg-status-nil-bg text-status-nil border-transparent",
 };
 
 interface StatusBadgeProps {
@@ -50,6 +68,7 @@ const StatusBadge = memo(function StatusBadge({ status, className, title }: Stat
   return (
     <Badge
       variant="outline"
+      shape="pill"
       title={title}
       className={cn(
         "px-2 py-0.5 text-xs font-medium",

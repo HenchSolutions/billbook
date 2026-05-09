@@ -224,22 +224,15 @@ export default function Stock() {
 
   return (
     <div className="page-container animate-fade-in">
-      <PageHeader
-        title="Stock"
-        description={
-          showAddStockView
-            ? "Add new stock entries for your items"
-            : "View stock entries, add purchases, and adjust quantities. Summarize by item in Reports → Item register."
-        }
-      />
+      <PageHeader title="Stock" />
 
       {canStockOverview ? (
         <div className="mb-6">
           {stockCardsPending && !stockDataForCards ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
             </div>
           ) : (
             <StockOverviewCards

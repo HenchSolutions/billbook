@@ -51,7 +51,6 @@ export default function Vendors() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Vendor"
-        description="Manage vendors for stock"
         action={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
@@ -84,11 +83,6 @@ export default function Vendors() {
         <EmptyState
           icon={<Truck className="h-5 w-5" />}
           title="No vendors found"
-          description={
-            debouncedSearch
-              ? `No vendors match "${debouncedSearch}". Try a different search or add a new vendor.`
-              : "Add your first vendor to get started."
-          }
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />

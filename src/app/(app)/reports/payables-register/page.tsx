@@ -104,7 +104,6 @@ export default function PayablesRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPayablesRegister.title}
-        description={reportPayablesRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -179,7 +178,7 @@ export default function PayablesRegisterPage() {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Clear filters

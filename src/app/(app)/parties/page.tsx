@@ -51,7 +51,6 @@ export default function Parties() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title="Customer"
-        description="Manage customers for invoicing"
         action={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
@@ -84,11 +83,6 @@ export default function Parties() {
         <EmptyState
           icon={<Users className="h-5 w-5" />}
           title="No customers found"
-          description={
-            debouncedSearch
-              ? `No customers match "${debouncedSearch}". Try a different search or add a new customer.`
-              : "Add your first customer to get started."
-          }
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />

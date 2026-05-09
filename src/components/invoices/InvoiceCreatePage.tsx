@@ -55,11 +55,6 @@ export function InvoiceCreatePage({
     <div className="page-container max-w-[96rem] animate-fade-in space-y-4">
       <PageHeader
         title={state.isEditMode ? `Edit ${state.pageMeta.label}` : `Create ${state.pageMeta.label}`}
-        description={
-          state.isEditMode
-            ? "Update party, dates, lines, and totals. Save applies changes to this draft."
-            : copy.pageDescription
-        }
         backHref={backHref}
         backLabel={backLabel}
       />

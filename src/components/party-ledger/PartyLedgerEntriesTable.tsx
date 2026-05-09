@@ -2,6 +2,7 @@ import { cn, formatCurrency, formatDate } from "@/lib/core/utils";
 import { formatLedgerEntryTypeLabel } from "@/lib/party/party-ledger-display";
 import type { LedgerEntry } from "@/lib/party/party-ledger";
 import { LedgerBalanceText } from "@/components/party-ledger/LedgerBalanceText";
+import { DataTableRoot } from "@/components/ui/data-table";
 
 export type PartyLedgerTableVariant = "ledger" | "statement";
 
@@ -18,27 +19,27 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
   const drCrHide = variant === "ledger" ? "hidden sm:table-cell" : "";
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <table className="w-full min-w-[280px] text-sm">
-        <thead className="bg-muted/40 text-muted-foreground">
+    <DataTableRoot density="default" className="rounded-md">
+      <table className="data-table min-w-[280px]">
+        <thead className="data-table-head-sticky text-muted-foreground">
           <tr>
-            <th className="px-3 py-2 text-left font-medium">Date</th>
-            <th className="px-3 py-2 text-left font-medium">Entry</th>
-            <th className={cn("px-3 py-2 text-right font-medium", drCrHide)}>Debit</th>
-            <th className={cn("px-3 py-2 text-right font-medium", drCrHide)}>Credit</th>
-            <th className="px-3 py-2 text-right font-medium">Balance</th>
+            <th className="data-table-th">Date</th>
+            <th className="data-table-th">Entry</th>
+            <th className={cn("data-table-th data-table-col-numeric", drCrHide)}>Debit</th>
+            <th className={cn("data-table-th data-table-col-numeric", drCrHide)}>Credit</th>
+            <th className="data-table-th data-table-col-numeric">Balance</th>
           </tr>
         </thead>
         <tbody>
           {entries.map((entry, idx) => (
-            <tr key={`${entry.entryType}-${idx}`} className="border-t">
-              <td className="px-3 py-2 text-muted-foreground">
+            <tr key={`${entry.entryType}-${idx}`} className="data-table-row">
+              <td className="data-table-td text-muted-foreground">
                 {formatDate(entry.entryDate ?? entry.createdAt)}
               </td>
-              <td className="px-3 py-2">{formatLedgerEntryTypeLabel(entry.entryType)}</td>
+              <td className="data-table-td">{formatLedgerEntryTypeLabel(entry.entryType)}</td>
               <td
                 className={cn(
-                  "px-3 py-2 text-right tabular-nums",
+                  "data-table-td data-table-col-numeric",
                   drCrHide,
                   entry.debitAmount && "font-medium text-red-600 dark:text-red-400",
                 )}
@@ -47,14 +48,14 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
               </td>
               <td
                 className={cn(
-                  "px-3 py-2 text-right tabular-nums",
+                  "data-table-td data-table-col-numeric",
                   drCrHide,
                   entry.creditAmount && "font-medium text-emerald-600 dark:text-emerald-400",
                 )}
               >
                 {entry.creditAmount ? formatCurrency(entry.creditAmount) : "—"}
               </td>
-              <td className="px-3 py-2 text-right">
+              <td className="data-table-td data-table-col-numeric">
                 <LedgerBalanceText
                   value={entry.runningBalance}
                   size="sm"
@@ -66,6 +67,6 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
           ))}
         </tbody>
       </table>
-    </div>
+    </DataTableRoot>
   );
 }

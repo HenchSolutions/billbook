@@ -1,12 +1,28 @@
+"use client";
+
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
-import { cn, formatCurrency } from "@/lib/core/utils";
-import type { DashboardData } from "@/types/dashboard";
+import { cn, formatCurrency, formatDate } from "@/lib/core/utils";
+import type { DashboardData, DashboardPeriodMode } from "@/types/dashboard";
 import { buildSalesPurchaseChartData } from "@/lib/business/dashboard-home";
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
-
+import { useResolvedCssHsl } from "@/hooks/use-resolved-css-hsl";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PAGE } from "@/constants/page-access";
 interface DashboardHomeSalesPurchaseChartProps {
   dashboard: DashboardData;
+  /** Same period as the dashboard filter (monthly / all time / custom). */
+  periodMode: DashboardPeriodMode;
+}
+
+function chartPeriodBadgeLabel(periodMode: DashboardPeriodMode, dashboard: DashboardData): string {
+  if (periodMode === "overall") return "All time";
+  if (periodMode === "monthly") return "This month";
+  if (dashboard.periodStart && dashboard.periodEnd) {
+    return `${formatDate(dashboard.periodStart)} – ${formatDate(dashboard.periodEnd)}`;
+  }
+  return "Custom range";
 }
 
 const PLACEHOLDER = [{ month: "—", sales: 0, purchase: 0 }];
@@ -19,12 +35,16 @@ function SalesPurchaseTooltip({
   label,
   showPurchaseSeries,
   purchaseEstimated,
+  salesColor,
+  purchaseColor,
 }: {
   active?: boolean;
   payload?: ReadonlyArray<{ payload?: unknown }>;
   label?: string | number;
   showPurchaseSeries: boolean;
   purchaseEstimated: boolean;
+  salesColor: string;
+  purchaseColor: string;
 }) {
   if (!active || !payload?.length) return null;
   const raw = payload[0]?.payload;
@@ -49,7 +69,7 @@ function SalesPurchaseTooltip({
           <dt className="flex items-center gap-2 text-muted-foreground">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-sm"
-              style={{ backgroundColor: "hsl(var(--chart-1))" }}
+              style={{ backgroundColor: salesColor }}
               aria-hidden
             />
             Sales
@@ -61,7 +81,7 @@ function SalesPurchaseTooltip({
             <dt className="flex items-center gap-2 text-muted-foreground">
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                style={{ backgroundColor: "hsl(var(--chart-3))" }}
+                style={{ backgroundColor: purchaseColor }}
                 aria-hidden
               />
               Purchase
@@ -81,9 +101,7 @@ function SalesPurchaseTooltip({
             <dd
               className={cn(
                 "font-semibold tabular-nums",
-                net >= 0
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-red-600 dark:text-red-400",
+                net >= 0 ? "text-status-paid" : "text-destructive",
               )}
             >
               {formatCurrency(net)}
@@ -97,34 +115,47 @@ function SalesPurchaseTooltip({
 
 export function DashboardHomeSalesPurchaseChart({
   dashboard,
+  periodMode,
 }: DashboardHomeSalesPurchaseChartProps) {
+  const { can } = usePermissions();
+  const canReports = can(PAGE.reports);
+  const salesColor = useResolvedCssHsl("--chart-2");
+  const purchaseColor = useResolvedCssHsl("--chart-3");
   const { rows, purchaseIsEstimated } = buildSalesPurchaseChartData(dashboard);
   const data = rows.length > 0 ? rows : PLACEHOLDER;
   const maxPurchase = data.reduce((m, r) => Math.max(m, r.purchase), 0);
   const showPurchaseSeries = maxPurchase > 0;
+  const periodBadge = chartPeriodBadgeLabel(periodMode, dashboard);
 
   return (
-    <Card className="rounded-2xl border border-border/80 bg-card shadow-sm">
-      <CardHeader className="pb-3 sm:pb-4">
-        <div>
-          <CardTitle className="text-base font-semibold">Sales vs purchase</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            {showPurchaseSeries
-              ? "Grouped bars per month — easy to compare sales and purchases side by side."
-              : "Sales by month. Purchase bars appear when purchase totals exist for each month."}
-          </p>
-          {purchaseIsEstimated && rows.length > 0 ? (
-            <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-500/90">
-              Purchase totals per month are not shown yet — only sales appear for now.
-            </p>
+    <Card className="border-border/60 shadow-sm">
+      <CardHeader className="space-y-2 pb-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+              <CardTitle className="text-lg font-semibold tracking-tight">
+                Sales vs purchase
+              </CardTitle>
+              <span className="max-w-[min(100%,280px)] truncate rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground sm:max-w-[360px]">
+                {periodBadge}
+              </span>
+            </div>
+          </div>
+          {canReports ? (
+            <Link
+              href="/reports"
+              className="shrink-0 text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/90 hover:underline"
+            >
+              All reports
+            </Link>
           ) : null}
         </div>
       </CardHeader>
       <CardContent className="pt-0">
         <ChartContainer
           config={{
-            sales: { label: "Sales", color: "hsl(var(--chart-1))" },
-            purchase: { label: "Purchase", color: "hsl(var(--chart-3))" },
+            sales: { label: "Sales", color: salesColor },
+            purchase: { label: "Purchase", color: purchaseColor },
           }}
           className={cn(
             "h-[min(320px,55vw)] min-h-[260px] w-full cursor-pointer",
@@ -164,6 +195,8 @@ export function DashboardHomeSalesPurchaseChart({
                   {...props}
                   showPurchaseSeries={showPurchaseSeries}
                   purchaseEstimated={purchaseIsEstimated}
+                  salesColor={salesColor}
+                  purchaseColor={purchaseColor}
                 />
               )}
             />
@@ -171,7 +204,7 @@ export function DashboardHomeSalesPurchaseChart({
             <Bar
               dataKey="sales"
               name="Sales"
-              fill="hsl(var(--chart-1))"
+              fill={salesColor}
               radius={[6, 6, 0, 0]}
               maxBarSize={56}
             />
@@ -179,7 +212,7 @@ export function DashboardHomeSalesPurchaseChart({
               <Bar
                 dataKey="purchase"
                 name="Purchase"
-                fill="hsl(var(--chart-3))"
+                fill={purchaseColor}
                 radius={[6, 6, 0, 0]}
                 maxBarSize={56}
               />
@@ -187,7 +220,7 @@ export function DashboardHomeSalesPurchaseChart({
           </BarChart>
         </ChartContainer>
         {rows.length === 0 ? (
-          <p className="mt-2 text-center text-xs text-muted-foreground">
+          <p className="mt-3 text-center text-sm text-muted-foreground">
             No monthly data yet. Record sales (and purchases) to populate this chart.
           </p>
         ) : null}

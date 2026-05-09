@@ -26,10 +26,7 @@ export default function AuditLogs() {
 
   return (
     <div className="page-container animate-fade-in">
-      <PageHeader
-        title="Audit logs"
-        description="Track actions in this business. Switch to Team & roles or business settings from the sidebar when needed."
-      />
+      <PageHeader title="Audit logs" />
 
       <AuditLogFilters
         actionFilter={actionFilter}

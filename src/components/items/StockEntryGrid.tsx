@@ -468,7 +468,7 @@ export function StockEntryGrid({
       </div>
 
       {addedRows.length > 0 && (
-        <div className="mt-4 space-y-3 rounded-xl border bg-card p-3 sm:mt-5 sm:p-4">
+        <div className="mt-4 space-y-3 rounded-lg border bg-card p-3 sm:mt-5 sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="space-y-0.5">
               <h3 className="text-sm font-semibold">Added in this session</h3>

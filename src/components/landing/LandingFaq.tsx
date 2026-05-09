@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 export function LandingFaq() {
   return (
     <section id="faq" className="scroll-mt-24">
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+      <div className="marketing-container py-14">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-foreground">
             Frequently asked questions

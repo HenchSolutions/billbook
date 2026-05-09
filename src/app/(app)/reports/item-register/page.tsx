@@ -69,7 +69,6 @@ export default function ItemRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportItemRegister.title}
-        description={reportItemRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -78,9 +77,9 @@ export default function ItemRegisterPage() {
         <div className="mb-6">
           {stockCardsPending && !stockDataForCards ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-2xl border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
+              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
             </div>
           ) : (
             <StockOverviewCards

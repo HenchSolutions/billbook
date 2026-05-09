@@ -22,6 +22,8 @@ interface DateRangePickerProps {
   onEndDateChange: (date: string) => void;
   error?: string | null;
   className?: string;
+  /** When false, calendars don’t auto-focus on open (clearer when picking dates from scratch). */
+  autoFocusCalendar?: boolean;
   /** Tighter layout (e.g. reports hub): shorter controls, less vertical label space. */
   compact?: boolean;
   /** Locale for From/To button labels (default en-GB). */
@@ -37,6 +39,7 @@ export default function DateRangePicker({
   onEndDateChange,
   error,
   className,
+  autoFocusCalendar = true,
   compact = false,
   displayLocale = DEFAULT_DISPLAY_LOCALE,
   displayDateOptions = DEFAULT_DISPLAY_DATE_OPTIONS,
@@ -89,12 +92,13 @@ export default function DateRangePicker({
               <Calendar
                 mode="single"
                 selected={parseISODateString(startDate)}
+                defaultMonth={parseISODateString(startDate) ?? new Date()}
                 onSelect={(date) => {
                   if (!date) return;
                   onStartDateChange(toISODateString(date));
                   setFromOpen(false);
                 }}
-                initialFocus
+                {...(autoFocusCalendar ? { initialFocus: true } : { initialFocus: false })}
               />
             </PopoverContent>
           </Popover>
@@ -126,12 +130,15 @@ export default function DateRangePicker({
               <Calendar
                 mode="single"
                 selected={parseISODateString(endDate)}
+                defaultMonth={
+                  parseISODateString(endDate) ?? parseISODateString(startDate) ?? new Date()
+                }
                 onSelect={(date) => {
                   if (!date) return;
                   onEndDateChange(toISODateString(date));
                   setToOpen(false);
                 }}
-                initialFocus
+                {...(autoFocusCalendar ? { initialFocus: true } : { initialFocus: false })}
               />
             </PopoverContent>
           </Popover>

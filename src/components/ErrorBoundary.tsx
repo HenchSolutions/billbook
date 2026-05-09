@@ -48,7 +48,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                   <AlertTriangle className="h-6 w-6 text-destructive" />
                 </div>
                 <div>
-                  <CardTitle>Something went wrong</CardTitle>
+                  <CardTitle className="text-lg font-semibold">Something went wrong</CardTitle>
                   <p className="text-sm text-muted-foreground">An unexpected error occurred</p>
                 </div>
               </div>

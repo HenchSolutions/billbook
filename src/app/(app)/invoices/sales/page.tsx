@@ -5,7 +5,6 @@ export default function SalesInvoicesPage() {
     <InvoicesByTypePage
       invoiceType="SALE_INVOICE"
       title="Sales Invoices"
-      description="Track outgoing invoices billed to customers"
       createLabel="New Sales Invoice"
     />
   );

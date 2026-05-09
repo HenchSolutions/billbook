@@ -54,9 +54,9 @@ const LINKS = [
 export default function HelpPage() {
   return (
     <PublicMarketingShell>
-      <div className="border-b bg-muted/20">
-        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-16">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+      <div className="border-b border-border/60 bg-muted/20">
+        <div className="marketing-container py-14 lg:py-16">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <LifeBuoy className="h-6 w-6" />
           </div>
           <h1 className="mt-6 max-w-2xl text-balance text-4xl font-semibold tracking-tight text-foreground">
@@ -74,15 +74,15 @@ export default function HelpPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-16">
+      <div className="marketing-container py-14 lg:py-16">
         <div className="grid gap-4 sm:grid-cols-2">
           {LINKS.map(({ title, desc, href, icon: Icon, cta }) => (
             <Card
               key={href}
-              className="group border-border/80 transition-all hover:border-primary/20 hover:shadow-md"
+              className="group border-border/60 transition-all hover:border-primary/20 hover:shadow-md"
             >
               <CardHeader className="flex flex-row items-start gap-3 space-y-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/80 text-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/80 text-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">

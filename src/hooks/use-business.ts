@@ -12,7 +12,7 @@ import type {
   CreateStaffRequest,
   UpdateStaffMembershipRequest,
 } from "@/types/auth";
-import type { DashboardData } from "@/types/dashboard";
+import type { BusinessDashboardQueryParams, DashboardData } from "@/types/dashboard";
 
 type BusinessTypeApiItem = {
   id?: unknown;
@@ -43,11 +43,25 @@ function toBusinessClassificationOptions(input: unknown): BusinessClassification
     .filter((item): item is BusinessClassificationOption => item !== null);
 }
 
-export function useDashboard(filter?: "monthly" | "overall") {
+export function useDashboard(
+  params: BusinessDashboardQueryParams,
+  options?: { enabled?: boolean },
+) {
+  const enabled = options?.enabled ?? true;
+
   return useQuery({
-    queryKey: queryKeys.business.dashboard(filter),
+    queryKey: queryKeys.business.dashboard(params),
+    enabled,
     queryFn: async () => {
-      const url = filter ? `/business/dashboard?filter=${filter}` : "/business/dashboard";
+      const sp = new URLSearchParams();
+      if (params.filter === "custom") {
+        sp.set("filter", "custom");
+        sp.set("startDate", params.startDate);
+        sp.set("endDate", params.endDate);
+      } else {
+        sp.set("filter", params.filter);
+      }
+      const url = `/business/dashboard?${sp.toString()}`;
       const res = await api.get<DashboardData>(url);
       return normalizeDashboard(res.data as unknown as Record<string, unknown>);
     },

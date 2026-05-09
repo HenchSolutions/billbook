@@ -27,10 +27,7 @@ function invalidateReceiptAndPartyCaches(qc: QueryClient) {
 }
 
 function invalidateDashboardAndReports(qc: QueryClient) {
-  invalidateQueryKeys(qc, [
-    queryKeys.business.dashboard("monthly"),
-    queryKeys.business.dashboard("overall"),
-  ]);
+  void qc.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
   void qc.invalidateQueries({ queryKey: ["reports"], refetchType: "all" });
 }
 

@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard,
+  Home,
   LayoutGrid,
   FileText,
   ChevronDown,
@@ -23,7 +23,6 @@ import {
   Wallet,
   ArrowDownLeft,
   ScrollText,
-  Folder,
   TrendingUp,
   ShoppingCart,
   ReceiptIndianRupee,
@@ -33,6 +32,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/core/utils";
+import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BusinessIdentity } from "@/components/BusinessIdentity";
@@ -98,7 +98,7 @@ const navSections: NavSection[] = [
       {
         label: "Dashboard",
         path: "/dashboard",
-        icon: LayoutDashboard,
+        icon: Home,
       },
     ],
   },
@@ -332,16 +332,16 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
 
   const sectionButtonClass = (active: boolean) =>
     cn(
-      "flex w-full items-center gap-2 rounded-md px-2 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition-colors",
+      "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
       active
         ? "text-sidebar-foreground"
-        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+        : "text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-foreground",
     );
 
   return (
     <aside
       className={cn(
-        "flex h-full min-h-0 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200",
+        "flex h-full min-h-0 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[2px_0_24px_-12px_hsl(var(--sidebar-foreground)_/_0.12)] transition-all duration-200",
         collapsed ? "w-16" : "w-64",
       )}
     >
@@ -367,12 +367,9 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
 
       <Separator className="bg-sidebar-border" />
 
-      <nav className="min-h-0 flex-1 space-y-4 overflow-y-auto px-2 py-4">
+      <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-2 py-4">
         {visibleSections.map((section) => (
-          <div
-            key={section.title}
-            className="rounded-lg border border-sidebar-border/50 bg-sidebar-accent/10 p-1.5"
-          >
+          <div key={section.title} className="space-y-1">
             {!collapsed && (
               <button
                 type="button"
@@ -381,7 +378,6 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                 aria-expanded={openSection === section.title}
               >
                 <span className="flex min-w-0 items-center gap-2">
-                  <Folder className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                   <span className="truncate">{section.title}</span>
                 </span>
                 <ChevronRight
@@ -410,10 +406,10 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                         href={item.path}
                         onClick={onNavigate}
                         className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                           isPathActive(item.path, item.activeMatch)
-                            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                            ? SIDEBAR_NAV_ACTIVE
+                            : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                         )}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
@@ -435,10 +431,10 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                                 href={invoiceItem.path}
                                 onClick={onNavigate}
                                 className={cn(
-                                  "block rounded-md px-3 py-2 text-sm transition-colors",
+                                  "block rounded-lg px-3 py-2 text-sm transition-colors",
                                   isInvoiceTypeActive(invoiceItem.path)
-                                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                                    ? SIDEBAR_NAV_ACTIVE
+                                    : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                                 )}
                               >
                                 {invoiceItem.label}
@@ -453,10 +449,10 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                       href={item.path}
                       onClick={onNavigate}
                       className={cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         isPathActive(item.path, item.activeMatch)
-                          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                          ? SIDEBAR_NAV_ACTIVE
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                       )}
                       title={collapsed ? item.label : undefined}
                     >
@@ -477,7 +473,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          className="w-full justify-start rounded-lg text-sidebar-foreground/75 hover:bg-sidebar-hover hover:text-sidebar-foreground"
           onClick={handleLogout}
           title="Log out"
         >
@@ -489,7 +485,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
           <>
             <Separator className="bg-sidebar-border" />
             <div className="flex w-full flex-nowrap items-center justify-start gap-2 px-2 py-2">
-              <span className="shrink-0 text-xs font-semibold tracking-wide text-white sm:text-sm">
+              <span className="shrink-0 text-xs font-semibold tracking-wide text-sidebar-foreground/55 sm:text-sm">
                 Billbook
               </span>
               <img

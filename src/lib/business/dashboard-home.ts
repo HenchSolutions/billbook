@@ -1,4 +1,10 @@
-import { humanizeApiEnum } from "@/lib/core/utils";
+import { max, subMonths } from "date-fns";
+import {
+  getIndianFinancialYearStartIsoDate,
+  parseISODateString,
+  toISODateString,
+} from "@/lib/core/date";
+import { formatDate, formatDateNumericINFromDate, humanizeApiEnum } from "@/lib/core/utils";
 import type {
   DashboardData,
   DashboardRecentLedgerRow,
@@ -24,12 +30,59 @@ function formatMarginPercent(v: string | number | null | undefined): string {
   return `${Math.round(pct)}%`;
 }
 
+/**
+ * Default dashboard custom range: 1 Apr (Indian FY containing “today”) through today,
+ * clamped so the span never exceeds `maxMonths` (same cap as report / dashboard API).
+ */
+export function getDashboardCustomRangeSeedIso(maxMonths: number): {
+  startDate: string;
+  endDate: string;
+} {
+  const end = new Date();
+  const endIso = toISODateString(end);
+  const fyStartStr = getIndianFinancialYearStartIsoDate(end);
+  const fyStart = parseISODateString(fyStartStr);
+  if (!fyStart) {
+    return { startDate: fyStartStr || toISODateString(subMonths(end, maxMonths)), endDate: endIso };
+  }
+  const earliestAllowedStart = subMonths(end, maxMonths);
+  const start = max([fyStart, earliestAllowedStart]);
+  return { startDate: toISODateString(start), endDate: endIso };
+}
+
 export function snapshotLabelDate(dashboard: DashboardData): Date {
   if (dashboard.snapshotDate) {
     const d = new Date(dashboard.snapshotDate);
     if (!isNaN(d.getTime())) return d;
   }
+  if (dashboard.filter === "custom" && dashboard.periodEnd) {
+    const d = new Date(dashboard.periodEnd);
+    if (!isNaN(d.getTime())) return d;
+  }
   return new Date();
+}
+
+/** Header subtitle — period range for custom filter, else “as of” date. */
+export function dashboardSnapshotCaption(dashboard: DashboardData): string {
+  if (dashboard.filter === "custom" && dashboard.periodStart && dashboard.periodEnd) {
+    return `${formatDate(dashboard.periodStart)} – ${formatDate(dashboard.periodEnd)}`;
+  }
+  return formatDateNumericINFromDate(snapshotLabelDate(dashboard));
+}
+
+/** Chart footnote from API metadata so monthly vs overall vs custom windows are explicit. */
+export function dashboardChartScopeFootnote(dashboard: DashboardData): string | null {
+  const t = dashboard.chartTrailingMonths;
+  if (t === 36) {
+    return "Bars show the last 36 months of invoice activity — not your entire history.";
+  }
+  if (t === 12) {
+    return "Bars show the last 12 months.";
+  }
+  if (dashboard.filter === "custom" && dashboard.periodStart && dashboard.periodEnd) {
+    return `Each bar is a calendar month from ${formatDate(dashboard.periodStart)} through ${formatDate(dashboard.periodEnd)}.`;
+  }
+  return null;
 }
 
 type SalesPurchaseChartRow = {

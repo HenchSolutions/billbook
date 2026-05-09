@@ -119,11 +119,11 @@ export function CreditNoteAllocationEditor({
     return (
       <Card
         id="credit-note-allocate"
-        className="min-w-0 max-w-full scroll-mt-20 overflow-hidden rounded-2xl border-border/80 shadow-sm"
+        className="min-w-0 max-w-full scroll-mt-20 overflow-hidden rounded-lg border-border/60 shadow-sm"
       >
         <CardHeader className="space-y-3 border-b border-border/60 bg-muted/15 px-4 py-4 sm:px-6">
           <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/80 text-muted-foreground">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/80 text-muted-foreground">
               <FileStack className="h-5 w-5" aria-hidden />
             </div>
             <div className="min-w-0 space-y-1">
@@ -139,7 +139,7 @@ export function CreditNoteAllocationEditor({
           </div>
         </CardHeader>
         <CardContent className="space-y-4 px-4 py-4 sm:px-6">
-          <div className="grid gap-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid gap-4 rounded-lg border border-border/60 bg-muted/20 p-4 sm:grid-cols-2 sm:gap-6">
             <div>
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Credit note amount
@@ -176,7 +176,7 @@ export function CreditNoteAllocationEditor({
   return (
     <Card
       id="credit-note-allocate"
-      className="min-w-0 max-w-full overflow-hidden rounded-2xl border-border/80 shadow-sm"
+      className="min-w-0 max-w-full overflow-hidden rounded-lg border-border/60 shadow-sm"
     >
       <CardHeader className="space-y-1 border-b border-border/60 bg-muted/15 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -203,7 +203,7 @@ export function CreditNoteAllocationEditor({
         </div>
       </CardHeader>
       <CardContent className="min-w-0 space-y-5 px-4 py-5 sm:px-6">
-        <div className="grid grid-cols-1 divide-y divide-border/60 rounded-xl border border-border/60 bg-muted/20 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-border/60">
+        <div className="grid grid-cols-1 divide-y divide-border/60 rounded-lg border border-border/60 bg-muted/20 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-border/60">
           <div className="flex flex-col justify-center px-4 py-4 sm:px-5 sm:py-5">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Credit note amount
@@ -238,11 +238,11 @@ export function CreditNoteAllocationEditor({
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No invoices to show.</p>
         ) : (
-          <div className="min-w-0 overflow-hidden rounded-xl border border-border/80">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-border/60">
             <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1 sm:mx-0 sm:px-0">
               <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-border/80 bg-muted/40 text-left">
+                  <tr className="border-b border-border/60 bg-muted/40 text-left">
                     <th className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Invoice
                     </th>
@@ -280,7 +280,7 @@ export function CreditNoteAllocationEditor({
                         <td className="px-3 py-2.5 align-middle font-medium">
                           <Link
                             href={`/invoices/${r.invoiceId}`}
-                            className="text-primary hover:underline"
+                            className="financial-id text-primary hover:underline"
                           >
                             {r.invoiceNumber}
                           </Link>

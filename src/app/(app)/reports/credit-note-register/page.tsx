@@ -84,7 +84,6 @@ export default function CreditNoteRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportCreditNoteRegister.title}
-        description={reportCreditNoteRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -151,8 +150,8 @@ export default function CreditNoteRegisterPage() {
                 ) : (
                   rows.map((cnRow) => (
                     <tr key={cnRow.id} className={rr.tr}>
-                      <td className={cn(rr.td, "font-medium tabular-nums")}>
-                        {cnRow.creditNoteNumber}
+                      <td className={rr.td}>
+                        <span className="financial-id font-medium">{cnRow.creditNoteNumber}</span>
                       </td>
                       <td className={rr.td}>
                         <StatusBadge status={cnRow.status} />
@@ -201,7 +200,7 @@ export default function CreditNoteRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
           Select a valid date range to load data.
         </p>
       )}

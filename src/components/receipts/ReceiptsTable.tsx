@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataTableRoot } from "@/components/ui/data-table";
 import TablePagination from "@/components/TablePagination";
 import {
   receiptOpeningSettlementNum,
@@ -31,22 +32,18 @@ export function ReceiptsTable({
   return (
     <Card>
       <CardContent className="p-0">
-        <div className="data-table-container overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Receipt</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Party</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Method</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  Opening tag
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  Unallocated
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
+        <DataTableRoot density="default" className="overflow-x-auto border-0 shadow-none">
+          <table className="data-table">
+            <thead className="data-table-head-sticky">
+              <tr>
+                <th className="data-table-th px-4">Receipt</th>
+                <th className="data-table-th px-4">Party</th>
+                <th className="data-table-th px-4">Date</th>
+                <th className="data-table-th px-4">Method</th>
+                <th className="data-table-th data-table-col-numeric px-4">Total</th>
+                <th className="data-table-th data-table-col-numeric px-4">Opening tag</th>
+                <th className="data-table-th data-table-col-numeric px-4">Unallocated</th>
+                <th className="data-table-th data-table-col-numeric px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -56,22 +53,22 @@ export function ReceiptsTable({
                 const canAllocate = unalloc > 0.001;
                 const methodBadge = receiptPaymentMethodBadgeProps(r.paymentMethod);
                 return (
-                  <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="px-4 py-3">
+                  <tr key={r.id} className="data-table-row last:border-0">
+                    <td className="data-table-td px-4">
                       <Link
                         href={`/receipts/${r.id}`}
-                        className="font-medium tabular-nums text-primary hover:underline"
+                        className="financial-id font-medium text-primary hover:underline"
                       >
                         {r.receiptNumber}
                       </Link>
                     </td>
-                    <td className="max-w-[180px] truncate px-4 py-3 text-muted-foreground">
+                    <td className="data-table-td max-w-[180px] truncate px-4 text-muted-foreground">
                       {r.partyName ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="data-table-td px-4 text-muted-foreground">
                       {formatDate(r.receivedAt || r.createdAt)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="data-table-td px-4">
                       <Badge
                         variant="outline"
                         className={methodBadge.className}
@@ -81,10 +78,10 @@ export function ReceiptsTable({
                           r.paymentMethod.replace(/_/g, " ")}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                    <td className="data-table-td data-table-col-numeric px-4 font-medium">
                       {formatCurrency(r.totalAmount)}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                    <td className="data-table-td data-table-col-numeric px-4 text-muted-foreground">
                       {openingTag > 0.001 ? (
                         <span className="font-medium text-foreground">
                           {formatCurrency(String(openingTag))}
@@ -93,7 +90,7 @@ export function ReceiptsTable({
                         "—"
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="data-table-td data-table-col-numeric px-4">
                       {unalloc > 0.001 ? (
                         <span className="font-medium text-amber-700">
                           {formatCurrency(String(unalloc))}
@@ -102,7 +99,7 @@ export function ReceiptsTable({
                         <span className="text-muted-foreground">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="data-table-td data-table-col-numeric px-4">
                       {canAllocate ? (
                         <Button variant="default" size="sm" className="h-8" asChild>
                           <Link href={`/receipts/${r.id}#allocate`}>Allocate</Link>
@@ -124,7 +121,7 @@ export function ReceiptsTable({
               })}
             </tbody>
           </table>
-        </div>
+        </DataTableRoot>
         {totalPages > 1 && (
           <div className="border-t p-4">
             <TablePagination

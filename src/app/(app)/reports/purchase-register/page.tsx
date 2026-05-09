@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
+import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import { RegisterInvoicePayStatusBadge } from "@/components/reports/RegisterInvoicePayStatusBadge";
 import {
   ReportRegisterEmptyRow,
@@ -78,7 +79,7 @@ export default function PurchaseRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit] = useState(DEFAULT_REPORT_LIMIT);
+  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
 
   const { data, isPending, error } = useInvoiceRegister(
     validStartDate,
@@ -166,7 +167,6 @@ export default function PurchaseRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPurchaseRegister.title}
-        description={reportPurchaseRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -174,21 +174,24 @@ export default function PurchaseRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportPurchaseRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Date range
-          </p>
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-            compact
-          />
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-          </p>
+        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Date range
+            </p>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+              Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
+            </p>
+          </div>
+          <ReportLimitInput value={limit} onChange={setLimit} stacked />
         </div>
 
         {/* Filter rows — 2-column on sm+ */}
@@ -297,7 +300,7 @@ export default function PurchaseRegisterPage() {
               {isFiltered && (
                 <button
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Clear filters
@@ -316,7 +319,12 @@ export default function PurchaseRegisterPage() {
           </div>
 
           <ReportRegisterTableScroll>
-            <ReportRegisterResultBar count={rows.length} rowLabel="records shown" limit={limit} />
+            <ReportRegisterResultBar
+              count={rows.length}
+              rowLabel="records shown"
+              limit={limit}
+              truncationHintCount={(data?.invoices ?? []).length}
+            />
             <table className={cn(rr.table, "min-w-[820px]")}>
               <thead className={rr.thead}>
                 <tr>
@@ -334,7 +342,7 @@ export default function PurchaseRegisterPage() {
                 {rows.length === 0 ? (
                   <ReportRegisterEmptyRow
                     colSpan={8}
-                    message="No purchase documents found. Try adjusting your filters or date range."
+                    message="No posted purchase documents in this range. Adjust filters or dates — drafts stay in workflow until finalized."
                   />
                 ) : (
                   rows.map((inv) => {
@@ -348,7 +356,10 @@ export default function PurchaseRegisterPage() {
                       <tr key={inv.id} className={rr.tr}>
                         <td className={rr.tdMuted}>{formatDate(inv.invoiceDate)}</td>
                         <td className={rr.td}>
-                          <Link href={`/invoices/${inv.id}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${inv.id}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             {inv.invoiceNumber}
                           </Link>
                         </td>
@@ -440,7 +451,7 @@ export default function PurchaseRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-border bg-muted/10 py-14 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-muted/10 py-14 text-center">
           <Search className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" aria-hidden />
           <p className="text-sm font-medium text-muted-foreground">
             Select a date range and click{" "}

@@ -23,7 +23,7 @@ export function StockAlertsBanner({ alerts, onMarkRead, markReadPending }: Stock
   const visible = expanded || !hasMore ? alerts : alerts.slice(0, ALERTS_PREVIEW_COUNT);
 
   return (
-    <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-amber-700 dark:text-amber-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />

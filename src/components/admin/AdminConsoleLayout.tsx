@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/core/utils";
+import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname() ?? "";
@@ -31,16 +32,16 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               className={cn(
                 "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 active
-                  ? "border-border bg-muted/80 font-medium text-foreground shadow-sm"
-                  : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-muted/40 hover:text-foreground",
+                  ? cn(SIDEBAR_NAV_ACTIVE, "border-transparent shadow-sm")
+                  : "border-transparent text-sidebar-foreground/75 hover:border-sidebar-border/50 hover:bg-sidebar-hover hover:text-sidebar-foreground",
               )}
             >
               <span
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border shadow-sm transition-colors",
                   active
-                    ? "border-primary/25 bg-primary/10 text-primary"
-                    : "border-border/60 bg-background/80 text-muted-foreground group-hover:text-foreground",
+                    ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "border-sidebar-border/40 bg-sidebar-accent/30 text-sidebar-foreground/80 group-hover:text-sidebar-foreground",
                 )}
                 aria-hidden
               >
@@ -79,8 +80,8 @@ function NavIconRail() {
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 active
-                  ? "border-primary/25 bg-primary/10 text-primary shadow-sm"
-                  : "border-border/60 bg-background/80 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                  ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                  : "border-sidebar-border/40 bg-sidebar-accent/30 text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
               )}
             >
               <Icon className="h-4 w-4" />
@@ -105,9 +106,9 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-card/80 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/65">
-        <div className="flex h-14 w-full items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between gap-3 border-b border-border/50 bg-background pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:gap-4 sm:pl-[max(1.5rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.5rem,env(safe-area-inset-right,0px))] lg:pl-[max(2rem,env(safe-area-inset-left,0px))] lg:pr-[max(2rem,env(safe-area-inset-right,0px))]">
+        <div className="flex h-full w-full items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -122,7 +123,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex w-[min(100%,20rem)] flex-col gap-0 p-0">
-                <SheetHeader className="border-b border-border/70 px-4 py-4 text-left">
+                <SheetHeader className="border-b border-border/50 px-4 py-4 text-left">
                   <SheetTitle className="text-base font-semibold">Admin console</SheetTitle>
                   <p className="text-xs font-normal text-muted-foreground">Choose a section</p>
                 </SheetHeader>
@@ -170,7 +171,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
       <div className="relative flex min-h-[calc(100vh-3.5rem)] w-full">
         <aside
           className={cn(
-            "sticky top-14 z-30 hidden h-[calc(100vh-3.5rem)] shrink-0 border-r border-border/70 bg-card/50 backdrop-blur-sm transition-[width] duration-300 ease-in-out lg:block",
+            "sticky top-14 z-30 hidden h-[calc(100vh-3.5rem)] shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out lg:block",
             sidebarCollapsed
               ? "w-[4rem] shadow-[inset_-1px_0_0_0_hsl(var(--border)/0.5)]"
               : "w-[15.5rem] shadow-[inset_-1px_0_0_0_hsl(var(--border)/0.5)]",
@@ -181,7 +182,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
             type="button"
             variant="outline"
             size="icon"
-            className="absolute -right-4 top-6 z-40 hidden h-8 w-8 rounded-full border-border/80 bg-background shadow-sm transition-all duration-300 ease-in-out lg:inline-flex"
+            className="absolute -right-4 top-6 z-40 hidden h-8 w-8 rounded-full border-border/60 bg-background shadow-sm transition-all duration-300 ease-in-out lg:inline-flex"
             onClick={() => setSidebarCollapsed((prev) => !prev)}
             aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -207,15 +208,8 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
           )}
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-12 pt-6 sm:px-6 sm:pt-8">
-          <div
-            className={cn(
-              "mx-auto w-full",
-              sidebarCollapsed ? "max-w-[min(1800px,100%)]" : "max-w-7xl",
-            )}
-          >
-            {children}
-          </div>
+        <main className="admin-main-shell min-w-0 flex-1 pb-12 pt-6 sm:py-10">
+          <div className="mx-auto w-full min-w-0 max-w-[min(100%,1600px)]">{children}</div>
         </main>
       </div>
     </div>

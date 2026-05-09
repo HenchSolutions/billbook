@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
+import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
@@ -104,13 +105,11 @@ export default function DebtRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
+  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
 
-  const { data, isPending, error } = useReceivablesAging(validEndDate, DEFAULT_REPORT_LIMIT);
+  const { data, isPending, error } = useReceivablesAging(validEndDate, limit);
 
-  const exportQuery = useMemo(
-    () => ({ asOf: validEndDate, limit: DEFAULT_REPORT_LIMIT }),
-    [validEndDate],
-  );
+  const exportQuery = useMemo(() => ({ asOf: validEndDate, limit }), [validEndDate, limit]);
 
   const rows = useMemo(() => {
     if (!data?.lines) return [];
@@ -221,7 +220,6 @@ export default function DebtRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportDebtRegister.title}
-        description={reportDebtRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -229,23 +227,26 @@ export default function DebtRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportDebtRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            From date / Up to date
-          </p>
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            error={dateRangeError}
-            compact
-          />
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Balances are as of <span className="font-medium text-foreground">Up to</span> (aging
-            snapshot). <span className="font-medium text-foreground">From</span> filters by invoice
-            date. Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-          </p>
+        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              From date / Up to date
+            </p>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              error={dateRangeError}
+              compact
+            />
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+              Balances are as of <span className="font-medium text-foreground">Up to</span> (aging
+              snapshot). <span className="font-medium text-foreground">From</span> filters by
+              invoice date. Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
+            </p>
+          </div>
+          <ReportLimitInput value={limit} onChange={setLimit} stacked />
         </div>
 
         <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
@@ -328,7 +329,7 @@ export default function DebtRegisterPage() {
         <ReportTabSkeleton layout="register-with-toolbar" />
       ) : data && validEndDate ? (
         <div className="space-y-2">
-          <div className="rounded-xl border border-border bg-muted/20 px-3 py-2.5 text-sm text-muted-foreground shadow-sm">
+          <div className="rounded-lg border border-border bg-muted/20 px-3 py-2.5 text-sm text-muted-foreground shadow-sm">
             As of{" "}
             <span className="font-medium text-foreground">{formatISODateDisplay(data.asOf)}</span>
             {validStartDate ? (
@@ -371,7 +372,8 @@ export default function DebtRegisterPage() {
             <ReportRegisterResultBar
               count={rows.length}
               rowLabel="invoices in snapshot"
-              limit={DEFAULT_REPORT_LIMIT}
+              limit={limit}
+              truncationHintCount={(data?.lines ?? []).length}
             />
             <table className={cn(rr.table, "min-w-[1180px]")}>
               <thead className={rr.thead}>
@@ -429,7 +431,10 @@ export default function DebtRegisterPage() {
                           )}
                         </td>
                         <td className={rr.td}>
-                          <Link href={`/invoices/${line.invoiceId}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${line.invoiceId}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             {line.invoiceNumber}
                           </Link>
                         </td>
@@ -505,7 +510,7 @@ export default function DebtRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
           Choose a valid date range (up to date drives the snapshot) and click Search.
         </p>
       )}

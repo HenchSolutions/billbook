@@ -3,8 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  /* Colour tokens aligned with `main` — slate neutrals + blue primary/accent (see origin/main:src/index.css). */
   :root {
-    --background: 210 20% 98%;
+    /* Page canvas — pure white so main content reads as white, not grey-tinted */
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -34,7 +36,7 @@
 
     --radius: 0.6rem;
 
-    /* Status colors */
+    /* Status — core set matches main */
     --status-paid: 152 60% 40%;
     --status-paid-bg: 152 60% 95%;
     --status-pending: 38 92% 50%;
@@ -43,13 +45,28 @@
     --status-draft-bg: 220 14% 93%;
     --status-overdue: 0 72% 51%;
     --status-overdue-bg: 0 72% 96%;
-    /* Distinct from draft (slate gray): cancelled reads as destructive / voided */
     --status-cancelled: 0 72% 42%;
     --status-cancelled-bg: 0 80% 96%;
     --status-final: 217 91% 55%;
     --status-final-bg: 217 91% 95%;
 
-    /* Sidebar */
+    /* GST / register badges — derived from the same main hues */
+    --status-einvoiced: 217 91% 52%;
+    --status-einvoiced-bg: 217 91% 95%;
+    --status-filed: 152 60% 38%;
+    --status-filed-bg: 152 60% 95%;
+    --status-b2b: 280 65% 52%;
+    --status-b2b-bg: 280 65% 95%;
+    --status-b2c: 217 84% 48%;
+    --status-b2c-bg: 217 84% 95%;
+    --status-rcm: 38 88% 46%;
+    --status-rcm-bg: 38 92% 95%;
+    --status-exempt: 220 10% 48%;
+    --status-exempt-bg: 220 14% 93%;
+    --status-nil: 215 16% 42%;
+    --status-nil-bg: 220 14% 93%;
+
+    /* Sidebar — matches main */
     --sidebar-background: 222 47% 12%;
     --sidebar-foreground: 210 20% 90%;
     --sidebar-primary: 217 84% 54%;
@@ -59,13 +76,19 @@
     --sidebar-border: 222 47% 18%;
     --sidebar-ring: 217 84% 54%;
     --sidebar-muted: 215 16% 55%;
+    /** Row hover — slate lift (not page `muted`, which reads as a light gray patch on the rail). */
+    --sidebar-hover: 222 40% 17%;
+    --sidebar-active-bar: 217 84% 54%;
 
-    /* Chart colors */
+    /* Charts — main palette + extras mapped into the same family */
     --chart-1: 217 84% 54%;
     --chart-2: 152 60% 40%;
     --chart-3: 38 92% 50%;
     --chart-4: 280 65% 55%;
     --chart-5: 0 72% 51%;
+    --chart-6: 217 84% 48%;
+    --chart-7: 280 65% 50%;
+    --chart-8: 152 55% 42%;
   }
 
   .dark {
@@ -97,10 +120,29 @@
     --sidebar-border: 222 35% 13%;
     --sidebar-ring: 217 84% 54%;
     --sidebar-muted: 215 16% 55%;
+    --sidebar-hover: 222 32% 12%;
+    --sidebar-active-bar: 217 84% 54%;
 
-    /* Cancelled: red family on dark surfaces (draft stays slate in :root only — redefine if needed) */
+    --chart-6: 217 78% 58%;
+    --chart-7: 280 62% 62%;
+    --chart-8: 152 52% 52%;
+
     --status-cancelled: 0 65% 72%;
     --status-cancelled-bg: 0 32% 18%;
+    --status-einvoiced: 217 85% 72%;
+    --status-einvoiced-bg: 217 40% 18%;
+    --status-filed: 152 55% 68%;
+    --status-filed-bg: 152 32% 18%;
+    --status-b2b: 280 62% 72%;
+    --status-b2b-bg: 280 32% 18%;
+    --status-b2c: 217 78% 72%;
+    --status-b2c-bg: 217 38% 18%;
+    --status-rcm: 38 85% 68%;
+    --status-rcm-bg: 38 35% 18%;
+    --status-exempt: 220 14% 72%;
+    --status-exempt-bg: 222 30% 16%;
+    --status-nil: 215 16% 68%;
+    --status-nil-bg: 222 30% 16%;
   }
 }
 
@@ -111,7 +153,18 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv11", "ss01";
+    font-feature-settings: "cv11", "ss01", "tnum";
+  }
+
+  /** Reduce stray horizontal scroll from occasional overflow (nested tables use their own scroll). */
+  html {
+    overflow-x: clip;
+  }
+
+  @supports not (overflow: clip) {
+    html {
+      overflow-x: hidden;
+    }
   }
 
   h1,
@@ -125,25 +178,72 @@
 }
 
 @layer components {
+  /*
+   * Page shell — InApp uses .content.py-10 + .container-fluid: generous vertical padding,
+   * horizontal padding from the fluid grid, and mb-6 between page title block and first cards.
+   */
   .page-container {
-    /* min-w-0: allow shrinking inside flex main so nested overflow-x-auto tables can scroll */
-    @apply mx-auto w-full min-w-0 max-w-7xl p-2 sm:p-3 lg:p-4;
+    /* min-w-0: nested overflow-x-auto tables can scroll inside flex main */
+    @apply mx-auto w-full min-w-0 max-w-[min(100%,1600px)] bg-background py-8 sm:py-10;
+  }
+
+  /** Marketing / legal chrome — same horizontal rhythm as `.page-container`, vertical spacing per section. */
+  .marketing-container {
+    @apply mx-auto w-full max-w-[min(100%,1600px)];
+  }
+
+  /**
+   * Horizontal padding respects notch / home-indicator safe areas on phones.
+   * Shared by app pages, marketing, and admin console main.
+   */
+  .page-container,
+  .marketing-container,
+  .admin-main-shell {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  .admin-main-shell {
+    @apply bg-background;
+  }
+
+  @media (min-width: 640px) {
+    .page-container,
+    .marketing-container,
+    .admin-main-shell {
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-container,
+    .marketing-container,
+    .admin-main-shell {
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
+    }
   }
 
   .page-header {
-    @apply mb-6 flex flex-col gap-1;
+    /* Title only (no subtitle): keep gap to page body tight */
+    @apply mb-4 flex flex-col gap-0 sm:mb-5;
   }
 
   .page-title {
-    @apply text-2xl font-bold;
+    @apply break-words text-2xl font-bold;
   }
 
   .page-description {
     @apply text-sm text-muted-foreground;
   }
 
+  /**
+   * Marketing / landing-only: hover gradient on KPI-style surfaces.
+   * Avoid in authenticated ledger UI — financial KPI affordance is the number, not motion on the shell.
+   */
   .stat-card {
-    @apply relative overflow-hidden rounded-lg border bg-card p-5 transition-all hover:shadow-md;
+    @apply relative overflow-hidden rounded-lg border bg-card p-6 transition-shadow hover:shadow-md;
   }
 
   .stat-card::before {
@@ -152,6 +252,11 @@
 
   .stat-card:hover::before {
     @apply opacity-100;
+  }
+
+  /** Codes & identifiers: GSTIN, PAN, invoice numbers, HSN, IFSC, bank refs — monospace + tabular for scan/copy. */
+  .financial-id {
+    @apply font-mono text-sm tabular-nums tracking-tight;
   }
 
   .stat-value {
@@ -164,6 +269,63 @@
 
   .data-table-container {
     @apply overflow-x-auto overflow-y-hidden rounded-lg border bg-card shadow-sm;
+  }
+
+  .data-table {
+    @apply w-full text-sm;
+  }
+
+  .data-table-head-sticky th {
+    @apply sticky top-0 z-10 bg-card;
+  }
+
+  .data-table-th {
+    @apply h-11 whitespace-nowrap border-b px-3 text-left text-sm font-medium text-muted-foreground;
+  }
+
+  .data-table-td {
+    @apply border-b px-3 align-middle text-sm;
+  }
+
+  /** Report register pages — extra cell spacing (uses `register-report-table` on `<table>`). */
+  .register-report-table.data-table .data-table-th,
+  .register-report-table.data-table .data-table-td {
+    @apply px-5 py-3 sm:px-6;
+  }
+
+  .register-report-table.data-table .data-table-th {
+    @apply h-auto min-h-[3rem];
+  }
+
+  .data-table-row {
+    @apply transition-colors hover:bg-muted/40;
+  }
+
+  .data-table-row-selected {
+    @apply bg-primary/5;
+  }
+
+  .data-table-col-numeric {
+    @apply text-right tabular-nums;
+  }
+
+  .data-table-bulk-bar {
+    @apply sticky top-0 z-20 flex min-h-11 items-center justify-between gap-2 border-b bg-secondary/70 px-3 py-2 backdrop-blur;
+  }
+
+  .table-density-compact .data-table-th,
+  .table-density-compact .data-table-td {
+    @apply h-9;
+  }
+
+  .table-density-default .data-table-th,
+  .table-density-default .data-table-td {
+    @apply h-11;
+  }
+
+  .table-density-comfortable .data-table-th,
+  .table-density-comfortable .data-table-td {
+    @apply h-[52px];
   }
 
   /* Enhanced card with gradient border effect */
@@ -247,6 +409,23 @@
     animation: float-slow 12s ease-in-out infinite;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-slide-in-right,
+    .animate-scale-in,
+    .animate-float-slow,
+    .animate-float-slower {
+      animation: none !important;
+    }
+
+    /** Radix / tailwindcss-animate entrance utilities used on dialogs, sheets, popovers, tooltips */
+    .animate-in,
+    .animate-out {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
   /* Animation delays */
   .animation-delay-200 {
     animation-delay: 0.2s;
@@ -256,18 +435,53 @@
     animation-delay: 0.4s;
   }
 
-  /* Gradient text */
+  /* Marketing-only utility */
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 
-  /* Glass effect */
+  /* Marketing-only utility */
   .glass-effect {
     @apply bg-white/80 backdrop-blur-sm dark:bg-black/30;
   }
 
-  /* Hover lift effect */
+  /* Marketing-only utility */
   .hover-lift {
     @apply transition-transform hover:scale-[1.02] hover:shadow-lg;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  html {
+    overflow: visible !important;
+  }
+
+  aside,
+  header,
+  nav,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  .page-container,
+  .marketing-container,
+  .admin-main-shell {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .data-table-container {
+    overflow: visible !important;
+    box-shadow: none !important;
   }
 }

@@ -125,7 +125,7 @@ export default function SupplierPaymentDialog({
             </DialogHeader>
             <div className="space-y-3 text-sm">
               <p>
-                <span className="font-medium tabular-nums">
+                <span className="financial-id font-medium">
                   {payment.paymentNumber ?? `Payment #${payment.id}`}
                 </span>{" "}
                 — {formatCurrency(payment.amount)}

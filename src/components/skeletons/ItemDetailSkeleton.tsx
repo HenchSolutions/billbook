@@ -15,7 +15,7 @@ export default function ItemDetailSkeleton() {
         ))}
       </div>
 
-      <Skeleton className="h-[320px] rounded-xl border" />
+      <Skeleton className="h-[320px] rounded-lg border" />
     </div>
   );
 }

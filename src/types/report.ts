@@ -19,6 +19,7 @@ export type ReportsDashboardQuery =
 export interface ReportsDashboardData {
   period: ReportPeriod;
   receipts: { count: number; totalAmount: string };
+  /** Counts and totals include finalized (posted) invoices only when the API scopes them that way. */
   invoices: { count: number; totalAmount: string };
   payouts: { count: number; totalAmount: string };
   debt: { totalReceivable: string; debtorCount: number };

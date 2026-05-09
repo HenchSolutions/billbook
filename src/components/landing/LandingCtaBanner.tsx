@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 
 export function LandingCtaBanner() {
   return (
-    <section className="relative overflow-hidden border-t bg-gradient-to-br from-primary/5 via-accent/5 to-background">
+    <section className="relative overflow-hidden border-t border-border/60 bg-gradient-to-br from-primary/5 via-accent/5 to-background">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 text-center lg:px-8">
+      <div className="marketing-container relative py-20 text-center">
         <p className="text-sm font-semibold text-primary">Ready to get started?</p>
         <h2 className="mx-auto mt-3 max-w-2xl text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Start billing smarter today.

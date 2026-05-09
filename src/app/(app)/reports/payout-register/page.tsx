@@ -98,7 +98,6 @@ export default function PayoutRegisterPage() {
     <div className="page-container animate-fade-in">
       <PageHeader
         title={reportPayoutRegister.title}
-        description={reportPayoutRegister.description}
         backHref="/reports"
         backLabel="Back to reports"
       />
@@ -165,14 +164,17 @@ export default function PayoutRegisterPage() {
                 ) : (
                   rows.map((p) => (
                     <tr key={p.id} className={rr.tr}>
-                      <td className={cn(rr.td, "font-medium tabular-nums")}>
-                        {payoutDisplayNumber(p)}
+                      <td className={rr.td}>
+                        <span className="financial-id font-medium">{payoutDisplayNumber(p)}</span>
                       </td>
                       <td className={rr.td}>{payoutCategoryLabel(p)}</td>
                       <td className={rr.td}>{p.partyName ?? p.payeeName ?? "—"}</td>
                       <td className={rr.td}>
                         {p.invoiceId ? (
-                          <Link href={`/invoices/${p.invoiceId}`} className={rr.link}>
+                          <Link
+                            href={`/invoices/${p.invoiceId}`}
+                            className={cn(rr.link, "financial-id")}
+                          >
                             #{p.invoiceId}
                           </Link>
                         ) : (
@@ -190,7 +192,7 @@ export default function PayoutRegisterPage() {
           </ReportRegisterTableScroll>
         </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
           Select a valid date range to load data.
         </p>
       )}

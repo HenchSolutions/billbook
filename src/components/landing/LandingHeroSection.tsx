@@ -14,7 +14,7 @@ export function LandingHeroSection() {
         <div className="absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-chart-2/10 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 py-14 lg:grid-cols-12 lg:px-8 lg:py-20">
+      <div className="marketing-container relative grid items-center gap-10 py-14 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-6">
           <Badge variant="secondary" className="mb-4 motion-safe:animate-fade-in">
             Built for B2B workflows
@@ -76,8 +76,8 @@ export function LandingHeroSection() {
         </div>
 
         <div className="lg:col-span-6">
-          <Card className="motion-safe:animate-scale-in overflow-hidden shadow-sm">
-            <div className="border-b bg-gradient-to-r from-accent/10 via-muted/40 to-background px-4 py-3">
+          <Card className="motion-safe:animate-scale-in overflow-hidden border-border/60 shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+            <div className="border-b border-border/60 bg-gradient-to-r from-primary/[0.06] via-muted/35 to-background px-4 py-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Invoice preview</p>
                 <Badge variant="secondary" className="text-[10px]">

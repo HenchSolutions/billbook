@@ -103,11 +103,14 @@ export function CategoryCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] rounded-lg border p-0 shadow-lg"
+        className="w-[var(--radix-popover-trigger-width)] border-0 bg-transparent p-0 shadow-none"
         align="start"
         sideOffset={4}
       >
-        <Command shouldFilter={false} className="rounded-lg">
+        <Command
+          shouldFilter={false}
+          className="overflow-hidden rounded-lg border border-border/80 bg-popover shadow-lg"
+        >
           <CommandInput
             placeholder="Search or type to add..."
             value={createInput}

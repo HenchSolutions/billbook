@@ -6,6 +6,7 @@ import { History, Pencil } from "lucide-react";
 import { api } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DataTableRoot } from "@/components/ui/data-table";
 import { LedgerBalanceText } from "@/components/party-ledger/LedgerBalanceText";
 import { queryKeys } from "@/lib/query/keys";
 import type { Party, PartyBalanceResponse } from "@/types/party";
@@ -50,35 +51,26 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
   });
 
   return (
-    <div className="data-table-container -mx-1 px-1 sm:mx-0 sm:px-0">
-      <table className="w-full min-w-[320px] text-sm" role="table" aria-label="Parties list">
-        <thead>
-          <tr className="border-b bg-muted/30">
-            <th
-              scope="col"
-              className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-6"
-            >
+    <DataTableRoot density="default" className="-mx-1 px-1 sm:mx-0 sm:px-0">
+      <table className="data-table min-w-[320px]" role="table" aria-label="Parties list">
+        <thead className="data-table-head-sticky">
+          <tr>
+            <th scope="col" className="data-table-th px-4 sm:px-6">
               Name
             </th>
-            <th scope="col" className="px-3 py-3 text-left font-medium text-muted-foreground">
+            <th scope="col" className="data-table-th">
               Phone
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-left font-medium text-muted-foreground md:table-cell"
-            >
+            <th scope="col" className="data-table-th hidden md:table-cell">
               GSTIN
             </th>
-            <th
-              scope="col"
-              className="hidden px-3 py-3 text-left font-medium text-muted-foreground md:table-cell"
-            >
+            <th scope="col" className="data-table-th hidden md:table-cell">
               State
             </th>
-            <th scope="col" className="px-3 py-3 text-right font-medium text-muted-foreground">
+            <th scope="col" className="data-table-th data-table-col-numeric">
               Current balance
             </th>
-            <th scope="col" className="px-3 py-3 text-center font-medium text-muted-foreground">
+            <th scope="col" className="data-table-th text-center">
               Actions
             </th>
           </tr>
@@ -97,11 +89,8 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
             const loading = fromList == null && q?.isPending;
 
             return (
-              <tr
-                key={party.id}
-                className="border-b transition-colors last:border-0 hover:bg-muted/20"
-              >
-                <td className="max-w-[200px] truncate px-4 py-3 font-medium sm:max-w-none sm:px-6">
+              <tr key={party.id} className="data-table-row last:border-0">
+                <td className="data-table-td max-w-[200px] truncate px-4 font-medium sm:max-w-none sm:px-6">
                   {party.name}
                   {!party.isActive && (
                     <Badge variant="outline" className="ml-2 text-[10px] font-medium">
@@ -109,14 +98,14 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                     </Badge>
                   )}
                 </td>
-                <td className="px-3 py-3 text-muted-foreground">{party.phone || "—"}</td>
-                <td className="hidden px-3 py-3 font-mono text-xs text-muted-foreground md:table-cell">
+                <td className="data-table-td text-muted-foreground">{party.phone || "—"}</td>
+                <td className="data-table-td hidden font-mono text-xs text-muted-foreground md:table-cell">
                   {party.gstin || "—"}
                 </td>
-                <td className="hidden px-3 py-3 text-muted-foreground md:table-cell">
+                <td className="data-table-td hidden text-muted-foreground md:table-cell">
                   {party.state || "—"}
                 </td>
-                <td className="px-3 py-3 text-right">
+                <td className="data-table-td data-table-col-numeric">
                   {loading ? (
                     <span className="text-muted-foreground">…</span>
                   ) : value ? (
@@ -125,7 +114,7 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-3 py-3">
+                <td className="data-table-td">
                   <div className="flex items-center justify-center gap-1">
                     <Button
                       variant="ghost"
@@ -154,6 +143,6 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
           })}
         </tbody>
       </table>
-    </div>
+    </DataTableRoot>
   );
 }
