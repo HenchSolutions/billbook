@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, Loader2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -289,7 +289,6 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Document numbering</CardTitle>
-          <CardDescription>Business settings — prefixes, sequences, and defaults</CardDescription>
         </CardHeader>
         <CardContent>{skeleton}</CardContent>
       </Card>
@@ -312,7 +311,6 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Document numbering</CardTitle>
-          <CardDescription>Business settings</CardDescription>
         </CardHeader>
         <CardContent>{err}</CardContent>
       </Card>
@@ -871,10 +869,6 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Document numbering</CardTitle>
-        <CardDescription>
-          Business settings — prefixes, sequences, financial year, and default due days for
-          invoices.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         {body}

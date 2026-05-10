@@ -10,9 +10,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AUTH_CARD_SURFACE_CLASS } from "@/lib/ui/auth-card-classes";
-import { strongPasswordSchema } from "@/lib/core/validation-schemas";
+import { optionalPhone10, strongPasswordSchema } from "@/lib/core/validation-schemas";
 
 const signupSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(100),
@@ -20,6 +20,7 @@ const signupSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
   password: strongPasswordSchema,
   businessName: z.string().trim().min(1, "Business name is required").max(200),
+  phone: optionalPhone10,
   otp: z.string().trim().length(6, "OTP must be 6 digits").optional().or(z.literal("")),
 });
 
@@ -54,6 +55,7 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
@@ -78,6 +80,7 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         businessName: businessName.trim(),
+        phone: getValues("phone")?.trim() || undefined,
       });
       setInfo(resp.message || "OTP resent. Please check your email.");
     } catch (err: unknown) {
@@ -98,6 +101,7 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
           firstName: data.firstName,
           lastName: data.lastName,
           businessName: data.businessName,
+          phone: data.phone?.trim() || undefined,
         });
         setInfo(resp.message || "OTP sent. Please check your email.");
         setOtpRequested(true);
@@ -115,6 +119,7 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
         firstName: data.firstName,
         lastName: data.lastName,
         businessName: data.businessName,
+        phone: data.phone?.trim() || undefined,
         otp: data.otp,
       });
       router.replace(redirectTo || "/dashboard");
@@ -134,11 +139,6 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
     <Card className={AUTH_CARD_SURFACE_CLASS}>
       <CardHeader className="pb-4 text-center">
         <CardTitle className="text-lg">Create your account</CardTitle>
-        <CardDescription>
-          {otpRequested
-            ? "Enter the 6-digit OTP sent to your email"
-            : "Create account and receive OTP for verification"}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -252,6 +252,23 @@ export default function SignupCard({ redirectTo, onRequestLogin }: SignupCardPro
               autoComplete="organization"
             />
             {errors.businessName && <FieldError>{errors.businessName.message}</FieldError>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone number</Label>
+            <Input
+              id="phone"
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="10-digit mobile number"
+              maxLength={10}
+              disabled={otpRequested}
+              aria-invalid={!!errors.phone}
+              {...register("phone")}
+              autoComplete="tel"
+            />
+            {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
           </div>
 
           {otpRequested && (

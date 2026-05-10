@@ -30,7 +30,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--sidebar-background))]",
                 active
                   ? cn(SIDEBAR_NAV_ACTIVE, "border-transparent shadow-sm")
                   : "border-transparent text-sidebar-foreground/75 hover:border-sidebar-border/50 hover:bg-sidebar-hover hover:text-sidebar-foreground",
@@ -50,7 +50,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               <span className="min-w-0 flex-1 text-left">
                 <span className="block leading-tight">{label}</span>
                 {description ? (
-                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                  <span className="mt-0.5 block text-xs font-normal text-sidebar-muted">
                     {description}
                   </span>
                 ) : null}
@@ -78,7 +78,7 @@ function NavIconRail() {
               aria-label={label}
               title={label}
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "flex h-9 w-9 items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--sidebar-background))]",
                 active
                   ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
                   : "border-sidebar-border/40 bg-sidebar-accent/30 text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
@@ -116,16 +116,21 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="shrink-0 lg:hidden"
+                  className="shrink-0 md:hidden"
                   aria-label="Open admin navigation"
                 >
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[min(100%,20rem)] flex-col gap-0 p-0">
-                <SheetHeader className="border-b border-border/50 px-4 py-4 text-left">
-                  <SheetTitle className="text-base font-semibold">Admin console</SheetTitle>
-                  <p className="text-xs font-normal text-muted-foreground">Choose a section</p>
+              <SheetContent
+                side="left"
+                className="flex w-[min(100%,20rem)] flex-col gap-0 border-r border-sidebar-border !bg-sidebar p-0 pb-[env(safe-area-inset-bottom,0px)] pt-[env(safe-area-inset-top,0px)] text-sidebar-foreground shadow-none [&>button]:right-3 [&>button]:top-4 [&>button]:text-sidebar-foreground"
+              >
+                <SheetHeader className="border-b border-sidebar-border/80 bg-sidebar px-4 py-4 text-left">
+                  <SheetTitle className="text-base font-semibold text-sidebar-foreground">
+                    Admin console
+                  </SheetTitle>
+                  <p className="text-xs font-normal text-sidebar-muted">Choose a section</p>
                 </SheetHeader>
                 <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Admin console">
                   <NavLinks onNavigate={closeMobile} />
@@ -171,10 +176,8 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
       <div className="relative flex min-h-[calc(100vh-3.5rem)] w-full">
         <aside
           className={cn(
-            "sticky top-14 z-30 hidden h-[calc(100vh-3.5rem)] shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out lg:block",
-            sidebarCollapsed
-              ? "w-[4rem] shadow-[inset_-1px_0_0_0_hsl(var(--border)/0.5)]"
-              : "w-[15.5rem] shadow-[inset_-1px_0_0_0_hsl(var(--border)/0.5)]",
+            "sticky top-14 z-30 hidden h-[calc(100vh-3.5rem)] min-h-0 shrink-0 flex-col border-r border-sidebar-border !bg-sidebar text-sidebar-foreground shadow-[2px_0_24px_-12px_hsl(var(--sidebar-foreground)_/_0.12)] transition-[width] duration-300 ease-in-out md:flex",
+            sidebarCollapsed ? "w-16" : "w-64",
           )}
           aria-label="Admin console"
         >
@@ -182,7 +185,7 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
             type="button"
             variant="outline"
             size="icon"
-            className="absolute -right-4 top-6 z-40 hidden h-8 w-8 rounded-full border-border/60 bg-background shadow-sm transition-all duration-300 ease-in-out lg:inline-flex"
+            className="absolute -right-3 top-5 z-40 hidden h-8 w-8 rounded-full border-border/60 bg-background shadow-sm transition-all duration-300 ease-in-out md:inline-flex"
             onClick={() => setSidebarCollapsed((prev) => !prev)}
             aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -195,15 +198,17 @@ function AdminConsoleFrame({ children }: { children: ReactNode }) {
           </Button>
 
           {sidebarCollapsed ? (
-            <div className="flex h-full flex-col items-center px-2 py-5 transition-opacity duration-200 ease-in-out">
+            <div className="flex min-h-0 flex-1 flex-col items-center overflow-y-auto px-2 py-5 transition-opacity duration-200 ease-in-out">
               <NavIconRail />
             </div>
           ) : (
-            <div className="flex h-full flex-col px-3 py-5 transition-opacity duration-200 ease-in-out">
-              <p className="mb-3 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-5 transition-opacity duration-200 ease-in-out">
+              <p className="mb-3 shrink-0 px-2 text-xs font-medium uppercase tracking-wide text-sidebar-muted">
                 Navigation
               </p>
-              <NavLinks />
+              <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+                <NavLinks />
+              </div>
             </div>
           )}
         </aside>

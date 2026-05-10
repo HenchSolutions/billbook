@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { FileText, PenLine, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import type { ProfileForm } from "@/components/settings/profileSchema";
 import { MONTHS, REGISTRATION_TYPES, COUNTRIES } from "@/constants";
 import { usePincodeAutofill } from "@/hooks/use-pincode-autofill";
@@ -28,21 +28,16 @@ import { countryCodeToFlagEmoji } from "@/lib/india/country-flags";
 import type { BusinessClassificationOption } from "@/types/auth";
 import { SavedBankAccountsSection } from "@/components/settings/BusinessBankAccountsCard";
 import { ApiClientError } from "@/api/error";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/core/utils";
 import { isValidGstin, isValidIndianPincode, isValidPan } from "@/lib/india/validators";
+import {
+  resolveClassificationFormValue,
+  toClassificationLabel,
+} from "@/lib/business/classification-label";
 
 const LOGO_MAX_SIZE_MB = 5;
 
 const SIGNATURE_MAX_SIZE_MB = 2;
-
-function toCapitalizedLabel(value: string): string {
-  const s = value.trim();
-  if (!s) return "";
-  return s.replace(/(^|[\s\-_/])([a-z])/g, (_, p1: string, p2: string) => {
-    return `${p1}${p2.toUpperCase()}`;
-  });
-}
 
 interface BusinessProfileFormProps {
   form: UseFormReturn<ProfileForm>;
@@ -110,6 +105,10 @@ function CreatableTypeInput({
             onChange(e.target.value);
             setOpen(true);
           }}
+          onBlur={() => {
+            const aligned = resolveClassificationFormValue(value, options);
+            if (aligned !== (value ?? "")) onChange(aligned);
+          }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
           autoComplete="off"
@@ -136,12 +135,12 @@ function CreatableTypeInput({
                   key={`${id}-${option.id}-${option.name}`}
                   value={option.name}
                   onSelect={() => {
-                    onChange(toCapitalizedLabel(option.name));
+                    onChange(toClassificationLabel(option.name));
                     setOpen(false);
                   }}
                   className="cursor-pointer"
                 >
-                  {toCapitalizedLabel(option.name)}
+                  {toClassificationLabel(option.name)}
                 </CommandItem>
               ))}
 
@@ -161,8 +160,8 @@ function CreatableTypeInput({
                   className="cursor-pointer"
                 >
                   {canManageTypeOptions
-                    ? `${isCreating ? "Adding…" : createLabel} "${toCapitalizedLabel((value ?? "").trim())}"`
-                    : `Use "${toCapitalizedLabel((value ?? "").trim())}"`}
+                    ? `${isCreating ? "Adding…" : createLabel} "${toClassificationLabel((value ?? "").trim())}"`
+                    : `Use "${toClassificationLabel((value ?? "").trim())}"`}
                 </CommandItem>
               )}
             </CommandGroup>
@@ -477,7 +476,7 @@ export function BusinessProfileForm({
                   />
                 </div>
               </div>
-              <div className="min-w-0 flex-1 space-y-4">
+              <div className="min-w-0 flex-1">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name" required>
@@ -531,7 +530,7 @@ export function BusinessProfileForm({
                       }}
                     />
                   </div>
-                  <div className="space-y-2 sm:col-span-2">
+                  <div className="space-y-2 sm:min-w-0">
                     <Label htmlFor="email">Company Email</Label>
                     <Input
                       id="email"
@@ -547,10 +546,58 @@ export function BusinessProfileForm({
                       </p>
                     )}
                   </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="phone">Phone number</Label>
+                    <div className="grid min-w-0 grid-cols-[minmax(0,6.75rem)_minmax(0,1fr)] gap-2 sm:grid-cols-[minmax(0,7.25rem)_minmax(0,1fr)]">
+                      <Select value={phoneCountryCode} onValueChange={handlePhoneCountryChange}>
+                        <SelectTrigger
+                          id="phoneCountry"
+                          aria-label="Phone country code"
+                          className="h-10 min-w-0"
+                        >
+                          <span className="flex min-w-0 items-center gap-0.5">
+                            <span aria-hidden className="shrink-0 text-base leading-none">
+                              {countryCodeToFlagEmoji(selectedPhoneCountry.code)}
+                            </span>
+                            <span className="truncate pl-0.5 tabular-nums">
+                              {selectedPhoneCountry.dialCode}
+                            </span>
+                          </span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COUNTRIES.map((item) => (
+                            <SelectItem key={item.code} value={item.code}>
+                              <span className="flex items-center gap-3">
+                                <span aria-hidden className="text-base leading-none">
+                                  {countryCodeToFlagEmoji(item.code)}
+                                </span>
+                                <span className="truncate">{item.label}</span>
+                                <span className="ml-auto tabular-nums">{item.dialCode}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="phone"
+                        className="min-w-0"
+                        placeholder="9876543210"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={10}
+                        aria-invalid={!!errors.phone}
+                        {...register("phone", {
+                          onChange: (e) => {
+                            e.target.value = String(e.target.value ?? "")
+                              .replace(/\D/g, "")
+                              .slice(0, 10);
+                          },
+                        })}
+                      />
+                    </div>
+                    {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
+                  </div>
+                  <div className="space-y-2 sm:min-w-0">
                     <Label htmlFor="businessType">
                       Business Type{" "}
                       <span className="text-xs font-normal text-foreground">(optional)</span>
@@ -581,7 +628,7 @@ export function BusinessProfileForm({
                       )}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:min-w-0">
                     <Label htmlFor="industryType">
                       Industry Type{" "}
                       <span className="text-xs font-normal text-foreground">(optional)</span>
@@ -612,55 +659,6 @@ export function BusinessProfileForm({
                       )}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone number</Label>
-                  <div className="grid grid-cols-[120px_1fr] gap-2 sm:grid-cols-[140px_1fr]">
-                    <Select value={phoneCountryCode} onValueChange={handlePhoneCountryChange}>
-                      <SelectTrigger
-                        id="phoneCountry"
-                        aria-label="Phone country code"
-                        className="h-10"
-                      >
-                        <span className="flex items-center gap-1">
-                          <span aria-hidden className="text-base leading-none">
-                            {countryCodeToFlagEmoji(selectedPhoneCountry.code)}
-                          </span>{" "}
-                          <span className="pl-1 tabular-nums">{selectedPhoneCountry.dialCode}</span>
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COUNTRIES.map((item) => (
-                          <SelectItem key={item.code} value={item.code}>
-                            <span className="flex items-center gap-3">
-                              <span aria-hidden className="text-base leading-none">
-                                {countryCodeToFlagEmoji(item.code)}
-                              </span>
-                              <span className="truncate">{item.label}</span>
-                              <span className="ml-auto tabular-nums">{item.dialCode}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      id="phone"
-                      placeholder="9876543210"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={10}
-                      aria-invalid={!!errors.phone}
-                      {...register("phone", {
-                        onChange: (e) => {
-                          e.target.value = String(e.target.value ?? "")
-                            .replace(/\D/g, "")
-                            .slice(0, 10);
-                        },
-                      })}
-                    />
-                  </div>
-                  {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
                 </div>
               </div>
             </div>
@@ -855,121 +853,168 @@ export function BusinessProfileForm({
             </div>
           </FormSection>
 
-          <FormSection title="Miscellaneous" contentClassName="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="registrationType">Business registration type</Label>
-              <Controller
-                name="registrationType"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    value={field.value?.trim() ? field.value : undefined}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger id="registrationType">
-                      <SelectValue placeholder="Select registration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {REGISTRATION_TYPES.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+          <FormSection title="Miscellaneous" contentClassName="space-y-6">
+            <p className="text-sm text-muted-foreground">
+              Registration type, signature for documents, and optional identifiers (TAN, UDYAM,
+              etc.).
+            </p>
 
-            <Separator />
-
-            <div className="space-y-3">
-              <Label className="text-foreground">Signature</Label>
-              <div className="rounded-lg border border-border bg-muted/25 px-4 py-4 text-center">
-                {displaySignatureUrl ? (
-                  <div className="relative mx-auto mt-1 inline-block">
-                    <img
-                      src={displaySignatureUrl}
-                      alt="Signature"
-                      className="max-h-16 w-auto max-w-[200px] object-contain"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
-                      onClick={handleRemoveSignature}
-                      aria-label="Remove signature"
+            <div className="grid w-full gap-4 sm:grid-cols-2 sm:items-stretch">
+              <div className="flex min-w-0 flex-col rounded-xl border border-border/80 bg-muted/15 p-4 shadow-sm ring-1 ring-border/30 sm:p-5">
+                <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground">
+                    <FileText className="h-4 w-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <Label
+                      htmlFor="registrationType"
+                      className="text-sm font-semibold text-foreground"
                     >
-                      <X className="h-3 w-3" />
-                    </Button>
+                      Registration type
+                    </Label>
+                    <p className="text-xs text-muted-foreground">How your business is registered</p>
                   </div>
-                ) : null}
-                <input
-                  ref={signatureInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleSignatureChange}
+                </div>
+                <Controller
+                  name="registrationType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value?.trim() ? field.value : undefined}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="registrationType" className="w-full bg-background">
+                        <SelectValue placeholder="Select registration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGISTRATION_TYPES.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3"
-                  onClick={handleSignatureClick}
-                  disabled={isUploadingSignature}
-                >
-                  {isUploadingSignature
-                    ? "Uploading…"
-                    : displaySignatureUrl
-                      ? "Change signature"
-                      : "Add signature"}
-                </Button>
+              </div>
+
+              <div className="flex min-w-0 flex-col rounded-xl border border-border/80 bg-muted/15 p-4 shadow-sm ring-1 ring-border/30 sm:p-5">
+                <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground">
+                    <PenLine className="h-4 w-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <span className="text-sm font-semibold text-foreground">Signature</span>
+                    <p className="text-xs text-muted-foreground">Shown on invoices and PDFs</p>
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col justify-center rounded-lg border border-dashed border-border/70 bg-background/80 px-3 py-4 text-center">
+                  {displaySignatureUrl ? (
+                    <div className="relative mx-auto inline-block">
+                      <img
+                        src={displaySignatureUrl}
+                        alt="Signature"
+                        className="max-h-20 w-auto max-w-[220px] object-contain"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -right-2 -top-2 h-6 w-6 rounded-full shadow-sm"
+                        onClick={handleRemoveSignature}
+                        aria-label="Remove signature"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="mb-2 text-xs text-muted-foreground">No signature uploaded</p>
+                  )}
+                  <input
+                    ref={signatureInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleSignatureChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mx-auto mt-1 gap-1.5"
+                    onClick={handleSignatureClick}
+                    disabled={isUploadingSignature}
+                  >
+                    <Upload className="h-3.5 w-3.5" aria-hidden />
+                    {isUploadingSignature
+                      ? "Uploading…"
+                      : displaySignatureUrl
+                        ? "Change signature"
+                        : "Upload signature"}
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <Separator />
-
-            <div className="space-y-3">
-              <Label className="text-foreground">Extra fields</Label>
-              <p className="text-xs text-muted-foreground">
-                Optional key–value pairs (e.g. TAN, UDYAM).
-              </p>
-              <div className="space-y-3">
-                {extraDetailFields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2">
-                    <Input
-                      placeholder="Key (e.g. TAN)"
-                      {...register(`extraDetails.${index}.key`)}
-                      className="flex-1"
-                    />
-                    <Input
-                      placeholder="Value"
-                      {...register(`extraDetails.${index}.value`)}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeExtraDetail(index)}
-                      aria-label="Remove"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+            <div className="w-full">
+              <div className="rounded-xl border border-border/80 bg-muted/10 p-4 shadow-sm ring-1 ring-border/30 sm:p-5">
+                <div className="mb-4 flex flex-col gap-1 border-b border-border/50 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground">Extra fields</Label>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Optional identifiers — e.g. TAN, UDYAM, IEC.
+                    </p>
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="w-full sm:w-auto"
-                  onClick={() => appendExtraDetail({ key: "", value: "" })}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add detail
-                </Button>
+                </div>
+                <div className="space-y-3">
+                  {extraDetailFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-1 gap-3 rounded-lg border border-border/60 bg-background/90 p-3 sm:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)_auto] sm:items-end sm:gap-2"
+                    >
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Key
+                        </span>
+                        <Input
+                          placeholder="e.g. TAN"
+                          {...register(`extraDetails.${index}.key`)}
+                          className="w-full min-w-0 bg-background"
+                        />
+                      </div>
+                      <div className="space-y-1.5 sm:min-w-0">
+                        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Value
+                        </span>
+                        <Input
+                          placeholder="Enter value"
+                          {...register(`extraDetails.${index}.value`)}
+                          className="w-full min-w-0 bg-background"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeExtraDetail(index)}
+                        aria-label="Remove row"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="w-full gap-1.5 sm:w-auto"
+                    onClick={() => appendExtraDetail({ key: "", value: "" })}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add field
+                  </Button>
+                </div>
               </div>
             </div>
           </FormSection>

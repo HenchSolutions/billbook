@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { gstinString, panString } from "@/lib/core/validation-schemas";
+import { gstinString, optionalPhone10, panString } from "@/lib/core/validation-schemas";
 
 const extraDetailSchema = z.object({
   key: z.string().trim().min(1, "Key is required"),
@@ -11,12 +11,7 @@ export const profileSchema = z
     name: z.string().trim().min(1, "Business name is required").max(200),
     country: z.string().trim().max(100).optional().or(z.literal("")),
     email: z.string().trim().email("Invalid email").max(255).optional().or(z.literal("")),
-    phone: z
-      .string()
-      .trim()
-      .refine((v) => v === "" || /^\d{10}$/.test(v), {
-        message: "Phone number must be exactly 10 digits when provided",
-      }),
+    phone: optionalPhone10,
     businessType: z.string().trim().max(100).optional().or(z.literal("")),
     industryType: z.string().trim().max(100).optional().or(z.literal("")),
     registrationType: z.string().trim().max(100).optional().or(z.literal("")),

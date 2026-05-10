@@ -209,11 +209,9 @@ export default function InvoiceDetail() {
   const openInvoiceDocument = async () => {
     const downloadUrl = pdfData?.downloadUrl;
     if (!downloadUrl || !invoice) return;
-    const fmt = (pdfData?.format ?? "").toLowerCase();
     const named = pdfData?.filename?.trim();
     const fallbackFilename =
-      named ||
-      `invoice-${pdfData?.invoiceNumber ?? invoice.invoiceNumber}.${fmt === "html" || fmt === "htm" ? "html" : "pdf"}`;
+      named || `invoice-${pdfData?.invoiceNumber ?? invoice.invoiceNumber}.pdf`;
     try {
       await downloadFileFromUrlAndOpenPdfPreview(downloadUrl, fallbackFilename);
     } catch (err) {

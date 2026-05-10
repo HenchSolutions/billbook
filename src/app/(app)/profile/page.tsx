@@ -20,6 +20,7 @@ import { profileSchema, type ProfileForm } from "@/components/settings/profileSc
 import { Button } from "@/components/ui/button";
 import { showErrorToast, showSuccessToast } from "@/lib/ui/toast-helpers";
 import { getProfileFormValues } from "@/lib/business/profile-form-values";
+import { resolveClassificationFormValue } from "@/lib/business/classification-label";
 import type {
   BusinessProfile,
   UpdateBusinessProfile,
@@ -104,7 +105,14 @@ function ProfileEditor({
   const createBusinessType = useCreateBusinessTypeOption();
   const createIndustryType = useCreateIndustryTypeOption();
 
-  const profileValues = useMemo(() => getProfileFormValues(business), [business]);
+  const profileValues = useMemo(() => {
+    const base = getProfileFormValues(business);
+    return {
+      ...base,
+      businessType: resolveClassificationFormValue(base.businessType, businessTypeOptions),
+      industryType: resolveClassificationFormValue(base.industryType, industryTypeOptions),
+    };
+  }, [business, businessTypeOptions, industryTypeOptions]);
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),

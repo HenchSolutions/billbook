@@ -54,3 +54,12 @@ export const panString = z
   .regex(/^$|^[A-Z]{5}[0-9]{4}[A-Z]$/, "Invalid PAN format")
   .optional()
   .or(z.literal(""));
+
+export const optionalPhone10 = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || /^\d{10}$/.test(v), {
+    message: "Phone number must be 10 digits",
+  })
+  .optional()
+  .or(z.literal(""));

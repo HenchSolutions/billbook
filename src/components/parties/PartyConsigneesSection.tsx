@@ -82,7 +82,7 @@ function consigneeUiLabels(partyType: PartyType) {
     deleteDescription: (name: string) => `This will remove “${name}” from delivery addresses.`,
   };
 }
-import { optionalEmail, optionalString } from "@/lib/core/validation-schemas";
+import { optionalEmail, optionalPhone10, optionalString } from "@/lib/core/validation-schemas";
 import { showErrorToast, showSuccessToast } from "@/lib/ui/toast-helpers";
 import { fetchPostalOffice } from "@/lib/india/pincode";
 import { formatConsigneeAddressInline } from "@/lib/party/party-address-display";
@@ -91,17 +91,11 @@ function sortConsignees(list: PartyConsignee[]): PartyConsignee[] {
   return [...list].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id - b.id);
 }
 
-const optionalPhoneDigits = z
-  .string()
-  .trim()
-  .refine((val) => val === "" || /^\d+$/.test(val), "Phone can only contain digits")
-  .refine((val) => val === "" || val.length === 10, "Phone number must be exactly 10 digits");
-
 const consigneeSchema = z.object({
   label: optionalString,
   consigneeName: z.string().trim().min(1, "Contact name is required"),
   address: z.string().trim().min(1, "Address is required"),
-  phone: optionalPhoneDigits,
+  phone: optionalPhone10,
   email: optionalEmail,
   city: optionalString,
   state: optionalString,

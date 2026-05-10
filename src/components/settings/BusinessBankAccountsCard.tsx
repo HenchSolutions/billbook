@@ -226,12 +226,29 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
             Couldn't load bank accounts. Refresh or try again.
           </p>
         ) : isPending ? (
-          <div className="space-y-2" aria-busy="true" aria-label="Loading bank accounts">
+          <div className="max-w-3xl space-y-2" aria-busy="true" aria-label="Loading bank accounts">
             {[0, 1].map((i) => (
-              <div key={i} className="rounded-lg border border-border/60 bg-muted/10 p-4">
-                <Skeleton className="mb-2 h-4 w-48" />
-                <Skeleton className="h-3 w-full max-w-xs" />
-                <Skeleton className="mt-1.5 h-3 w-1/2" />
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-lg border border-border/70 bg-background p-4"
+              >
+                <Skeleton className="mt-0.5 h-4 w-4 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 space-y-1.5">
+                      <Skeleton className="h-4 w-44 max-w-full" />
+                      <Skeleton className="h-3 w-full max-w-md" />
+                      <div className="flex flex-wrap gap-4 pt-1">
+                        <Skeleton className="h-3 w-32" />
+                        <Skeleton className="h-3 w-28" />
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <Skeleton className="h-8 w-[4.25rem] rounded-md" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

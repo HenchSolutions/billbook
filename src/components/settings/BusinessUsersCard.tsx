@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -224,12 +224,6 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
     resolver: zodResolver(reactivateSchema),
     defaultValues: { password: "", confirmPassword: "" },
   });
-
-  const memberStats = useMemo(() => {
-    if (!users?.length) return { total: 0, active: 0 };
-    const active = users.filter((u) => u.isActive).length;
-    return { total: users.length, active };
-  }, [users]);
 
   if (!canView) {
     return null;
@@ -566,16 +560,10 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
     );
   };
 
-  const membersSubtitle =
-    !isPending && users && users.length > 0
-      ? `${memberStats.active} active · ${memberStats.total} total`
-      : "People who can access this business";
-
   const membersBlock = (
     <div>
       <div className="border-b border-border/60 bg-muted/15 px-5 py-4 sm:px-6">
         <h3 className="text-lg font-semibold tracking-tight">Team members</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{membersSubtitle}</p>
       </div>
       <div className="p-4 sm:p-5">
         {isPending ? (

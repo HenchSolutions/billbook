@@ -1,9 +1,14 @@
+"use client";
+
+import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import type { ProfileCompletion, ProfileCompletionSection } from "@/types/auth";
 import type { BusinessBankAccount } from "@/types/bank-account";
-import { CheckCircle2, CircleDashed } from "lucide-react";
+import { CheckCircle2, CircleDashed, ListChecks } from "lucide-react";
 import { INVOICE_PROFILE_MIN_PERCENT } from "@/lib/business/business-document-gate";
+import { cn } from "@/lib/core/utils";
 
 interface ProfileCompletionCardProps {
   profileCompletion: ProfileCompletion;
@@ -55,7 +60,7 @@ function ChecklistRow({
         <div className="min-w-0">
           <p className="font-medium text-foreground">{label}</p>
           {!complete && missing.length > 0 ? (
-            <p className="text-xs text-foreground">{missing.join(" · ")}</p>
+            <p className="text-xs text-muted-foreground">{missing.join(" · ")}</p>
           ) : null}
         </div>
       </div>
@@ -64,6 +69,20 @@ function ChecklistRow({
 }
 
 export function ProfileCompletionCard({ profileCompletion, business }: ProfileCompletionCardProps) {
+  const [checklistOpen, setChecklistOpen] = useState(false);
+  const checklistAnchorRef = useRef<HTMLDivElement>(null);
+
+  function toggleChecklist(next?: boolean) {
+    setChecklistOpen((open) => {
+      const resolved = next ?? !open;
+      if (resolved) {
+        requestAnimationFrame(() => {
+          checklistAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      }
+      return resolved;
+    });
+  }
   const { percentage, canCreateInvoice, breakdown = {} } = profileCompletion;
 
   const registrationMissing: string[] = [];
@@ -117,6 +136,8 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
     },
   ] as const;
 
+  const incompleteCount = gateRows.filter((r) => !r.complete).length;
+
   return (
     <Card className="w-full border-border bg-card shadow-sm ring-1 ring-border/40">
       <CardHeader className="border-b border-border bg-muted/45 pb-3 pt-4">
@@ -133,26 +154,64 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
           <span className="text-sm font-semibold tabular-nums text-foreground">{percentage}%</span>
         </div>
 
-        <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/25 px-3 py-2.5">
-          {canCreateInvoice ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-          ) : (
-            <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-          )}
-          <div>
+        <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-muted/25 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-2">
+            {canCreateInvoice ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            ) : (
+              <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            )}
             <p className="text-sm font-semibold text-foreground">
               {canCreateInvoice ? "You can create invoices" : "You cannot create invoices yet"}
             </p>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-1.5 self-stretch sm:self-auto"
+            onClick={() => toggleChecklist()}
+            aria-expanded={checklistOpen}
+            aria-controls="profile-completion-checklist"
+            id="profile-completion-checklist-toggle"
+          >
+            <ListChecks className="h-3.5 w-3.5" aria-hidden />
+            {checklistOpen ? "Hide checklist" : "View checklist"}
+            {!checklistOpen && incompleteCount > 0 ? (
+              <span className="ml-0.5 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-amber-950 dark:text-amber-100">
+                {incompleteCount}
+              </span>
+            ) : null}
+          </Button>
         </div>
 
-        <div className="border-foreground/12 rounded-lg border bg-background p-3">
-          <p className="mb-2 text-sm font-semibold text-foreground">Checklist</p>
-          <ul className="space-y-2">
-            {gateRows.map((item) => (
-              <ChecklistRow key={item.label} {...item} />
-            ))}
-          </ul>
+        <div
+          ref={checklistAnchorRef}
+          className={cn(
+            "overflow-hidden rounded-lg transition-[opacity,box-shadow] duration-200",
+            checklistOpen && "border border-border/80 bg-background shadow-sm",
+          )}
+        >
+          <div
+            id="profile-completion-checklist"
+            role="region"
+            aria-labelledby="profile-completion-checklist-toggle"
+            className={cn(
+              "grid transition-[grid-template-rows] duration-200 ease-out",
+              checklistOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+            )}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="px-3 pb-3 pt-2">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">Profile checklist</p>
+                <ul className="space-y-2.5">
+                  {gateRows.map((item) => (
+                    <ChecklistRow key={item.label} {...item} />
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

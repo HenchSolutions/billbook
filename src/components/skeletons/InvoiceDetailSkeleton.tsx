@@ -1,15 +1,14 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Mirrors invoice detail: back link, PageHeader + actions, summary card, details, lines, payments. */
+/** Mirrors invoice detail: PageBackLink, PageHeader + actions, InvoiceSummaryCards, InvoiceDetailsCards (2-col), Items table, Payments. */
 export default function InvoiceDetailSkeleton() {
   return (
     <div className="page-container animate-fade-in">
       <Skeleton className="mb-4 h-4 w-36" />
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-48 max-w-[90vw]" />
-          <Skeleton className="h-4 w-72 max-w-full" />
+        <div className="page-header mb-0 space-y-2">
+          <Skeleton className="h-9 w-52 max-w-[90vw] sm:h-10" />
         </div>
         <div className="flex flex-wrap gap-2">
           <Skeleton className="h-9 w-24 rounded-md" />
@@ -18,7 +17,8 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <div className="mb-6 overflow-hidden rounded-lg border">
+      {/* InvoiceSummaryCards */}
+      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <Skeleton className="h-1.5 w-full rounded-none" />
         <div className="space-y-5 p-6">
           <div className="flex items-start justify-between gap-4">
@@ -26,7 +26,7 @@ export default function InvoiceDetailSkeleton() {
               <Skeleton className="h-12 w-12 shrink-0 rounded-lg" />
               <div className="space-y-2">
                 <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-8 w-40" />
+                <Skeleton className="h-8 w-44 max-w-[70vw]" />
               </div>
             </div>
             <Skeleton className="h-7 w-20 rounded-full" />
@@ -35,7 +35,7 @@ export default function InvoiceDetailSkeleton() {
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <div className="space-y-2">
               <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-5 w-48 max-w-full" />
               <Skeleton className="h-4 w-36" />
             </div>
             <div className="space-y-2 sm:text-right">
@@ -46,20 +46,44 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-28 rounded-lg" />
-        ))}
+      {/* InvoiceDetailsCards — md:grid-cols-2 */}
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
+        <div className="flex min-h-[220px] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b px-6 pb-3 pt-4">
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <div className="flex flex-1 flex-col space-y-3 p-6">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full max-w-md" />
+            <Skeleton className="mt-auto h-20 rounded-md border border-border/60 bg-muted/15" />
+          </div>
+        </div>
+        <div className="flex min-h-[220px] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b px-6 pb-3 pt-4">
+            <Skeleton className="h-5 w-36" />
+          </div>
+          <div className="flex flex-1 flex-col space-y-2 p-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex justify-between gap-3">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="mb-6 space-y-2">
-        <Skeleton className="h-5 w-32" />
-        <div className="rounded-lg border p-4">
+      {/* InvoiceLineItemsTable */}
+      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b px-6 pb-3 pt-4">
+          <Skeleton className="h-5 w-16" />
+        </div>
+        <div className="p-4 pt-2">
           <div className="mb-3 flex gap-4 border-b pb-3">
             <Skeleton className="h-4 flex-1" />
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-24 max-md:hidden" />
           </div>
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="mb-2 h-10 w-full" />
@@ -67,8 +91,35 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <Skeleton className="mb-6 h-36 rounded-lg" />
-      <Skeleton className="h-48 rounded-lg" />
+      {/* InvoicePaymentsTable */}
+      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b px-6 pb-3 pt-4">
+          <Skeleton className="h-5 w-28" />
+        </div>
+        <div className="space-y-3 p-6">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/15 px-3 py-2.5"
+            >
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* InvoiceAuditHistory (optional block) */}
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b px-6 pb-3 pt-4">
+          <Skeleton className="h-5 w-36" />
+        </div>
+        <div className="space-y-3 p-6">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-12 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -226,6 +226,7 @@ export interface SignupRequest {
   businessName: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
 }
 
 export interface SignupOtpVerifyRequest extends SignupRequest {
