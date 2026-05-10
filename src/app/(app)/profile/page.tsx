@@ -53,17 +53,6 @@ function getComparableProfileSnapshot(values: ProfileForm): string {
     city: (values.city ?? "").trim(),
     state: (values.state ?? "").trim(),
     pincode: (values.pincode ?? "").trim(),
-    accountHolderName: (values.accountHolderName ?? "").trim(),
-    bankAccountNumber: (values.bankAccountNumber ?? "").trim(),
-    confirmAccountNumber: (values.confirmAccountNumber ?? "").trim(),
-    bankName: (values.bankName ?? "").trim(),
-    branchName: (values.branchName ?? "").trim(),
-    bankCity: (values.bankCity ?? "").trim(),
-    bankState: (values.bankState ?? "").trim(),
-    ifscCode: (values.ifscCode ?? "").trim().toUpperCase(),
-    transferAmount: (values.transferAmount ?? "").trim(),
-    transferCurrency: (values.transferCurrency ?? "").trim(),
-    transferType: values.transferType ?? "",
     gstin: (values.gstin ?? "").trim(),
     pan: (values.pan ?? "").trim(),
     financialYearStart: values.financialYearStart ?? 4,
@@ -99,6 +88,8 @@ function ProfileEditor({
   industryTypeOptions,
   canManageTypeOptions,
   canEditProfile,
+  canViewBankAccounts,
+  canEditBankAccounts,
 }: {
   business: BusinessProfile;
   businessTypeOptions: BusinessClassificationOption[];
@@ -106,6 +97,8 @@ function ProfileEditor({
   canManageTypeOptions: boolean;
   /** OWNER — can PUT /business/profile; STAFF is read-only. */
   canEditProfile: boolean;
+  canViewBankAccounts: boolean;
+  canEditBankAccounts: boolean;
 }) {
   const updateProfile = useUpdateBusinessProfile();
   const createBusinessType = useCreateBusinessTypeOption();
@@ -172,17 +165,6 @@ function ProfileEditor({
         city: trimOrNull(data.city),
         state: trimOrNull(data.state),
         pincode: trimOrNull(data.pincode),
-        accountHolderName: trimOrNull(data.accountHolderName),
-        bankAccountNumber: trimOrNull(data.bankAccountNumber),
-        confirmAccountNumber: trimOrNull(data.confirmAccountNumber),
-        bankName: trimOrNull(data.bankName),
-        branchName: trimOrNull(data.branchName),
-        bankCity: trimOrNull(data.bankCity),
-        bankState: trimOrNull(data.bankState),
-        ifscCode: trimTaxId(data.ifscCode),
-        transferAmount: trimOrNull(data.transferAmount),
-        transferCurrency: trimOrNull(data.transferCurrency),
-        transferType: data.transferType ? data.transferType : null,
         gstin: trimTaxId(data.gstin),
         pan: trimTaxId(data.pan),
         financialYearStart: data.financialYearStart,
@@ -245,7 +227,7 @@ function ProfileEditor({
         }
       />
 
-      <div className="w-full space-y-3">
+      <div className="w-full space-y-6 sm:space-y-8">
         {business?.profileCompletion && (
           <ProfileCompletionCard
             profileCompletion={business.profileCompletion}
@@ -264,6 +246,8 @@ function ProfileEditor({
           onLogoUpload={handleLogoUpload}
           onSignatureUpload={handleSignatureUpload}
           readOnly={!canEditProfile}
+          canViewBankAccounts={canViewBankAccounts}
+          canEditBankAccounts={canEditBankAccounts}
         />
       </div>
     </>
@@ -310,6 +294,8 @@ export default function Profile() {
             can(P.business.business_types.manage) && can(P.business.industry_types.manage)
           }
           canEditProfile={can(P.business.profile.update)}
+          canViewBankAccounts={can(P.business.profile.view)}
+          canEditBankAccounts={can(P.business.profile.update)}
         />
       ) : (
         <PageHeader title="My Profile" />

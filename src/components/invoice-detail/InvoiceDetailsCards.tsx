@@ -8,6 +8,8 @@ import { formatInvoicePartyAddressLines } from "@/lib/party/party-address-displa
 import { cn, formatCurrency, formatDate, formatSignedCurrency, formatTime } from "@/lib/core/utils";
 import type { InvoiceDetail } from "@/types/invoice";
 import { useInvoice } from "@/hooks/use-invoices";
+import { useBusinessBankAccounts } from "@/hooks/use-bank-accounts";
+import { maskBankAccountNumber } from "@/lib/business/bank-account-validation";
 
 interface InvoiceDetailsCardsProps {
   invoice: InvoiceDetail;
@@ -33,6 +35,9 @@ function DetailRow({
 }
 
 export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
+  const { data: bankAccountsPayload } = useBusinessBankAccounts({
+    enabled: invoice.invoiceType === "SALE_INVOICE",
+  });
   const summaryTitle = getInvoiceTypeCreateCopy(invoice.invoiceType).summaryTitle;
   const bill = getInvoiceBillSummary(invoice);
   const partyAddressText = formatInvoicePartyAddressLines(invoice);
@@ -98,6 +103,51 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
                     {String(invoice.sellingPriceMarginPercent).trim()}%
                   </span>
                 </DetailRow>
+              </div>
+            </div>
+          ) : null}
+
+          {invoice.invoiceType === "SALE_INVOICE" ? (
+            <div className="space-y-2 border-t border-border/60 pt-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Bank on printed invoice
+              </p>
+              <div className="rounded-md border bg-muted/15 px-3 py-2.5 text-sm">
+                {invoice.businessBankAccountId == null ? (
+                  <span className="text-muted-foreground">
+                    Profile default (saved default account or legacy bank fields in business
+                    profile)
+                  </span>
+                ) : (
+                  (() => {
+                    const acc = bankAccountsPayload?.bankAccounts?.find(
+                      (a) => a.id === invoice.businessBankAccountId,
+                    );
+                    if (!acc) {
+                      return (
+                        <span className="text-muted-foreground">
+                          Selected account ID {invoice.businessBankAccountId}
+                        </span>
+                      );
+                    }
+                    const title = acc.label?.trim()
+                      ? `${acc.label.trim()} · ${acc.bankName}`
+                      : acc.bankName;
+                    return (
+                      <span>
+                        {title}{" "}
+                        <span className="font-mono text-muted-foreground">
+                          {maskBankAccountNumber(acc.bankAccountNumber)}
+                        </span>
+                        {acc.isDefault ? (
+                          <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
+                            Default
+                          </span>
+                        ) : null}
+                      </span>
+                    );
+                  })()
+                )}
               </div>
             </div>
           ) : null}

@@ -7,6 +7,12 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/core/utils";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useRoleGroupsList } from "@/hooks/use-role-groups";
+import {
+  COMMAND_PALETTE_SECTION_HEADINGS,
+  COMMAND_PALETTE_SECTION_ORDER,
+  getCommandPaletteRoutesBySection,
+  getVisibleQuickAddEntries,
+} from "@/constants/command-palette-routes";
 import { INVOICE_PAGE_ACCESS_KEYS, PAGE } from "@/constants/page-access";
 import {
   CommandDialog,
@@ -46,17 +52,12 @@ export default function TopBar({
   const handleOpenProfile = () => router.push("/profile");
 
   const canListRoleGroups = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
-  const canViewInvoices = INVOICE_PAGE_ACCESS_KEYS.some((key) => can(key));
-  const canQuickAddInvoice = canViewInvoices;
+  const canQuickAddInvoice = INVOICE_PAGE_ACCESS_KEYS.some((key) => can(key));
   const canQuickAddParty = can(PAGE.parties);
   const canQuickAddItem = can(PAGE.items);
   const canPayments = can(PAGE.payments_outbound);
   const canReceipts = can(PAGE.receipts);
   const canReports = can(PAGE.reports);
-  const canSettings = can(PAGE.settings);
-  const canTax = can(PAGE.tax);
-  const canStock = can(PAGE.stock);
-  const canCreditNotes = can(PAGE.credit_notes);
   const shouldResolveRoleGroupName =
     user?.role === "STAFF" &&
     !user.roleGroupName?.trim() &&
@@ -64,6 +65,10 @@ export default function TopBar({
     canListRoleGroups;
 
   const { data: roleGroups = [] } = useRoleGroupsList(shouldResolveRoleGroupName);
+
+  const routesBySection = useMemo(() => getCommandPaletteRoutesBySection(can), [can]);
+
+  const quickAddEntries = useMemo(() => getVisibleQuickAddEntries(can), [can]);
 
   const roleBadgeLabel = useMemo(() => {
     if (!user) return "";
@@ -279,174 +284,51 @@ export default function TopBar({
             <div className="mx-auto max-w-[18rem] space-y-2">
               <p className="text-sm font-medium text-foreground">No matches</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Try a page name or action. Clear the search to browse everything.
+                Try a page name, route, or action. Clear the search to browse everything.
               </p>
             </div>
           </CommandEmpty>
-          <CommandGroup heading="Quick Add">
-            {canQuickAddInvoice ? (
-              <CommandItem onSelect={() => handleNavigate("/invoices/new?type=SALE_INVOICE")}>
-                <div className="flex flex-col">
-                  <span>New Sales Invoice</span>
-                  <span className="cmdk-item-desc text-xs text-muted-foreground">
-                    Create a sale bill quickly
-                  </span>
-                </div>
-                <CommandShortcut>N</CommandShortcut>
-              </CommandItem>
-            ) : null}
-            {canQuickAddParty ? (
-              <CommandItem onSelect={() => handleNavigate("/parties")}>
-                <div className="flex flex-col">
-                  <span>New Customer</span>
-                  <span className="cmdk-item-desc text-xs text-muted-foreground">
-                    Add party details
-                  </span>
-                </div>
-                <CommandShortcut>P</CommandShortcut>
-              </CommandItem>
-            ) : null}
-            {canQuickAddItem ? (
-              <CommandItem onSelect={() => handleNavigate("/items")}>
-                <div className="flex flex-col">
-                  <span>New Item</span>
-                  <span className="cmdk-item-desc text-xs text-muted-foreground">
-                    Add product or service
-                  </span>
-                </div>
-                <CommandShortcut>I</CommandShortcut>
-              </CommandItem>
-            ) : null}
-            {canPayments ? (
-              <CommandItem onSelect={() => handleNavigate("/payments/outbound/new")}>
-                <div className="flex flex-col">
-                  <span>New Payment</span>
-                  <span className="cmdk-item-desc text-xs text-muted-foreground">
-                    Record outbound voucher
-                  </span>
-                </div>
-                <CommandShortcut>O</CommandShortcut>
-              </CommandItem>
-            ) : null}
-          </CommandGroup>
-          <CommandGroup heading="Go To">
-            <CommandItem
-              value="dashboard"
-              keywords={["home", "overview"]}
-              onSelect={() => handleNavigate("/dashboard")}
-            >
-              Dashboard
-            </CommandItem>
-            {canViewInvoices ? (
-              <CommandItem
-                value="invoices"
-                keywords={["bills", "sale", "purchase"]}
-                onSelect={() => handleNavigate("/invoices")}
-              >
-                Invoices
-              </CommandItem>
-            ) : null}
-            {can(PAGE.parties) ? (
-              <CommandItem
-                value="customers parties"
-                keywords={["party", "buyer", "clients"]}
-                onSelect={() => handleNavigate("/parties")}
-              >
-                Customers
-              </CommandItem>
-            ) : null}
-            {can(PAGE.items) ? (
-              <CommandItem
-                value="items products"
-                keywords={["sku", "catalog"]}
-                onSelect={() => handleNavigate("/items")}
-              >
-                Items
-              </CommandItem>
-            ) : null}
-            {canStock ? (
-              <CommandItem
-                value="stock inventory"
-                keywords={["warehouse", "quantity"]}
-                onSelect={() => handleNavigate("/stock")}
-              >
-                Stock
-              </CommandItem>
-            ) : null}
-            {canReports ? (
-              <CommandItem
-                value="reports"
-                keywords={["analytics"]}
-                onSelect={() => handleNavigate("/reports")}
-              >
-                Reports
-              </CommandItem>
-            ) : null}
-            {canReceipts ? (
-              <CommandItem
-                value="receipts"
-                keywords={["incoming payment"]}
-                onSelect={() => handleNavigate("/receipts")}
-              >
-                Receipts
-              </CommandItem>
-            ) : null}
-            {canCreditNotes ? (
-              <CommandItem
-                value="credit notes"
-                keywords={["cn", "returns"]}
-                onSelect={() => handleNavigate("/credit-notes")}
-              >
-                Credit notes
-              </CommandItem>
-            ) : null}
-            {canPayments ? (
-              <CommandItem
-                value="payments outbound"
-                keywords={["pay vendor", "voucher"]}
-                onSelect={() => handleNavigate("/payments/outbound")}
-              >
-                Payments
-              </CommandItem>
-            ) : null}
-            {canTax ? (
-              <CommandItem
-                value="tax gst"
-                keywords={["gst", "hsn", "rates"]}
-                onSelect={() => handleNavigate("/tax")}
-              >
-                Tax
-              </CommandItem>
-            ) : null}
-            {canSettings ? (
-              <CommandItem
-                value="settings"
-                keywords={[
-                  "setting",
-                  "preferences",
-                  "business profile",
-                  "configuration",
-                  "company",
-                  "billing",
-                ]}
-                onSelect={() => handleNavigate("/settings")}
-              >
-                <div className="flex flex-col">
-                  <span>Settings</span>
-                  <span className="cmdk-item-desc text-xs text-muted-foreground">
-                    Business profile and preferences
-                  </span>
-                </div>
-              </CommandItem>
-            ) : null}
-            <CommandItem
-              value="profile account"
-              keywords={["user", "me"]}
-              onSelect={() => handleNavigate("/profile")}
-            >
-              Profile
-            </CommandItem>
-          </CommandGroup>
+          {quickAddEntries.length > 0 ? (
+            <CommandGroup heading="Quick add">
+              {quickAddEntries.map((entry) => (
+                <CommandItem
+                  key={entry.id}
+                  value={`quick:${entry.id}`}
+                  keywords={[entry.label, entry.description, entry.path, ...(entry.keywords ?? [])]}
+                  onSelect={() => handleNavigate(entry.path)}
+                >
+                  <div className="flex flex-col">
+                    <span>{entry.label}</span>
+                    <span className="cmdk-item-desc text-xs text-muted-foreground">
+                      {entry.description}
+                    </span>
+                  </div>
+                  {entry.shortcut ? <CommandShortcut>{entry.shortcut}</CommandShortcut> : null}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ) : null}
+          {COMMAND_PALETTE_SECTION_ORDER.map((section) => {
+            const routes = routesBySection[section];
+            if (!routes?.length) return null;
+            return (
+              <CommandGroup key={section} heading={COMMAND_PALETTE_SECTION_HEADINGS[section]}>
+                {routes.map((route) => {
+                  const pathTokens = route.path.replace(/^\//, "").replace(/\//g, " ");
+                  return (
+                    <CommandItem
+                      key={`${section}:${route.path}`}
+                      value={`goto:${route.path}`}
+                      keywords={[route.label, route.path, pathTokens, ...(route.keywords ?? [])]}
+                      onSelect={() => handleNavigate(route.path)}
+                    >
+                      {route.label}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            );
+          })}
           <CommandGroup heading="Help">
             <CommandItem
               value="keyboard shortcuts hotkeys"

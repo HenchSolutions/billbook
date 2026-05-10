@@ -117,6 +117,16 @@ export function InvoiceCreatePage({
           documentNumber: displayNumber ?? undefined,
           numberLabel: documentNumberLabel,
         }}
+        saleBankAccountSelect={
+          initialType === "SALE_INVOICE"
+            ? {
+                value: state.saleBankSelectValue,
+                onValueChange: state.setSaleBankSelectValue,
+                accounts: state.bankAccounts,
+                isLoading: state.isBankAccountsLoading,
+              }
+            : undefined
+        }
       />
 
       <LineEditorSection

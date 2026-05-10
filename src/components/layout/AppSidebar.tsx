@@ -1,230 +1,36 @@
 "use client";
 
-import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Home,
-  LayoutGrid,
-  FileText,
-  ChevronDown,
-  ChevronRight,
-  Package,
-  Users,
-  Truck,
-  BarChart3,
-  Receipt,
-  FileMinus,
-  Settings,
-  LogOut,
-  PackageCheck,
-  Wallet,
-  ArrowDownLeft,
-  ScrollText,
-  TrendingUp,
-  ShoppingCart,
-  ReceiptIndianRupee,
-  HandCoins,
-  Landmark,
-  Boxes,
-  CalendarClock,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/core/utils";
 import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BusinessIdentity } from "@/components/BusinessIdentity";
 import { usePermissions } from "@/hooks/use-permissions";
-import { INVOICE_PAGE_ACCESS_KEYS, PAGE } from "@/constants/page-access";
+import {
+  getInvoiceSubNavItems,
+  getSidebarNavSections,
+  type SidebarNavItemModel,
+  type SidebarNavSectionModel,
+} from "@/lib/navigation/app-nav-catalog";
 import { TeamRolesSidebarBlock } from "@/components/layout/TeamRolesSidebarBlock";
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: ElementType;
-  /** If set, item is shown only when `can(pageKey)` — see `PAGE` in `@/constants/page-access`. */
-  pageKey?: string;
-  /** Show when user has any of these page keys */
-  anyPageKey?: string[];
-  /** `exact` = only `/path` matches, not `/path/...` (used for Business settings vs role groups) */
-  activeMatch?: "exact" | "prefix";
-}
+/** Static invoice lane links — derived once from the nav catalog. */
+const INVOICE_SUB_NAV_ITEMS = getInvoiceSubNavItems();
 
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-type SectionTitle = NavSection["title"];
+type SectionTitle = SidebarNavSectionModel["title"];
 
 /** Sidebar sections follow the active route until the user folds/expands; then we store explicit open state (including “none”). */
 type SectionFoldMode = { kind: "route" } | { kind: "custom"; open: SectionTitle | null };
-
-/** Distinct icons per reports route; unknown paths use {@link BarChart3}. */
-function reportSidebarIcon(reportPath: string): ElementType {
-  const base = reportPath.replace(/\/$/, "") || "/";
-  switch (base) {
-    case "/reports":
-      return LayoutGrid;
-    case "/reports/invoice-register":
-      return TrendingUp;
-    case "/reports/purchase-register":
-      return ShoppingCart;
-    case "/reports/receipt-register":
-      return ReceiptIndianRupee;
-    case "/reports/debt-register":
-      return HandCoins;
-    case "/reports/payables-register":
-      return Landmark;
-    case "/reports/item-register":
-      return Boxes;
-    case "/reports/credit-note-register":
-      return FileMinus;
-    case "/reports/payout-register":
-      return ArrowDownLeft;
-    case "/reports/receivables-aging":
-      return CalendarClock;
-    default:
-      return BarChart3;
-  }
-}
-
-const navSections: NavSection[] = [
-  {
-    title: "Overview",
-    items: [
-      {
-        label: "Dashboard",
-        path: "/dashboard",
-        icon: Home,
-      },
-    ],
-  },
-  {
-    title: "Master",
-    items: [
-      { label: "Items", path: "/items", icon: Package, pageKey: PAGE.items },
-      { label: "Stock", path: "/stock", icon: PackageCheck, pageKey: PAGE.stock },
-    ],
-  },
-  {
-    title: "Parties",
-    items: [
-      { label: "Customers", path: "/parties", icon: Users, pageKey: PAGE.parties },
-      { label: "Vendors", path: "/vendors", icon: Truck, pageKey: PAGE.vendors },
-    ],
-  },
-  {
-    title: "Accounting",
-    items: [
-      {
-        label: "Invoices",
-        path: "/invoices",
-        icon: FileText,
-        anyPageKey: [...INVOICE_PAGE_ACCESS_KEYS],
-      },
-      { label: "Receipts", path: "/receipts", icon: Wallet, pageKey: PAGE.receipts },
-      {
-        label: "Credit Notes",
-        path: "/credit-notes",
-        icon: FileMinus,
-        pageKey: PAGE.credit_notes,
-      },
-      {
-        label: "Payments",
-        path: "/payments/outbound",
-        icon: ArrowDownLeft,
-        pageKey: PAGE.payments_outbound,
-      },
-    ],
-  },
-  {
-    title: "Reports",
-    items: [
-      {
-        label: "Reports Dashboard",
-        path: "/reports",
-        icon: reportSidebarIcon("/reports"),
-        pageKey: PAGE.reports,
-        activeMatch: "exact",
-      },
-      {
-        label: "Sales register",
-        path: "/reports/invoice-register",
-        icon: reportSidebarIcon("/reports/invoice-register"),
-        pageKey: PAGE.reports_sales_register,
-      },
-      {
-        label: "Purchase register",
-        path: "/reports/purchase-register",
-        icon: reportSidebarIcon("/reports/purchase-register"),
-        pageKey: PAGE.reports_purchase_register,
-      },
-      {
-        label: "Receipt register",
-        path: "/reports/receipt-register",
-        icon: reportSidebarIcon("/reports/receipt-register"),
-        pageKey: PAGE.reports_receipt_register,
-      },
-      {
-        label: "Debt register",
-        path: "/reports/debt-register",
-        icon: reportSidebarIcon("/reports/debt-register"),
-        pageKey: PAGE.reports_debt_register,
-      },
-      {
-        label: "Payables register",
-        path: "/reports/payables-register",
-        icon: reportSidebarIcon("/reports/payables-register"),
-        pageKey: PAGE.reports_payables_register,
-      },
-      {
-        label: "Item register",
-        path: "/reports/item-register",
-        icon: reportSidebarIcon("/reports/item-register"),
-        pageKey: PAGE.reports_item_register,
-      },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      { label: "Profile", path: "/profile", icon: Users, pageKey: PAGE.profile },
-      {
-        label: "Business Settings",
-        path: "/settings",
-        icon: Settings,
-        pageKey: PAGE.settings,
-        activeMatch: "exact",
-      },
-    ],
-  },
-  {
-    title: "More",
-    items: [
-      { label: "Tax / GST", path: "/tax", icon: Receipt, pageKey: PAGE.tax },
-      { label: "Audit Logs", path: "/audit-logs", icon: ScrollText, pageKey: PAGE.audit_logs },
-    ],
-  },
-];
 
 interface AppSidebarProps {
   collapsed: boolean;
   onNavigate?: () => void;
 }
-
-const invoiceNavItems = [
-  { label: "Sales Invoice", path: "/invoices/sales", pageKey: PAGE.invoices_sales },
-  { label: "Purchase Invoice", path: "/invoices/purchases", pageKey: PAGE.invoices_purchases },
-  { label: "Sales Return", path: "/invoices/sales-return", pageKey: PAGE.invoices_sales_return },
-  {
-    label: "Purchase Return",
-    path: "/invoices/purchase-return",
-    pageKey: PAGE.invoices_purchase_return,
-  },
-] as const;
 
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
@@ -245,7 +51,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   };
 
   const isPathActive = useCallback(
-    (path: string, activeMatch: NavItem["activeMatch"] = "prefix") => {
+    (path: string, activeMatch: SidebarNavItemModel["activeMatch"] = "prefix") => {
       if (isPartyLedgerRoute && ledgerSource === "vendors") {
         if (path === "/vendors") return true;
         if (path === "/parties") return false;
@@ -276,8 +82,8 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
 
   const invoicesExpanded =
     normalizedPathname === "/invoices" || normalizedPathname.startsWith("/invoices/");
-  const visibleSections = useMemo((): NavSection[] => {
-    return navSections
+  const visibleSections = useMemo((): SidebarNavSectionModel[] => {
+    return getSidebarNavSections()
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
@@ -400,8 +206,8 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                   />
                 )}
                 {section.items.map((item) =>
-                  item.path === "/invoices" && !collapsed ? (
-                    <div key={item.path} className="space-y-0.5">
+                  item.id === "invoices" && !collapsed ? (
+                    <div key={item.id} className="space-y-0.5">
                       <Link
                         href={item.path}
                         onClick={onNavigate}
@@ -423,29 +229,29 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                       </Link>
                       {invoicesExpanded && (
                         <div className="ml-6 mt-1 space-y-1">
-                          {invoiceNavItems
-                            .filter((invoiceItem) => can(invoiceItem.pageKey))
-                            .map((invoiceItem) => (
-                              <Link
-                                key={invoiceItem.path}
-                                href={invoiceItem.path}
-                                onClick={onNavigate}
-                                className={cn(
-                                  "block rounded-lg px-3 py-2 text-sm transition-colors",
-                                  isInvoiceTypeActive(invoiceItem.path)
-                                    ? SIDEBAR_NAV_ACTIVE
-                                    : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
-                                )}
-                              >
-                                {invoiceItem.label}
-                              </Link>
-                            ))}
+                          {INVOICE_SUB_NAV_ITEMS.filter((invoiceItem) =>
+                            can(invoiceItem.pageKey),
+                          ).map((invoiceItem) => (
+                            <Link
+                              key={invoiceItem.path}
+                              href={invoiceItem.path}
+                              onClick={onNavigate}
+                              className={cn(
+                                "block rounded-lg px-3 py-2 text-sm transition-colors",
+                                isInvoiceTypeActive(invoiceItem.path)
+                                  ? SIDEBAR_NAV_ACTIVE
+                                  : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
+                              )}
+                            >
+                              {invoiceItem.label}
+                            </Link>
+                          ))}
                         </div>
                       )}
                     </div>
                   ) : (
                     <Link
-                      key={item.path}
+                      key={item.id}
                       href={item.path}
                       onClick={onNavigate}
                       className={cn(

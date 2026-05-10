@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { cn, formatCurrency, formatDate } from "@/lib/core/utils";
 import type { DashboardData, DashboardPeriodMode } from "@/types/dashboard";
 import { buildSalesPurchaseChartData } from "@/lib/business/dashboard-home";
-import { dashboardReportsNavLinkClass } from "@/components/dashboard/dashboard-utils";
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
 import { useResolvedCssHsl } from "@/hooks/use-resolved-css-hsl";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
+
 interface DashboardHomeSalesPurchaseChartProps {
   dashboard: DashboardData;
   /** Same period as the dashboard filter (monthly / all time / custom). */
@@ -143,9 +144,13 @@ export function DashboardHomeSalesPurchaseChart({
             </div>
           </div>
           {canReports ? (
-            <Link href="/reports" className={dashboardReportsNavLinkClass}>
-              All reports
-            </Link>
+            <Button
+              variant="link"
+              asChild
+              className="h-auto shrink-0 px-0 text-xs font-medium sm:text-sm"
+            >
+              <Link href="/reports">All reports</Link>
+            </Button>
           ) : null}
         </div>
       </CardHeader>

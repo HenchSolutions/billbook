@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, Boxes, FileText, Grid2x2, MoreHorizontal, Users } from "lucide-react";
-import { PAGE, INVOICE_PAGE_ACCESS_KEYS } from "@/constants/page-access";
+import type { LucideIcon } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
 import { cn } from "@/lib/core/utils";
+import {
+  getNavPathById,
+  MOBILE_BOTTOM_NAV_SLOTS,
+  type MobileNavTabId,
+} from "@/lib/navigation/app-nav-catalog";
 
 interface MobileBottomNavProps {
   onMoreClick: () => void;
@@ -17,44 +22,24 @@ function isRouteActive(pathname: string, base: string) {
   return clean === route || clean.startsWith(`${route}/`);
 }
 
+/** Icons for the fixed mobile tab strip — aligned with {@link MOBILE_BOTTOM_NAV_SLOTS}. */
+const MOBILE_TAB_ICONS: Record<MobileNavTabId, LucideIcon> = {
+  dashboard: Grid2x2,
+  invoices: FileText,
+  customers: Users,
+  items: Boxes,
+  "reports-hub": BarChart3,
+};
+
 export default function MobileBottomNav({ onMoreClick }: MobileBottomNavProps) {
   const pathname = usePathname() ?? "";
   const { can } = usePermissions();
 
-  const canViewInvoices = INVOICE_PAGE_ACCESS_KEYS.some((key) => can(key));
-
-  const items = [
-    {
-      label: "Home",
-      path: "/dashboard",
-      icon: Grid2x2,
-      enabled: true,
-    },
-    {
-      label: "Bills",
-      path: "/invoices",
-      icon: FileText,
-      enabled: canViewInvoices,
-    },
-    {
-      label: "Parties",
-      path: "/parties",
-      icon: Users,
-      enabled: can(PAGE.parties) || can(PAGE.vendors),
-    },
-    {
-      label: "Inventory",
-      path: "/items",
-      icon: Boxes,
-      enabled: can(PAGE.items) || can(PAGE.stock),
-    },
-    {
-      label: "Reports",
-      path: "/reports",
-      icon: BarChart3,
-      enabled: can(PAGE.reports),
-    },
-  ].filter((item) => item.enabled);
+  const items = MOBILE_BOTTOM_NAV_SLOTS.filter((slot) => slot.enabled(can)).map((slot) => ({
+    label: slot.tabLabel,
+    path: getNavPathById(slot.routeId),
+    icon: MOBILE_TAB_ICONS[slot.routeId],
+  }));
 
   const visibleItems = items.slice(0, 4);
 

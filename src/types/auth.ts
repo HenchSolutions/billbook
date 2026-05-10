@@ -1,3 +1,5 @@
+import type { BusinessBankAccount } from "@/types/bank-account";
+
 export type Role = "OWNER" | "STAFF" | "ADMIN";
 
 export type TaxType = "GST" | "NON_GST";
@@ -77,17 +79,6 @@ export interface BusinessProfile {
   city: string | null;
   state: string | null;
   pincode: string | null;
-  accountHolderName: string | null;
-  bankAccountNumber: string | null;
-  confirmAccountNumber: string | null;
-  bankName: string | null;
-  branchName: string | null;
-  bankCity: string | null;
-  bankState: string | null;
-  ifscCode: string | null;
-  transferAmount: string | null;
-  transferCurrency: string | null;
-  transferType: TransferType | null;
   gstin: string | null;
   pan: string | null;
   financialYearStart: number;
@@ -102,9 +93,11 @@ export interface BusinessProfile {
   validityEnd?: string | null;
   /** Profile completion; present when API returns it */
   profileCompletion?: ProfileCompletion;
+  /** Saved bank accounts from GET /business/profile (embedded array). */
+  bankAccounts?: BusinessBankAccount[];
 }
 
-/** Payload for PUT /business/profile */
+/** Payload for PUT /business/profile — identity, address and tax only; bank fields removed. */
 export interface UpdateBusinessProfile {
   name: string;
   country?: string | null;
@@ -118,17 +111,6 @@ export interface UpdateBusinessProfile {
   city?: string | null;
   state?: string | null;
   pincode?: string | null;
-  accountHolderName?: string | null;
-  bankAccountNumber?: string | null;
-  confirmAccountNumber?: string | null;
-  bankName?: string | null;
-  branchName?: string | null;
-  bankCity?: string | null;
-  bankState?: string | null;
-  ifscCode?: string | null;
-  transferAmount?: string | null;
-  transferCurrency?: string | null;
-  transferType?: TransferType | null;
   gstin?: string | null;
   pan?: string | null;
   financialYearStart?: number;

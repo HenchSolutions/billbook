@@ -68,6 +68,8 @@ export interface Invoice {
   originalBillDate?: string | null;
   /** Net payment terms in days (purchase flows). */
   paymentTermsDays?: number | null;
+  /** Sale invoices only — linked saved bank account for PDF payment block; null = profile default. */
+  businessBankAccountId?: number | null;
 }
 
 export interface InvoiceItem {
@@ -201,6 +203,8 @@ export interface CreateInvoiceRequest {
   originalBillNumber?: string;
   originalBillDate?: string;
   paymentTermsDays?: number;
+  /** `SALE_INVOICE` only — omit or null for profile default */
+  businessBankAccountId?: number | null;
   items: InvoiceItemInput[];
 }
 
@@ -224,6 +228,8 @@ export interface UpdateInvoiceRequest {
   originalBillNumber?: string | null;
   originalBillDate?: string | null;
   paymentTermsDays?: number | null;
+  /** `SALE_INVOICE` only — null clears FK */
+  businessBankAccountId?: number | null;
   items?: InvoiceItemInput[];
 }
 

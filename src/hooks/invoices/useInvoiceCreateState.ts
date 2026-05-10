@@ -24,6 +24,8 @@ import {
   useUpdateInvoiceById,
 } from "@/hooks/use-invoices";
 import { useBusinessSettings } from "@/hooks/use-business-settings";
+import { useBusinessBankAccounts } from "@/hooks/use-bank-accounts";
+import { ApiClientError } from "@/api/error";
 import type { InvoiceItemInput, UpdateInvoiceRequest } from "@/types/invoice";
 import {
   getStockEntryById,
@@ -116,6 +118,15 @@ export function useInvoiceCreateState(
   const [focusedIssueLineId, setFocusedIssueLineId] = useState<string | null>(null);
   const [unitPriceFloorWarning, setUnitPriceFloorWarning] = useState<string | null>(null);
   const [unitPriceFloorIsError, setUnitPriceFloorIsError] = useState(false);
+  /**
+   * Sale invoices only — matches PartyAndDates bank select:
+   * `__auto__` = POST omits key (server links primary saved account); PATCH sets default id or omits if none.
+   * `__profile__` = explicit null FK (PDF uses legacy profile bank fields only).
+   * Otherwise numeric string = specific saved account id.
+   */
+  const [saleBankSelectValue, setSaleBankSelectValue] = useState<string>(() =>
+    invoiceType === "SALE_INVOICE" && !editInvoiceId ? "__auto__" : "__profile__",
+  );
 
   const debouncedStockSearch = useDebounce(stockSearchText, 300);
   const stockSearchQuery = debouncedStockSearch.trim();
@@ -168,6 +179,9 @@ export function useInvoiceCreateState(
       : undefined;
   const { data: sourceInvoice } = useInvoice(returnCapSourceId);
   const { data: businessSettings } = useBusinessSettings();
+  const { data: bankAccountsResponse, isPending: isBankAccountsLoading } = useBusinessBankAccounts({
+    enabled: invoiceType === "SALE_INVOICE",
+  });
   const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } = useNextInvoiceNumber({
     invoiceDate,
     invoiceType,
@@ -876,6 +890,15 @@ export function useInvoiceCreateState(
         : "",
     );
     setNotes(editingDraftInvoice.notes ?? "");
+    if (editingDraftInvoice.invoiceType === "SALE_INVOICE") {
+      if (editingDraftInvoice.businessBankAccountId == null) {
+        setSaleBankSelectValue("__profile__");
+      } else {
+        setSaleBankSelectValue(String(editingDraftInvoice.businessBankAccountId));
+      }
+    } else {
+      setSaleBankSelectValue("__profile__");
+    }
     setDiscountAmount(editingDraftInvoice.discountAmount ?? "");
     setDiscountPercent(editingDraftInvoice.discountPercent ?? "");
 
@@ -1873,6 +1896,18 @@ export function useInvoiceCreateState(
                   : {}),
               }
             : {}),
+          ...(invoiceType === "SALE_INVOICE"
+            ? (() => {
+                if (saleBankSelectValue === "__auto__") {
+                  const defId = bankAccountsResponse?.bankAccounts?.find((a) => a.isDefault)?.id;
+                  return defId != null ? { businessBankAccountId: defId } : {};
+                }
+                if (saleBankSelectValue === "__profile__") {
+                  return { businessBankAccountId: null };
+                }
+                return { businessBankAccountId: Number(saleBankSelectValue) };
+              })()
+            : {}),
           items: linePayload,
         };
         await updateDraftInvoice.mutateAsync({ invoiceId: editInvoiceId, body });
@@ -1908,6 +1943,13 @@ export function useInvoiceCreateState(
         linesToSubmit.every((l) => l.sourceInvoiceItemId != null)
           ? { sourceInvoiceId }
           : {}),
+        ...(invoiceType === "SALE_INVOICE"
+          ? saleBankSelectValue === "__auto__"
+            ? {}
+            : saleBankSelectValue === "__profile__"
+              ? { businessBankAccountId: null }
+              : { businessBankAccountId: Number(saleBankSelectValue) }
+          : {}),
         items: linePayload,
       });
 
@@ -1915,6 +1957,21 @@ export function useInvoiceCreateState(
       router.push(created?.id != null ? `/invoices/${created.id}` : pageMeta.path);
     } catch (err) {
       if (maybeShowTrialExpiredToast(err)) return;
+      if (err instanceof ApiClientError && err.status === 400) {
+        const msg = (err.message ?? "").toLowerCase();
+        if (
+          msg.includes("businessbankaccount") ||
+          msg.includes("bank account") ||
+          msg.includes("bank_account")
+        ) {
+          showErrorToast(
+            err.message,
+            "Bank account doesn’t apply to this document or isn’t available. Pick another account or use profile bank fields only.",
+          );
+          submitGuardRef.current = false;
+          return;
+        }
+      }
       const failTitle =
         editInvoiceId != null
           ? invoiceType === "PURCHASE_RETURN"
@@ -1955,6 +2012,8 @@ export function useInvoiceCreateState(
     returnLinkedSourceBlockedReason,
     purchaseMarginFieldValid,
     partyType,
+    saleBankSelectValue,
+    bankAccountsResponse?.bankAccounts,
   ]);
 
   useEffect(() => {
@@ -2101,5 +2160,9 @@ export function useInvoiceCreateState(
     saveInvoice: {
       isPending: createInvoice.isPending || updateDraftInvoice.isPending,
     },
+    saleBankSelectValue,
+    setSaleBankSelectValue,
+    bankAccounts: bankAccountsResponse?.bankAccounts ?? [],
+    isBankAccountsLoading,
   };
 }

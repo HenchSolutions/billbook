@@ -23,6 +23,8 @@ import type { Party, PartyConsignee, PartyType } from "@/types/party";
 import { isPurchaseVendorBillMetaType } from "@/lib/invoice/invoice";
 import { cn } from "@/lib/core/utils";
 import type { InvoiceType } from "@/types/invoice";
+import type { BusinessBankAccount } from "@/types/bank-account";
+import { maskBankAccountNumber } from "@/lib/business/bank-account-validation";
 
 interface PartyAndDatesCardsProps {
   invoiceType: InvoiceType;
@@ -60,6 +62,13 @@ interface PartyAndDatesCardsProps {
     documentNumber?: string;
     numberLabel?: string;
   };
+  /** Sale invoice only — saved bank account for PDF payment block */
+  saleBankAccountSelect?: {
+    value: string;
+    onValueChange: (value: string) => void;
+    accounts: BusinessBankAccount[];
+    isLoading: boolean;
+  };
 }
 
 export function PartyAndDatesCards({
@@ -88,6 +97,7 @@ export function PartyAndDatesCards({
   partyErrorText,
   sellingMarginErrorText,
   invoiceDocumentBanner,
+  saleBankAccountSelect,
 }: PartyAndDatesCardsProps) {
   const copy = getInvoiceTypeCreateCopy(invoiceType);
   const todayIso = toISODateString(new Date());
@@ -369,6 +379,54 @@ export function PartyAndDatesCards({
                   {sellingMarginErrorText}
                 </p>
               ) : null}
+            </div>
+          ) : null}
+          {saleBankAccountSelect ? (
+            <div className="space-y-2 border-t border-border/60 pt-3">
+              <Label htmlFor="sale-bank-account">Bank details on invoice</Label>
+              <Select
+                value={saleBankAccountSelect.value}
+                onValueChange={saleBankAccountSelect.onValueChange}
+                disabled={saleBankAccountSelect.isLoading}
+              >
+                <SelectTrigger id="sale-bank-account" className="h-auto min-h-10 w-full">
+                  <SelectValue
+                    placeholder={
+                      saleBankAccountSelect.isLoading ? "Loading accounts…" : "Choose bank account"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__auto__">Primary saved account (auto)</SelectItem>
+                  <SelectItem value="__profile__">Profile bank fields only (PDF)</SelectItem>
+                  {saleBankAccountSelect.accounts.map((a) => {
+                    const title = a.label?.trim()
+                      ? `${a.label.trim()} · ${a.bankName}`
+                      : a.bankName;
+                    const tail = maskBankAccountNumber(a.bankAccountNumber);
+                    return (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        <span className="flex flex-wrap items-center gap-x-1">
+                          <span>{title}</span>
+                          <span className="text-muted-foreground">{tail}</span>
+                          {a.isDefault ? (
+                            <span className="rounded bg-muted px-1 text-[10px] font-medium uppercase">
+                              Primary
+                            </span>
+                          ) : null}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                <strong className="font-medium text-foreground">Primary saved account</strong> lets
+                the server pick your default (`is_default`) row—omit on create.{" "}
+                <strong className="font-medium text-foreground">Profile bank fields only</strong>{" "}
+                keeps no saved-account link (legacy profile columns on the PDF). Manage accounts
+                under My profile.
+              </p>
             </div>
           ) : null}
         </CardContent>

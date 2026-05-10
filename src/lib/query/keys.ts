@@ -222,6 +222,7 @@ export const queryKeys = {
       return ["dashboard", params.filter] as const;
     },
     profile: () => ["business-profile"] as const,
+    bankAccounts: () => ["business-bank-accounts"] as const,
     businessTypes: () => ["business-type-options"] as const,
     industryTypes: () => ["industry-type-options"] as const,
     users: () => ["business-users"] as const,

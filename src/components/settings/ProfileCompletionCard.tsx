@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { ProfileCompletion, ProfileCompletionSection } from "@/types/auth";
+import type { BusinessBankAccount } from "@/types/bank-account";
 import { CheckCircle2, CircleDashed } from "lucide-react";
 import { INVOICE_PROFILE_MIN_PERCENT } from "@/lib/business/business-document-gate";
 
@@ -13,13 +14,8 @@ interface ProfileCompletionCardProps {
     city?: string | null;
     state?: string | null;
     pincode?: string | null;
-    accountHolderName?: string | null;
-    bankAccountNumber?: string | null;
-    bankName?: string | null;
-    branchName?: string | null;
-    ifscCode?: string | null;
-    bankCity?: string | null;
-    bankState?: string | null;
+    /** Saved bank accounts from GET /business/profile */
+    bankAccounts?: BusinessBankAccount[];
   };
 }
 
@@ -81,13 +77,17 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
   if (!isFilled(business?.pincode)) addressMissing.push("Pincode");
 
   const bankMissing: string[] = [];
-  if (!isFilled(business?.accountHolderName)) bankMissing.push("Account holder name");
-  if (!isFilled(business?.bankAccountNumber)) bankMissing.push("Bank account number");
-  if (!isFilled(business?.bankName)) bankMissing.push("Bank name");
-  if (!isFilled(business?.branchName)) bankMissing.push("Branch name");
-  if (!isFilled(business?.ifscCode)) bankMissing.push("IFSC code");
-  if (!isFilled(business?.bankCity)) bankMissing.push("Bank city");
-  if (!isFilled(business?.bankState)) bankMissing.push("Bank state");
+  const hasCompleteAccount = (business?.bankAccounts ?? []).some(
+    (acc) =>
+      isFilled(acc.accountHolderName) &&
+      isFilled(acc.bankAccountNumber) &&
+      isFilled(acc.bankName) &&
+      isFilled(acc.branchName) &&
+      isFilled(acc.ifscCode) &&
+      isFilled(acc.bankCity) &&
+      isFilled(acc.bankState),
+  );
+  if (!hasCompleteAccount) bankMissing.push("Add at least one complete bank account");
 
   const weightedOk = percentage >= INVOICE_PROFILE_MIN_PERCENT;
   const regComplete = sectionComplete(breakdown.registration, registrationMissing.length === 0);
@@ -111,10 +111,9 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
       missing: addrComplete ? [] : missingOrHint(addressMissing, "Review address"),
     },
     {
-      label:
-        "Bank — Account holder name · Bank account number · Bank name · Branch name · IFSC code · Bank city · Bank state",
+      label: "Bank — at least one saved account with all required fields",
       complete: bankComplete,
-      missing: bankComplete ? [] : missingOrHint(bankMissing, "Review bank details"),
+      missing: bankComplete ? [] : missingOrHint(bankMissing, "Add a bank account in Bank details"),
     },
   ] as const;
 

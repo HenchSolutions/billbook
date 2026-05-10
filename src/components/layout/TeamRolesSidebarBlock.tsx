@@ -4,6 +4,11 @@ import Link from "next/link";
 import { ChevronDown, Shield, UserCog } from "lucide-react";
 import { cn } from "@/lib/core/utils";
 import { PAGE } from "@/constants/page-access";
+import {
+  ROLE_GROUPS_ROUTE_PATH,
+  TEAM_MEMBERS_SIDEBAR_LABEL,
+  TEAM_ROUTE_PATH,
+} from "@/lib/navigation/app-nav-catalog";
 import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
 
 type CanFn = (key: string) => boolean;
@@ -27,8 +32,8 @@ export function TeamRolesSidebarBlock({
   if (!canTeam && !canRoles) return null;
 
   const p = (safePathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
-  const inTeam = p === "/team";
-  const inRoles = safePathname.startsWith("/settings/role-groups");
+  const inTeam = p === TEAM_ROUTE_PATH;
+  const inRoles = safePathname.startsWith(ROLE_GROUPS_ROUTE_PATH);
   const inTeamOrRoles = inTeam || inRoles;
 
   const linkClass = (active: boolean) =>
@@ -49,7 +54,7 @@ export function TeamRolesSidebarBlock({
 
   /** Both areas: parent + expandable subs (mirrors Invoices). */
   if (canTeam && canRoles) {
-    const parentHref = "/team";
+    const parentHref = TEAM_ROUTE_PATH;
     const expanded = inTeamOrRoles;
 
     if (collapsed) {
@@ -78,11 +83,11 @@ export function TeamRolesSidebarBlock({
         </Link>
         {expanded && (
           <div className="ml-6 mt-1 space-y-1">
-            <Link href="/team" onClick={onNavigate} className={subLinkClass(inTeam)}>
-              Members
+            <Link href={TEAM_ROUTE_PATH} onClick={onNavigate} className={subLinkClass(inTeam)}>
+              {TEAM_MEMBERS_SIDEBAR_LABEL}
             </Link>
             <Link
-              href="/settings/role-groups"
+              href={ROLE_GROUPS_ROUTE_PATH}
               onClick={onNavigate}
               className={subLinkClass(inRoles)}
             >
@@ -97,7 +102,7 @@ export function TeamRolesSidebarBlock({
   if (canTeam) {
     return (
       <Link
-        href="/team"
+        href={TEAM_ROUTE_PATH}
         onClick={onNavigate}
         className={linkClass(inTeam)}
         title={collapsed ? "Team" : undefined}
@@ -110,7 +115,7 @@ export function TeamRolesSidebarBlock({
 
   return (
     <Link
-      href="/settings/role-groups"
+      href={ROLE_GROUPS_ROUTE_PATH}
       onClick={onNavigate}
       className={linkClass(inRoles)}
       title={collapsed ? "Role groups" : undefined}

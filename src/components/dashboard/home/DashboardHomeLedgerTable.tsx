@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,6 @@ import {
   ledgerTypeLabel,
   type ActivityTabFilter,
 } from "@/lib/business/dashboard-home";
-import { dashboardReportsNavLinkClass } from "@/components/dashboard/dashboard-utils";
-import { usePermissions } from "@/hooks/use-permissions";
-import { PAGE } from "@/constants/page-access";
 
 const PAGE_SIZE = 8;
 
@@ -32,8 +28,6 @@ const ACTIVITY_TABS: { value: ActivityTabFilter; label: string }[] = [
 ];
 
 export function DashboardHomeLedgerTable({ dashboard }: DashboardHomeLedgerTableProps) {
-  const { can } = usePermissions();
-  const canReports = can(PAGE.reports);
   const allRows = useMemo(() => buildRecentActivityRows(dashboard), [dashboard]);
   const [tab, setTab] = useState<ActivityTabFilter>("all");
   const [page, setPage] = useState(1);
@@ -58,20 +52,13 @@ export function DashboardHomeLedgerTable({ dashboard }: DashboardHomeLedgerTable
         </CardHeader>
         <CardContent className="pt-0">
           <Tabs value={tab} onValueChange={onTabChange} className="w-full">
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <TabsList className="h-auto w-full flex-1 flex-wrap justify-start gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5 sm:w-auto sm:flex-initial">
-                {ACTIVITY_TABS.map((t) => (
-                  <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">
-                    {t.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {canReports ? (
-                <Link href="/reports" className={dashboardReportsNavLinkClass}>
-                  All reports
-                </Link>
-              ) : null}
-            </div>
+            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5 sm:w-auto">
+              {ACTIVITY_TABS.map((t) => (
+                <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm">
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
             <TabsContent value={tab} className="mt-5 outline-none focus-visible:ring-offset-0">
               <PaginatedActivityTable
                 rows={filteredRows}
