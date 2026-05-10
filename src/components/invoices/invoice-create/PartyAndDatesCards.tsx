@@ -398,7 +398,7 @@ export function PartyAndDatesCards({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__auto__">Primary saved account (auto)</SelectItem>
-                  <SelectItem value="__profile__">Profile bank fields only (PDF)</SelectItem>
+                  <SelectItem value="__none__">No bank account on invoice</SelectItem>
                   {saleBankAccountSelect.accounts.map((a) => {
                     const title = a.label?.trim()
                       ? `${a.label.trim()} · ${a.bankName}`
@@ -422,10 +422,9 @@ export function PartyAndDatesCards({
               </Select>
               <p className="text-xs text-muted-foreground">
                 <strong className="font-medium text-foreground">Primary saved account</strong> lets
-                the server pick your default (`is_default`) row—omit on create.{" "}
-                <strong className="font-medium text-foreground">Profile bank fields only</strong>{" "}
-                keeps no saved-account link (legacy profile columns on the PDF). Manage accounts
-                under My profile.
+                the server use your default saved account when creating.{" "}
+                <strong className="font-medium text-foreground">No bank account on invoice</strong>{" "}
+                sends no link—the PDF payment block stays empty. Manage accounts under My profile.
               </p>
             </div>
           ) : null}

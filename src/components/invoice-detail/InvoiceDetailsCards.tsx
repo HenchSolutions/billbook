@@ -115,8 +115,7 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
               <div className="rounded-md border bg-muted/15 px-3 py-2.5 text-sm">
                 {invoice.businessBankAccountId == null ? (
                   <span className="text-muted-foreground">
-                    Profile default (saved default account or legacy bank fields in business
-                    profile)
+                    No bank account linked on this invoice
                   </span>
                 ) : (
                   (() => {

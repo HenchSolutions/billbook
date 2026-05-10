@@ -3,7 +3,6 @@ import type { BusinessBankAccount } from "@/types/bank-account";
 export type Role = "OWNER" | "STAFF" | "ADMIN";
 
 export type TaxType = "GST" | "NON_GST";
-export type TransferType = "NEFT" | "RTGS" | "IMPS" | "UPI";
 
 /** Lightweight user returned inside AuthResponse */
 export interface User {

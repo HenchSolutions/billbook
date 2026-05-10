@@ -120,12 +120,12 @@ export function useInvoiceCreateState(
   const [unitPriceFloorIsError, setUnitPriceFloorIsError] = useState(false);
   /**
    * Sale invoices only — matches PartyAndDates bank select:
-   * `__auto__` = POST omits key (server links primary saved account); PATCH sets default id or omits if none.
-   * `__profile__` = explicit null FK (PDF uses legacy profile bank fields only).
+   * `__auto__` = omit `businessBankAccountId` on create (server uses default saved account).
+   * `__none__` = explicit `businessBankAccountId: null` (no bank on invoice / PDF).
    * Otherwise numeric string = specific saved account id.
    */
   const [saleBankSelectValue, setSaleBankSelectValue] = useState<string>(() =>
-    invoiceType === "SALE_INVOICE" && !editInvoiceId ? "__auto__" : "__profile__",
+    invoiceType === "SALE_INVOICE" && !editInvoiceId ? "__auto__" : "__none__",
   );
 
   const debouncedStockSearch = useDebounce(stockSearchText, 300);
@@ -892,12 +892,12 @@ export function useInvoiceCreateState(
     setNotes(editingDraftInvoice.notes ?? "");
     if (editingDraftInvoice.invoiceType === "SALE_INVOICE") {
       if (editingDraftInvoice.businessBankAccountId == null) {
-        setSaleBankSelectValue("__profile__");
+        setSaleBankSelectValue("__none__");
       } else {
         setSaleBankSelectValue(String(editingDraftInvoice.businessBankAccountId));
       }
     } else {
-      setSaleBankSelectValue("__profile__");
+      setSaleBankSelectValue("__none__");
     }
     setDiscountAmount(editingDraftInvoice.discountAmount ?? "");
     setDiscountPercent(editingDraftInvoice.discountPercent ?? "");
@@ -1902,7 +1902,7 @@ export function useInvoiceCreateState(
                   const defId = bankAccountsResponse?.bankAccounts?.find((a) => a.isDefault)?.id;
                   return defId != null ? { businessBankAccountId: defId } : {};
                 }
-                if (saleBankSelectValue === "__profile__") {
+                if (saleBankSelectValue === "__none__") {
                   return { businessBankAccountId: null };
                 }
                 return { businessBankAccountId: Number(saleBankSelectValue) };
@@ -1946,7 +1946,7 @@ export function useInvoiceCreateState(
         ...(invoiceType === "SALE_INVOICE"
           ? saleBankSelectValue === "__auto__"
             ? {}
-            : saleBankSelectValue === "__profile__"
+            : saleBankSelectValue === "__none__"
               ? { businessBankAccountId: null }
               : { businessBankAccountId: Number(saleBankSelectValue) }
           : {}),
@@ -1966,7 +1966,7 @@ export function useInvoiceCreateState(
         ) {
           showErrorToast(
             err.message,
-            "Bank account doesn’t apply to this document or isn’t available. Pick another account or use profile bank fields only.",
+            "Bank account doesn’t apply to this document or isn’t available. Pick another account or choose no bank on invoice.",
           );
           submitGuardRef.current = false;
           return;

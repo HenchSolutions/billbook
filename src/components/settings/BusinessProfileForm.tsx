@@ -59,7 +59,7 @@ interface BusinessProfileFormProps {
   onSignatureUpload?: (file: File) => Promise<string | null>;
   /** When true, profile is view-only (STAFF — GET allowed, PUT blocked by API). */
   readOnly?: boolean;
-  /** Saved bank accounts block inside Bank details (same section as profile bank fields). */
+  /** Saved bank accounts (CRUD) under Bank details. */
   canViewBankAccounts?: boolean;
   canEditBankAccounts?: boolean;
 }
