@@ -226,7 +226,7 @@ export default function InvoiceDetail() {
   );
 
   return (
-    <div className="page-container animate-fade-in">
+    <div className="page-container animate-fade-in pb-16">
       <PageBackLink href={typeMeta?.path ?? "/invoices"}>
         Back to {typeMeta?.label ?? "invoices"}
       </PageBackLink>

@@ -75,19 +75,13 @@ export function OutboundPaymentsTable({
           <table className="data-table min-w-[720px]">
             <thead className="data-table-head-sticky">
               <tr>
-                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Voucher</th>
-                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Type</th>
-                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Date</th>
-                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">
-                  Party / payee
-                </th>
-                <th className="data-table-th px-4 text-[11px] uppercase tracking-wider">Method</th>
-                <th className="data-table-th data-table-col-numeric px-4 text-[11px] uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="data-table-th data-table-col-numeric px-4 text-[11px] uppercase tracking-wider">
-                  PDF
-                </th>
+                <th className="data-table-th px-4">Voucher</th>
+                <th className="data-table-th px-4">Type</th>
+                <th className="data-table-th px-4">Date</th>
+                <th className="data-table-th px-4">Party / payee</th>
+                <th className="data-table-th px-4">Method</th>
+                <th className="data-table-th data-table-col-numeric px-4">Amount</th>
+                <th className="data-table-th data-table-col-numeric px-4">PDF</th>
               </tr>
             </thead>
             <tbody className="[&_tr:nth-child(even)]:bg-muted/15">

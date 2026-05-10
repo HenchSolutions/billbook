@@ -291,7 +291,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="page-container animate-fade-in pb-10">
+    <div className="page-container animate-fade-in pb-16">
       <ErrorBanner error={error} fallbackMessage="Failed to load profile" />
       {business ? (
         <ProfileEditor

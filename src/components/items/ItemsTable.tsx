@@ -95,7 +95,7 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                     title="Edit"
                     aria-label={`Edit ${item.name}`}
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   {!isServiceType(item.type) && onViewLedger ? (
                     <Button
@@ -106,7 +106,7 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                       title="Stock movement history"
                       aria-label={`Stock movement history for ${item.name}`}
                     >
-                      <History className="h-3.5 w-3.5" />
+                      <History className="h-4 w-4" />
                     </Button>
                   ) : null}
                 </div>

@@ -18,11 +18,11 @@
     --primary: 222 47% 22%;
     --primary-foreground: 210 20% 98%;
 
-    --secondary: 214 18% 94%;
+    --secondary: 214 18% 91%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 214 18% 94%;
-    --muted-foreground: 215 16% 40%;
+    --muted: 214 18% 91%;
+    --muted-foreground: 215 16% 38%;
 
     --accent: 217 84% 54%;
     --accent-foreground: 0 0% 100%;
@@ -30,9 +30,9 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 16% 90%;
-    --input: 214 16% 90%;
-    --ring: 222 47% 28%;
+    --border: 214 16% 82%;
+    --input: 214 16% 82%;
+    --ring: 217 84% 54%;
 
     --radius: 0.6rem;
 
@@ -244,11 +244,11 @@
   }
 
   .data-table-row {
-    @apply transition-colors hover:bg-muted/40;
+    @apply transition-colors hover:bg-muted/60;
   }
 
   .data-table-row-selected {
-    @apply bg-primary/5;
+    @apply bg-primary/10;
   }
 
   .data-table-col-numeric {

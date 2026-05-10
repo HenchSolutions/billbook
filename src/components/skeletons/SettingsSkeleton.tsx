@@ -58,7 +58,7 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
   if (variant === "profile") {
     /** Mirrors `ProfileEditor` + `BusinessProfileForm`: PageHeader row, completion card, stacked FormSections. */
     return (
-      <div className="page-container animate-fade-in pb-10">
+      <div className="page-container animate-fade-in pb-16">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="page-header mb-0">
             <Skeleton className="h-9 w-48 max-w-[85vw] sm:h-10" />

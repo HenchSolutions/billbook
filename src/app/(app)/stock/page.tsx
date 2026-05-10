@@ -7,6 +7,7 @@ import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import SearchInput from "@/components/SearchInput";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/use-debounce";
 import { StockOverviewCards } from "@/components/items/StockOverviewCards";
@@ -51,11 +52,11 @@ export default function Stock() {
   const debouncedSearch = useDebounce(search, 300);
 
   const { data: itemsData, isPending: itemsPending, error: itemsError } = useItems({ limit: 100 });
-  const { data: stockDataForCards, isPending: stockCardsPending } = useStockList({
-    limit: 1,
-    enabled: canStockOverview,
-  });
-  const { data: stockData, error: stockError } = useStockList({
+  const {
+    data: stockData,
+    isPending: stockPending,
+    error: stockError,
+  } = useStockList({
     limit: 200,
     search: debouncedSearch || undefined,
   });
@@ -68,11 +69,6 @@ export default function Stock() {
   } = useStockEntries({ limit: 200, search: debouncedSearch || undefined });
   const createStockEntry = useCreateStockEntry();
   const updateStockEntry = useUpdateStockEntry();
-  const { data: suppliersData } = useParties({
-    type: "SUPPLIER",
-    includeInactive: false,
-    limit: 200,
-  });
 
   const items = useMemo(
     () => (itemsData?.items ?? []).filter((i) => i.isActive),
@@ -85,10 +81,10 @@ export default function Stock() {
       : null;
   const showAddStockView = canManageStock && (stockView === "add" || prefillItemId > 0);
 
-  const { data: stockDataForLowFlags } = useStockList({
-    limit: 500,
-    enabled: !showAddStockView,
-  });
+  const { data: suppliersData } = useParties(
+    { type: "SUPPLIER", includeInactive: false, limit: 200 },
+    { enabled: canManageStock && showAddStockView },
+  );
 
   const stockEntries = useMemo(
     (): StockEntry[] => stockEntriesData?.entries ?? [],
@@ -147,7 +143,7 @@ export default function Stock() {
   }, [stockData?.stock, stockEntries]);
   const activeSuppliers = useMemo(() => suppliersData?.parties ?? [], [suppliersData?.parties]);
 
-  const summary = (canStockOverview ? stockDataForCards?.summary : undefined) ?? stockData?.summary;
+  const summary = stockData?.summary;
   const totalPurchasedValue = summary?.stockValue?.totalPurchasedValue ?? "0";
   const totalItems = summary?.stockValue?.totalItems ?? 0;
   const totalQuantity = summary?.stockValue?.totalQuantity ?? "0";
@@ -158,11 +154,11 @@ export default function Stock() {
 
   const lowStockItemIds = useMemo(() => {
     const s = new Set<number>();
-    for (const row of stockDataForLowFlags?.stock ?? []) {
+    for (const row of stockData?.stock ?? []) {
       if (row.isLowStock === true) s.add(row.itemId);
     }
     return s;
-  }, [stockDataForLowFlags?.stock]);
+  }, [stockData?.stock]);
 
   const handleStockSubmit = useCallback(
     async (entries: CreateStockEntryRequest[]): Promise<StockEntry[]> => {
@@ -228,11 +224,11 @@ export default function Stock() {
 
       {canStockOverview ? (
         <div className="mb-6">
-          {stockCardsPending && !stockDataForCards ? (
+          {stockPending && !stockData ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
-              <div className="h-[88px] animate-pulse rounded-lg border bg-muted/50" />
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-[88px] rounded-lg" />
+              ))}
             </div>
           ) : (
             <StockOverviewCards

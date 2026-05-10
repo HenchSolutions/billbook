@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataTableRoot } from "@/components/ui/data-table";
 import { formatCurrency, formatDate } from "@/lib/core/utils";
 import { openSignedPdfFromApiPath } from "@/lib/ui/signed-pdf";
 import {
@@ -79,47 +80,45 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="data-table-container overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="px-3 py-3 text-left font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                <th className="px-3 py-3 text-left font-medium text-muted-foreground">Method</th>
-                <th className="px-3 py-3 text-right font-medium text-muted-foreground">Amount</th>
-                <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground lg:table-cell">
-                  Reference / doc
-                </th>
-                <th className="px-3 py-3 text-right font-medium text-muted-foreground">Actions</th>
+      <CardContent className="p-0">
+        <DataTableRoot
+          density="default"
+          className="overflow-x-auto rounded-none border-0 shadow-none"
+        >
+          <table className="data-table min-w-[640px]">
+            <thead className="data-table-head-sticky">
+              <tr>
+                <th className="data-table-th">Type</th>
+                <th className="data-table-th">Date</th>
+                <th className="data-table-th">Method</th>
+                <th className="data-table-th data-table-col-numeric">Amount</th>
+                <th className="data-table-th hidden lg:table-cell">Reference / doc</th>
+                <th className="data-table-th text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {lines.map((p) => (
-                <tr
-                  key={`${p.source}-${p.id}`}
-                  className="border-b last:border-0 hover:bg-muted/20"
-                >
-                  <td className="px-3 py-3">
+                <tr key={`${p.source}-${p.id}`} className="data-table-row last:border-0">
+                  <td className="data-table-td">
                     <Badge variant="outline" className={sourceBadgeClass(p)}>
                       {sourceLabel(p)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDate(p.createdAt)}</td>
-                  <td className="px-3 py-3">
+                  <td className="data-table-td text-muted-foreground">{formatDate(p.createdAt)}</td>
+                  <td className="data-table-td">
                     <Badge variant="outline" className={METHOD_STYLES[p.paymentMethod] ?? ""}>
                       {p.paymentMethod.replace("_", " ")}
                     </Badge>
                   </td>
                   <td
-                    className={`px-3 py-3 text-right font-semibold tabular-nums ${
+                    className={`data-table-td data-table-col-numeric font-semibold ${
                       p.source === "OUTBOUND_REFUND" ? "text-destructive" : "text-status-paid"
                     }`}
                   >
                     {p.source === "OUTBOUND_REFUND" ? "−" : ""}
                     {formatCurrency(p.amount)}
                   </td>
-                  <td className="hidden max-w-[220px] truncate px-4 py-3 text-muted-foreground lg:table-cell">
+                  <td className="data-table-td hidden max-w-[220px] truncate text-muted-foreground lg:table-cell">
                     {p.source === "RECEIPT_ALLOCATION" && p.receiptNumber ? (
                       <Link
                         href={`/receipts/${p.receiptId}`}
@@ -133,7 +132,7 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
                       (p.referenceNumber ?? "—")
                     )}
                   </td>
-                  <td className="px-3 py-3 text-right">
+                  <td className="data-table-td text-right">
                     <div className="flex flex-wrap justify-end gap-1">
                       {p.source === "RECEIPT_ALLOCATION" && (
                         <Button
@@ -178,7 +177,7 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
               ))}
             </tbody>
           </table>
-        </div>
+        </DataTableRoot>
       </CardContent>
     </Card>
   );

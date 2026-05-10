@@ -37,7 +37,7 @@ export function FieldError({ id, className, ...props }: React.ComponentPropsWith
     <p
       id={id}
       role="alert"
-      className={cn("mt-1.5 text-xs text-destructive", className)}
+      className={cn("mt-1.5 text-sm text-destructive", className)}
       {...props}
     />
   );

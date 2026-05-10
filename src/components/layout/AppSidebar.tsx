@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/core/utils";
 import { SIDEBAR_NAV_ACTIVE } from "@/lib/ui/sidebar-nav-styles";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BusinessIdentity } from "@/components/BusinessIdentity";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -35,20 +34,13 @@ interface AppSidebarProps {
 export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const { can } = usePermissions();
   const [sectionFold, setSectionFold] = useState<SectionFoldMode>({ kind: "route" });
   const safePathname = pathname ?? "";
   const normalizedPathname = (safePathname.split("?")[0] ?? "").replace(/\/$/, "") || "/";
   const ledgerSource = searchParams.get("from");
   const isPartyLedgerRoute = /^\/parties\/[^/]+\/ledger\/?$/.test(safePathname);
-
-  const handleLogout = async () => {
-    onNavigate?.();
-    router.replace("/?loggedOut=1");
-    await logout();
-  };
 
   const isPathActive = useCallback(
     (path: string, activeMatch: SidebarNavItemModel["activeMatch"] = "prefix") => {
@@ -273,40 +265,25 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         ))}
       </nav>
 
-      <Separator className="bg-sidebar-border" />
-
-      <div className="shrink-0 space-y-1 p-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start rounded-lg text-sidebar-foreground/90 hover:bg-sidebar-hover hover:text-sidebar-foreground"
-          onClick={handleLogout}
-          title="Log out"
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="ml-3">Log out</span>}
-        </Button>
-
-        {!collapsed && (
-          <>
-            <Separator className="bg-sidebar-border" />
-            <div className="flex w-full flex-nowrap items-center justify-start gap-2 px-2 py-2">
-              <span className="shrink-0 text-xs font-semibold tracking-wide text-sidebar-foreground/55 sm:text-sm">
-                Billbook
-              </span>
-              <img
-                src="/hench-logo.png"
-                alt="Hench Solutions"
-                width={560}
-                height={186}
-                className="h-10 max-h-10 w-auto min-w-0 max-w-[70%] shrink object-contain object-left"
-                decoding="async"
-                draggable={false}
-              />
-            </div>
-          </>
-        )}
-      </div>
+      {!collapsed && (
+        <>
+          <Separator className="bg-sidebar-border" />
+          <div className="flex w-full shrink-0 flex-nowrap items-center justify-start gap-2 px-4 py-3">
+            <span className="shrink-0 text-xs font-semibold tracking-wide text-sidebar-foreground/55 sm:text-sm">
+              Billbook
+            </span>
+            <img
+              src="/hench-logo.png"
+              alt="Hench Solutions"
+              width={560}
+              height={186}
+              className="h-10 max-h-10 w-auto min-w-0 max-w-[70%] shrink object-contain object-left"
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        </>
+      )}
     </aside>
   );
 }

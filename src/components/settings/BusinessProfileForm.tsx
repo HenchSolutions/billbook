@@ -408,7 +408,7 @@ export function BusinessProfileForm({
     <form
       id="profile-form"
       onSubmit={readOnly ? (e) => e.preventDefault() : handleSubmit(onSubmit)}
-      className="w-full min-w-0"
+      className="flex w-full min-w-0 flex-col gap-6"
     >
       <fieldset disabled={readOnly} className="min-w-0 space-y-6 border-0 p-0">
         <div className="flex flex-col gap-6">

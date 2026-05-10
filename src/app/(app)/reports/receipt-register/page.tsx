@@ -436,9 +436,7 @@ export default function ReceiptRegisterPage() {
       ) : data ? (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="font-semibold tabular-nums text-foreground">{rows.length}</span>
-              {rows.length === 1 ? "record" : "records"}
+            <div className="flex items-center gap-2">
               {isFiltered && (
                 <button
                   type="button"
@@ -552,7 +550,7 @@ export default function ReceiptRegisterPage() {
                       colSpan={5}
                       className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground"
                     >
-                      Total — {rows.length} {rows.length === 1 ? "record" : "records"}
+                      Total
                     </td>
                     <td className={cn(rr.tdRight, "font-bold text-foreground")}>
                       {formatCurrency(String(totals.amount.toFixed(2)))}

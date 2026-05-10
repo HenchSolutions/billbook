@@ -43,7 +43,7 @@ export function ReceiptsTable({
                 <th className="data-table-th data-table-col-numeric px-4">Total</th>
                 <th className="data-table-th data-table-col-numeric px-4">Opening tag</th>
                 <th className="data-table-th data-table-col-numeric px-4">Unallocated</th>
-                <th className="data-table-th data-table-col-numeric px-4">Actions</th>
+                <th className="data-table-th px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -99,7 +99,7 @@ export function ReceiptsTable({
                         <span className="text-muted-foreground">—</span>
                       )}
                     </td>
-                    <td className="data-table-td data-table-col-numeric px-4">
+                    <td className="data-table-td px-4 text-center">
                       {canAllocate ? (
                         <Button variant="default" size="sm" className="h-8" asChild>
                           <Link href={`/receipts/${r.id}#allocate`}>Allocate</Link>

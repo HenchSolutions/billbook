@@ -94,16 +94,26 @@ export default function InvoiceDetailSkeleton() {
       {/* InvoicePaymentsTable */}
       <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="border-b px-6 pb-3 pt-4">
-          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-5 w-36" />
         </div>
-        <div className="space-y-3 p-6">
+        <div className="overflow-x-auto">
+          <div className="flex items-center gap-4 border-b border-border bg-muted/30 px-4 py-2.5">
+            <Skeleton className="h-3 w-14" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="ml-auto h-3 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/15 px-3 py-2.5"
+              className="flex items-center gap-4 border-b border-border/60 px-4 py-3 last:border-0"
             >
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-6 w-16 rounded-full" />
               <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="ml-auto h-4 w-24" />
+              <Skeleton className="h-8 w-28 rounded-md" />
             </div>
           ))}
         </div>

@@ -294,9 +294,7 @@ export default function PurchaseRegisterPage() {
         <div className="space-y-2">
           {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="font-semibold tabular-nums text-foreground">{rows.length}</span>
-              {rows.length === 1 ? "record" : "records"}
+            <div className="flex items-center gap-2">
               {isFiltered && (
                 <button
                   onClick={handleClear}
@@ -410,7 +408,7 @@ export default function PurchaseRegisterPage() {
                       colSpan={4}
                       className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground"
                     >
-                      Total — {rows.length} {rows.length === 1 ? "record" : "records"}
+                      Total
                     </td>
                     <td
                       className={cn(

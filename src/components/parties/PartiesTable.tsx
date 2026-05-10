@@ -123,7 +123,7 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                       title="Edit"
                       aria-label={`Edit ${party.name}`}
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     {showLedger ? (
                       <Button
@@ -133,7 +133,7 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                         title="Account History"
                         aria-label={`View account history for ${party.name}`}
                       >
-                        <History className="h-3.5 w-3.5" />
+                        <History className="h-4 w-4" />
                       </Button>
                     ) : null}
                   </div>

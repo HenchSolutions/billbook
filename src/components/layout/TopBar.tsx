@@ -2,7 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Menu, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import {
+  Building2,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Settings,
+  User,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/core/utils";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -39,7 +50,7 @@ export default function TopBar({
   sidebarCollapsed = false,
   isMobile = false,
 }: TopBarProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { can } = usePermissions();
   const router = useRouter();
   const [commandOpen, setCommandOpen] = useState(false);
@@ -47,11 +58,26 @@ export default function TopBar({
   const [modifierKeyLabel, setModifierKeyLabel] = useState("Ctrl");
 
   const displayName = user ? `${user.firstName} ${user.lastName}` : "";
+  const userEmail = user?.email?.trim();
   const organizationCode = user?.organizationCode?.trim();
   const businessName = user?.businessName?.trim();
-  const handleOpenProfile = () => router.push("/profile");
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const handleNavigateAndClose = (path: string) => {
+    setProfileOpen(false);
+    router.push(path);
+  };
+
+  const handleLogout = async () => {
+    setProfileOpen(false);
+    router.replace("/?loggedOut=1");
+    await logout();
+  };
 
   const canListRoleGroups = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
+  const canViewProfile = can(PAGE.profile);
+  const canViewSettings = can(PAGE.settings);
+  const canViewTeam = can(PAGE.team);
   const canQuickAddInvoice = INVOICE_PAGE_ACCESS_KEYS.some((key) => can(key));
   const canQuickAddParty = can(PAGE.parties);
   const canQuickAddItem = can(PAGE.items);
@@ -255,27 +281,91 @@ export default function TopBar({
         >
           <Search className="h-4 w-4" />
         </Button>
-        <button
-          type="button"
-          onClick={handleOpenProfile}
-          className="flex items-center gap-3 rounded-lg px-2 py-1 text-left transition-colors hover:bg-muted/80"
-          aria-label="Open profile"
-        >
-          <div className="hidden text-right sm:block">
-            <p className="text-sm font-medium leading-none">{displayName}</p>
-            <Badge
-              variant="secondary"
-              shape="tag"
-              className="mt-0.5 max-w-[11rem] truncate px-1.5 py-0 text-[10px]"
-              title={roleBadgeLabel}
+        <Popover open={profileOpen} onOpenChange={setProfileOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-3 rounded-lg px-2 py-1 text-left transition-colors hover:bg-muted/80"
+              aria-label="Open profile menu"
+              aria-haspopup="true"
+              aria-expanded={profileOpen}
             >
-              {roleBadgeLabel}
-            </Badge>
-          </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card text-xs font-semibold text-foreground shadow-sm">
-            {user?.firstName?.charAt(0) || "U"}
-          </div>
-        </button>
+              <div className="hidden text-right sm:block">
+                <p className="text-sm font-medium leading-none">{displayName}</p>
+                <Badge
+                  variant="secondary"
+                  shape="tag"
+                  className="mt-0.5 max-w-[11rem] truncate px-1.5 py-0 text-[10px]"
+                  title={roleBadgeLabel}
+                >
+                  {roleBadgeLabel}
+                </Badge>
+              </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card text-sm font-semibold text-foreground shadow-sm">
+                {user?.firstName?.charAt(0) || "U"}
+              </div>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" sideOffset={8} className="w-64 p-0">
+            {/* User identity header */}
+            <div className="px-4 py-3">
+              <p className="text-sm font-semibold leading-tight text-foreground">{displayName}</p>
+              {userEmail && (
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{userEmail}</p>
+              )}
+              {businessName && (
+                <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
+                  {businessName}
+                </p>
+              )}
+            </div>
+            <Separator />
+            {/* Navigation actions */}
+            <div className="py-1.5">
+              {canViewProfile && (
+                <button
+                  type="button"
+                  onClick={() => handleNavigateAndClose("/profile")}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-muted/60"
+                >
+                  <User className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  My Profile
+                </button>
+              )}
+              {canViewSettings && (
+                <button
+                  type="button"
+                  onClick={() => handleNavigateAndClose("/settings")}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-muted/60"
+                >
+                  <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  Business Settings
+                </button>
+              )}
+              {(canViewTeam || canListRoleGroups) && (
+                <button
+                  type="button"
+                  onClick={() => handleNavigateAndClose("/team")}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-muted/60"
+                >
+                  <Settings className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  Team & Roles
+                </button>
+              )}
+            </div>
+            <Separator />
+            <div className="py-1.5">
+              <button
+                type="button"
+                onClick={() => void handleLogout()}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden />
+                Log out
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
       <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
         <CommandInput placeholder="Search pages, create actions, shortcuts..." />
