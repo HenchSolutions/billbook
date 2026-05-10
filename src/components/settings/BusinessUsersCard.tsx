@@ -501,7 +501,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
               <div
                 className={cn(
                   "flex flex-col gap-4 rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors",
-                  "dark:ring-white/10 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+                  "sm:flex-row sm:items-center sm:justify-between sm:gap-4",
                   "hover:border-primary/20 hover:bg-muted/15",
                 )}
               >
@@ -592,7 +592,7 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
       {shellInner}
     </div>
   ) : (
-    <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+    <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5">
       {shellInner}
     </div>
   );

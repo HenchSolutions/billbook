@@ -178,7 +178,7 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
             <ListChecks className="h-3.5 w-3.5" aria-hidden />
             {checklistOpen ? "Hide checklist" : "View checklist"}
             {!checklistOpen && incompleteCount > 0 ? (
-              <span className="ml-0.5 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-amber-950 dark:text-amber-100">
+              <span className="ml-0.5 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-amber-950">
                 {incompleteCount}
               </span>
             ) : null}

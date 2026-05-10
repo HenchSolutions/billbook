@@ -146,8 +146,7 @@ export function StockEntriesTable({
                     className={cn(
                       stockTableTdClass,
                       "px-3 text-left font-medium sm:px-4",
-                      isLowStockRow &&
-                        "border-l-[3px] border-l-destructive/70 dark:border-l-destructive/60",
+                      isLowStockRow && "border-l-[3px] border-l-destructive/70",
                     )}
                   >
                     {itemName}

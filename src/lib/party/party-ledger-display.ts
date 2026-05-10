@@ -39,15 +39,13 @@ export function partyLedgerBalanceInlineParts(raw: string | null | undefined): {
     return {
       amountStr,
       label: "Debit",
-      labelClassName:
-        "text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400",
+      labelClassName: "text-xs font-semibold uppercase tracking-wide text-red-600",
     };
   }
   return {
     amountStr,
     label: "Credit",
-    labelClassName:
-      "text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400",
+    labelClassName: "text-xs font-semibold uppercase tracking-wide text-emerald-600",
   };
 }
 

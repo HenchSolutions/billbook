@@ -144,10 +144,9 @@ export default function PartyLedgerPage() {
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          <span className="font-medium text-red-600 dark:text-red-400">Debit</span> and{" "}
-          <span className="font-medium text-emerald-600 dark:text-emerald-400">Credit</span> show
-          whether the party owes you or you owe them; the amount shown is always a positive rupee
-          value.
+          <span className="font-medium text-red-600">Debit</span> and{" "}
+          <span className="font-medium text-emerald-600">Credit</span> show whether the party owes
+          you or you owe them; the amount shown is always a positive rupee value.
         </p>
         <Button variant="outline" size="sm" className="shrink-0 self-start sm:self-auto" asChild>
           <Link href={paymentHref}>{paymentLabel}</Link>

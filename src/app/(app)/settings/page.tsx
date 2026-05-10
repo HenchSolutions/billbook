@@ -31,7 +31,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+          <div className="rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5">
             <div className="p-6 sm:p-8">
               <DocumentNumberingCard embedded />
             </div>

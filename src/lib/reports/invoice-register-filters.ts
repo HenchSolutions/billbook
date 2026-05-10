@@ -6,7 +6,7 @@ import type { InvoiceRegisterRowDto } from "@/types/report";
 export const REGISTER_FLOAT_EPS = 0.001;
 
 /** Negative signed amounts (outflows / sale returns) in registers. */
-export const REGISTER_NEGATIVE_AMOUNT_CLASS = "text-red-600 dark:text-red-400";
+export const REGISTER_NEGATIVE_AMOUNT_CLASS = "text-red-600";
 
 export type InvoiceRegisterPayStatusFilter = "ALL" | "PAID" | "UNPAID" | "PARTIAL";
 

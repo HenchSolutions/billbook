@@ -14,7 +14,7 @@ export const PAYMENT_METHOD_LABEL: Record<string, string> = {
 /** Distinct badge styling for system-generated opening receipts. */
 export function receiptPaymentMethodBadgeClass(method: string): string {
   if (method === "OPENING_BALANCE") {
-    return "border-primary/30 bg-primary/[0.08] text-foreground dark:bg-primary/12";
+    return "border-primary/30 bg-primary/[0.08] text-foreground";
   }
   return "";
 }

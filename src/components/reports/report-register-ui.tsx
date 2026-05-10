@@ -147,9 +147,8 @@ export function ReportRegisterSummaryCard({
     <div
       className={cn(
         "rounded-lg border px-5 py-4 text-sm shadow-sm",
-        variant === "emerald" &&
-          "border-status-paid/25 bg-status-paid/[0.06] dark:bg-status-paid/10",
-        variant === "rose" && "border-destructive/25 bg-destructive/[0.06] dark:bg-destructive/10",
+        variant === "emerald" && "border-status-paid/25 bg-status-paid/[0.06]",
+        variant === "rose" && "border-destructive/25 bg-destructive/[0.06]",
       )}
     >
       {children}

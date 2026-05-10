@@ -4,7 +4,7 @@ import type { LegendProps } from "recharts";
 
 import { cn, formatNumber } from "@/lib/core/utils";
 
-const THEMES = { light: "", dark: ".dark" } as const;
+const THEMES = { light: "" } as const;
 
 export type ChartConfig = {
   [k in string]: {

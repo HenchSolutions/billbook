@@ -76,7 +76,7 @@ export function LandingHeroSection() {
         </div>
 
         <div className="lg:col-span-6">
-          <Card className="motion-safe:animate-scale-in overflow-hidden border-border/60 shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+          <Card className="motion-safe:animate-scale-in overflow-hidden border-border/60 shadow-md ring-1 ring-black/[0.04]">
             <div className="border-b border-border/60 bg-gradient-to-r from-primary/[0.06] via-muted/35 to-background px-4 py-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Invoice preview</p>

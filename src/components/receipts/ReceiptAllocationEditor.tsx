@@ -277,7 +277,7 @@ export function ReceiptAllocationEditor({
             <p
               className={cn(
                 "mt-1 text-xl font-semibold tabular-nums tracking-tight",
-                remaining > 0.001 ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+                remaining > 0.001 ? "text-amber-700" : "text-muted-foreground",
               )}
             >
               {formatCurrency(String(Math.max(0, remaining)))}

@@ -155,7 +155,7 @@ export default function PayablesRegisterPage() {
           <ReportRegisterSummaryCard variant="rose">
             <p className="text-muted-foreground">
               <span>{reportPayablesRegister.summaryTotalLabel} </span>
-              <span className="text-lg font-semibold tabular-nums text-rose-900 dark:text-rose-100">
+              <span className="text-lg font-semibold tabular-nums text-rose-900">
                 {formatCurrency(totalPayableStr)}
               </span>
             </p>
@@ -231,7 +231,7 @@ export default function PayablesRegisterPage() {
                           rr.tdRight,
                           "font-semibold",
                           num(p.payableAmount) > REGISTER_FLOAT_EPS
-                            ? "text-rose-800 dark:text-rose-300"
+                            ? "text-rose-800"
                             : "text-muted-foreground",
                         )}
                       >
@@ -257,7 +257,7 @@ export default function PayablesRegisterPage() {
                         rr.tdRight,
                         "font-bold",
                         totals.payable > REGISTER_FLOAT_EPS
-                          ? "text-rose-800 dark:text-rose-300"
+                          ? "text-rose-800"
                           : "text-muted-foreground",
                       )}
                     >

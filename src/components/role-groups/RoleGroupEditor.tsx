@@ -146,7 +146,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
       <PageHeader title={isCreate ? "New role group" : (existing?.name ?? "Role group")} />
 
       <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-5xl flex-col gap-10 pb-8">
-        <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+        <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5">
           <div className="border-b border-border/60 bg-muted/20 px-5 py-4 sm:px-6">
             <h2 className="text-lg font-semibold tracking-tight">Details</h2>
           </div>

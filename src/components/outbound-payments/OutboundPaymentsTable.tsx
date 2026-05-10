@@ -132,7 +132,7 @@ export function OutboundPaymentsTable({
                       {PAYMENT_METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
                     </Badge>
                   </td>
-                  <td className="data-table-td data-table-col-numeric px-4 font-semibold text-rose-700 dark:text-rose-400">
+                  <td className="data-table-td data-table-col-numeric px-4 font-semibold text-rose-700">
                     {formatCurrency(p.amount)}
                   </td>
                   <td className="data-table-td data-table-col-numeric px-4">

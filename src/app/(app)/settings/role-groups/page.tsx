@@ -101,7 +101,7 @@ export default function RoleGroupsListPage() {
                       href={`/settings/role-groups/${g.id}`}
                       className={cn(
                         "group flex items-stretch gap-3 rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/5 transition-colors sm:gap-4 sm:p-5",
-                        "hover:border-primary/25 hover:bg-muted/20 dark:ring-white/10",
+                        "hover:border-primary/25 hover:bg-muted/20",
                       )}
                     >
                       <div

@@ -119,7 +119,7 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                 <td className="data-table-td data-table-col-numeric hidden sm:table-cell">
                   {unalloc != null ? (
                     unalloc > 0.001 ? (
-                      <span className="font-medium text-amber-800 dark:text-amber-200">
+                      <span className="font-medium text-amber-800">
                         {formatCurrency(String(unalloc))}
                       </span>
                     ) : (

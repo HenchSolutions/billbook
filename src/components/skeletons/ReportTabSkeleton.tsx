@@ -140,7 +140,7 @@ export function ReportTabSkeleton({
           <Skeleton className="h-9 w-36" />
           <Skeleton className="h-9 w-36" />
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]">
+        <div className="rounded-lg border border-border/60 bg-card p-4 shadow-sm ring-1 ring-black/[0.03]">
           <Skeleton className="mb-3 h-5 w-48" />
           <Skeleton className="h-[220px] w-full rounded-lg" />
         </div>
@@ -166,7 +166,7 @@ export function ReportsDashboardSkeleton() {
           {[1, 2, 3].map((i) => (
             <Skeleton
               key={i}
-              className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]"
+              className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03]"
             />
           ))}
         </div>
@@ -178,8 +178,8 @@ export function ReportsDashboardSkeleton() {
           <Skeleton className="h-4 w-full max-w-lg" />
         </div>
         <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-          <Skeleton className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]" />
-          <Skeleton className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]" />
+          <Skeleton className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03]" />
+          <Skeleton className="h-[148px] rounded-lg border border-border/60 shadow-sm ring-1 ring-black/[0.03]" />
         </div>
       </section>
     </div>

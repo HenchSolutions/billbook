@@ -389,7 +389,7 @@ export default function PurchaseRegisterPage() {
                             money.balance < -REGISTER_FLOAT_EPS
                               ? REGISTER_NEGATIVE_AMOUNT_CLASS
                               : money.balance > REGISTER_FLOAT_EPS
-                                ? "text-rose-700 dark:text-rose-400"
+                                ? "text-rose-700"
                                 : "text-muted-foreground",
                           )}
                         >
@@ -437,7 +437,7 @@ export default function PurchaseRegisterPage() {
                         totals.balance < -REGISTER_FLOAT_EPS
                           ? REGISTER_NEGATIVE_AMOUNT_CLASS
                           : totals.balance > REGISTER_FLOAT_EPS
-                            ? "text-rose-700 dark:text-rose-400"
+                            ? "text-rose-700"
                             : "text-muted-foreground",
                       )}
                     >

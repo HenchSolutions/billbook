@@ -99,7 +99,6 @@ function KpiLinkCard({
         "group relative block h-full rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03] transition-all",
         "hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "dark:bg-card/80 dark:ring-white/[0.04]",
         "sm:p-5",
       )}
     >
@@ -146,7 +145,6 @@ function KpiSplitCard({
       className={cn(
         fluidMetricShellClass,
         "group relative block h-full rounded-lg border border-border/60 bg-card/90 p-4 shadow-sm ring-1 ring-black/[0.03]",
-        "dark:bg-card/80 dark:ring-white/[0.04]",
         "sm:p-5",
       )}
     >
@@ -198,13 +196,13 @@ function BalanceLinkCard({
 }) {
   const shell =
     accent === "emerald"
-      ? "border-l-[3px] border-l-status-paid/90 hover:border-l-status-paid bg-gradient-to-r from-status-paid/[0.08] to-transparent dark:from-status-paid/12"
-      : "border-l-[3px] border-l-destructive/90 hover:border-l-destructive bg-gradient-to-r from-destructive/[0.08] to-transparent dark:from-destructive/12";
+      ? "border-l-[3px] border-l-status-paid/90 hover:border-l-status-paid bg-gradient-to-r from-status-paid/[0.08] to-transparent"
+      : "border-l-[3px] border-l-destructive/90 hover:border-l-destructive bg-gradient-to-r from-destructive/[0.08] to-transparent";
 
   return (
     <div
       className={cn(
-        "flex overflow-hidden rounded-lg border border-border/60 bg-card/90 shadow-sm ring-1 ring-black/[0.03] transition-colors hover:bg-muted/15 dark:ring-white/[0.04]",
+        "flex overflow-hidden rounded-lg border border-border/60 bg-card/90 shadow-sm ring-1 ring-black/[0.03] transition-colors hover:bg-muted/15",
         shell,
       )}
     >

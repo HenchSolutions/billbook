@@ -268,7 +268,7 @@ export function PermissionCatalogTree({
         "overflow-hidden",
         embedded
           ? "rounded-lg border border-border/60 bg-background/60"
-          : "rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10",
+          : "rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5",
       )}
     >
       <div

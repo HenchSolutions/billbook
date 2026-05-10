@@ -10,10 +10,10 @@ import type { DashboardData } from "@/types/dashboard";
 type PulseKind = "low" | "out" | "dead" | "fast";
 
 const SHELL: Record<PulseKind, string> = {
-  low: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-status-pending",
-  out: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-destructive",
-  dead: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
-  fast: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-status-paid",
+  low: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-status-pending",
+  out: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-destructive",
+  dead: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03]",
+  fast: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-status-paid",
 };
 
 const ICON_TILE: Record<PulseKind, string> = {

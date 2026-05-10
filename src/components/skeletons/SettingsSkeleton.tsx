@@ -30,7 +30,7 @@ export default function SettingsSkeleton({ variant = "compact" }: SettingsSkelet
                 <Skeleton className="h-4 w-full max-w-lg" />
               </div>
             </div>
-            <div className="rounded-lg border border-border/60 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+            <div className="rounded-lg border border-border/60 shadow-sm ring-1 ring-black/5">
               <div className="space-y-4 p-6 sm:p-8">
                 <Skeleton className="h-5 w-48" />
                 <Skeleton className="h-10 w-full" />

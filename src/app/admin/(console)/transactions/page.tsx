@@ -62,17 +62,17 @@ function paymentSummary(row: AdminTransactionRow): string {
 function kindBadgeClass(kind: string): string {
   switch (kind) {
     case "RECEIPT":
-      return "border-emerald-500/35 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100";
+      return "border-emerald-500/35 bg-emerald-500/10 text-emerald-950";
     case "SALE_INVOICE":
     case "SALE_RETURN":
-      return "border-primary/35 bg-primary/10 text-primary dark:text-primary";
+      return "border-primary/35 bg-primary/10 text-primary";
     case "PURCHASE_INVOICE":
     case "PURCHASE_RETURN":
-      return "border-chart-3/40 bg-chart-3/12 text-foreground dark:bg-chart-3/15";
+      return "border-chart-3/40 bg-chart-3/12 text-foreground";
     case "OPENING_BALANCE":
       return "border-border bg-muted/60 text-muted-foreground";
     case "OUTBOUND_PAYMENT":
-      return "border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100";
+      return "border-amber-500/40 bg-amber-500/10 text-amber-950";
     default:
       return "border-border bg-background text-foreground";
   }

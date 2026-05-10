@@ -51,22 +51,20 @@ type MetricKind =
 /** Card surfaces stay `bg-card`; metric hue is a top accent only (reads cleanly on the dashboard canvas). */
 const CARD_SHELL: Record<KpiTone, string> = {
   "today-sales":
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-accent",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-accent",
   "period-sales":
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-primary",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-primary",
   purchase:
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-3",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-chart-3",
   margin:
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-2",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-chart-2",
   "profit-positive":
-    "border border-border/90 bg-card shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06] border-t-[3px] border-t-status-paid",
+    "border border-border/90 bg-card shadow-md ring-1 ring-black/[0.04] border-t-[3px] border-t-status-paid",
   "profit-negative":
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-destructive",
-  "profit-neutral":
-    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
-  cash: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05] border-t-[3px] border-t-chart-3",
-  default:
-    "border border-border/90 bg-muted/20 shadow-sm ring-1 ring-black/[0.02] dark:bg-muted/15 dark:ring-white/[0.04]",
+    "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-destructive",
+  "profit-neutral": "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03]",
+  cash: "border border-border/90 bg-card shadow-sm ring-1 ring-black/[0.03] border-t-[3px] border-t-chart-3",
+  default: "border border-border/90 bg-muted/20 shadow-sm ring-1 ring-black/[0.02]",
 };
 
 const VALUE_CLASS: Record<KpiTone, string> = {
@@ -74,8 +72,8 @@ const VALUE_CLASS: Record<KpiTone, string> = {
   "period-sales": "text-foreground",
   purchase: "text-foreground",
   margin: "text-foreground",
-  "profit-positive": "text-status-paid dark:text-status-paid",
-  "profit-negative": "text-destructive dark:text-destructive",
+  "profit-positive": "text-status-paid",
+  "profit-negative": "text-destructive",
   "profit-neutral": "text-foreground",
   cash: "text-foreground",
   default: "text-muted-foreground",

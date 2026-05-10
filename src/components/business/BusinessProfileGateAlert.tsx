@@ -37,12 +37,7 @@ export function BusinessProfileGateAlert({
   const text = COPY[context];
 
   return (
-    <Alert
-      className={
-        className ??
-        "border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/25 dark:text-amber-100"
-      }
-    >
+    <Alert className={className ?? "border-amber-200 bg-amber-50 text-amber-950"}>
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle className="text-sm">{text.title}</AlertTitle>
       <AlertDescription className="space-y-2 text-sm">

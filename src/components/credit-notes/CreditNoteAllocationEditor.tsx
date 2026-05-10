@@ -155,9 +155,7 @@ export function CreditNoteAllocationEditor({
               <p
                 className={cn(
                   "mt-1 text-lg font-semibold tabular-nums tracking-tight",
-                  unallocated > 0.001
-                    ? "text-amber-700 dark:text-amber-400"
-                    : "text-muted-foreground",
+                  unallocated > 0.001 ? "text-amber-700" : "text-muted-foreground",
                 )}
               >
                 {formatCurrency(String(unallocated))}
@@ -227,7 +225,7 @@ export function CreditNoteAllocationEditor({
             <p
               className={cn(
                 "mt-1 break-words text-lg font-semibold tabular-nums tracking-tight sm:text-xl",
-                remaining > 0.001 ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+                remaining > 0.001 ? "text-amber-700" : "text-muted-foreground",
               )}
             >
               {formatCurrency(String(Math.max(0, remaining)))}

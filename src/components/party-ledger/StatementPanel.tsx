@@ -119,13 +119,13 @@ function StatementPeriodSummary({ statement }: { statement: StatementJsonData })
           <dd className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <span className="inline-flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
               <span className="text-xs font-medium text-muted-foreground">Debits</span>
-              <span className="font-semibold text-red-600 dark:text-red-400">
+              <span className="font-semibold text-red-600">
                 {formatCurrency(statement.totals.debit)}
               </span>
             </span>
             <span className="inline-flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
               <span className="text-xs font-medium text-muted-foreground">Credits</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="font-semibold text-emerald-600">
                 {formatCurrency(statement.totals.credit)}
               </span>
             </span>

@@ -56,7 +56,7 @@ function ValidityCell({ validityEnd }: { validityEnd: string | null }) {
         <span className="tabular-nums text-muted-foreground">{label}</span>
         <Badge
           variant="outline"
-          className="border-amber-500/40 bg-amber-500/10 text-[0.65rem] font-medium text-amber-950 dark:text-amber-100"
+          className="border-amber-500/40 bg-amber-500/10 text-[0.65rem] font-medium text-amber-950"
         >
           ≤ 7 days
         </Badge>

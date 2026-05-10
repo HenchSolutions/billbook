@@ -108,7 +108,7 @@ export default function OutboundPaymentsPage() {
               <ArrowDownLeft className="h-3.5 w-3.5" aria-hidden />
               This page total
             </div>
-            <p className="text-2xl font-semibold tabular-nums tracking-tight text-rose-700 dark:text-rose-400">
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-rose-700">
               {formatCurrency(pageTotalOutflow.toFixed(2))}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">

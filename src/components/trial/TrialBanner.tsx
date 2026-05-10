@@ -20,13 +20,10 @@ export function TrialBanner({ validityEnd, onRefresh, refreshing }: TrialBannerP
   return (
     <div
       role="status"
-      className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100"
+      className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-950"
     >
       <div className="flex min-w-0 items-center gap-2">
-        <CalendarClock
-          className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300"
-          aria-hidden
-        />
+        <CalendarClock className="h-4 w-4 shrink-0 text-amber-700" aria-hidden />
         <span className="min-w-0">
           Trial access ends on <strong className="font-semibold">{label}</strong>. Save your work
           and ask your admin to extend validity if needed.

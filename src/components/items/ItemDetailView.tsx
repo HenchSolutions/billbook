@@ -229,7 +229,7 @@ export function ItemDetailView({ id }: { id: number }) {
                               <td
                                 className={cn(
                                   "whitespace-nowrap py-3 pl-3 pr-8 text-right font-medium tabular-nums",
-                                  m.quantity > 0 && "text-emerald-600 dark:text-emerald-400",
+                                  m.quantity > 0 && "text-emerald-600",
                                   m.quantity < 0 && "text-destructive",
                                 )}
                               >

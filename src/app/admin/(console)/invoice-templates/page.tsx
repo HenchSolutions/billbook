@@ -94,13 +94,9 @@ function QualityBadge({ score }: { score: number | undefined | null }) {
         <span
           className={cn(
             "inline-flex cursor-default items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold",
-            isGreen &&
-              "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400",
-            isYellow &&
-              "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400",
-            !isGreen &&
-              !isYellow &&
-              "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400",
+            isGreen && "border-emerald-200 bg-emerald-50 text-emerald-700",
+            isYellow && "border-amber-200 bg-amber-50 text-amber-700",
+            !isGreen && !isYellow && "border-red-200 bg-red-50 text-red-700",
           )}
         >
           {isGreen ? (
@@ -132,7 +128,7 @@ function formatModelLabel(selectedModel: string | null | undefined): string | nu
 
 function AiProcessingPanel({ stepIndex }: { stepIndex: number }) {
   return (
-    <div className="mt-3 rounded-lg border border-border/60 bg-gradient-to-br from-primary/[0.07] to-muted/40 p-4 dark:border-border dark:from-primary/10 dark:to-muted/25">
+    <div className="mt-3 rounded-lg border border-border/60 bg-gradient-to-br from-primary/[0.07] to-muted/40 p-4">
       <div className="mb-3 flex items-center gap-2">
         <Sparkles className="h-4 w-4 animate-pulse text-primary" />
         <p className="text-sm font-semibold text-foreground">AI is transforming your template…</p>
@@ -146,7 +142,7 @@ function AiProcessingPanel({ stepIndex }: { stepIndex: number }) {
               key={step}
               className={cn(
                 "flex items-center gap-2 text-xs transition-all duration-300",
-                isDone && "text-emerald-700 dark:text-emerald-400",
+                isDone && "text-emerald-700",
                 isCurrent && "font-medium text-primary",
                 i > stepIndex && "text-muted-foreground/40",
               )}
@@ -185,7 +181,7 @@ function AiResultPanel({
   const hasFallback = result.selectedModel === "default-fallback";
 
   return (
-    <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-sidebar-accent to-primary/[0.06] p-4 dark:border-primary/25 dark:from-sidebar-accent dark:to-primary/5">
+    <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-sidebar-accent to-primary/[0.06] p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <BrainCircuit className="h-4 w-4 text-primary" />
@@ -211,7 +207,7 @@ function AiResultPanel({
           </span>
         )}
         {hasFallback && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
             <AlertTriangle className="h-3 w-3" />
             Default template applied
           </span>
@@ -234,12 +230,12 @@ function AiResultPanel({
 
       {warnings.length > 0 && (
         <details className="mt-2 text-xs">
-          <summary className="cursor-pointer select-none text-amber-700 dark:text-amber-400">
+          <summary className="cursor-pointer select-none text-amber-700">
             {warnings.length} warning{warnings.length > 1 ? "s" : ""} — click to review
           </summary>
           <ul className="mt-1.5 space-y-1 pl-1">
             {warnings.map((w, i) => (
-              <li key={i} className="flex items-start gap-1.5 text-amber-700 dark:text-amber-400">
+              <li key={i} className="flex items-start gap-1.5 text-amber-700">
                 <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0" />
                 {w}
               </li>
@@ -289,12 +285,12 @@ function VersionDiagnostics({ version }: { version: TemplateVersion }) {
           </span>
         )}
         {warnings.length > 0 && (
-          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
             {warnings.length} warning{warnings.length > 1 ? "s" : ""}
           </span>
         )}
         {isDefaultFallback && (
-          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
             default template
           </span>
         )}
@@ -303,7 +299,7 @@ function VersionDiagnostics({ version }: { version: TemplateVersion }) {
 
       <div className="space-y-1.5 border-t border-border/50 px-2.5 py-2">
         {isDefaultFallback && (
-          <p className="flex items-start gap-1.5 text-amber-700 [overflow-wrap:anywhere] dark:text-amber-400">
+          <p className="flex items-start gap-1.5 text-amber-700 [overflow-wrap:anywhere]">
             <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0" />
             Platform default template was applied — the uploaded HTML did not contain a recognizable
             invoice structure.
@@ -318,10 +314,7 @@ function VersionDiagnostics({ version }: { version: TemplateVersion }) {
         ))}
 
         {warnings.map((w, i) => (
-          <p
-            key={i}
-            className="flex items-start gap-1.5 text-amber-700 [overflow-wrap:anywhere] dark:text-amber-400"
-          >
+          <p key={i} className="flex items-start gap-1.5 text-amber-700 [overflow-wrap:anywhere]">
             <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0" />
             {w}
           </p>
@@ -677,7 +670,7 @@ export default function AdminInvoiceTemplatesPage() {
             <CardTitle className="flex items-center gap-2 text-lg">
               <Upload className="h-4 w-4" />
               Upload or add new version
-              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-0.5 text-xs font-medium text-primary dark:bg-primary/15">
+              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-0.5 text-xs font-medium text-primary">
                 <Sparkles className="h-3 w-3" />
                 AI-powered
               </span>
@@ -1263,7 +1256,7 @@ export default function AdminInvoiceTemplatesPage() {
                                       Assign this version
                                     </p>
                                     {version.status !== "PUBLISHED" && (
-                                      <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
+                                      <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
                                         Publish first to enable assignment
                                       </span>
                                     )}

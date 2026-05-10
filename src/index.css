@@ -90,60 +90,6 @@
     --chart-7: 280 65% 50%;
     --chart-8: 152 55% 42%;
   }
-
-  .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 20% 93%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 20% 93%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 20% 93%;
-    --primary: 217 84% 54%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 30% 16%;
-    --secondary-foreground: 210 20% 93%;
-    --muted: 222 30% 16%;
-    --muted-foreground: 215 16% 65%;
-    --accent: 217 84% 54%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 222 30% 16%;
-    --input: 222 30% 16%;
-    --ring: 210 20% 75%;
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 210 20% 82%;
-    --sidebar-primary: 217 84% 54%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 35% 13%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 35% 13%;
-    --sidebar-ring: 217 84% 54%;
-    --sidebar-muted: 215 16% 55%;
-    --sidebar-hover: 222 32% 12%;
-    --sidebar-active-bar: 217 84% 54%;
-
-    --chart-6: 217 78% 58%;
-    --chart-7: 280 62% 62%;
-    --chart-8: 152 52% 52%;
-
-    --status-cancelled: 0 65% 72%;
-    --status-cancelled-bg: 0 32% 18%;
-    --status-einvoiced: 217 85% 72%;
-    --status-einvoiced-bg: 217 40% 18%;
-    --status-filed: 152 55% 68%;
-    --status-filed-bg: 152 32% 18%;
-    --status-b2b: 280 62% 72%;
-    --status-b2b-bg: 280 32% 18%;
-    --status-b2c: 217 78% 72%;
-    --status-b2c-bg: 217 38% 18%;
-    --status-rcm: 38 85% 68%;
-    --status-rcm-bg: 38 35% 18%;
-    --status-exempt: 220 14% 72%;
-    --status-exempt-bg: 222 30% 16%;
-    --status-nil: 215 16% 68%;
-    --status-nil-bg: 222 30% 16%;
-  }
 }
 
 @layer base {
@@ -442,7 +388,7 @@
 
   /* Marketing-only utility */
   .glass-effect {
-    @apply bg-white/80 backdrop-blur-sm dark:bg-black/30;
+    @apply bg-white/80 backdrop-blur-sm;
   }
 
   /* Marketing-only utility */

@@ -141,7 +141,7 @@ export default function CreditNoteDetailPage() {
               {remaining > 0.001 && (
                 <Badge
                   variant="outline"
-                  className="max-w-full whitespace-normal break-words border-amber-500/40 bg-amber-500/5 text-left font-normal text-amber-800 dark:text-amber-200"
+                  className="max-w-full whitespace-normal break-words border-amber-500/40 bg-amber-500/5 text-left font-normal text-amber-800"
                 >
                   {formatCurrency(String(remaining))} unallocated
                 </Badge>
@@ -263,9 +263,7 @@ export default function CreditNoteDetailPage() {
                   <span
                     className={cn(
                       "shrink-0 font-medium tabular-nums",
-                      remaining > 0.001
-                        ? "text-amber-700 dark:text-amber-400"
-                        : "text-muted-foreground",
+                      remaining > 0.001 ? "text-amber-700" : "text-muted-foreground",
                     )}
                   >
                     {formatCurrency(String(remaining))}

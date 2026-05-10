@@ -41,7 +41,7 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
                 className={cn(
                   "data-table-td data-table-col-numeric",
                   drCrHide,
-                  entry.debitAmount && "font-medium text-red-600 dark:text-red-400",
+                  entry.debitAmount && "font-medium text-red-600",
                 )}
               >
                 {entry.debitAmount ? formatCurrency(entry.debitAmount) : "—"}
@@ -50,7 +50,7 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
                 className={cn(
                   "data-table-td data-table-col-numeric",
                   drCrHide,
-                  entry.creditAmount && "font-medium text-emerald-600 dark:text-emerald-400",
+                  entry.creditAmount && "font-medium text-emerald-600",
                 )}
               >
                 {entry.creditAmount ? formatCurrency(entry.creditAmount) : "—"}

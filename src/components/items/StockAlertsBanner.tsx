@@ -25,11 +25,11 @@ export function StockAlertsBanner({ alerts, onMarkRead, markReadPending }: Stock
   return (
     <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2 text-amber-700 dark:text-amber-400">
+        <div className="flex min-w-0 items-center gap-2 text-amber-700">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span className="font-medium">Low stock alerts</span>
           {hasMore ? (
-            <span className="text-xs font-normal tabular-nums text-amber-800/80 dark:text-amber-300/90">
+            <span className="text-xs font-normal tabular-nums text-amber-800/80">
               ({alerts.length})
             </span>
           ) : null}
@@ -39,7 +39,7 @@ export function StockAlertsBanner({ alerts, onMarkRead, markReadPending }: Stock
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 shrink-0 gap-1 text-amber-900 hover:bg-amber-500/20 hover:text-amber-950 dark:text-amber-200 dark:hover:bg-amber-500/15 dark:hover:text-amber-50"
+            className="h-8 shrink-0 gap-1 text-amber-900 hover:bg-amber-500/20 hover:text-amber-950"
             onClick={() => setExpanded((e) => !e)}
             aria-expanded={expanded}
           >
