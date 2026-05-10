@@ -215,7 +215,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                           isPathActive(item.path, item.activeMatch)
                             ? SIDEBAR_NAV_ACTIVE
-                            : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
+                            : "text-sidebar-foreground/90 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                         )}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
@@ -240,7 +240,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                                 "block rounded-lg px-3 py-2 text-sm transition-colors",
                                 isInvoiceTypeActive(invoiceItem.path)
                                   ? SIDEBAR_NAV_ACTIVE
-                                  : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
+                                  : "text-sidebar-foreground/90 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                               )}
                             >
                               {invoiceItem.label}
@@ -258,7 +258,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         isPathActive(item.path, item.activeMatch)
                           ? SIDEBAR_NAV_ACTIVE
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-hover hover:text-sidebar-foreground",
+                          : "text-sidebar-foreground/90 hover:bg-sidebar-hover hover:text-sidebar-foreground",
                       )}
                       title={collapsed ? item.label : undefined}
                     >
@@ -279,7 +279,7 @@ export default function AppSidebar({ collapsed, onNavigate }: AppSidebarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start rounded-lg text-sidebar-foreground/75 hover:bg-sidebar-hover hover:text-sidebar-foreground"
+          className="w-full justify-start rounded-lg text-sidebar-foreground/90 hover:bg-sidebar-hover hover:text-sidebar-foreground"
           onClick={handleLogout}
           title="Log out"
         >
