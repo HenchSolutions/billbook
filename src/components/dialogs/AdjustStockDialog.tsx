@@ -74,6 +74,7 @@ export default function AdjustStockDialog({
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -123,6 +124,17 @@ export default function AdjustStockDialog({
     if (!Number.isFinite(sid)) {
       showErrorToast(null, "Select a stock batch.");
       return;
+    }
+    if (data.direction === "remove" && selectedBatch != null) {
+      const available = parseFloat(
+        String(selectedBatch.actualQuantity ?? selectedBatch.quantity ?? "0"),
+      );
+      if (parseFloat(data.amount) > available) {
+        setError("amount", {
+          message: `Cannot remove more than available stock (${formatStockQuantity(String(available))})`,
+        });
+        return;
+      }
     }
     const quantity = data.direction === "add" ? data.amount : `-${data.amount}`;
     try {
