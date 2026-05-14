@@ -1,15 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -31,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2, TriangleAlert, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CategoryCombobox } from "@/components/items/CategoryCombobox";
@@ -191,6 +186,7 @@ interface ItemDialogProps {
   item?: Item | null;
   initialName?: string;
   onSuccess?: (item: Item) => void;
+  presentation?: "dialog" | "inline";
   /** POST /items/units is owner-only; hide “add unit” for STAFF. */
   canManageUnits?: boolean;
 }
@@ -201,10 +197,12 @@ export default function ItemDialog({
   item,
   initialName,
   onSuccess,
+  presentation = "dialog",
   canManageUnits = true,
 }: ItemDialogProps) {
   const queryClient = useQueryClient();
   const isEdit = !!item;
+  const isInline = presentation === "inline";
   const createMutation = useCreateItem();
   const updateMutation = useUpdateItem(item?.id ?? 0);
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
@@ -254,6 +252,7 @@ export default function ItemDialog({
   const [category, setCategory] = useState<Category | null>(null);
   const [showCategoryError, setShowCategoryError] = useState(false);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
+  const instanceId = useId();
   const isItemActive = watch("isActive");
   const normalizedHsn = (hsnCodeValue ?? "").trim();
   const hsnFormatInvalid = normalizedHsn.length > 0 && !isValidHsnCode(normalizedHsn);
@@ -469,6 +468,12 @@ export default function ItemDialog({
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+  const formTitle = isEdit ? "Edit Item" : "New Item";
+  const activeStatusId = `${instanceId}-status-active`;
+  const inactiveStatusId = `${instanceId}-status-inactive`;
+  const sectionSpacingClass = isInline ? "space-y-3" : "space-y-4";
+  const fieldSpacingClass = isInline ? "space-y-2" : "space-y-2";
+  const gridGapClass = isInline ? "gap-3" : "gap-4";
 
   const formatRateValue = (value: number): string => {
     const rounded = Number(value.toFixed(2));
@@ -537,312 +542,360 @@ export default function ItemDialog({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-2xl">
-        <DialogHeader className="shrink-0 border-b px-6 py-4">
-          <DialogTitle>{isEdit ? "Edit Item" : "New Item"}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex min-h-0 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-            <div className="space-y-6">
-              <section className="space-y-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Details</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label required>Name</Label>
-                    <Input
-                      className="placeholder:opacity-80"
-                      aria-invalid={!!errors.name}
-                      {...register("name", {
-                        onChange: () => {
-                          if (errors.name?.message === ITEM_NAME_DUPLICATE_ERROR) {
-                            clearErrors("name");
-                          }
-                        },
-                      })}
-                      placeholder="Item or service name"
-                    />
-                    {errors.name && <FieldError>{errors.name.message}</FieldError>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label required>Type</Label>
+  if (isInline && !open) {
+    return null;
+  }
+
+  const formContent = (
+    <form
+      onSubmit={(event) => {
+        event.stopPropagation();
+        void handleSubmit(onSubmit, onInvalidSubmit)(event);
+      }}
+      className="flex min-h-0 flex-col"
+    >
+      <div className={isInline ? "" : "min-h-0 flex-1 overflow-y-auto"}>
+        <div
+          className={
+            isInline
+              ? "grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
+              : "space-y-6 px-6 py-4"
+          }
+        >
+          <section className={sectionSpacingClass}>
+            <h3 className="text-sm font-medium text-muted-foreground">Details</h3>
+            <div className={`grid grid-cols-1 ${gridGapClass} sm:grid-cols-2`}>
+              <div className={fieldSpacingClass}>
+                <Label required>Name</Label>
+                <Input
+                  className="placeholder:opacity-80"
+                  aria-invalid={!!errors.name}
+                  autoFocus={!isEdit}
+                  {...register("name", {
+                    onChange: () => {
+                      if (errors.name?.message === ITEM_NAME_DUPLICATE_ERROR) {
+                        clearErrors("name");
+                      }
+                    },
+                  })}
+                  placeholder="Item or service name"
+                />
+                {errors.name && <FieldError>{errors.name.message}</FieldError>}
+              </div>
+              <div className={fieldSpacingClass}>
+                <Label required>Type</Label>
+                <Select
+                  value={productType}
+                  onValueChange={(v) => {
+                    const newType = v as "STOCK" | "SERVICE";
+                    setValue("type", newType);
+                    setValue("unit", newType === "SERVICE" ? "hr" : "nos");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STOCK">Stock</SelectItem>
+                    <SelectItem value="SERVICE">Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className={fieldSpacingClass}>
+              <Label required>Category</Label>
+              <CategoryCombobox
+                value={category}
+                onValueChange={(nextCategory) => {
+                  setCategory(nextCategory);
+                  if (nextCategory?.id && nextCategory.id > 0) {
+                    setShowCategoryError(false);
+                  }
+                }}
+                categories={categories}
+                categoriesLoading={categoriesLoading}
+                onCreateCategory={handleCreateCategory}
+                placeholder="Search or add category..."
+              />
+              {showCategoryError && (!category?.id || category.id <= 0) ? (
+                <FieldError>Category is required</FieldError>
+              ) : null}
+            </div>
+            <div className={`grid grid-cols-1 ${gridGapClass} sm:grid-cols-2`}>
+              <div className={fieldSpacingClass}>
+                <Label required>Unit</Label>
+                <UnitCombobox
+                  type={productType}
+                  value={watch("unit") || defaultUnitForType(productType)}
+                  onValueChange={(v) => setValue("unit", v ?? defaultUnitForType(productType))}
+                  units={units}
+                  unitsLoading={unitsLoading}
+                  onCreateUnit={
+                    canManageUnits
+                      ? (value, label) => handleCreateUnit(value, label, productType)
+                      : undefined
+                  }
+                  placeholder="Select unit"
+                />
+                {errors.unit && <FieldError>{errors.unit.message}</FieldError>}
+              </div>
+              {productType === "STOCK" && (
+                <div className={fieldSpacingClass}>
+                  <Label required>Min stock alert</Label>
+                  <Input
+                    className="placeholder:opacity-80"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    step={1}
+                    min={0}
+                    {...register("minStockThreshold", {
+                      onChange: (event) => {
+                        event.target.value = event.target.value.replace(/\D/g, "");
+                      },
+                    })}
+                    placeholder="e.g. 10"
+                  />
+                  {errors.minStockThreshold && (
+                    <FieldError>{errors.minStockThreshold.message}</FieldError>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    You'll be notified when quantity drops below this value. Required for stock
+                    items.
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className={fieldSpacingClass}>
+              <Label>Description</Label>
+              <Textarea
+                className="placeholder:opacity-80"
+                rows={2}
+                {...register("description")}
+                placeholder="Optional"
+              />
+            </div>
+          </section>
+
+          <div className={isInline ? "space-y-4" : "space-y-6"}>
+            <section className={sectionSpacingClass}>
+              <h3 className="text-sm font-medium text-muted-foreground">Classification</h3>
+              <div className={`grid grid-cols-1 ${gridGapClass} sm:grid-cols-2`}>
+                <div className={fieldSpacingClass}>
+                  <Label>HSN Code</Label>
+                  <Input
+                    className="financial-id placeholder:opacity-80"
+                    maxLength={8}
+                    aria-invalid={!!errors.hsnCode || hsnFormatInvalid}
+                    {...register("hsnCode", {
+                      onChange: (e) => {
+                        e.target.value = String(e.target.value ?? "")
+                          .replace(/\D/g, "")
+                          .slice(0, 8);
+                      },
+                    })}
+                    placeholder="e.g. 998314"
+                  />
+                  {!errors.hsnCode && hsnFormatInvalid ? (
+                    <FieldError>HSN should be 4, 6, or 8 digits.</FieldError>
+                  ) : null}
+                </div>
+                <div className={fieldSpacingClass}>
+                  <Label>SAC Code</Label>
+                  <Input
+                    className="financial-id placeholder:opacity-80"
+                    maxLength={6}
+                    {...register("sacCode")}
+                    placeholder="e.g. 998313"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className={sectionSpacingClass}>
+              <h3 className="text-sm font-medium text-muted-foreground">Tax</h3>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="isTaxable"
+                  checked={watch("isTaxable")}
+                  onCheckedChange={(checked: boolean) => setValue("isTaxable", checked)}
+                />
+                <Label htmlFor="isTaxable" className="cursor-pointer font-normal">
+                  Taxable
+                </Label>
+              </div>
+              {watch("isTaxable") && (
+                <div className={`grid grid-cols-1 ${gridGapClass} sm:grid-cols-2`}>
+                  <div className={fieldSpacingClass}>
+                    <Label required>Tax type</Label>
                     <Select
-                      value={productType}
-                      onValueChange={(v) => {
-                        const newType = v as "STOCK" | "SERVICE";
-                        setValue("type", newType);
-                        setValue("unit", newType === "SERVICE" ? "hr" : "nos");
-                      }}
+                      value={watch("taxType")}
+                      onValueChange={(v) => setValue("taxType", v as "GST" | "OTHER")}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="STOCK">Stock</SelectItem>
-                        <SelectItem value="SERVICE">Service</SelectItem>
+                        <SelectItem value="GST">GST</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.taxType && <FieldError>{errors.taxType.message}</FieldError>}
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label required>Category</Label>
-                  <CategoryCombobox
-                    value={category}
-                    onValueChange={(nextCategory) => {
-                      setCategory(nextCategory);
-                      if (nextCategory?.id && nextCategory.id > 0) {
-                        setShowCategoryError(false);
-                      }
-                    }}
-                    categories={categories}
-                    categoriesLoading={categoriesLoading}
-                    onCreateCategory={handleCreateCategory}
-                    placeholder="Search or add category..."
-                  />
-                  {showCategoryError && (!category?.id || category.id <= 0) ? (
-                    <FieldError>Category is required</FieldError>
-                  ) : null}
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label required>Unit</Label>
-                    <UnitCombobox
-                      type={productType}
-                      value={watch("unit") || defaultUnitForType(productType)}
-                      onValueChange={(v) => setValue("unit", v ?? defaultUnitForType(productType))}
-                      units={units}
-                      unitsLoading={unitsLoading}
-                      onCreateUnit={
-                        canManageUnits
-                          ? (value, label) => handleCreateUnit(value, label, productType)
-                          : undefined
-                      }
-                      placeholder="Select unit"
-                    />
-                    {errors.unit && <FieldError>{errors.unit.message}</FieldError>}
-                  </div>
-                  {productType === "STOCK" && (
-                    <div className="space-y-2">
-                      <Label required>Min stock alert</Label>
-                      <Input
-                        className="placeholder:opacity-80"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        step={1}
-                        min={0}
-                        {...register("minStockThreshold", {
-                          onChange: (event) => {
-                            event.target.value = event.target.value.replace(/\D/g, "");
-                          },
-                        })}
-                        placeholder="e.g. 10"
-                      />
-                      {errors.minStockThreshold && (
-                        <FieldError>{errors.minStockThreshold.message}</FieldError>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        You'll be notified when quantity drops below this value. Required for stock
-                        items.
-                      </p>
+                  {watch("taxType") === "GST" ? (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className={fieldSpacingClass}>
+                        <Label className="text-xs" required>
+                          CGST %
+                        </Label>
+                        <Input
+                          placeholder="e.g. 9"
+                          className="placeholder:opacity-80"
+                          {...register("cgstRate", {
+                            onChange: () => {
+                              syncFromIntraRates();
+                            },
+                          })}
+                        />
+                        {errors.cgstRate && <FieldError>{errors.cgstRate.message}</FieldError>}
+                      </div>
+                      <div className={fieldSpacingClass}>
+                        <Label className="text-xs" required>
+                          SGST %
+                        </Label>
+                        <Input
+                          placeholder="e.g. 9"
+                          className="placeholder:opacity-80"
+                          {...register("sgstRate", {
+                            onChange: () => {
+                              syncFromIntraRates();
+                            },
+                          })}
+                        />
+                        {errors.sgstRate && <FieldError>{errors.sgstRate.message}</FieldError>}
+                      </div>
+                      <div className={fieldSpacingClass}>
+                        <Label className="text-xs" required>
+                          IGST %
+                        </Label>
+                        <Input
+                          placeholder="e.g. 18"
+                          className="placeholder:opacity-80"
+                          {...register("igstRate", {
+                            onChange: (event) => {
+                              syncFromIgstRate(event.target.value);
+                            },
+                          })}
+                        />
+                        {errors.igstRate && <FieldError>{errors.igstRate.message}</FieldError>}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className={fieldSpacingClass}>
+                        <Label className="text-xs" required>
+                          Other tax name
+                        </Label>
+                        <Input
+                          className="placeholder:opacity-80"
+                          maxLength={100}
+                          placeholder="e.g. VAT"
+                          {...register("otherTaxName")}
+                        />
+                        {errors.otherTaxName && (
+                          <FieldError>{errors.otherTaxName.message}</FieldError>
+                        )}
+                      </div>
+                      <div className={fieldSpacingClass}>
+                        <Label className="text-xs" required>
+                          Rate %
+                        </Label>
+                        <Input
+                          placeholder="0"
+                          className="placeholder:opacity-80"
+                          {...register("otherTaxRate")}
+                        />
+                        {errors.otherTaxRate && (
+                          <FieldError>{errors.otherTaxRate.message}</FieldError>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    className="placeholder:opacity-80"
-                    rows={2}
-                    {...register("description")}
-                    placeholder="Optional"
-                  />
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Classification</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>HSN Code</Label>
-                    <Input
-                      className="financial-id placeholder:opacity-80"
-                      maxLength={8}
-                      aria-invalid={!!errors.hsnCode || hsnFormatInvalid}
-                      {...register("hsnCode", {
-                        onChange: (e) => {
-                          e.target.value = String(e.target.value ?? "")
-                            .replace(/\D/g, "")
-                            .slice(0, 8);
-                        },
-                      })}
-                      placeholder="e.g. 998314"
-                    />
-                    {!errors.hsnCode && hsnFormatInvalid ? (
-                      <FieldError>HSN should be 4, 6, or 8 digits.</FieldError>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SAC Code</Label>
-                    <Input
-                      className="financial-id placeholder:opacity-80"
-                      maxLength={6}
-                      {...register("sacCode")}
-                      placeholder="e.g. 998313"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Tax</h3>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="isTaxable"
-                    checked={watch("isTaxable")}
-                    onCheckedChange={(checked: boolean) => setValue("isTaxable", checked)}
-                  />
-                  <Label htmlFor="isTaxable" className="cursor-pointer font-normal">
-                    Taxable
-                  </Label>
-                </div>
-                {watch("isTaxable") && (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label required>Tax type</Label>
-                      <Select
-                        value={watch("taxType")}
-                        onValueChange={(v) => setValue("taxType", v as "GST" | "OTHER")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="GST">GST</SelectItem>
-                          <SelectItem value="OTHER">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.taxType && <FieldError>{errors.taxType.message}</FieldError>}
-                    </div>
-                    {watch("taxType") === "GST" ? (
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="space-y-2">
-                          <Label className="text-xs" required>
-                            CGST %
-                          </Label>
-                          <Input
-                            placeholder="e.g. 9"
-                            className="placeholder:opacity-80"
-                            {...register("cgstRate", {
-                              onChange: () => {
-                                syncFromIntraRates();
-                              },
-                            })}
-                          />
-                          {errors.cgstRate && <FieldError>{errors.cgstRate.message}</FieldError>}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs" required>
-                            SGST %
-                          </Label>
-                          <Input
-                            placeholder="e.g. 9"
-                            className="placeholder:opacity-80"
-                            {...register("sgstRate", {
-                              onChange: () => {
-                                syncFromIntraRates();
-                              },
-                            })}
-                          />
-                          {errors.sgstRate && <FieldError>{errors.sgstRate.message}</FieldError>}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs" required>
-                            IGST %
-                          </Label>
-                          <Input
-                            placeholder="e.g. 18"
-                            className="placeholder:opacity-80"
-                            {...register("igstRate", {
-                              onChange: (event) => {
-                                syncFromIgstRate(event.target.value);
-                              },
-                            })}
-                          />
-                          {errors.igstRate && <FieldError>{errors.igstRate.message}</FieldError>}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label className="text-xs" required>
-                            Other tax name
-                          </Label>
-                          <Input
-                            className="placeholder:opacity-80"
-                            maxLength={100}
-                            placeholder="e.g. VAT"
-                            {...register("otherTaxName")}
-                          />
-                          {errors.otherTaxName && (
-                            <FieldError>{errors.otherTaxName.message}</FieldError>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs" required>
-                            Rate %
-                          </Label>
-                          <Input
-                            placeholder="0"
-                            className="placeholder:opacity-80"
-                            {...register("otherTaxRate")}
-                          />
-                          {errors.otherTaxRate && (
-                            <FieldError>{errors.otherTaxRate.message}</FieldError>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </section>
-            </div>
+              )}
+            </section>
           </div>
-          <div className="shrink-0 border-t px-6 py-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <Label className="text-sm font-medium">Status</Label>
-              <RadioGroup
-                value={isItemActive ? "active" : "inactive"}
-                onValueChange={handleStatusChange}
-                className="flex items-center gap-6"
-                aria-label="Item status"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem id="status-active" value="active" />
-                  <Label htmlFor="status-active" className="cursor-pointer text-sm font-normal">
-                    Active
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem id="status-inactive" value="inactive" />
-                  <Label htmlFor="status-inactive" className="cursor-pointer text-sm font-normal">
-                    Inactive
-                  </Label>
-                </div>
-              </RadioGroup>
+        </div>
+      </div>
+
+      <div className="shrink-0 border-t px-0 py-2.5 sm:px-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Label className="text-sm font-medium">Status</Label>
+          <RadioGroup
+            value={isItemActive ? "active" : "inactive"}
+            onValueChange={handleStatusChange}
+            className="flex flex-wrap items-center gap-4"
+            aria-label="Item status"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem id={activeStatusId} value="active" />
+              <Label htmlFor={activeStatusId} className="cursor-pointer text-sm font-normal">
+                Active
+              </Label>
             </div>
-          </div>
-          <DialogFooter className="shrink-0 border-t px-6 py-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting || isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? "Save" : "Create"}
-            </Button>
-          </DialogFooter>
-        </form>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem id={inactiveStatusId} value="inactive" />
+              <Label htmlFor={inactiveStatusId} className="cursor-pointer text-sm font-normal">
+                Inactive
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+      </div>
+      <div className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting || isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isEdit ? "Save" : "Create"}
+        </Button>
+      </div>
+    </form>
+  );
+
+  const content = isInline ? (
+    <Card className="overflow-hidden border-border/80 bg-card shadow-sm">
+      <CardHeader className="border-b bg-muted/10 px-4 py-3 sm:px-5">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-sm sm:text-base">{formTitle}</CardTitle>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onOpenChange(false)}
+            aria-label="Close form"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 p-4 pt-3 sm:p-5 sm:pt-4">{formContent}</CardContent>
+    </Card>
+  ) : (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-2xl">
+        <DialogHeader className="shrink-0 border-b px-6 py-4">
+          <DialogTitle>{formTitle}</DialogTitle>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
+    </Dialog>
+  );
 
+  return (
+    <>
+      {content}
       <AlertDialog
         open={deactivateConfirmOpen}
         onOpenChange={(open) => setDeactivateConfirmOpen(open)}
@@ -869,6 +922,6 @@ export default function ItemDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Dialog>
+    </>
   );
 }

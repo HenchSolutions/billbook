@@ -241,15 +241,15 @@ export function ItemAutocomplete({
                   onSelect={() => handleSelect(item)}
                   data-highlight-index={index}
                   id={open ? `item-${item.id}` : undefined}
-                  className="group cursor-pointer items-start gap-2 py-2 data-[selected=true]:text-accent-foreground"
+                  className="group cursor-pointer items-start gap-2 py-2 data-[selected=true]:text-foreground"
                 >
-                  <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground group-data-[selected=true]:text-accent-foreground/85">
+                  <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground group-data-[selected=true]:text-foreground/80">
                     <Package className="h-3.5 w-3.5" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm leading-5">{item.name}</p>
                     {categoryLabel(item) && (
-                      <p className="truncate text-xs leading-4 text-muted-foreground group-data-[selected=true]:text-accent-foreground/85">
+                      <p className="truncate text-xs leading-4 text-muted-foreground group-data-[selected=true]:text-foreground/80">
                         {categoryLabel(item)}
                       </p>
                     )}
@@ -257,9 +257,7 @@ export function ItemAutocomplete({
                   <Check
                     className={cn(
                       "mt-0.5 h-4 w-4 shrink-0",
-                      value?.id === item.id
-                        ? "text-foreground opacity-100 group-data-[selected=true]:text-accent-foreground"
-                        : "opacity-0",
+                      value?.id === item.id ? "text-foreground opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>
@@ -275,10 +273,14 @@ export function ItemAutocomplete({
                   }}
                   data-highlight-index={addItemIndex}
                   id={open ? "item-add" : undefined}
-                  className="group mt-1 cursor-pointer border-t border-border pt-1 data-[selected=true]:text-accent-foreground"
+                  className={cn(
+                    "group mt-2 cursor-pointer items-center gap-2 rounded-md border border-primary/15 bg-primary/[0.06] py-2.5 text-primary",
+                    "hover:bg-primary/[0.1] hover:text-primary",
+                    "aria-selected:border-primary/25 aria-selected:bg-primary/[0.12] aria-selected:text-primary",
+                  )}
                 >
-                  <Plus className="mr-2 h-4 w-4 shrink-0 text-muted-foreground group-data-[selected=true]:text-accent-foreground" />
-                  <span className="truncate text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                  <Plus className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="truncate font-medium text-primary">
                     Add item{trimmedInput ? ` "${trimmedInput}"` : ""}
                   </span>
                 </CommandItem>

@@ -130,7 +130,7 @@
    */
   .page-container {
     /* min-w-0: nested overflow-x-auto tables can scroll inside flex main */
-    @apply mx-auto w-full min-w-0 max-w-[min(100%,1600px)] bg-background py-8 sm:py-10;
+    @apply mx-auto w-full min-w-0 max-w-[min(100%,1600px)] bg-background pb-4 pt-2 sm:pb-6 sm:pt-4;
   }
 
   /** Marketing / legal chrome — same horizontal rhythm as `.page-container`, vertical spacing per section. */

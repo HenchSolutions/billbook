@@ -57,7 +57,17 @@ export function VendorAutocomplete({
     [suppliers, inputValue],
   );
   const trimmedInput = inputValue.trim();
-  const shouldShowAddVendor = Boolean(onAddVendor && trimmedInput);
+  const hasExactMatch = useMemo(
+    () =>
+      Boolean(
+        trimmedInput &&
+        [...suppliers, ...(value ? [value] : [])].some(
+          (supplier) => supplier.name.trim().toLowerCase() === trimmedInput.toLowerCase(),
+        ),
+      ),
+    [suppliers, trimmedInput, value],
+  );
+  const shouldShowAddVendor = Boolean(onAddVendor && trimmedInput && !hasExactMatch);
 
   const optionsLength = 1 + filtered.length + (shouldShowAddVendor ? 1 : 0);
   const addVendorIndex = shouldShowAddVendor ? 1 + filtered.length : -1;
@@ -228,15 +238,15 @@ export function VendorAutocomplete({
                 onSelect={() => handleSelect(null)}
                 data-highlight-index={0}
                 id={open ? "vendor-none" : undefined}
-                className="group cursor-pointer data-[selected=true]:text-accent-foreground"
+                className="group cursor-pointer data-[selected=true]:text-foreground"
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4 shrink-0",
-                    !value ? "text-accent-foreground opacity-100" : "opacity-0",
+                    !value ? "text-foreground opacity-100" : "opacity-0",
                   )}
                 />
-                <span className="text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                <span className="text-muted-foreground group-data-[selected=true]:text-foreground">
                   None
                 </span>
               </CommandItem>
@@ -247,15 +257,15 @@ export function VendorAutocomplete({
                   onSelect={() => handleSelect(s)}
                   data-highlight-index={index + 1}
                   id={open ? `vendor-${s.id}` : undefined}
-                  className="group cursor-pointer data-[selected=true]:text-accent-foreground"
+                  className="group cursor-pointer data-[selected=true]:text-foreground"
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4 shrink-0",
-                      value?.id === s.id ? "text-accent-foreground opacity-100" : "opacity-0",
+                      value?.id === s.id ? "text-foreground opacity-100" : "opacity-0",
                     )}
                   />
-                  <span className="truncate group-data-[selected=true]:text-accent-foreground">
+                  <span className="truncate group-data-[selected=true]:text-foreground">
                     {s.name}
                   </span>
                 </CommandItem>
@@ -271,10 +281,14 @@ export function VendorAutocomplete({
                   }}
                   data-highlight-index={addVendorIndex}
                   id={open ? "vendor-add" : undefined}
-                  className="group mt-1 cursor-pointer border-t border-border pt-1 data-[selected=true]:text-accent-foreground"
+                  className={cn(
+                    "group mt-2 cursor-pointer items-center gap-2 rounded-md border border-primary/15 bg-primary/[0.06] py-2.5 text-primary",
+                    "hover:bg-primary/[0.1] hover:text-primary",
+                    "aria-selected:border-primary/25 aria-selected:bg-primary/[0.12] aria-selected:text-primary",
+                  )}
                 >
-                  <Plus className="mr-2 h-4 w-4 shrink-0 text-muted-foreground group-data-[selected=true]:text-accent-foreground" />
-                  <span className="text-muted-foreground group-data-[selected=true]:text-accent-foreground">
+                  <Plus className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="truncate font-medium text-primary">
                     Add vendor{trimmedInput ? ` "${trimmedInput}"` : ""}
                   </span>
                 </CommandItem>

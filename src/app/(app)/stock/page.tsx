@@ -51,7 +51,14 @@ export default function Stock() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data: itemsData, isPending: itemsPending, error: itemsError } = useItems({ limit: 100 });
+  const {
+    data: itemsData,
+    isPending: itemsPending,
+    error: itemsError,
+  } = useItems({
+    limit: 500,
+    includeInactive: true,
+  });
   const {
     data: stockData,
     isPending: stockPending,
@@ -72,6 +79,10 @@ export default function Stock() {
 
   const items = useMemo(
     () => (itemsData?.items ?? []).filter((i) => i.isActive),
+    [itemsData?.items],
+  );
+  const activeItemIds = useMemo(
+    () => new Set((itemsData?.items ?? []).filter((item) => item.isActive).map((item) => item.id)),
     [itemsData?.items],
   );
   const prefillItemId = Number(searchParams.get("addItemId") ?? "");
@@ -150,7 +161,13 @@ export default function Stock() {
   const lowStockCount = summary?.lowStock?.totalItems ?? 0;
   const lowStockQuantity = summary?.lowStock?.totalQuantity;
   const totalSellingValue = summary?.stockValue?.totalAmount ?? "0";
-  const unreadAlerts = useMemo(() => alertsData?.alerts ?? [], [alertsData?.alerts]);
+  const unreadAlerts = useMemo(
+    () =>
+      (alertsData?.alerts ?? []).filter((alert) =>
+        alert.itemId == null ? true : activeItemIds.has(alert.itemId),
+      ),
+    [activeItemIds, alertsData?.alerts],
+  );
 
   const lowStockItemIds = useMemo(() => {
     const s = new Set<number>();

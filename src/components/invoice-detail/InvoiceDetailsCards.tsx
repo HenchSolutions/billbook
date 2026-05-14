@@ -59,6 +59,11 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
     bill.taxableTotal > EPS || bill.taxTotal > EPS
       ? `Total tax (${bill.taxPercentEffective.toFixed(2)}%)`
       : "Total tax";
+  const linkedBankAccount =
+    invoice.businessBankAccountId != null
+      ? (bankAccountsPayload?.bankAccounts?.find((a) => a.id === invoice.businessBankAccountId) ??
+        null)
+      : null;
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
@@ -117,35 +122,28 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
                   <span className="text-muted-foreground">
                     No bank account linked on this invoice
                   </span>
-                ) : (
-                  (() => {
-                    const acc = bankAccountsPayload?.bankAccounts?.find(
-                      (a) => a.id === invoice.businessBankAccountId,
-                    );
-                    if (!acc) {
-                      return (
-                        <span className="text-muted-foreground">
-                          Selected account ID {invoice.businessBankAccountId}
-                        </span>
-                      );
-                    }
-                    const title = acc.label?.trim()
-                      ? `${acc.label.trim()} · ${acc.bankName}`
-                      : acc.bankName;
-                    return (
-                      <span>
-                        {title}{" "}
-                        <span className="font-mono text-muted-foreground">
-                          {maskBankAccountNumber(acc.bankAccountNumber)}
-                        </span>
-                        {acc.isDefault ? (
-                          <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
-                            Default
-                          </span>
-                        ) : null}
+                ) : linkedBankAccount ? (
+                  <div className="space-y-2">
+                    <DetailRow label="Bank">
+                      <span className="truncate">
+                        {linkedBankAccount.label?.trim()
+                          ? `${linkedBankAccount.label.trim()} · ${linkedBankAccount.bankName}`
+                          : linkedBankAccount.bankName}
                       </span>
-                    );
-                  })()
+                    </DetailRow>
+                    <DetailRow label="Account no.">
+                      <span className="font-mono text-sm">
+                        {maskBankAccountNumber(linkedBankAccount.bankAccountNumber)}
+                      </span>
+                    </DetailRow>
+                    <DetailRow label="IFSC">
+                      <span className="font-mono text-sm">{linkedBankAccount.ifscCode}</span>
+                    </DetailRow>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">
+                    Selected account ID {invoice.businessBankAccountId}
+                  </span>
                 )}
               </div>
             </div>

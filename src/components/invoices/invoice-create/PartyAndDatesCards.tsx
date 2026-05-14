@@ -71,6 +71,17 @@ interface PartyAndDatesCardsProps {
   };
 }
 
+function getSaleBankAccountTitle(account: BusinessBankAccount): string {
+  const label = account.label?.trim();
+  const isPrimaryAlias = label ? /^primary(?:\s*\(from profile\))?$/i.test(label) : false;
+
+  if (label && !isPrimaryAlias) {
+    return `${label} · ${account.bankName}`;
+  }
+
+  return account.bankName;
+}
+
 export function PartyAndDatesCards({
   invoiceType,
   party,
@@ -162,20 +173,14 @@ export function PartyAndDatesCards({
               }}
               disabled={!party || isConsigneesLoading}
             >
-              <SelectTrigger className="h-auto min-h-8 items-start py-1 [&>span]:line-clamp-none">
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left leading-tight">
-                  {party ? (
-                    <>
-                      <span className="truncate text-sm font-medium">{selectedTitle}</span>
-                      {selectedAddressLine ? (
-                        <span className="truncate text-xs text-muted-foreground">
-                          {selectedAddressLine}
-                        </span>
-                      ) : null}
-                    </>
-                  ) : (
-                    <SelectValue placeholder={`Select ${copy.partyLabel.toLowerCase()} first`} />
-                  )}
+              <SelectTrigger className="min-h-[3.75rem] items-start rounded-lg border-border/70 px-3 py-2.5 text-left [&>span]:line-clamp-none">
+                <div className="flex min-w-0 flex-1 flex-col text-left">
+                  <span className="truncate text-sm font-medium leading-5 text-foreground">
+                    {party ? selectedTitle : `Select ${copy.partyLabel.toLowerCase()} first`}
+                  </span>
+                  <span className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
+                    {party ? selectedAddressLine || "No address saved" : "Choose party first"}
+                  </span>
                 </div>
               </SelectTrigger>
               <SelectContent>
@@ -185,17 +190,21 @@ export function PartyAndDatesCards({
                   </SelectItem>
                 ) : (
                   <>
-                    <SelectItem value="__PRIMARY__">
-                      <div className="flex flex-col">
-                        <span>{primaryAddressOptionLabel}</span>
-                        <span className="text-xs opacity-80">{primaryAddressLine}</span>
+                    <SelectItem value="__PRIMARY__" className="py-2">
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium">{primaryAddressOptionLabel}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {primaryAddressLine}
+                        </span>
                       </div>
                     </SelectItem>
                     {consignees.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>
-                        <div className="flex flex-col">
-                          <span>{c.label?.trim() || c.consigneeName}</span>
-                          <span className="text-xs opacity-80">
+                      <SelectItem key={c.id} value={String(c.id)} className="py-2">
+                        <div className="flex min-w-0 flex-col">
+                          <span className="truncate font-medium">
+                            {c.label?.trim() || c.consigneeName}
+                          </span>
+                          <span className="truncate text-xs text-muted-foreground">
                             {formatConsigneeAddressInline(c) || "No address"}
                           </span>
                         </div>
@@ -397,12 +406,9 @@ export function PartyAndDatesCards({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__auto__">Primary saved account (auto)</SelectItem>
                   <SelectItem value="__none__">No bank account on invoice</SelectItem>
                   {saleBankAccountSelect.accounts.map((a) => {
-                    const title = a.label?.trim()
-                      ? `${a.label.trim()} · ${a.bankName}`
-                      : a.bankName;
+                    const title = getSaleBankAccountTitle(a);
                     const tail = maskBankAccountNumber(a.bankAccountNumber);
                     return (
                       <SelectItem key={a.id} value={String(a.id)}>
@@ -421,10 +427,9 @@ export function PartyAndDatesCards({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                <strong className="font-medium text-foreground">Primary saved account</strong> lets
-                the server use your default saved account when creating.{" "}
+                The default bank account is selected automatically for sale invoices. Choose{" "}
                 <strong className="font-medium text-foreground">No bank account on invoice</strong>{" "}
-                sends no link—the PDF payment block stays empty. Manage accounts under My profile.
+                to keep the PDF payment block empty. Manage accounts under My profile.
               </p>
             </div>
           ) : null}

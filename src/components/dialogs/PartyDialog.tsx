@@ -1,17 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2, TriangleAlert, X } from "lucide-react";
 import { useCreateParty, useUpdateParty } from "@/hooks/use-parties";
 import {
   AlertDialog,
@@ -76,6 +71,7 @@ interface Props {
   party?: Party | null;
   initialName?: string;
   defaultType?: "CUSTOMER" | "SUPPLIER";
+  presentation?: "dialog" | "inline";
   /** When true, type is fixed to defaultType and the Type field is hidden (e.g. when opening from Customer or Vendor page) */
   typeLocked?: boolean;
   /** Called with the created party after successful create (edit not used) */
@@ -88,15 +84,18 @@ export default function PartyDialog({
   party,
   initialName,
   defaultType = "CUSTOMER",
+  presentation = "dialog",
   typeLocked = false,
   onSuccess,
 }: Props) {
   const isEdit = !!party;
+  const isInline = presentation === "inline";
   const openingBalanceLocked =
     isEdit && party != null && hasPersistedOpeningBalance(party.openingBalance);
   const createMutation = useCreateParty();
   const updateMutation = useUpdateParty(party?.id ?? 0);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
+  const instanceId = useId();
 
   const {
     register,
@@ -238,6 +237,13 @@ export default function PartyDialog({
 
   const isPending = createMutation.isPending || updateMutation.isPending;
   const isSaving = isSubmitting || isPending;
+  const formTitle = isEdit ? `Edit ${partyLabelTitle}` : `New ${partyLabelTitle}`;
+  const activeStatusId = `${instanceId}-status-active`;
+  const inactiveStatusId = `${instanceId}-status-inactive`;
+  const formSpacingClass = isInline ? "space-y-3" : "space-y-4";
+  const fieldSpacingClass = isInline ? "space-y-2" : "space-y-2";
+  const groupSpacingClass = isInline ? "space-y-3" : "space-y-4";
+  const gridGapClass = isInline ? "gap-3" : "gap-4";
 
   const handleStatusChange = (value: string) => {
     if (value === "active") {
@@ -258,90 +264,157 @@ export default function PartyDialog({
     setDeactivateConfirmOpen(false);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? `Edit ${partyLabelTitle}` : `New ${partyLabelTitle}`}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className={typeLocked ? "space-y-2" : "grid grid-cols-2 gap-4"}>
-            <div className="space-y-2">
-              <Label required>Name</Label>
-              <Input {...register("name")} aria-invalid={!!errors.name} />
-              {errors.name && <FieldError>{errors.name.message}</FieldError>}
-            </div>
-            {!typeLocked && (
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select
-                  value={partyType}
-                  onValueChange={(v) => setValue("type", v as "CUSTOMER" | "SUPPLIER")}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CUSTOMER">Customer</SelectItem>
-                    <SelectItem value="SUPPLIER">Vendor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
+  if (isInline && !open) {
+    return null;
+  }
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input type="email" {...register("email")} />
-              {errors.email && <FieldError>{errors.email.message}</FieldError>}
-            </div>
-            <div className="space-y-2">
-              <Label required>Phone</Label>
-              <Input
-                aria-invalid={!!errors.phone}
-                {...register("phone", {
-                  onChange: (e) => {
-                    e.target.value = String(e.target.value ?? "")
-                      .replace(/\D/g, "")
-                      .slice(0, 10);
-                  },
-                })}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="tel"
-                maxLength={10}
-              />
-              {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
-            </div>
+  const formContent = (
+    <form
+      onSubmit={(event) => {
+        event.stopPropagation();
+        void handleSubmit(onSubmit)(event);
+      }}
+      className={formSpacingClass}
+    >
+      <div className={groupSpacingClass}>
+        <div
+          className={
+            isInline
+              ? `grid grid-cols-1 ${gridGapClass} md:grid-cols-2 xl:grid-cols-4`
+              : typeLocked
+                ? groupSpacingClass
+                : `grid grid-cols-1 ${gridGapClass} sm:grid-cols-2`
+          }
+        >
+          <div className={fieldSpacingClass}>
+            <Label required>Name</Label>
+            <Input autoFocus={!isEdit} {...register("name")} aria-invalid={!!errors.name} />
+            {errors.name && <FieldError>{errors.name.message}</FieldError>}
           </div>
-
-          <div className="space-y-2 sm:max-w-md">
-            <Label>GSTIN</Label>
+          <div className={fieldSpacingClass}>
+            <Label required>Phone</Label>
             <Input
-              className="financial-id"
-              placeholder="22AAAAA0000A1Z5"
-              aria-invalid={!!errors.gstin || gstinFormatInvalid}
-              {...register("gstin", {
+              aria-invalid={!!errors.phone}
+              {...register("phone", {
                 onChange: (e) => {
                   e.target.value = String(e.target.value ?? "")
-                    .toUpperCase()
-                    .replace(/\s+/g, "")
-                    .slice(0, 15);
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
                 },
               })}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="tel"
+              maxLength={10}
             />
-            {errors.gstin && <FieldError>{errors.gstin.message}</FieldError>}
-            {!errors.gstin && gstinFormatInvalid ? (
-              <FieldError>GSTIN must be 15 characters (e.g. 22AAAAA0000A1Z5).</FieldError>
-            ) : null}
+            {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
+          </div>
+          <div className={fieldSpacingClass}>
+            <Label>Email</Label>
+            <Input type="email" {...register("email")} />
+            {errors.email && <FieldError>{errors.email.message}</FieldError>}
+          </div>
+          {!typeLocked && (
+            <div className={fieldSpacingClass}>
+              <Label>Type</Label>
+              <Select
+                value={partyType}
+                onValueChange={(v) => setValue("type", v as "CUSTOMER" | "SUPPLIER")}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CUSTOMER">Customer</SelectItem>
+                  <SelectItem value="SUPPLIER">Vendor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        <div
+          className={
+            isInline
+              ? `grid grid-cols-1 ${gridGapClass} lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]`
+              : groupSpacingClass
+          }
+        >
+          <div className={groupSpacingClass}>
+            <div className={fieldSpacingClass}>
+              <Label>GSTIN</Label>
+              <Input
+                className="financial-id"
+                placeholder="22AAAAA0000A1Z5"
+                aria-invalid={!!errors.gstin || gstinFormatInvalid}
+                {...register("gstin", {
+                  onChange: (e) => {
+                    e.target.value = String(e.target.value ?? "")
+                      .toUpperCase()
+                      .replace(/\s+/g, "")
+                      .slice(0, 15);
+                  },
+                })}
+              />
+              {errors.gstin && <FieldError>{errors.gstin.message}</FieldError>}
+              {!errors.gstin && gstinFormatInvalid ? (
+                <FieldError>GSTIN must be 15 characters (e.g. 22AAAAA0000A1Z5).</FieldError>
+              ) : null}
+            </div>
+
+            <div className={fieldSpacingClass}>
+              <Label>Address</Label>
+              <Input {...register("address")} placeholder="Area / locality" />
+            </div>
+
+            <div
+              className={`grid grid-cols-1 ${gridGapClass} sm:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)]`}
+            >
+              <div className={fieldSpacingClass}>
+                <Label>Postal Code</Label>
+                <Input
+                  {...register("postalCode")}
+                  placeholder="560034"
+                  maxLength={10}
+                  inputMode="numeric"
+                  aria-invalid={postalCodeFormatInvalid}
+                />
+                {postalCodeFormatInvalid ? (
+                  <FieldError>Enter a valid 6-digit Indian pincode.</FieldError>
+                ) : null}
+              </div>
+              <div className={fieldSpacingClass}>
+                <Label>City</Label>
+                <Input {...register("city")} />
+              </div>
+              <div className={fieldSpacingClass}>
+                <Label>State</Label>
+                <Input {...register("state")} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Enter 6-digit pincode to auto-fill address, city and state.
+            </p>
           </div>
 
-          <div className="space-y-2">
+          <div className={fieldSpacingClass}>
             <Label>Opening balance</Label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
-              <div className="min-w-0 flex-1 space-y-1.5">
+            <div
+              className={
+                isInline
+                  ? `grid grid-cols-1 ${gridGapClass} sm:grid-cols-[minmax(0,1fr)_10.5rem]`
+                  : "flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3"
+              }
+            >
+              <div className="min-w-0 space-y-1.5">
+                <Label
+                  htmlFor="opening-balance-amount"
+                  className="block text-xs text-muted-foreground"
+                >
+                  Amount
+                </Label>
                 <Input
+                  id="opening-balance-amount"
                   placeholder="0.00"
                   inputMode="decimal"
                   autoComplete="off"
@@ -353,17 +426,19 @@ export default function PartyDialog({
                   <FieldError>{errors.openingBalanceAmount.message}</FieldError>
                 )}
               </div>
-              <div className="w-full shrink-0 sm:w-[10.5rem]">
+              <div className="space-y-1.5">
                 <Label
                   htmlFor="opening-balance-nature"
-                  className="mb-1.5 block text-xs text-muted-foreground"
+                  className="block text-xs text-muted-foreground"
                 >
                   Type
                 </Label>
                 <Select
                   value={watch("openingBalanceNature")}
                   onValueChange={(v) =>
-                    setValue("openingBalanceNature", v as "DEBIT" | "CREDIT", { shouldDirty: true })
+                    setValue("openingBalanceNature", v as "DEBIT" | "CREDIT", {
+                      shouldDirty: true,
+                    })
                   }
                   disabled={openingBalanceLocked}
                 >
@@ -385,87 +460,89 @@ export default function PartyDialog({
                   : "Debit: customer owes you · Credit: customer paid in advance."}
             </p>
           </div>
+        </div>
+      </div>
 
-          <div className="space-y-2">
-            <Label>Postal Code</Label>
-            <Input
-              {...register("postalCode")}
-              placeholder="e.g. 560034"
-              maxLength={10}
-              inputMode="numeric"
-              aria-invalid={postalCodeFormatInvalid}
-            />
-            <p className="text-xs text-muted-foreground">
-              Enter 6-digit pincode to auto-fill address, city and state
-            </p>
-            {postalCodeFormatInvalid ? (
-              <FieldError>Enter a valid 6-digit Indian pincode.</FieldError>
-            ) : null}
-          </div>
+      {isEdit && party?.id ? (
+        <PartyConsigneesSection partyId={party.id} partyType={partyType} enabled={open} />
+      ) : null}
 
-          <div className="space-y-2">
-            <Label>Address</Label>
-            <Input {...register("address")} placeholder="Area / locality" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>City</Label>
-              <Input {...register("city")} />
+      <div className={isInline ? "border-t pt-2.5" : "border-t pt-3"}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Label className="text-sm font-medium">Status</Label>
+          <RadioGroup
+            value={isPartyActive ? "active" : "inactive"}
+            onValueChange={handleStatusChange}
+            className="flex flex-wrap items-center gap-4"
+            aria-label={`${partyLabelTitle} status`}
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem id={activeStatusId} value="active" />
+              <Label htmlFor={activeStatusId} className="cursor-pointer text-sm font-normal">
+                Active
+              </Label>
             </div>
-            <div className="space-y-2">
-              <Label>State</Label>
-              <Input {...register("state")} />
+            <div className="flex items-center gap-2">
+              <RadioGroupItem id={inactiveStatusId} value="inactive" />
+              <Label htmlFor={inactiveStatusId} className="cursor-pointer text-sm font-normal">
+                Inactive
+              </Label>
             </div>
-          </div>
+          </RadioGroup>
+        </div>
+      </div>
 
-          {isEdit && party?.id ? (
-            <PartyConsigneesSection partyId={party.id} partyType={partyType} enabled={open} />
-          ) : null}
+      <div className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isSaving
+            ? isEdit
+              ? "Saving..."
+              : `Creating ${partyLabelTitle}...`
+            : isEdit
+              ? "Save"
+              : `Create ${partyLabelTitle}`}
+        </Button>
+      </div>
+    </form>
+  );
 
-          <div className="border-t pt-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <Label className="text-sm font-medium">Status</Label>
-              <RadioGroup
-                value={isPartyActive ? "active" : "inactive"}
-                onValueChange={handleStatusChange}
-                className="flex items-center gap-6"
-                aria-label={`${partyLabelTitle} status`}
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem id="status-active" value="active" />
-                  <Label htmlFor="status-active" className="cursor-pointer text-sm font-normal">
-                    Active
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem id="status-inactive" value="inactive" />
-                  <Label htmlFor="status-inactive" className="cursor-pointer text-sm font-normal">
-                    Inactive
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSaving
-                ? isEdit
-                  ? "Saving..."
-                  : `Creating ${partyLabelTitle}...`
-                : isEdit
-                  ? "Save"
-                  : `Create ${partyLabelTitle}`}
-            </Button>
-          </DialogFooter>
-        </form>
+  const content = isInline ? (
+    <Card className="overflow-hidden border-border/80 bg-card shadow-sm">
+      <CardHeader className="border-b bg-muted/10 px-4 py-3 sm:px-5">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-sm sm:text-base">{formTitle}</CardTitle>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onOpenChange(false)}
+            aria-label="Close form"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 pt-3 sm:p-5 sm:pt-4">{formContent}</CardContent>
+    </Card>
+  ) : (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>{formTitle}</DialogTitle>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
+    </Dialog>
+  );
 
+  return (
+    <>
+      {content}
       <AlertDialog
         open={deactivateConfirmOpen}
         onOpenChange={(open) => setDeactivateConfirmOpen(open)}
@@ -492,6 +569,6 @@ export default function PartyDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Dialog>
+    </>
   );
 }

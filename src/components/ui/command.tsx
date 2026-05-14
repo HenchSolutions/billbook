@@ -111,8 +111,8 @@ const CommandItem = React.forwardRef<
     ref={ref}
     className={cn(
       "group relative flex cursor-pointer select-none items-start gap-3 rounded-lg border-l-2 border-l-transparent px-3 py-2.5 text-left text-sm font-medium leading-snug text-foreground outline-none transition-colors duration-100 ease-out",
-      "hover:bg-muted/65 hover:text-foreground",
-      "aria-selected:border-primary aria-selected:bg-muted aria-selected:text-foreground aria-selected:hover:bg-muted",
+      "hover:bg-primary/10 hover:text-foreground",
+      "aria-selected:hover:bg-primary/12 aria-selected:border-primary aria-selected:bg-primary/10 aria-selected:text-foreground",
       "aria-selected:[&_.cmdk-item-desc]:text-muted-foreground",
       "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-45",
       className,

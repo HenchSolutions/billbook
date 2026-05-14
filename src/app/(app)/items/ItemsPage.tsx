@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -39,8 +39,9 @@ export default function ItemsPage() {
   const [categoryId, setCategoryId] = useState<number | undefined>();
   const [includeInactive, setIncludeInactive] = useState(true);
   const debouncedSearch = useDebounce(search, 300);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editItem, setEditItem] = useState<Item | undefined>();
+  const [formOpen, setFormOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | undefined>();
+  const formSectionRef = useRef<HTMLDivElement | null>(null);
 
   const {
     data: itemsData,
@@ -56,16 +57,47 @@ export default function ItemsPage() {
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
   const filteredItems = itemsData?.items ?? [];
+  const isEditing = !!selectedItem;
+
+  useEffect(() => {
+    if (formOpen) {
+      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [formOpen]);
+
+  const closeForm = useCallback(() => {
+    setFormOpen(false);
+    setSelectedItem(undefined);
+  }, []);
 
   const openCreate = useCallback(() => {
-    setEditItem(undefined);
-    setDialogOpen(true);
+    setSelectedItem(undefined);
+    setFormOpen(true);
   }, []);
 
+  const toggleForm = useCallback(() => {
+    if (formOpen && !isEditing) {
+      closeForm();
+      return;
+    }
+    openCreate();
+  }, [closeForm, formOpen, isEditing, openCreate]);
+
   const openEdit = useCallback((item: Item) => {
-    setEditItem(item);
-    setDialogOpen(true);
+    setSelectedItem(item);
+    setFormOpen(true);
   }, []);
+
+  const handleFormOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        closeForm();
+        return;
+      }
+      setFormOpen(true);
+    },
+    [closeForm],
+  );
 
   if (itemId) {
     return (
@@ -81,13 +113,29 @@ export default function ItemsPage() {
         title="Items"
         action={
           canCreateItem ? (
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Item
+            <Button onClick={toggleForm} variant={formOpen && !isEditing ? "outline" : "default"}>
+              {formOpen && !isEditing ? (
+                <X className="mr-2 h-4 w-4" />
+              ) : (
+                <Plus className="mr-2 h-4 w-4" />
+              )}
+              {formOpen ? (isEditing ? "New Item" : "Close Form") : "Add Item"}
             </Button>
           ) : undefined
         }
       />
+
+      {canCreateItem && formOpen ? (
+        <div ref={formSectionRef} className="mb-6">
+          <ItemDialog
+            open={formOpen}
+            onOpenChange={handleFormOpenChange}
+            item={selectedItem}
+            canManageUnits={can(P.item.unit.manage)}
+            presentation="inline"
+          />
+        </div>
+      ) : null}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchInput
@@ -131,7 +179,7 @@ export default function ItemsPage() {
           icon={<Package className="h-5 w-5" />}
           title="No items found"
           action={
-            canCreateItem ? (
+            canCreateItem && !formOpen ? (
               <Button size="sm" onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Item
@@ -148,13 +196,6 @@ export default function ItemsPage() {
             : {})}
         />
       )}
-
-      <ItemDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        item={editItem}
-        canManageUnits={can(P.item.unit.manage)}
-      />
     </div>
   );
 }

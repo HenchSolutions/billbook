@@ -182,11 +182,22 @@ export function useInvoiceCreateState(
   const { data: bankAccountsResponse, isPending: isBankAccountsLoading } = useBusinessBankAccounts({
     enabled: invoiceType === "SALE_INVOICE",
   });
+  const defaultSaleBankAccountId = useMemo(
+    () => bankAccountsResponse?.bankAccounts?.find((a) => a.isDefault)?.id ?? null,
+    [bankAccountsResponse?.bankAccounts],
+  );
   const { data: nextInvoiceNumber, isPending: isNextInvoiceNumberPending } = useNextInvoiceNumber({
     invoiceDate,
     invoiceType,
     enabled: !editInvoiceId,
   });
+  useEffect(() => {
+    if (invoiceType !== "SALE_INVOICE" || editInvoiceId) return;
+    setSaleBankSelectValue((current) => {
+      if (current !== "__auto__") return current;
+      return defaultSaleBankAccountId != null ? String(defaultSaleBankAccountId) : "__none__";
+    });
+  }, [defaultSaleBankAccountId, editInvoiceId, invoiceType]);
   const stockAnchorInvoice = editInvoiceId ? editingDraftInvoice : sourceInvoice;
   const sourceEntryIds = useMemo(
     () =>
@@ -1899,8 +1910,9 @@ export function useInvoiceCreateState(
           ...(invoiceType === "SALE_INVOICE"
             ? (() => {
                 if (saleBankSelectValue === "__auto__") {
-                  const defId = bankAccountsResponse?.bankAccounts?.find((a) => a.isDefault)?.id;
-                  return defId != null ? { businessBankAccountId: defId } : {};
+                  return defaultSaleBankAccountId != null
+                    ? { businessBankAccountId: defaultSaleBankAccountId }
+                    : {};
                 }
                 if (saleBankSelectValue === "__none__") {
                   return { businessBankAccountId: null };
@@ -1945,7 +1957,9 @@ export function useInvoiceCreateState(
           : {}),
         ...(invoiceType === "SALE_INVOICE"
           ? saleBankSelectValue === "__auto__"
-            ? {}
+            ? defaultSaleBankAccountId != null
+              ? { businessBankAccountId: defaultSaleBankAccountId }
+              : {}
             : saleBankSelectValue === "__none__"
               ? { businessBankAccountId: null }
               : { businessBankAccountId: Number(saleBankSelectValue) }
@@ -2013,7 +2027,7 @@ export function useInvoiceCreateState(
     purchaseMarginFieldValid,
     partyType,
     saleBankSelectValue,
-    bankAccountsResponse?.bankAccounts,
+    defaultSaleBankAccountId,
   ]);
 
   useEffect(() => {

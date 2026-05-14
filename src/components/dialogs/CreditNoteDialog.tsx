@@ -28,7 +28,7 @@ import type { CreditNoteSummary } from "@/types/credit-note";
 import type { Invoice } from "@/types/invoice";
 import { requiredPriceString, optionalString } from "@/lib/core/validation-schemas";
 import { withInvoiceQuantityErrorDetails } from "@/lib/invoice/invoice-quantity-error-details";
-import { formatCurrency } from "@/lib/core/utils";
+import { formatCurrency, formatDate } from "@/lib/core/utils";
 import { showErrorToast, showSuccessToast } from "@/lib/ui/toast-helpers";
 import { maybeShowTrialExpiredToast } from "@/lib/business/trial";
 
@@ -40,6 +40,18 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+function sourceInvoiceParty(invoice: Invoice): string {
+  return invoice.partyName?.trim() || "Unknown party";
+}
+
+function sourceInvoiceMeta(invoice: Invoice): string {
+  return `${sourceInvoiceParty(invoice)} · ${formatDate(invoice.invoiceDate)}`;
+}
+
+function sourceInvoiceSubtitle(invoice: Invoice): string {
+  return `${sourceInvoiceMeta(invoice)} · ${formatCurrency(invoice.totalAmount)}`;
+}
+
 function sumFinalCreditOnInvoice(creditNotes: CreditNoteSummary[], invoiceId: number): number {
   let s = 0;
   for (const cn of creditNotes) {
@@ -48,6 +60,12 @@ function sumFinalCreditOnInvoice(creditNotes: CreditNoteSummary[], invoiceId: nu
     s += parseFloat(cn.amount) || 0;
   }
   return s;
+}
+
+function remainingCreditCapacity(invoice: Invoice, creditNotes: CreditNoteSummary[]): number {
+  const invoiceTotal = parseFloat(invoice.totalAmount ?? "0") || 0;
+  const existing = sumFinalCreditOnInvoice(creditNotes, invoice.id);
+  return Math.max(0, invoiceTotal - existing);
 }
 
 interface Props {
@@ -78,14 +96,6 @@ export default function CreditNoteDialog({
     enabled: open && !isLocked,
   });
 
-  const { data: saleInvoicesData, isPending: saleInvoicesPending } = useInvoices({
-    status: "FINAL",
-    invoiceType: "SALE_INVOICE",
-    page: 1,
-    pageSize: 200,
-    enabled: open && !isLocked,
-  });
-
   const { data: existingCreditNotesData, isPending: creditNotesListPending } = useCreditNotes(
     isLocked
       ? { invoiceId: lockedInvoiceId, page: 1, pageSize: 200, enabled: open }
@@ -93,19 +103,11 @@ export default function CreditNoteDialog({
   );
 
   const invoices = useMemo(() => {
-    const m = new Map<number, Invoice>();
-    for (const inv of returnInvoicesData?.invoices ?? []) {
-      m.set(inv.id, inv);
-    }
-    for (const inv of saleInvoicesData?.invoices ?? []) {
-      m.set(inv.id, inv);
-    }
-    return [...m.values()].sort((a, b) =>
-      String(a.invoiceNumber).localeCompare(String(b.invoiceNumber), undefined, {
-        numeric: true,
-      }),
-    );
-  }, [returnInvoicesData?.invoices, saleInvoicesData?.invoices]);
+    const creditNotes = existingCreditNotesData?.creditNotes ?? [];
+    return [...(returnInvoicesData?.invoices ?? [])]
+      .filter((invoice) => remainingCreditCapacity(invoice, creditNotes) > 0.01)
+      .sort((a, b) => new Date(b.invoiceDate).getTime() - new Date(a.invoiceDate).getTime());
+  }, [existingCreditNotesData?.creditNotes, returnInvoicesData?.invoices]);
 
   const {
     register,
@@ -215,7 +217,7 @@ export default function CreditNoteDialog({
 
   const listPending = isLocked
     ? creditNotesListPending
-    : returnInvoicesPending || saleInvoicesPending || creditNotesListPending;
+    : returnInvoicesPending || creditNotesListPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -250,29 +252,45 @@ export default function CreditNoteDialog({
                   setValue("invoiceId", Number(v));
                 }}
               >
-                <SelectTrigger disabled={invoices.length === 0 || listPending}>
-                  <SelectValue
-                    placeholder={
-                      listPending
-                        ? "Loading…"
-                        : invoices.length === 0
-                          ? "No eligible documents"
-                          : "Select invoice or return"
-                    }
-                  />
+                <SelectTrigger
+                  disabled={invoices.length === 0 || listPending}
+                  className="min-h-[3.5rem] items-start py-2.5 [&>span]:line-clamp-none"
+                >
+                  {selectedInvoice ? (
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5 pr-6 text-left">
+                      <span className="truncate text-sm font-medium text-foreground">
+                        {selectedInvoice.invoiceNumber}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {sourceInvoiceSubtitle(selectedInvoice)}
+                      </span>
+                    </div>
+                  ) : (
+                    <SelectValue
+                      placeholder={
+                        listPending
+                          ? "Loading…"
+                          : invoices.length === 0
+                            ? "No eligible sales returns"
+                            : "Select sales return"
+                      }
+                    />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {invoices.length === 0 ? (
                     <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      No final sale invoices or sales returns found. Create and finalise a document
-                      first.
+                      No eligible sales returns found. Fully credited returns are hidden.
                     </div>
                   ) : (
                     invoices.map((inv) => (
-                      <SelectItem key={inv.id} value={String(inv.id)}>
-                        {inv.invoiceNumber} —{" "}
-                        {inv.invoiceType === "SALE_RETURN" ? "Return" : "Sale"} —{" "}
-                        {inv.partyName?.trim() || "Unknown party"}
+                      <SelectItem key={inv.id} value={String(inv.id)} className="py-2.5">
+                        <div className="flex min-w-0 flex-col gap-0.5">
+                          <span className="truncate font-medium">{inv.invoiceNumber}</span>
+                          <span className="truncate text-xs text-muted-foreground">
+                            {sourceInvoiceSubtitle(inv)}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))
                   )}

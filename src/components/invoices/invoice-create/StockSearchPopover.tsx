@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -233,8 +234,10 @@ export function StockSearchPopover({
                         <div className="mt-0.5 truncate text-xs text-muted-foreground">
                           No stock available for this item.
                         </div>
-                        <div className="mt-0.5 text-[11px] text-primary">
-                          Add stock for this item
+                        <div className="mt-1">
+                          <span className="inline-flex items-center rounded-md border border-primary/15 bg-primary/[0.06] px-2 py-1 text-[11px] font-medium text-primary">
+                            Add stock for this item
+                          </span>
                         </div>
                       </div>
                     </CommandItem>
@@ -245,13 +248,18 @@ export function StockSearchPopover({
                 <CommandItem
                   value={`add-item-${searchText.trim().toLowerCase()}`}
                   onSelect={onAddNewItem}
-                  className="items-start py-2 text-foreground"
+                  className={cn(
+                    "mx-2 mt-2 items-center gap-2 rounded-md border border-primary/15 bg-primary/[0.06] py-2.5 text-primary",
+                    "hover:bg-primary/[0.1] hover:text-primary",
+                    "aria-selected:border-primary/25 aria-selected:bg-primary/[0.12] aria-selected:text-primary",
+                  )}
                 >
+                  <Plus className="h-4 w-4 shrink-0 text-primary" />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">
+                    <div className="truncate text-sm font-medium text-primary">
                       Add new item &quot;{searchText.trim()}&quot;
                     </div>
-                    <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                    <div className="mt-0.5 truncate text-xs text-primary/80">
                       Item not found. Create it and then add stock.
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -110,6 +109,19 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
   });
 
   const accounts = useMemo(() => sortAccounts(data?.bankAccounts ?? []), [data?.bankAccounts]);
+  const autoPrimaryAttemptedIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!canEdit || accounts.length !== 1 || updateMut.isPending) return;
+    const onlyAccount = accounts[0];
+    if (!onlyAccount || onlyAccount.isDefault) {
+      autoPrimaryAttemptedIdRef.current = null;
+      return;
+    }
+    if (autoPrimaryAttemptedIdRef.current === onlyAccount.id) return;
+    autoPrimaryAttemptedIdRef.current = onlyAccount.id;
+    void updateMut.mutateAsync({ bankAccountId: onlyAccount.id, body: { isDefault: true } });
+  }, [accounts, canEdit, updateMut]);
 
   const openCreate = useCallback(() => {
     form.reset(emptyForm);
@@ -198,14 +210,8 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
   return (
     <>
       <div className="space-y-3">
-        {/* ── Sub-header ──────────────────────────────────────── */}
         <div className="flex items-center justify-between gap-2">
-          <div className="space-y-0.5">
-            <p className="text-sm font-semibold text-foreground">Saved accounts</p>
-            <p className="text-xs text-muted-foreground">
-              Select one as primary — it will be pre-filled on new invoices.
-            </p>
-          </div>
+          <p className="text-sm font-semibold text-foreground">Saved accounts</p>
           {canEdit ? (
             <Button
               type="button"
@@ -256,9 +262,7 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
           <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-border/60 bg-muted/10 px-6 py-6 text-center">
             <Landmark className="h-6 w-6 text-muted-foreground/40" aria-hidden />
             <p className="text-sm text-muted-foreground">
-              {canEdit
-                ? "No saved accounts yet — use the button above to add one."
-                : "No saved accounts."}
+              {canEdit ? "No saved accounts yet." : "No saved accounts."}
             </p>
           </div>
         ) : (
@@ -358,12 +362,6 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
                         </div>
                       ) : null}
                     </div>
-
-                    {!isPrimary && canEdit ? (
-                      <p className="mt-2 text-[11px] text-muted-foreground">
-                        Click to make primary
-                      </p>
-                    ) : null}
                   </div>
                 </div>
               );
@@ -376,13 +374,8 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="flex max-h-[min(90dvh,680px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
           {/* sticky header */}
-          <DialogHeader className="shrink-0 space-y-1 border-b border-border/80 px-6 py-4 text-left">
+          <DialogHeader className="shrink-0 border-b border-border/80 px-6 py-4 text-left">
             <DialogTitle>{editing ? "Edit bank account" : "Add bank account"}</DialogTitle>
-            <DialogDescription className="text-xs">
-              {editing
-                ? "Update the details below and save."
-                : "Fill in your bank details. IFSC must be 11 characters; account number 6–34 digits."}
-            </DialogDescription>
           </DialogHeader>
 
           {/* scrollable form body */}
@@ -507,9 +500,6 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">Set as primary account</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Pre-filled on new invoices when no specific account is chosen.
-                  </p>
                 </div>
               </button>
             </form>

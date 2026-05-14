@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Truck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Truck, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/EmptyState";
@@ -26,9 +26,10 @@ export default function Vendors() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editParty, setEditParty] = useState<Party | undefined>();
+  const [formOpen, setFormOpen] = useState(false);
+  const [selectedParty, setSelectedParty] = useState<Party | undefined>();
   const [includeInactive, setIncludeInactive] = useState(true);
+  const formSectionRef = useRef<HTMLDivElement | null>(null);
 
   const { data, isPending, error } = useParties({
     type: PARTY_TYPE,
@@ -37,14 +38,43 @@ export default function Vendors() {
   });
 
   const parties = data?.parties ?? [];
+  const isEditing = !!selectedParty;
+
+  useEffect(() => {
+    if (formOpen) {
+      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [formOpen]);
+
+  const closeForm = () => {
+    setFormOpen(false);
+    setSelectedParty(undefined);
+  };
 
   const openCreate = () => {
-    setEditParty(undefined);
-    setDialogOpen(true);
+    setSelectedParty(undefined);
+    setFormOpen(true);
   };
+
+  const toggleForm = () => {
+    if (formOpen && !isEditing) {
+      closeForm();
+      return;
+    }
+    openCreate();
+  };
+
   const openEdit = (p: Party) => {
-    setEditParty(p);
-    setDialogOpen(true);
+    setSelectedParty(p);
+    setFormOpen(true);
+  };
+
+  const handleFormOpenChange = (open: boolean) => {
+    if (!open) {
+      closeForm();
+      return;
+    }
+    setFormOpen(true);
   };
 
   return (
@@ -52,12 +82,29 @@ export default function Vendors() {
       <PageHeader
         title="Vendor"
         action={
-          <Button onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Vendor
+          <Button onClick={toggleForm} variant={formOpen && !isEditing ? "outline" : "default"}>
+            {formOpen && !isEditing ? (
+              <X className="mr-2 h-4 w-4" />
+            ) : (
+              <Plus className="mr-2 h-4 w-4" />
+            )}
+            {formOpen ? (isEditing ? "New Vendor" : "Close Form") : "Add Vendor"}
           </Button>
         }
       />
+
+      {formOpen ? (
+        <div ref={formSectionRef} className="mb-6">
+          <PartyDialog
+            open={formOpen}
+            onOpenChange={handleFormOpenChange}
+            party={selectedParty}
+            defaultType={PARTY_TYPE}
+            typeLocked
+            presentation="inline"
+          />
+        </div>
+      ) : null}
 
       <SearchInput
         value={search}
@@ -84,10 +131,12 @@ export default function Vendors() {
           icon={<Truck className="h-5 w-5" />}
           title="No vendors found"
           action={
-            <Button size="sm" onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Vendor
-            </Button>
+            !formOpen ? (
+              <Button size="sm" onClick={openCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Vendor
+              </Button>
+            ) : undefined
           }
         />
       ) : (
@@ -98,14 +147,6 @@ export default function Vendors() {
           showLedger={canVendorLedger}
         />
       )}
-
-      <PartyDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        party={editParty}
-        defaultType="SUPPLIER"
-        typeLocked
-      />
     </div>
   );
 }

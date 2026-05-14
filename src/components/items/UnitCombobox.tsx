@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Plus, Ruler } from "lucide-react";
 import { cn } from "@/lib/core/utils";
 import { Button } from "@/components/ui/button";
@@ -84,8 +84,20 @@ export function UnitCombobox({
       u.label.toLowerCase().includes(searchLower) ||
       u.value.toLowerCase().includes(searchLower),
   );
-  const showCreate = createInput.trim().length > 0 && onCreateUnit;
   const createName = createInput.trim();
+  const hasExactMatch = useMemo(
+    () =>
+      Boolean(
+        searchLower &&
+        units.some(
+          (unit) =>
+            unit.label.trim().toLowerCase() === searchLower ||
+            unit.value.trim().toLowerCase() === searchLower,
+        ),
+      ),
+    [units, searchLower],
+  );
+  const showCreate = createName.length > 0 && onCreateUnit && !hasExactMatch;
   const hasUnits = units.length > 0;
 
   return (
@@ -143,7 +155,7 @@ export function UnitCombobox({
                 {showCreate ? (
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 rounded-md bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+                    className="inline-flex items-center gap-2 rounded-md border border-primary/15 bg-primary/[0.06] px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/[0.1] disabled:opacity-60"
                     onClick={handleCreate}
                     disabled={creating}
                   >
@@ -186,14 +198,20 @@ export function UnitCombobox({
                 </CommandGroup>
               )}
               {showCreate && (
-                <CommandGroup className="mt-1 border-t p-0 pt-1">
+                <CommandGroup className="p-0">
                   <CommandItem
                     onSelect={handleCreate}
                     disabled={creating}
-                    className="flex cursor-pointer items-center gap-2 bg-muted/30 py-2.5 text-primary hover:bg-primary/10"
+                    className={cn(
+                      "mx-2 mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-primary/15 bg-primary/[0.06] py-2.5 text-primary",
+                      "hover:bg-primary/[0.1] hover:text-primary",
+                      "aria-selected:border-primary/25 aria-selected:bg-primary/[0.12] aria-selected:text-primary",
+                    )}
                   >
                     <Plus className="h-4 w-4 shrink-0" />
-                    <span>{creating ? "Adding…" : `Add "${createName}"`}</span>
+                    <span className="font-medium">
+                      {creating ? "Adding…" : `Add "${createName}"`}
+                    </span>
                   </CommandItem>
                 </CommandGroup>
               )}

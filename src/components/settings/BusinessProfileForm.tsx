@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, type ReactNode } from "react";
-import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, PenLine, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { FileText, PenLine, Pencil, Upload, X } from "lucide-react";
 import type { ProfileForm } from "@/components/settings/profileSchema";
 import { MONTHS, REGISTRATION_TYPES, COUNTRIES } from "@/constants";
 import { usePincodeAutofill } from "@/hooks/use-pincode-autofill";
@@ -222,14 +222,6 @@ export function BusinessProfileForm({
     formState: { errors },
   } = form;
 
-  const {
-    fields: extraDetailFields,
-    append: appendExtraDetail,
-    remove: removeExtraDetail,
-  } = useFieldArray({
-    control,
-    name: "extraDetails",
-  });
   const [phoneCountryCode, setPhoneCountryCode] = useState("IN");
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [pendingSignatureFile, setPendingSignatureFile] = useState<File | null>(null);
@@ -854,11 +846,6 @@ export function BusinessProfileForm({
           </FormSection>
 
           <FormSection title="Miscellaneous" contentClassName="space-y-6">
-            <p className="text-sm text-muted-foreground">
-              Registration type, signature for documents, and optional identifiers (TAN, UDYAM,
-              etc.).
-            </p>
-
             <div className="grid w-full gap-4 sm:grid-cols-2 sm:items-stretch">
               <div className="flex min-w-0 flex-col rounded-xl border border-border/80 bg-muted/15 p-4 shadow-sm ring-1 ring-border/30 sm:p-5">
                 <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-3">
@@ -872,7 +859,6 @@ export function BusinessProfileForm({
                     >
                       Registration type
                     </Label>
-                    <p className="text-xs text-muted-foreground">How your business is registered</p>
                   </div>
                 </div>
                 <Controller
@@ -905,7 +891,6 @@ export function BusinessProfileForm({
                   </span>
                   <div className="min-w-0">
                     <span className="text-sm font-semibold text-foreground">Signature</span>
-                    <p className="text-xs text-muted-foreground">Shown on invoices and PDFs</p>
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col justify-center rounded-lg border border-dashed border-border/70 bg-background/80 px-3 py-4 text-center">
@@ -951,68 +936,6 @@ export function BusinessProfileForm({
                       : displaySignatureUrl
                         ? "Change signature"
                         : "Upload signature"}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full">
-              <div className="rounded-xl border border-border/80 bg-muted/10 p-4 shadow-sm ring-1 ring-border/30 sm:p-5">
-                <div className="mb-4 flex flex-col gap-1 border-b border-border/50 pb-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <Label className="text-sm font-semibold text-foreground">Extra fields</Label>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Optional identifiers — e.g. TAN, UDYAM, IEC.
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {extraDetailFields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="grid grid-cols-1 gap-3 rounded-lg border border-border/60 bg-background/90 p-3 sm:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)_auto] sm:items-end sm:gap-2"
-                    >
-                      <div className="space-y-1.5">
-                        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                          Key
-                        </span>
-                        <Input
-                          placeholder="e.g. TAN"
-                          {...register(`extraDetails.${index}.key`)}
-                          className="w-full min-w-0 bg-background"
-                        />
-                      </div>
-                      <div className="space-y-1.5 sm:min-w-0">
-                        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                          Value
-                        </span>
-                        <Input
-                          placeholder="Enter value"
-                          {...register(`extraDetails.${index}.value`)}
-                          className="w-full min-w-0 bg-background"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeExtraDetail(index)}
-                        aria-label="Remove row"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="w-full gap-1.5 sm:w-auto"
-                    onClick={() => appendExtraDetail({ key: "", value: "" })}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add field
                   </Button>
                 </div>
               </div>
