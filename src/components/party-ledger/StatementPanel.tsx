@@ -1,4 +1,4 @@
-import { Download, Loader2, RefreshCcw } from "lucide-react";
+import { Download, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DateRangePicker from "@/components/DateRangePicker";
 import { PartyLedgerEntriesTable } from "@/components/party-ledger/PartyLedgerEntriesTable";
@@ -31,33 +31,34 @@ export function StatementPanel({
 }: StatementPanelProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={onStartDateChange}
-          onEndDateChange={onEndDateChange}
-        />
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onLoadStatement}
-            className="w-full sm:w-auto"
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" /> Load
-          </Button>
-          <Button type="button" onClick={onGeneratePdf} className="w-full sm:w-auto">
-            <Download className="mr-2 h-4 w-4" /> PDF
-          </Button>
+      <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={onStartDateChange}
+            onEndDateChange={onEndDateChange}
+            compact
+            className="min-w-0 flex-1"
+          />
+          <div className="flex shrink-0 flex-row flex-wrap items-center justify-end gap-2 border-t border-border/50 pt-3 lg:border-t-0 lg:pt-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onLoadStatement}
+              disabled={isFetching}
+            >
+              <RefreshCcw className={cn("mr-1.5 h-3.5 w-3.5", isFetching && "animate-spin")} />
+              Load
+            </Button>
+            <Button type="button" size="sm" onClick={onGeneratePdf} disabled={isFetching}>
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              PDF
+            </Button>
+          </div>
         </div>
       </div>
-
-      {isFetching && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-        </div>
-      )}
 
       {statement && (
         <div className="space-y-3">

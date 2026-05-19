@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import ErrorBanner from "@/components/ErrorBanner";
 import TablePagination from "@/components/TablePagination";
 import PageHeader from "@/components/PageHeader";
@@ -8,16 +7,23 @@ import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { AuditLogFilters, AuditLogsTable } from "@/components/audit-logs/AuditLogSections";
 import { useAuditLogs } from "@/hooks/use-audit-logs";
 import { usePagination } from "@/hooks/use-pagination";
+import { useAppliedFilters } from "@/hooks/use-applied-filters";
 
 export default function AuditLogs() {
   const { page, setPage, resetPage } = usePagination();
-  const [actionFilter, setActionFilter] = useState<string>("");
+  const {
+    draft: searchDraft,
+    applied: searchApplied,
+    apply: applySearch,
+    reset: resetSearch,
+    patchDraft,
+  } = useAppliedFilters({ action: "ALL" });
   const pageSize = 20;
 
   const { data, isPending, error } = useAuditLogs({
     page,
     pageSize,
-    action: actionFilter || undefined,
+    action: searchApplied.action === "ALL" ? undefined : searchApplied.action,
   });
 
   const logs = data?.logs ?? [];
@@ -29,11 +35,17 @@ export default function AuditLogs() {
       <PageHeader title="Audit logs" />
 
       <AuditLogFilters
-        actionFilter={actionFilter}
-        onActionFilterChange={(v) => {
-          setActionFilter(v === "ALL" ? "" : v);
+        actionFilter={searchDraft.action}
+        onActionFilterChange={(v) => patchDraft({ action: v })}
+        onApply={() => {
+          applySearch();
           resetPage();
         }}
+        onClear={() => {
+          resetSearch();
+          resetPage();
+        }}
+        clearDisabled={searchApplied.action === "ALL"}
       />
 
       <ErrorBanner error={error} fallbackMessage="Failed to load audit logs" />

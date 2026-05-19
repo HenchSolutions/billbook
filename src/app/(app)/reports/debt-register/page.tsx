@@ -2,13 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { RotateCcw, Search } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import DateRangePicker from "@/components/DateRangePicker";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,18 +14,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
   ReportRegisterSearchCard,
+  ReportRegisterSearchLayout,
+  ReportSearchField,
+  ReportSearchGrid,
   ReportRegisterTableScroll,
   rr,
 } from "@/components/reports/report-register-ui";
+import { PageSearchActions } from "@/components/PageSearchSection";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { useReceivablesAging } from "@/hooks/use-reports";
 import { useRegisterDateRange } from "@/hooks/use-date-range";
-import { DEFAULT_REPORT_LIMIT, MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
+import { DEFAULT_REPORT_LIMIT } from "@/constants";
 import { reportDebtRegister } from "@/lib/reports/report-labels";
 import type { ClientReportTableExport } from "@/lib/reports/report-table-export";
 import { parseISODateString, formatISODateDisplay } from "@/lib/core/date";
@@ -105,7 +105,7 @@ export default function DebtRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
 
   const { data, isPending, error } = useReceivablesAging(validEndDate, limit);
 
@@ -227,11 +227,8 @@ export default function DebtRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportDebtRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              From date / Up to date
-            </p>
+        <ReportRegisterSearchLayout
+          period={
             <DateRangePicker
               startDate={startDate}
               endDate={endDate}
@@ -240,89 +237,65 @@ export default function DebtRegisterPage() {
               error={dateRangeError}
               compact
             />
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Balances are as of <span className="font-medium text-foreground">Up to</span> (aging
-              snapshot). <span className="font-medium text-foreground">From</span> filters by
-              invoice date. Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-            </p>
-          </div>
-          <ReportLimitInput value={limit} onChange={setLimit} stacked />
-        </div>
+          }
+          filters={
+            <ReportSearchGrid>
+              <ReportSearchField label="Invoice no.">
+                <Input
+                  className="h-8"
+                  value={draft.invoiceNo}
+                  onChange={(e) => setDraft((d) => ({ ...d, invoiceNo: e.target.value }))}
+                  placeholder="Search by invoice number"
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </ReportSearchField>
 
-        <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Invoice no.</Label>
-            <Input
-              className="h-8"
-              value={draft.invoiceNo}
-              onChange={(e) => setDraft((d) => ({ ...d, invoiceNo: e.target.value }))}
-              placeholder="Search by invoice number"
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-          </div>
+              <ReportSearchField label="Outstanding" optional>
+                <Select
+                  value={draft.outstanding}
+                  onValueChange={(v) =>
+                    setDraft((d) => ({ ...d, outstanding: v as OutstandingFilter }))
+                  }
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="UNPAID">Unpaid</SelectItem>
+                    <SelectItem value="PARTIAL">Partially paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </ReportSearchField>
 
-          <div className="space-y-1">
-            <div className="flex items-end justify-between gap-2">
-              <Label className="text-xs font-medium text-muted-foreground">Outstanding</Label>
-              <span className="text-[10px] font-medium uppercase text-muted-foreground/80">
-                Optional
-              </span>
-            </div>
-            <Select
-              value={draft.outstanding}
-              onValueChange={(v) =>
-                setDraft((d) => ({ ...d, outstanding: v as OutstandingFilter }))
+              <ReportSearchField label="Customer">
+                <PartyAutocomplete
+                  value={draft.customerParty}
+                  onValueChange={(p) => setDraft((d) => ({ ...d, customerParty: p }))}
+                  serverSearch
+                  partiesQueryType="CUSTOMER"
+                  placeholder="Type to search customers…"
+                  className="h-8"
+                  inputId="debt-register-customer"
+                />
+              </ReportSearchField>
+            </ReportSearchGrid>
+          }
+          actions={
+            <PageSearchActions
+              className="!mt-0 !border-0 !pt-0"
+              onClear={handleClear}
+              onSearch={handleSearch}
+              clearDisabled={
+                !isFiltered &&
+                !draft.invoiceNo &&
+                !draft.customerParty &&
+                draft.outstanding === "ALL"
               }
-            >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="UNPAID">Unpaid</SelectItem>
-                <SelectItem value="PARTIAL">Partially paid</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1 sm:col-span-2">
-            <Label className="text-xs font-medium text-muted-foreground">Customer</Label>
-            <PartyAutocomplete
-              value={draft.customerParty}
-              onValueChange={(p) => setDraft((d) => ({ ...d, customerParty: p }))}
-              serverSearch
-              partiesQueryType="CUSTOMER"
-              placeholder="Type to search customers…"
-              className="h-8"
-              inputId="debt-register-customer"
+              searchDisabled={!validEndDate}
             />
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            disabled={
-              !isFiltered && !draft.invoiceNo && !draft.customerParty && draft.outstanding === "ALL"
-            }
-          >
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Clear
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSearch}
-            disabled={!validEndDate}
-            className="min-w-[100px]"
-          >
-            <Search className="mr-1.5 h-3.5 w-3.5" />
-            Search
-          </Button>
-        </div>
+          }
+        />
       </ReportRegisterSearchCard>
 
       {isPending ? (

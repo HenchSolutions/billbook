@@ -1,17 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import DateRangePicker from "@/components/DateRangePicker";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterFilterCard,
-  ReportRegisterFilterGrid,
-  ReportRegisterFilterGroup,
   ReportRegisterResultBar,
   ReportRegisterTableScroll,
   rr,
@@ -20,7 +17,7 @@ import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { usePayoutRegister } from "@/hooks/use-reports";
 import { useRegisterDateRange } from "@/hooks/use-date-range";
 import { cn, formatCurrency, formatDate, humanizeApiEnum } from "@/lib/core/utils";
-import { DEFAULT_REPORT_LIMIT } from "@/constants";
+import { DEFAULT_REPORT_LIMIT, MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
 import { reportPayoutRegister } from "@/lib/reports/report-labels";
 import type { ClientReportTableExport } from "@/lib/reports/report-table-export";
 import type { PayoutRegisterRowDto } from "@/types/report";
@@ -51,7 +48,7 @@ export default function PayoutRegisterPage() {
     validEndDate,
   } = useRegisterDateRange();
 
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
   const { data, isPending, error } = usePayoutRegister(validStartDate, validEndDate, limit);
 
   const rows = useMemo(() => data?.payouts ?? [], [data?.payouts]);
@@ -104,22 +101,16 @@ export default function PayoutRegisterPage() {
 
       <ErrorBanner error={error} fallbackMessage={reportPayoutRegister.loadError} />
 
-      <ReportRegisterFilterCard>
-        <ReportRegisterFilterGrid cols={2}>
-          <ReportRegisterFilterGroup title="Period">
-            <DateRangePicker
-              startDate={startDate}
-              endDate={endDate}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
-              error={dateRangeError}
-              compact
-            />
-          </ReportRegisterFilterGroup>
-          <ReportRegisterFilterGroup>
-            <ReportLimitInput value={limit} onChange={setLimit} stacked />
-          </ReportRegisterFilterGroup>
-        </ReportRegisterFilterGrid>
+      <ReportRegisterFilterCard className="py-2.5">
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+          error={dateRangeError}
+          compact
+          hint={`Max ${MAX_REPORT_DATE_RANGE_MONTHS} months`}
+        />
       </ReportRegisterFilterCard>
 
       {isPending ? (

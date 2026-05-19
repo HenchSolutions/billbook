@@ -154,7 +154,7 @@ export default function PartyLedgerPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="mt-5">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid h-9 w-full max-w-md grid-cols-2 gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
           <TabsTrigger value="ledger">Transactions</TabsTrigger>
           <TabsTrigger value="statement">Statement</TabsTrigger>
         </TabsList>

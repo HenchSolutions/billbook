@@ -9,7 +9,6 @@ import DateRangePicker from "@/components/DateRangePicker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -18,19 +17,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
   ReportRegisterSearchCard,
+  ReportRegisterSearchLayout,
+  ReportSearchField,
+  ReportSearchGrid,
   ReportRegisterTableScroll,
   rr,
 } from "@/components/reports/report-register-ui";
+import { PageSearchActions } from "@/components/PageSearchSection";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { useReceiptRegister } from "@/hooks/use-reports";
 import { useReceipt } from "@/hooks/use-receipts";
 import { useRegisterDateRange } from "@/hooks/use-date-range";
-import { DEFAULT_REPORT_LIMIT, MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
+import { DEFAULT_REPORT_LIMIT } from "@/constants";
 import { reportReceiptRegister } from "@/lib/reports/report-labels";
 import type { ClientReportTableExport } from "@/lib/reports/report-table-export";
 import { cn, capitaliseWords, formatCurrency, formatDate } from "@/lib/core/utils";
@@ -204,7 +206,7 @@ export default function ReceiptRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
   const [allocDialogReceiptId, setAllocDialogReceiptId] = useState<number | null>(null);
 
   const { data, isPending, error } = useReceiptRegister(validStartDate, validEndDate, limit);
@@ -310,11 +312,8 @@ export default function ReceiptRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportReceiptRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Date range
-            </p>
+        <ReportRegisterSearchLayout
+          period={
             <DateRangePicker
               startDate={startDate}
               endDate={endDate}
@@ -323,112 +322,85 @@ export default function ReceiptRegisterPage() {
               error={dateRangeError}
               compact
             />
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-            </p>
-          </div>
-          <ReportLimitInput value={limit} onChange={setLimit} stacked />
-        </div>
+          }
+          filters={
+            <ReportSearchGrid>
+              <ReportSearchField label="Receipt no.">
+                <Input
+                  className="h-8"
+                  value={draft.receiptNo}
+                  onChange={(e) => setDraft((d) => ({ ...d, receiptNo: e.target.value }))}
+                  placeholder="e.g. RCP-00012"
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </ReportSearchField>
 
-        <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Receipt no.</Label>
-            <Input
-              className="h-8"
-              value={draft.receiptNo}
-              onChange={(e) => setDraft((d) => ({ ...d, receiptNo: e.target.value }))}
-              placeholder="e.g. RCP-00012"
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-          </div>
+              <ReportSearchField label="Type" optional>
+                <Select
+                  value={draft.receiptKind}
+                  onValueChange={(v) =>
+                    setDraft((d) => ({ ...d, receiptKind: v as ReceiptKindFilter }))
+                  }
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="AGAINST_INVOICE">Against invoice</SelectItem>
+                    <SelectItem value="ADVANCE">Advance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </ReportSearchField>
 
-          <div className="space-y-1">
-            <div className="flex items-end justify-between gap-2">
-              <Label className="text-xs font-medium text-muted-foreground">Type</Label>
-              <span className="text-[10px] font-medium uppercase text-muted-foreground/80">
-                Optional
-              </span>
-            </div>
-            <Select
-              value={draft.receiptKind}
-              onValueChange={(v) =>
-                setDraft((d) => ({ ...d, receiptKind: v as ReceiptKindFilter }))
+              <ReportSearchField label="Customer">
+                <PartyAutocomplete
+                  value={draft.customerParty}
+                  onValueChange={(p) => setDraft((d) => ({ ...d, customerParty: p }))}
+                  serverSearch
+                  partiesQueryType="CUSTOMER"
+                  placeholder="Type to search customers…"
+                  className="h-8"
+                  inputId="receipt-register-customer"
+                />
+              </ReportSearchField>
+
+              <ReportSearchField label="Allocation">
+                <Select
+                  value={draft.adjustment}
+                  onValueChange={(v) =>
+                    setDraft((d) => ({ ...d, adjustment: v as AdjustmentFilter }))
+                  }
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="PAID">Fully adjusted</SelectItem>
+                    <SelectItem value="UNPAID">None adjusted</SelectItem>
+                    <SelectItem value="PARTIAL">Partly adjusted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </ReportSearchField>
+            </ReportSearchGrid>
+          }
+          actions={
+            <PageSearchActions
+              className="!mt-0 !border-0 !pt-0"
+              onClear={handleClear}
+              onSearch={handleSearch}
+              clearDisabled={
+                !isFiltered &&
+                !draft.receiptNo &&
+                !draft.customerParty &&
+                draft.receiptKind === "ALL" &&
+                draft.adjustment === "ALL"
               }
-            >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="AGAINST_INVOICE">Against invoice</SelectItem>
-                <SelectItem value="ADVANCE">Advance</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Customer</Label>
-            <PartyAutocomplete
-              value={draft.customerParty}
-              onValueChange={(p) => setDraft((d) => ({ ...d, customerParty: p }))}
-              serverSearch
-              partiesQueryType="CUSTOMER"
-              placeholder="Type to search customers…"
-              className="h-8"
-              inputId="receipt-register-customer"
+              searchDisabled={!validStartDate || !validEndDate}
             />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Allocation</Label>
-            <Select
-              value={draft.adjustment}
-              onValueChange={(v) => setDraft((d) => ({ ...d, adjustment: v as AdjustmentFilter }))}
-            >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="PAID">Fully adjusted</SelectItem>
-                <SelectItem value="UNPAID">None adjusted</SelectItem>
-                <SelectItem value="PARTIAL">Partly adjusted</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">
-              Filter by how much of the receipt is applied (invoices + opening).
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-end gap-2 border-t border-border/60 pt-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            disabled={
-              !isFiltered &&
-              !draft.receiptNo &&
-              !draft.customerParty &&
-              draft.receiptKind === "ALL" &&
-              draft.adjustment === "ALL"
-            }
-          >
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Clear
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSearch}
-            disabled={!validStartDate || !validEndDate}
-            className="min-w-[90px]"
-          >
-            <Search className="mr-1.5 h-3.5 w-3.5" />
-            Search
-          </Button>
-        </div>
+          }
+        />
       </ReportRegisterSearchCard>
 
       {isPending ? (

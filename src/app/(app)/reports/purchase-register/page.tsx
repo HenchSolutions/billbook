@@ -6,9 +6,7 @@ import { RotateCcw, Search } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import DateRangePicker from "@/components/DateRangePicker";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,19 +15,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import { RegisterInvoicePayStatusBadge } from "@/components/reports/RegisterInvoicePayStatusBadge";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
   ReportRegisterSearchCard,
+  ReportRegisterSearchLayout,
+  ReportSearchField,
+  ReportSearchGrid,
   ReportRegisterTableScroll,
   rr,
 } from "@/components/reports/report-register-ui";
+import { PageSearchActions } from "@/components/PageSearchSection";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { useInvoiceRegister } from "@/hooks/use-reports";
 import { useRegisterDateRange } from "@/hooks/use-date-range";
-import { DEFAULT_REPORT_LIMIT, MAX_REPORT_DATE_RANGE_MONTHS } from "@/constants";
+import { DEFAULT_REPORT_LIMIT } from "@/constants";
 import { reportPurchaseRegister } from "@/lib/reports/report-labels";
 import type { ClientReportTableExport } from "@/lib/reports/report-table-export";
 import {
@@ -79,7 +80,7 @@ export default function PurchaseRegisterPage() {
 
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
 
   const { data, isPending, error } = useInvoiceRegister(
     validStartDate,
@@ -174,11 +175,8 @@ export default function PurchaseRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportPurchaseRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Date range
-            </p>
+        <ReportRegisterSearchLayout
+          period={
             <DateRangePicker
               startDate={startDate}
               endDate={endDate}
@@ -187,104 +185,83 @@ export default function PurchaseRegisterPage() {
               error={dateRangeError}
               compact
             />
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Max {MAX_REPORT_DATE_RANGE_MONTHS} months.
-            </p>
-          </div>
-          <ReportLimitInput value={limit} onChange={setLimit} stacked />
-        </div>
+          }
+          filters={
+            <ReportSearchGrid>
+              <ReportSearchField label="Bill / Invoice no.">
+                <Input
+                  className="h-8"
+                  value={draft.billNo}
+                  onChange={(e) => setDraft((d) => ({ ...d, billNo: e.target.value }))}
+                  placeholder="e.g. BILL-0012"
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </ReportSearchField>
 
-        {/* Filter rows — 2-column on sm+ */}
-        <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Bill / Invoice no.</Label>
-            <Input
-              className="h-8"
-              value={draft.billNo}
-              onChange={(e) => setDraft((d) => ({ ...d, billNo: e.target.value }))}
-              placeholder="e.g. BILL-0012"
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              <ReportSearchField label="Type">
+                <Select
+                  value={draft.docType}
+                  onValueChange={(v) => setDraft((d) => ({ ...d, docType: v as DocTypeFilter }))}
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="PURCHASE_INVOICE">Purchase invoice</SelectItem>
+                    <SelectItem value="PURCHASE_RETURN">Purchase return</SelectItem>
+                  </SelectContent>
+                </Select>
+              </ReportSearchField>
+
+              <ReportSearchField label="Supplier">
+                <PartyAutocomplete
+                  value={draft.supplierParty}
+                  onValueChange={(p) => setDraft((d) => ({ ...d, supplierParty: p }))}
+                  serverSearch
+                  partiesQueryType="SUPPLIER"
+                  placeholder="Type to search suppliers…"
+                  className="h-8"
+                  inputId="purchase-register-supplier"
+                />
+              </ReportSearchField>
+
+              <ReportSearchField label="Payment status">
+                <Select
+                  value={draft.payStatus}
+                  onValueChange={(v) =>
+                    setDraft((d) => ({ ...d, payStatus: v as PayStatusFilter }))
+                  }
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="PAID">Paid</SelectItem>
+                    <SelectItem value="UNPAID">Unpaid</SelectItem>
+                    <SelectItem value="PARTIAL">Partial paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </ReportSearchField>
+            </ReportSearchGrid>
+          }
+          actions={
+            <PageSearchActions
+              className="!mt-0 !border-0 !pt-0"
+              onClear={handleClear}
+              onSearch={handleSearch}
+              clearDisabled={
+                !isFiltered &&
+                !draft.billNo &&
+                !draft.supplierParty &&
+                draft.docType === "ALL" &&
+                draft.payStatus === "ALL"
+              }
+              searchDisabled={!validStartDate || !validEndDate}
             />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Type</Label>
-            <Select
-              value={draft.docType}
-              onValueChange={(v) => setDraft((d) => ({ ...d, docType: v as DocTypeFilter }))}
-            >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="PURCHASE_INVOICE">Purchase invoice</SelectItem>
-                <SelectItem value="PURCHASE_RETURN">Purchase return</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Supplier</Label>
-            <PartyAutocomplete
-              value={draft.supplierParty}
-              onValueChange={(p) => setDraft((d) => ({ ...d, supplierParty: p }))}
-              serverSearch
-              partiesQueryType="SUPPLIER"
-              placeholder="Type to search suppliers…"
-              className="h-8"
-              inputId="purchase-register-supplier"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Payment status</Label>
-            <Select
-              value={draft.payStatus}
-              onValueChange={(v) => setDraft((d) => ({ ...d, payStatus: v as PayStatusFilter }))}
-            >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="PAID">Paid</SelectItem>
-                <SelectItem value="UNPAID">Unpaid</SelectItem>
-                <SelectItem value="PARTIAL">Partial paid</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-3 flex items-center justify-end gap-2 border-t border-border/60 pt-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            disabled={
-              !isFiltered &&
-              !draft.billNo &&
-              !draft.supplierParty &&
-              draft.docType === "ALL" &&
-              draft.payStatus === "ALL"
-            }
-          >
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Clear
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSearch}
-            disabled={!validStartDate || !validEndDate}
-            className="min-w-[90px]"
-          >
-            <Search className="mr-1.5 h-3.5 w-3.5" />
-            Search
-          </Button>
-        </div>
+          }
+        />
       </ReportRegisterSearchCard>
 
       {/* ── Results ── */}

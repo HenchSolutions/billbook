@@ -2,22 +2,23 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { RotateCcw, Search } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import { PartyAutocomplete } from "@/components/invoices/PartyAutocomplete";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
 import {
   ReportRegisterEmptyRow,
   ReportRegisterResultBar,
   ReportRegisterSearchCard,
+  ReportRegisterSearchLayout,
+  ReportSearchField,
+  ReportSearchGrid,
   ReportRegisterSummaryCard,
   ReportRegisterTableScroll,
   rr,
 } from "@/components/reports/report-register-ui";
+import { PageSearchActions } from "@/components/PageSearchSection";
 import { ReportTabSkeleton } from "@/components/skeletons/ReportTabSkeleton";
 import { usePayablesRegister } from "@/hooks/use-reports";
 import { DEFAULT_REPORT_LIMIT } from "@/constants";
@@ -51,7 +52,7 @@ function sumPayablesRows(rows: PayablesRegisterPartyRow[]) {
 }
 
 export default function PayablesRegisterPage() {
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
 
@@ -94,11 +95,11 @@ export default function PayablesRegisterPage() {
     ]);
     return {
       reportTitle: reportPayablesRegister.title,
-      subtitle: `Row limit ${limit}`,
+      subtitle: "Payables register",
       headers: [...headers],
       rows: body,
     };
-  }, [data, rows, limit]);
+  }, [data, rows]);
 
   return (
     <div className="page-container animate-fade-in">
@@ -111,41 +112,31 @@ export default function PayablesRegisterPage() {
       <ErrorBanner error={error} fallbackMessage={reportPayablesRegister.loadError} />
 
       <ReportRegisterSearchCard>
-        <div className="mb-3 grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2">
-          <ReportLimitInput value={limit} onChange={setLimit} stacked />
-          <div className="space-y-1">
-            <Label className="text-xs font-medium text-muted-foreground">Supplier / party</Label>
-            <PartyAutocomplete
-              value={draft.supplierParty}
-              onValueChange={(p) => setDraft((d) => ({ ...d, supplierParty: p }))}
-              serverSearch
-              partiesQueryType="SUPPLIER"
-              placeholder="Type to search suppliers…"
-              className="h-8"
-              inputId="payables-register-supplier"
+        <ReportRegisterSearchLayout
+          filters={
+            <ReportSearchGrid className="sm:grid-cols-1 lg:max-w-md">
+              <ReportSearchField label="Supplier / party">
+                <PartyAutocomplete
+                  value={draft.supplierParty}
+                  onValueChange={(p) => setDraft((d) => ({ ...d, supplierParty: p }))}
+                  serverSearch
+                  partiesQueryType="SUPPLIER"
+                  placeholder="Type to search suppliers…"
+                  className="h-8"
+                  inputId="payables-register-supplier"
+                />
+              </ReportSearchField>
+            </ReportSearchGrid>
+          }
+          actions={
+            <PageSearchActions
+              className="!mt-0 !border-0 !pt-0"
+              onClear={handleClear}
+              onSearch={handleSearch}
+              clearDisabled={!isFiltered && !draft.supplierParty}
             />
-            <p className="text-[10px] leading-snug text-muted-foreground">
-              Row limit loads from the server; pick a supplier and click Search to filter this list.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-end gap-2 border-t border-border/60 pt-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            disabled={!isFiltered && !draft.supplierParty}
-          >
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Clear
-          </Button>
-          <Button type="button" size="sm" onClick={handleSearch} className="min-w-[90px]">
-            <Search className="mr-1.5 h-3.5 w-3.5" />
-            Search
-          </Button>
-        </div>
+          }
+        />
       </ReportRegisterSearchCard>
 
       {isPending ? (

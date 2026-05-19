@@ -5,29 +5,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSection";
 import { AUDIT_ACTIONS } from "@/constants";
 
 interface AuditLogFiltersProps {
   actionFilter: string;
   onActionFilterChange: (value: string) => void;
+  onApply: () => void;
+  onClear: () => void;
+  clearDisabled?: boolean;
 }
 
-export function AuditLogFilters({ actionFilter, onActionFilterChange }: AuditLogFiltersProps) {
+export function AuditLogFilters({
+  actionFilter,
+  onActionFilterChange,
+  onApply,
+  onClear,
+  clearDisabled,
+}: AuditLogFiltersProps) {
   return (
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-      <Select value={actionFilter} onValueChange={onActionFilterChange}>
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="Filter by action" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">All Actions</SelectItem>
-          {AUDIT_ACTIONS.map((a) => (
-            <SelectItem key={a} value={a}>
-              {a}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <PageSearchCard>
+      <div className="space-y-1 sm:max-w-xs">
+        <Label className="text-xs font-medium text-muted-foreground">Action type</Label>
+        <Select value={actionFilter || "ALL"} onValueChange={onActionFilterChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All actions" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All actions</SelectItem>
+            {AUDIT_ACTIONS.map((a) => (
+              <SelectItem key={a} value={a}>
+                {a}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <PageSearchActions onSearch={onApply} onClear={onClear} clearDisabled={clearDisabled} />
+    </PageSearchCard>
   );
 }

@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Plus, ArrowDownLeft, BarChart3, FileSpreadsheet, SlidersHorizontal } from "lucide-react";
+import { Plus, ArrowDownLeft, BarChart3, FileSpreadsheet } from "lucide-react";
+import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSection";
+import { useAppliedFilters } from "@/hooks/use-applied-filters";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,16 +35,25 @@ function sumOutboundAmounts(rows: OutboundPayment[]): number {
 export default function OutboundPaymentsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const [category, setCategory] = useState<OutboundPaymentCategory | "ALL">("ALL");
-  const [partyIdStr, setPartyIdStr] = useState<string>("all");
+  const {
+    draft: searchDraft,
+    applied: searchApplied,
+    apply: applySearch,
+    reset: resetSearch,
+    patchDraft,
+  } = useAppliedFilters<{ category: OutboundPaymentCategory | "ALL"; partyIdStr: string }>({
+    category: "ALL",
+    partyIdStr: "all",
+  });
 
-  const partyId = partyIdStr === "all" ? undefined : parseInt(partyIdStr, 10);
+  const appliedPartyId =
+    searchApplied.partyIdStr === "all" ? undefined : parseInt(searchApplied.partyIdStr, 10);
 
   const { data, isPending, error } = useOutboundPayments({
     page,
     pageSize,
-    category,
-    partyId: Number.isFinite(partyId) ? partyId : undefined,
+    category: searchApplied.category,
+    partyId: Number.isFinite(appliedPartyId) ? appliedPartyId : undefined,
   });
 
   const { data: partiesData } = useParties({ includeInactive: true, limit: 200 });
@@ -64,12 +75,16 @@ export default function OutboundPaymentsPage() {
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = total === 0 ? 0 : Math.min(page * pageSize, total);
 
-  const filtersActive = category !== "ALL" || partyIdStr !== "all";
+  const filtersActive = searchApplied.category !== "ALL" || searchApplied.partyIdStr !== "all";
   const pageTotalOutflow = sumOutboundAmounts(payments);
 
-  const clearFilters = () => {
-    setCategory("ALL");
-    setPartyIdStr("all");
+  const handleSearch = () => {
+    applySearch();
+    setPage(1);
+  };
+
+  const handleClear = () => {
+    resetSearch();
     setPage(1);
   };
 
@@ -126,91 +141,73 @@ export default function OutboundPaymentsPage() {
         </div>
       )}
 
-      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm ring-1 ring-border/50">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 bg-muted/25 px-4 py-3 sm:px-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden />
-            <span className="text-sm font-semibold text-foreground">Filters</span>
-            {filtersActive ? (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                Active
-              </span>
-            ) : null}
+      <PageSearchCard className="mb-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label
+              htmlFor="payment-type-filter"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Payment type
+            </Label>
+            <Select
+              value={searchDraft.category}
+              onValueChange={(v) => patchDraft({ category: v as OutboundPaymentCategory | "ALL" })}
+            >
+              <SelectTrigger id="payment-type-filter" className="h-9 bg-background">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All types</SelectItem>
+                {OUTBOUND_CATEGORY_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {filtersActive ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={clearFilters}
-              >
-                Clear filters
-              </Button>
-            ) : null}
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 px-3 text-xs" asChild>
-              <Link href="/reports/payout-register" title="Payment register (reports)">
-                <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span className="hidden sm:inline">Payment register</span>
-                <span className="sm:hidden">Register</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-        <div className="p-4 sm:p-5">
-          <div className="flex w-full flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
-            <div className="w-full min-w-[200px] max-w-md flex-1 space-y-2">
-              <Label htmlFor="payment-type-filter" className="text-xs text-muted-foreground">
-                Payment type
-              </Label>
-              <Select
-                value={category}
-                onValueChange={(v) => {
-                  setCategory(v as OutboundPaymentCategory | "ALL");
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger id="payment-type-filter" className="h-11 bg-background">
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All types</SelectItem>
-                  {OUTBOUND_CATEGORY_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-full min-w-[220px] max-w-md flex-1 space-y-2">
-              <Label htmlFor="payment-party-filter" className="text-xs text-muted-foreground">
-                Party
-              </Label>
-              <Select
-                value={partyIdStr}
-                onValueChange={(v) => {
-                  setPartyIdStr(v);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger id="payment-party-filter" className="h-11 bg-background">
-                  <SelectValue placeholder="All parties" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All parties</SelectItem>
-                  {parties.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-1">
+            <Label
+              htmlFor="payment-party-filter"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Party
+            </Label>
+            <Select
+              value={searchDraft.partyIdStr}
+              onValueChange={(v) => patchDraft({ partyIdStr: v })}
+            >
+              <SelectTrigger id="payment-party-filter" className="h-9 bg-background">
+                <SelectValue placeholder="All parties" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All parties</SelectItem>
+                {parties.map((p) => (
+                  <SelectItem key={p.id} value={String(p.id)}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 px-3 text-xs" asChild>
+            <Link href="/reports/payout-register" title="Payment register (reports)">
+              <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="hidden sm:inline">Payment register</span>
+              <span className="sm:hidden">Register</span>
+            </Link>
+          </Button>
+          <PageSearchActions
+            onSearch={handleSearch}
+            onClear={handleClear}
+            clearDisabled={!filtersActive}
+            className="mt-0 border-0 pt-0"
+          />
+        </div>
+      </PageSearchCard>
 
       {isPending ? (
         <TableSkeleton rows={8} />

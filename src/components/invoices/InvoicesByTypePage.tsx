@@ -41,12 +41,18 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
     debouncedSearch,
     setSearch,
     partyId,
+    draftPartyId,
     startDate,
     endDate,
+    appliedStartDate,
+    appliedEndDate,
     handleStatusChange,
     handlePartyChange,
     handleStartDateChange,
     handleEndDateChange,
+    applySearchFilters,
+    clearSearchFilters,
+    hasActiveSearchFilters,
   } = useInvoicesListFilters();
 
   const partyType = isSalesFamily(invoiceType) ? "CUSTOMER" : "SUPPLIER";
@@ -62,8 +68,8 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
     search: debouncedSearch || undefined,
     invoiceType,
     partyId,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    startDate: appliedStartDate || undefined,
+    endDate: appliedEndDate || undefined,
   });
 
   const invoices = useMemo(() => {
@@ -178,12 +184,15 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
         search={search}
         onSearchChange={setSearch}
         parties={parties}
-        partyId={partyId}
+        partyId={draftPartyId}
         onPartyChange={handlePartyChange}
         startDate={startDate}
         endDate={endDate}
         onStartDateChange={handleStartDateChange}
         onEndDateChange={handleEndDateChange}
+        onApply={applySearchFilters}
+        onClear={clearSearchFilters}
+        clearDisabled={!hasActiveSearchFilters && !search && !partyId && !startDate && !endDate}
       />
 
       <ErrorBanner error={error} fallbackMessage="Failed to load invoices" />

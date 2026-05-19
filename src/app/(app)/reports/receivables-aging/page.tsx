@@ -2,16 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import { ReportRegisterExportToolbar } from "@/components/reports/ReportRegisterExportToolbar";
-import { ReportLimitInput } from "@/components/reports/ReportLimitInput";
-import {
-  ReportRegisterFilterCard,
-  ReportRegisterFilterGrid,
-  ReportRegisterFilterGroup,
-} from "@/components/reports/report-register-ui";
+import { ReportRegisterFilterCard } from "@/components/reports/report-register-ui";
 import {
   ReceivablesAgingSection,
   receivablesAgingBucketDisplay,
@@ -27,7 +21,7 @@ import type { ReceivablesAgingBucket } from "@/types/report";
 
 export default function ReceivablesAgingPage() {
   const [asOf, setAsOf] = useState(() => toISODateString(new Date()));
-  const [limit, setLimit] = useState(DEFAULT_REPORT_LIMIT);
+  const limit = DEFAULT_REPORT_LIMIT;
   const [bucketFilter, setBucketFilter] = useState<ReceivablesAgingBucket | "ALL">("ALL");
 
   const asOfValid = parseISODateString(asOf) !== undefined;
@@ -77,26 +71,17 @@ export default function ReceivablesAgingPage() {
 
       <ErrorBanner error={error} fallbackMessage={reportInvoiceAging.loadError} />
 
-      <ReportRegisterFilterCard>
-        <ReportRegisterFilterGrid cols={2} className="xl:grid-cols-[auto_auto]">
-          <ReportRegisterFilterGroup title="Period">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="as-of" className="text-xs font-medium text-muted-foreground">
-                As of date
-              </Label>
-              <Input
-                id="as-of"
-                type="date"
-                className="h-9 w-full sm:w-44"
-                value={asOf}
-                onChange={(e) => setAsOf(e.target.value)}
-              />
-            </div>
-          </ReportRegisterFilterGroup>
-          <ReportRegisterFilterGroup>
-            <ReportLimitInput value={limit} onChange={setLimit} stacked />
-          </ReportRegisterFilterGroup>
-        </ReportRegisterFilterGrid>
+      <ReportRegisterFilterCard className="py-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">As of</span>
+          <Input
+            id="as-of"
+            type="date"
+            className="h-8 w-full sm:w-44"
+            value={asOf}
+            onChange={(e) => setAsOf(e.target.value)}
+          />
+        </div>
       </ReportRegisterFilterCard>
 
       {isPending ? (

@@ -45,11 +45,17 @@ export function ReturnSourceInvoicePicker({ returnType }: ReturnSourceInvoicePic
     debouncedSearch,
     setSearch,
     partyId,
+    draftPartyId,
     startDate,
     endDate,
+    appliedStartDate,
+    appliedEndDate,
     handlePartyChange,
     handleStartDateChange,
     handleEndDateChange,
+    applySearchFilters,
+    clearSearchFilters,
+    hasActiveSearchFilters,
   } = useInvoicesListFilters({ defaultStatus: "FINAL", defaultPageSize: 20 });
 
   const { data: partiesData } = useParties({ type: partyQueryType, includeInactive: false });
@@ -64,8 +70,8 @@ export function ReturnSourceInvoicePicker({ returnType }: ReturnSourceInvoicePic
     search: debouncedSearch || undefined,
     invoiceType: sourceInvoiceType,
     partyId,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    startDate: appliedStartDate || undefined,
+    endDate: appliedEndDate || undefined,
   });
 
   const invoices = useMemo(() => {
@@ -100,12 +106,17 @@ export function ReturnSourceInvoicePicker({ returnType }: ReturnSourceInvoicePic
         onSearchChange={setSearch}
         searchPlaceholder={searchPlaceholder}
         parties={parties}
-        partyId={partyId}
+        partyId={draftPartyId}
         onPartyChange={handlePartyChange}
         startDate={startDate}
         endDate={endDate}
         onStartDateChange={handleStartDateChange}
         onEndDateChange={handleEndDateChange}
+        onApply={applySearchFilters}
+        onClear={clearSearchFilters}
+        clearDisabled={
+          !hasActiveSearchFilters && !search && !draftPartyId && !startDate && !endDate
+        }
       />
 
       <ErrorBanner error={error} fallbackMessage="Failed to load invoices" />

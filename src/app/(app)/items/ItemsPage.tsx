@@ -14,6 +14,8 @@ import {
 import EmptyState from "@/components/EmptyState";
 import ErrorBanner from "@/components/ErrorBanner";
 import SearchInput from "@/components/SearchInput";
+import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSection";
+import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import ItemDetailSkeleton from "@/components/skeletons/ItemDetailSkeleton";
@@ -21,7 +23,7 @@ import ItemDialog from "@/components/dialogs/ItemDialog";
 import { ItemsTable } from "@/components/items/ItemsTable";
 import { ItemDetailView } from "@/components/items/ItemDetailView";
 import { useItems, useCategories } from "@/hooks/use-items";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useAppliedFilters } from "@/hooks/use-applied-filters";
 import type { Item } from "@/types/item";
 import { Switch } from "@/components/ui/switch";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -35,10 +37,17 @@ export default function ItemsPage() {
   const router = useRouter();
   const params = useParams<{ itemId?: string | string[] }>();
   const itemId = Array.isArray(params?.itemId) ? params.itemId[0] : params?.itemId;
-  const [search, setSearch] = useState("");
-  const [categoryId, setCategoryId] = useState<number | undefined>();
-  const [includeInactive, setIncludeInactive] = useState(true);
-  const debouncedSearch = useDebounce(search, 300);
+  const {
+    draft: searchDraft,
+    applied: searchApplied,
+    apply: applySearch,
+    reset: resetSearch,
+    patchDraft,
+  } = useAppliedFilters({
+    search: "",
+    categoryId: undefined as number | undefined,
+    includeInactive: true,
+  });
   const [formOpen, setFormOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | undefined>();
   const formSectionRef = useRef<HTMLDivElement | null>(null);
@@ -48,10 +57,10 @@ export default function ItemsPage() {
     isPending: itemsPending,
     error: itemsError,
   } = useItems({
-    search: debouncedSearch || undefined,
-    categoryId,
+    search: searchApplied.search || undefined,
+    categoryId: searchApplied.categoryId,
     limit: 100,
-    includeInactive,
+    includeInactive: searchApplied.includeInactive,
   });
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
@@ -137,38 +146,57 @@ export default function ItemsPage() {
         </div>
       ) : null}
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search items..."
-          className="w-full sm:max-w-xs"
-        />
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-1.5">
-          <Switch
-            checked={includeInactive}
-            onCheckedChange={setIncludeInactive}
-            aria-label="Show inactive items"
-          />
-          <span className="text-sm text-muted-foreground">Show inactive</span>
+      <PageSearchCard>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1 sm:col-span-2 lg:col-span-1">
+            <Label className="text-xs font-medium text-muted-foreground">Item name</Label>
+            <SearchInput
+              value={searchDraft.search}
+              onChange={(v) => patchDraft({ search: v })}
+              placeholder="Search items..."
+              className="max-w-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-muted-foreground">Category</Label>
+            <Select
+              value={searchDraft.categoryId != null ? String(searchDraft.categoryId) : "all"}
+              onValueChange={(v) => patchDraft({ categoryId: v === "all" ? undefined : Number(v) })}
+            >
+              <SelectTrigger className="h-9 w-full">
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All categories</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end">
+            <div className="flex h-9 w-full items-center gap-2 rounded-lg border border-border bg-muted/20 px-3">
+              <Switch
+                checked={searchDraft.includeInactive}
+                onCheckedChange={(checked) => patchDraft({ includeInactive: checked })}
+                aria-label="Show inactive items"
+              />
+              <span className="text-sm text-muted-foreground">Show inactive</span>
+            </div>
+          </div>
         </div>
-        <Select
-          value={categoryId != null ? String(categoryId) : "all"}
-          onValueChange={(v) => setCategoryId(v === "all" ? undefined : Number(v))}
-        >
-          <SelectTrigger className="h-9 w-full min-w-[180px] sm:w-[200px]">
-            <SelectValue placeholder="All categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <PageSearchActions
+          onSearch={applySearch}
+          onClear={resetSearch}
+          clearDisabled={
+            !searchApplied.search &&
+            searchApplied.categoryId == null &&
+            searchApplied.includeInactive
+          }
+        />
+      </PageSearchCard>
 
       <ErrorBanner error={itemsError} fallbackMessage="Failed to load items" />
 

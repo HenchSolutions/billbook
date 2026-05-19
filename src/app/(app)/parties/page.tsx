@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/EmptyState";
 import ErrorBanner from "@/components/ErrorBanner";
 import SearchInput from "@/components/SearchInput";
+import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSection";
+import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import PartyDialog from "@/components/dialogs/PartyDialog";
 import { PartiesTable } from "@/components/parties/PartySections";
 import { Switch } from "@/components/ui/switch";
 import { useParties } from "@/hooks/use-parties";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useAppliedFilters } from "@/hooks/use-applied-filters";
 import type { Party } from "@/types/party";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
@@ -24,17 +26,21 @@ export default function Parties() {
   const { can } = usePermissions();
   const canPartyLedger = can(PAGE.parties_ledger);
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 300);
+  const {
+    draft: searchDraft,
+    applied: searchApplied,
+    apply: applySearch,
+    reset: resetSearch,
+    patchDraft,
+  } = useAppliedFilters({ search: "", includeInactive: true });
   const [formOpen, setFormOpen] = useState(false);
   const [selectedParty, setSelectedParty] = useState<Party | undefined>();
-  const [includeInactive, setIncludeInactive] = useState(true);
   const formSectionRef = useRef<HTMLDivElement | null>(null);
 
   const { data, isPending, error } = useParties({
     type: PARTY_TYPE,
-    includeInactive,
-    search: debouncedSearch || undefined,
+    includeInactive: searchApplied.includeInactive,
+    search: searchApplied.search || undefined,
   });
 
   const parties = data?.parties ?? [];
@@ -106,21 +112,34 @@ export default function Parties() {
         </div>
       ) : null}
 
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Search customers..."
-        className="mb-4 w-full sm:max-w-sm"
-      />
-
-      <div className="mb-4 flex w-fit items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-1.5">
-        <Switch
-          checked={includeInactive}
-          onCheckedChange={setIncludeInactive}
-          aria-label="Show inactive customers"
+      <PageSearchCard>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-muted-foreground">Customer name</Label>
+            <SearchInput
+              value={searchDraft.search}
+              onChange={(v) => patchDraft({ search: v })}
+              placeholder="Search customers..."
+              className="max-w-none"
+            />
+          </div>
+          <div className="flex items-end">
+            <div className="flex h-9 w-full items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 sm:max-w-xs">
+              <Switch
+                checked={searchDraft.includeInactive}
+                onCheckedChange={(checked) => patchDraft({ includeInactive: checked })}
+                aria-label="Show inactive customers"
+              />
+              <span className="text-sm text-muted-foreground">Show inactive</span>
+            </div>
+          </div>
+        </div>
+        <PageSearchActions
+          onSearch={applySearch}
+          onClear={resetSearch}
+          clearDisabled={!searchApplied.search && searchApplied.includeInactive}
         />
-        <span className="text-sm text-muted-foreground">Show inactive</span>
-      </div>
+      </PageSearchCard>
 
       <ErrorBanner error={error} fallbackMessage="Failed to load customers" />
 

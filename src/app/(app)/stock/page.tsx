@@ -6,10 +6,10 @@ import Link from "next/link";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import SearchInput from "@/components/SearchInput";
+import { useDebounce } from "@/hooks/use-debounce";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useDebounce } from "@/hooks/use-debounce";
 import { StockOverviewCards } from "@/components/items/StockOverviewCards";
 import { StockAlertsBanner } from "@/components/items/StockAlertsBanner";
 import { StockEntryGrid } from "@/components/items/StockEntryGrid";
@@ -287,14 +287,12 @@ export default function Stock() {
                   <h3 className="text-base font-semibold">Stock list</h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">One row per stock entry.</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <SearchInput
-                    value={search}
-                    onChange={setSearch}
-                    placeholder="Search stock..."
-                    className="min-w-[180px]"
-                  />
-                </div>
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search stock..."
+                  className="min-w-[180px]"
+                />
               </div>
               <ErrorBanner error={entriesError} fallbackMessage="Failed to load stock entries" />
               {entriesPending ? (
