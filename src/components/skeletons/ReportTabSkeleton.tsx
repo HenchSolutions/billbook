@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/core/utils";
 
-/** Result bar + header row + body rows — matches `ReportRegisterTableScroll` + `rr` table. */
+/** Result bar + header row + body rows. matches `ReportRegisterTableScroll` + `rr` table. */
 function RegisterTableSkeleton({
   columns = "wide",
   rows = 8,
@@ -64,11 +64,11 @@ export type ReportTabSkeletonLayout =
 
 type ReportTabSkeletonProps = {
   /**
-   * `register-table` — table-only shell (legacy).
-   * `register-with-toolbar` — search/filter card + export row + table.
-   * `balance-register` — summary + exports + table (payables).
-   * `aging` — summary + exports + chart + chips + table.
-   * `simple` — single block (escape hatch).
+   * `register-table`. table-only shell (legacy).
+   * `register-with-toolbar`. search/filter card + export row + table.
+   * `balance-register`. summary + exports + table (payables).
+   * `aging`. summary + exports + chart + chips + table.
+   * `simple`. single block (escape hatch).
    */
   layout?: ReportTabSkeletonLayout;
   /** Only used when `layout` is `simple`. */

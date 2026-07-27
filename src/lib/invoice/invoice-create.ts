@@ -158,18 +158,18 @@ export function formatLineGstRateDisplay(line: InvoiceLineDraft): string {
     if (c > 0 && s > 0) return `${fmtGstRate(c)}+${fmtGstRate(s)}%`;
     if (c > 0) return `CGST ${fmtGstRate(c)}%`;
     if (s > 0) return `SGST ${fmtGstRate(s)}%`;
-    return "—";
+    return "-";
   }
 
   if (iTrim !== "") {
-    return ig > 0 ? `IGST ${fmtGstRate(ig)}%` : "—";
+    return ig > 0 ? `IGST ${fmtGstRate(ig)}%` : "-";
   }
 
   if (c > 0 && s > 0) return `${fmtGstRate(c)}+${fmtGstRate(s)}%`;
   if (ig > 0 && c === 0 && s === 0) return `IGST ${fmtGstRate(ig)}%`;
 
   const total = lineGstTotalPercent(line);
-  if (total <= 0) return "—";
+  if (total <= 0) return "-";
   return `${fmtGstRate(total)}%`;
 }
 

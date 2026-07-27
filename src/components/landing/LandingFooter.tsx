@@ -11,7 +11,7 @@ export function LandingFooter() {
           <div className="lg:col-span-4">
             <Logo className="h-9 w-9" />
             <p className="mt-3 text-sm text-muted-foreground">
-              Invoicing, stock, reports, and GST / Tax — the same modules you use after sign-in,
+              Invoicing, stock, reports, and GST / Tax, the same modules you use after sign-in,
               described clearly.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -77,7 +77,7 @@ export function LandingFooter() {
 
         <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} BillBook</span>
-          <span>Built for B2B billing in India — CSV registers, Tax / GST HTML, audit trails.</span>
+          <span>Built for B2B billing in India. CSV registers, Tax / GST HTML, audit trails.</span>
         </div>
       </div>
     </footer>

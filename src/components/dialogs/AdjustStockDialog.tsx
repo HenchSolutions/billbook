@@ -156,7 +156,7 @@ export default function AdjustStockDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Adjust Stock — {itemName}</DialogTitle>
+          <DialogTitle>Adjust stock: {itemName}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">

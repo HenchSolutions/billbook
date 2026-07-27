@@ -62,7 +62,7 @@ export default function EditStockEntryDialog({
     if (!open || !entry) return;
     const nextSellingPrice = String(entry.sellingPrice ?? "");
     const nextPurchasePrice =
-      entry.purchasePrice == null || entry.purchasePrice === "—" ? "" : entry.purchasePrice;
+      entry.purchasePrice == null || entry.purchasePrice === "-" ? "" : entry.purchasePrice;
     setSellingPrice(nextSellingPrice);
     setPurchasePrice(nextPurchasePrice);
     setSellingPriceDecimal(nextSellingPrice.includes("."));

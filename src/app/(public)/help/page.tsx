@@ -23,7 +23,7 @@ export const metadata: Metadata = publicPageMetadata({
 const LINKS = [
   {
     title: "Interactive feature tour",
-    desc: "Scroll the home page tabs for invoices, stock, reports, and GST / Tax — they mirror the product.",
+    desc: "Scroll the home page tabs for invoices, stock, reports, and GST / Tax. They mirror the product.",
     href: "/#features",
     icon: LayoutGrid,
     cta: "Open features",
@@ -37,7 +37,7 @@ const LINKS = [
   },
   {
     title: "What’s included",
-    desc: "Invoices, stock, reports, GST / Tax, and exports — same modules as in the app sidebar.",
+    desc: "Invoices, stock, reports, GST / Tax, and exports, same modules as in the app sidebar.",
     href: "/#features",
     icon: BookOpen,
     cta: "See features",
@@ -63,7 +63,7 @@ export default function HelpPage() {
             Help centre
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-muted-foreground">
-            Everything here points at real pages — no placeholder links back to signup for answers
+            Everything here points at real pages, not placeholder links back to signup for answers
             you actually need.
           </p>
           <Button asChild className="mt-8" size="lg">

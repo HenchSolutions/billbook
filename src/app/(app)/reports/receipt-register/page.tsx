@@ -111,7 +111,7 @@ function splitLinkedInvoiceSummary(raw: string | null | undefined): string[] {
 function refInvoicesExportCell(r: ReceiptRegisterRowDto): string {
   const parts = splitLinkedInvoiceSummary(r.linkedInvoiceSummary);
   if (parts.length > 0) return parts.join(", ");
-  return "—";
+  return "-";
 }
 
 function ReceiptRegisterRefInvoicesCell({
@@ -168,7 +168,7 @@ function ReceiptRegisterRefInvoicesCell({
       </button>
     );
   }
-  return <span className="text-sm text-muted-foreground">—</span>;
+  return <span className="text-sm text-muted-foreground">-</span>;
 }
 
 function adjustmentStatus(r: ReceiptRegisterRowDto): Exclude<AdjustmentFilter, "ALL"> {
@@ -282,9 +282,9 @@ export default function ReceiptRegisterPage() {
       return [
         formatDate(r.receivedAt),
         r.receiptNumber,
-        r.partyName ?? "—",
+        r.partyName ?? "-",
         ref,
-        r.paymentMethod ? capitaliseWords(String(r.paymentMethod).replace(/_/g, " ")) : "—",
+        r.paymentMethod ? capitaliseWords(String(r.paymentMethod).replace(/_/g, " ")) : "-",
         formatCurrency(r.totalAmount),
         formatCurrency(String(adjDisplay.toFixed(2))),
         formatCurrency(String(unadjDisplay.toFixed(2))),
@@ -489,7 +489,7 @@ export default function ReceiptRegisterPage() {
                             {r.receiptNumber}
                           </button>
                         </td>
-                        <td className={rr.td}>{r.partyName ?? "—"}</td>
+                        <td className={rr.td}>{r.partyName ?? "-"}</td>
                         <td className={cn(rr.td, "max-w-[13rem]")}>
                           <ReceiptRegisterRefInvoicesCell
                             row={r}
@@ -499,7 +499,7 @@ export default function ReceiptRegisterPage() {
                         <td className={rr.tdMuted}>
                           {r.paymentMethod
                             ? capitaliseWords(String(r.paymentMethod).replace(/_/g, " "))
-                            : "—"}
+                            : "-"}
                         </td>
                         <td className={cn(rr.tdRight, "font-medium")}>
                           {formatCurrency(r.totalAmount)}
@@ -586,7 +586,7 @@ export default function ReceiptRegisterPage() {
                   {openingSettlementOnDetail > MONEY_EPS ? (
                     <tr className="border-t border-border first:border-t-0">
                       <td className="px-3 py-2.5 text-foreground">
-                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "-"}</span>
                       </td>
                       <td className="px-3 py-2.5 text-muted-foreground">Opening balance</td>
                       <td className="px-3 py-2.5 text-right font-medium tabular-nums text-foreground">
@@ -600,7 +600,7 @@ export default function ReceiptRegisterPage() {
                       className="border-t border-border first:border-t-0"
                     >
                       <td className="px-3 py-2.5 text-foreground">
-                        <span className="financial-id">{allocDetail?.receiptNumber ?? "—"}</span>
+                        <span className="financial-id">{allocDetail?.receiptNumber ?? "-"}</span>
                       </td>
                       <td className="px-3 py-2.5">
                         <Link

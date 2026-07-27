@@ -22,7 +22,7 @@ function isRouteActive(pathname: string, base: string) {
   return clean === route || clean.startsWith(`${route}/`);
 }
 
-/** Icons for the fixed mobile tab strip — aligned with {@link MOBILE_BOTTOM_NAV_SLOTS}. */
+/** Icons for the fixed mobile tab strip. aligned with {@link MOBILE_BOTTOM_NAV_SLOTS}. */
 const MOBILE_TAB_ICONS: Record<MobileNavTabId, LucideIcon> = {
   dashboard: Grid2x2,
   invoices: FileText,

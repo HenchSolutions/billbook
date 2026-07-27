@@ -23,8 +23,8 @@ export function LandingHeroSection() {
             Make billing feel <span className="gradient-text">effortless</span>.
           </h1>
           <p className="animation-delay-400 mt-4 text-pretty text-base text-muted-foreground motion-safe:animate-fade-in sm:text-lg">
-            Create invoices, manage customers and vendors, track credit notes, receipts, and stock —
-            then open Reports and GST / Tax for the same CSV and HTML exports you get in the app.
+            Create invoices, manage customers and vendors, track credit notes, receipts, and stock.
+            Then open Reports and GST / Tax for the same CSV and HTML exports you get in the app.
           </p>
 
           <div className="animation-delay-400 mt-8 flex flex-col gap-3 motion-safe:animate-fade-in sm:flex-row">

@@ -54,7 +54,7 @@ export function ReportRegisterSearchBody({
   );
 }
 
-/** Filter fields — one column on mobile, two per row from sm up. */
+/** Filter fields. one column on mobile, two per row from sm up. */
 export function ReportSearchGrid({
   children,
   className,
@@ -96,7 +96,7 @@ export function ReportSearchField({
   );
 }
 
-/** Filter row(s) for date range, limit, extra actions — card on the page. */
+/** Filter row(s) for date range, limit, extra actions. card on the page. */
 export function ReportRegisterFilterCard({
   className,
   children,
@@ -169,11 +169,11 @@ export function ReportRegisterResultBar({
   count,
   rowLabel,
   limit,
-  /** API row count before client-side filters — used only for the truncation hint. */
+  /** API row count before client-side filters. used only for the truncation hint. */
   truncationHintCount,
 }: {
   count: number;
-  /** e.g. "receipts", "invoices" — plural, lowercase */
+  /** e.g. "receipts", "invoices". plural, lowercase */
   rowLabel: string;
   limit?: number;
   truncationHintCount?: number;
@@ -187,7 +187,7 @@ export function ReportRegisterResultBar({
       {maybeTruncated ? (
         <span className="text-status-pending">
           {" "}
-          · Showing up to {limit} rows — raise the limit if you need more.
+          · Showing up to {limit} rows. Raise the limit if you need more.
         </span>
       ) : null}
     </div>

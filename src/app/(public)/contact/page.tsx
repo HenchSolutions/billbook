@@ -29,7 +29,7 @@ export default function ContactPage() {
             Let&apos;s talk
           </h1>
           <p className="mt-4 max-w-xl text-pretty text-muted-foreground">
-            Product questions, rollout support, or a walkthrough of Reports and GST / Tax — send a
+            Product questions, rollout support, or a walkthrough of Reports and GST / Tax. Send a
             note and we&apos;ll respond from the address below.
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function ContactPage() {
               through your organisation&apos;s admin.
             </li>
             <li>
-              Exploring the product? Start free — the app matches what you see on the{" "}
+              Exploring the product? Start free. The app matches what you see on the{" "}
               <Link className="font-medium text-primary hover:underline" href="/">
                 home page
               </Link>{" "}

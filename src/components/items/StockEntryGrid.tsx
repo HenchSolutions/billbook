@@ -170,8 +170,8 @@ export function StockEntryGrid({
 
       const vendorName =
         currentRow.supplierId != null
-          ? (suppliers.find((s) => s.id === currentRow.supplierId)?.name ?? "—")
-          : "—";
+          ? (suppliers.find((s) => s.id === currentRow.supplierId)?.name ?? "-")
+          : "-";
 
       setAddedRows((prev) => [
         {
@@ -182,11 +182,11 @@ export function StockEntryGrid({
           itemType: currentRow.item!.type,
           supplierId: currentRow.supplierId,
           vendorName,
-          purchaseDate: isService ? "—" : currentRow.purchaseDate,
+          purchaseDate: isService ? "-" : currentRow.purchaseDate,
           quantity: quantityStr,
           sellingPrice: sellingStr,
           purchasePrice: isService
-            ? "—"
+            ? "-"
             : String(parseFloat(String(currentRow.purchasePrice ?? "").trim())),
         },
         ...prev,
@@ -210,8 +210,8 @@ export function StockEntryGrid({
       const updated = await onEditSessionEntry(entryId, data);
       const supplierName =
         data.supplierId != null
-          ? (suppliers.find((s) => s.id === data.supplierId)?.name ?? "—")
-          : "—";
+          ? (suppliers.find((s) => s.id === data.supplierId)?.name ?? "-")
+          : "-";
 
       setAddedRows((prev) =>
         prev.map((row) => {
@@ -221,7 +221,7 @@ export function StockEntryGrid({
             supplierId: data.supplierId ?? null,
             vendorName: supplierName,
             purchaseDate: isServiceType(row.itemType)
-              ? "—"
+              ? "-"
               : (data.purchaseDate ?? row.purchaseDate),
             quantity:
               updated?.quantity != null
@@ -231,7 +231,7 @@ export function StockEntryGrid({
                 : row.quantity,
             sellingPrice: updated?.sellingPrice ?? data.sellingPrice,
             purchasePrice: isServiceType(row.itemType)
-              ? "—"
+              ? "-"
               : (updated?.purchasePrice ?? data.purchasePrice ?? row.purchasePrice),
           };
         }),
@@ -337,7 +337,7 @@ export function StockEntryGrid({
                 <td className="px-3 py-2.5 align-middle">
                   {isServiceType(row.item?.type) ? (
                     <div className="flex h-9 items-center justify-center rounded-md border border-dashed text-muted-foreground">
-                      —
+                      -
                     </div>
                   ) : (
                     <Popover
@@ -419,7 +419,7 @@ export function StockEntryGrid({
                 <td className="px-2 py-2.5 text-right align-middle lg:px-3">
                   {isServiceType(row.item?.type) ? (
                     <div className="flex h-9 items-center justify-center rounded-md border border-dashed text-muted-foreground">
-                      —
+                      -
                     </div>
                   ) : (
                     <Input
@@ -521,8 +521,8 @@ export function StockEntryGrid({
                     <td className="px-3 py-2.5 lg:px-4">{row.vendorName}</td>
                     <td className="px-3 py-2.5">
                       {isServiceType(row.itemType)
-                        ? "—"
-                        : formatISODateDisplay(row.purchaseDate) || "—"}
+                        ? "-"
+                        : formatISODateDisplay(row.purchaseDate) || "-"}
                     </td>
                     <td className="px-3 py-2.5 text-right tabular-nums">
                       {formatStockQuantity(row.quantity)}
@@ -531,7 +531,7 @@ export function StockEntryGrid({
                       {formatNumeric(row.sellingPrice)}
                     </td>
                     <td className="px-3 py-2.5 text-right tabular-nums">
-                      {row.purchasePrice === "—" ? "—" : formatNumeric(row.purchasePrice)}
+                      {row.purchasePrice === "-" ? "-" : formatNumeric(row.purchasePrice)}
                     </td>
                     <td className="px-3 py-2.5 text-center">
                       <Button
@@ -572,10 +572,10 @@ export function StockEntryGrid({
                 itemName: rowBeingEdited.itemName,
                 itemType: rowBeingEdited.itemType,
                 purchaseDate:
-                  rowBeingEdited.purchaseDate === "—" ? "" : rowBeingEdited.purchaseDate,
+                  rowBeingEdited.purchaseDate === "-" ? "" : rowBeingEdited.purchaseDate,
                 sellingPrice: rowBeingEdited.sellingPrice,
                 purchasePrice:
-                  rowBeingEdited.purchasePrice === "—" ? "" : rowBeingEdited.purchasePrice,
+                  rowBeingEdited.purchasePrice === "-" ? "" : rowBeingEdited.purchasePrice,
                 supplierId: rowBeingEdited.supplierId,
                 unit: items.find((item) => item.id === rowBeingEdited.itemId)?.unit,
               }

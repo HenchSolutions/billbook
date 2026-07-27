@@ -96,7 +96,7 @@ function ProfileEditor({
   businessTypeOptions: BusinessClassificationOption[];
   industryTypeOptions: BusinessClassificationOption[];
   canManageTypeOptions: boolean;
-  /** OWNER — can PUT /business/profile; STAFF is read-only. */
+  /** OWNER. can PUT /business/profile; STAFF is read-only. */
   canEditProfile: boolean;
   canViewBankAccounts: boolean;
   canEditBankAccounts: boolean;

@@ -128,7 +128,7 @@ export default function SupplierPaymentDialog({
                 <span className="financial-id font-medium">
                   {payment.paymentNumber ?? `Payment #${payment.id}`}
                 </span>{" "}
-                — {formatCurrency(payment.amount)}
+                , {formatCurrency(payment.amount)}
               </p>
               <p className="text-muted-foreground">
                 Applied to this bill:{" "}

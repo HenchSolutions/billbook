@@ -23,9 +23,9 @@ export function dashboardToNumber(v: string | number | null | undefined): number
 }
 
 function formatMarginPercent(v: string | number | null | undefined): string {
-  if (v == null || v === "") return "—";
+  if (v == null || v === "") return "-";
   const n = dashboardToNumber(v);
-  if (!Number.isFinite(n)) return "—";
+  if (!Number.isFinite(n)) return "-";
   const pct = n > 0 && n <= 1 ? n * 100 : n;
   return `${Math.round(pct)}%`;
 }
@@ -74,7 +74,7 @@ export function dashboardSnapshotCaption(dashboard: DashboardData): string {
 export function dashboardChartScopeFootnote(dashboard: DashboardData): string | null {
   const t = dashboard.chartTrailingMonths;
   if (t === 36) {
-    return "Bars show the last 36 months of invoice activity — not your entire history.";
+    return "Bars show the last 36 months of invoice activity, not your entire history.";
   }
   if (t === 12) {
     return "Bars show the last 12 months.";
@@ -112,7 +112,7 @@ export function buildRecentActivityRows(dashboard: DashboardData): DashboardRece
 
 export function ledgerTypeLabel(entryType: string): string {
   const t = entryType.trim();
-  if (!t) return "—";
+  if (!t) return "-";
   const map: Record<string, string> = {
     SALE_INVOICE: "Sale",
     SALE_RETURN: "Sale return",
@@ -176,5 +176,5 @@ export function resolveDashboardMarginDisplay(dashboard: MarginDashboardPick): s
   ) {
     return formatMarginPercent((profitNum / revenueNum) * 100);
   }
-  return "—";
+  return "-";
 }

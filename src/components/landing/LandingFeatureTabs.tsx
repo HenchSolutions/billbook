@@ -24,8 +24,7 @@ export function LandingFeatureTabs() {
             Your entire business, one platform
           </h2>
           <p className="mt-4 text-base text-muted-foreground">
-            From first invoice to GST / Tax and report CSVs — the same areas you will use in the
-            app.
+            From first invoice to GST / Tax and report CSVs, the same areas you will use in the app.
           </p>
         </div>
 

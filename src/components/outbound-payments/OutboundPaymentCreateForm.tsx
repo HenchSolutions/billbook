@@ -344,8 +344,8 @@ export function OutboundPaymentCreateForm() {
                 ) : (
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     {category === "PARTY_PAYMENT"
-                      ? "Skip this to record an on-account payment — enter the amount below."
-                      : "Open the list, tick returns with a balance, then Select — the amount field updates automatically."}
+                      ? "Skip this to record an on-account payment. Enter the amount below."
+                      : "Open the list, tick returns with a balance, then Select. The amount field updates automatically."}
                   </p>
                 )}
               </div>

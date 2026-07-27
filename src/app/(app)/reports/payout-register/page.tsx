@@ -23,18 +23,18 @@ import type { ClientReportTableExport } from "@/lib/reports/report-table-export"
 import type { PayoutRegisterRowDto } from "@/types/report";
 
 function payoutDisplayNumber(p: PayoutRegisterRowDto) {
-  return p.paymentNumber ?? p.payoutNumber ?? "—";
+  return p.paymentNumber ?? p.payoutNumber ?? "-";
 }
 
 function payoutCategoryLabel(p: PayoutRegisterRowDto) {
   const raw = p.paymentCategory ?? p.category;
-  if (!raw) return "—";
-  return humanizeApiEnum(String(raw)) || "—";
+  if (!raw) return "-";
+  return humanizeApiEnum(String(raw)) || "-";
 }
 
 function payoutMethodLabel(method: string | undefined) {
-  if (!method) return "—";
-  return humanizeApiEnum(String(method)) || "—";
+  if (!method) return "-";
+  return humanizeApiEnum(String(method)) || "-";
 }
 
 export default function PayoutRegisterPage() {
@@ -77,8 +77,8 @@ export default function PayoutRegisterPage() {
     const body = rows.map((p) => [
       payoutDisplayNumber(p),
       payoutCategoryLabel(p),
-      p.partyName ?? p.payeeName ?? "—",
-      p.invoiceId ? `#${p.invoiceId}` : "—",
+      p.partyName ?? p.payeeName ?? "-",
+      p.invoiceId ? `#${p.invoiceId}` : "-",
       formatCurrency(p.amount),
       payoutMethodLabel(p.paymentMethod),
       formatDate(p.paidAt ?? p.createdAt),
@@ -159,7 +159,7 @@ export default function PayoutRegisterPage() {
                         <span className="financial-id font-medium">{payoutDisplayNumber(p)}</span>
                       </td>
                       <td className={rr.td}>{payoutCategoryLabel(p)}</td>
-                      <td className={rr.td}>{p.partyName ?? p.payeeName ?? "—"}</td>
+                      <td className={rr.td}>{p.partyName ?? p.payeeName ?? "-"}</td>
                       <td className={rr.td}>
                         {p.invoiceId ? (
                           <Link
@@ -169,7 +169,7 @@ export default function PayoutRegisterPage() {
                             #{p.invoiceId}
                           </Link>
                         ) : (
-                          "—"
+                          "-"
                         )}
                       </td>
                       <td className={cn(rr.tdRight, "font-medium")}>{formatCurrency(p.amount)}</td>

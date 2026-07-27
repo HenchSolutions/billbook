@@ -118,7 +118,7 @@ export default function CreditNoteDetailPage() {
 
   const partyLedgerId = resolvedCreditNotePartyId(creditNote);
   const partyNameForLink = creditNote.party?.partyName?.trim() ?? "";
-  const partyLabel = partyNameForLink || "—";
+  const partyLabel = partyNameForLink || "-";
   const canLinkPartyLedger = partyLedgerId != null && partyNameForLink !== "";
 
   const canDelete =
@@ -346,7 +346,7 @@ export default function CreditNoteDetailPage() {
         <div className="min-w-0 rounded-lg border border-border/60 bg-muted/10 p-4 sm:p-6">
           <p className="text-sm leading-relaxed text-muted-foreground">
             Deleting removes this credit from the customer’s account and archives the note. You can
-            only delete when it isn’t applied to invoices — clear allocations first if needed.
+            only delete when it isn’t applied to invoices. clear allocations first if needed.
           </p>
           <Button
             type="button"

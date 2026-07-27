@@ -17,7 +17,7 @@ type Props = {
 
 /**
  * Link to an invoice detail page using the human-readable invoice number when available.
- * When `invoiceId` is missing, renders plain text (e.g. display number only or "—").
+ * When `invoiceId` is missing, renders plain text (e.g. display number only or "-").
  */
 export function LinkedInvoiceLink({
   invoiceId,
@@ -41,11 +41,11 @@ export function LinkedInvoiceLink({
         ? isPending
           ? "Loading…"
           : "Invoice"
-        : "—";
+        : "-";
 
   const content = children ?? defaultLabel;
   const codeLike =
-    Boolean(number && number !== "" && number !== "—") &&
+    Boolean(number && number !== "" && number !== "-") &&
     defaultLabel !== "Loading…" &&
     defaultLabel !== "Invoice";
 

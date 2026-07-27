@@ -369,7 +369,7 @@ function formatReceiptAllocationsValue(value: unknown): string {
     formatCurrency(typeof amt === "number" ? String(amt) : String(amt ?? "0")),
   );
   const n = amounts.length;
-  if (n === 0) return "—";
+  if (n === 0) return "-";
   if (n === 1) return `Applied ${amounts[0]} to an invoice`;
   return [`Split across ${n} invoices`, ...amounts.map((a) => `• ${a}`)].join("\n");
 }
@@ -391,8 +391,8 @@ function formatEntryValue(key: string, value: unknown): string {
     }
   }
   if (Array.isArray(value)) {
-    if (value.length === 0) return "—";
-    if (key === "items") return summarizeInvoiceLineItems(value as LineRow[]) || "—";
+    if (value.length === 0) return "-";
+    if (key === "items") return summarizeInvoiceLineItems(value as LineRow[]) || "-";
     return `${value.length} item(s)`;
   }
   return String(value);

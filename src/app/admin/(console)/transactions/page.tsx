@@ -47,7 +47,7 @@ const ADMIN_TRANSACTION_CSV_COLUMNS = [
 const DEFAULT_PAGE_LIMIT = 100;
 
 function emptyDash(value: string | null | undefined): string {
-  if (value === null || value === undefined || String(value).trim() === "") return "—";
+  if (value === null || value === undefined || String(value).trim() === "") return "-";
   return String(value);
 }
 
@@ -56,7 +56,7 @@ function paymentSummary(row: AdminTransactionRow): string {
   if (row.paymentMethod?.trim()) parts.push(humanizeApiEnum(row.paymentMethod));
   if (row.paymentCategory?.trim()) parts.push(humanizeApiEnum(row.paymentCategory));
   if (row.referenceNumber?.trim()) parts.push(row.referenceNumber.trim());
-  return parts.length ? parts.join(" · ") : "—";
+  return parts.length ? parts.join(" · ") : "-";
 }
 
 function kindBadgeClass(kind: string): string {

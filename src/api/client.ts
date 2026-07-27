@@ -142,7 +142,7 @@ async function request<T>(
 
     const message =
       response.status === 429
-        ? "Too many requests — please wait a moment and try again."
+        ? "Too many requests. please wait a moment and try again."
         : errorData?.error || `Request failed (${response.status})`;
 
     if (

@@ -71,7 +71,7 @@ const TABLE_ROWS = [
 const CAPTIONS = [
   "Get instant low-stock alerts before you run out of key items.",
   "Track purchase cost vs. selling price for every item.",
-  "Log stock entries when purchase bills arrive — no spreadsheet needed.",
+  "Log stock entries when purchase bills arrive, no spreadsheet needed.",
 ];
 
 export function InventoryTab() {

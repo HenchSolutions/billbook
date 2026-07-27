@@ -51,7 +51,7 @@ export function ItemAutocomplete({
 
   const categoryLabel = (item: Item) => {
     const d = getItemCategoryDisplay(item);
-    return d === "—" ? "" : d;
+    return d === "-" ? "" : d;
   };
   const filtered = useMemo(
     () =>

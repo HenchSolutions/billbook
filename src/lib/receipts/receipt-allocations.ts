@@ -40,7 +40,7 @@ export function maxReceiptAllocToInvoice(
 ): number {
   const T = num(row.totalAmount);
   const P = num(row.paidAmount);
-  if (T > 0.001 && row.totalAmount !== "—" && Number.isFinite(P)) {
+  if (T > 0.001 && row.totalAmount !== "-" && Number.isFinite(P)) {
     return Math.max(0, T - P + initialFromThisReceipt);
   }
   const D = num(row.dueAmount);

@@ -47,7 +47,7 @@ export function showErrorToast(errorOrMessage: unknown, title?: string) {
     window.dispatchEvent(new Event(REFRESH_PERMISSIONS_EVENT));
   }
 
-  /** `showErrorToast(null, "…")` — only the second string is shown (validation-style messages). */
+  /** `showErrorToast(null, "…")`. only the second string is shown (validation-style messages). */
   if ((errorOrMessage === null || errorOrMessage === undefined) && title !== undefined) {
     toast.error(title);
     return;

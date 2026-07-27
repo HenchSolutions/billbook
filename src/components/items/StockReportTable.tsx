@@ -19,7 +19,7 @@ import {
 
 interface StockReportTableProps {
   rows: StockListItem[];
-  /** Used to detect SERVICE items so cost/stock columns show "—" and adjust is hidden */
+  /** Used to detect SERVICE items so cost/stock columns show "-" and adjust is hidden */
   items?: Item[];
   onAdjust?: (itemId: number, itemName: string) => void;
   /** When false, links to per-item stock ledger are hidden. */
@@ -106,12 +106,12 @@ export function StockReportTable({
                       "hidden text-left text-muted-foreground sm:table-cell",
                     )}
                   >
-                    {row.unit || "—"}
+                    {row.unit || "-"}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground md:table-cell")}
                   >
-                    {service ? "—" : formatStockQtyOrDash(row.quantityPurchased)}
+                    {service ? "-" : formatStockQtyOrDash(row.quantityPurchased)}
                   </td>
                   <td
                     className={cn(
@@ -120,15 +120,15 @@ export function StockReportTable({
                       service ? "text-muted-foreground" : adjustedTextClass,
                     )}
                   >
-                    {service ? "—" : formatStockAdjustmentDelta(row.quantityAdjusted)}
+                    {service ? "-" : formatStockAdjustmentDelta(row.quantityAdjusted)}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground md:table-cell")}
                   >
-                    {service ? "—" : formatStockQtyOrDash(row.quantitySold)}
+                    {service ? "-" : formatStockQtyOrDash(row.quantitySold)}
                   </td>
                   <td className={cn(stockTableTdRight, "font-semibold")}>
-                    {service ? "—" : formatStockQtyOrDash(row.actualQuantity)}
+                    {service ? "-" : formatStockQtyOrDash(row.actualQuantity)}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground sm:table-cell")}
@@ -137,16 +137,16 @@ export function StockReportTable({
                       ? formatCurrency(row.defaultRate)
                       : row.stockValue != null
                         ? formatCurrency(row.stockValue)
-                        : "—"}
+                        : "-"}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground lg:table-cell")}
                   >
                     {service
-                      ? "—"
+                      ? "-"
                       : row.purchasedValue != null
                         ? formatCurrency(row.purchasedValue)
-                        : "—"}
+                        : "-"}
                   </td>
                   <td className={cn(stockTableTdClass, "hidden text-center md:table-cell")}>
                     {service ? (

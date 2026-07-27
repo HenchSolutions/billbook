@@ -27,8 +27,8 @@ const FINALIZE_INVENTORY_HELP: ReactNode = (
     <p>
       Finalizing updates stock: it can reduce quantity on sales, put quantity back on sale returns,
       add batches from purchase bills, or reduce batches on purchase returns, depending on this
-      document. If something went wrong, you can try again—a bill that is already finalized will not
-      change stock twice.
+      document. If something went wrong, you can try again. A bill that is already finalized will
+      not change stock twice.
     </p>
     <p className="border-t border-border/60 pt-2 text-muted-foreground">
       <span className="font-medium text-foreground">Payments:</span> Finalizing does{" "}
@@ -36,7 +36,7 @@ const FINALIZE_INVENTORY_HELP: ReactNode = (
       advances off the bill. For <strong>sales</strong>, use{" "}
       <span className="text-foreground">Record payment</span> or allocate receipts (including
       opening advance receipts). For <strong>purchases</strong>, use{" "}
-      <span className="text-foreground">Record supplier payment</span>—the{" "}
+      <span className="text-foreground">Record supplier payment</span>. The{" "}
       <span className="font-medium text-foreground">Paid</span> amount on the bill only changes when
       you record those payments.
     </p>
@@ -45,11 +45,11 @@ const FINALIZE_INVENTORY_HELP: ReactNode = (
 
 const NOTIFY_WHATSAPP_HELP = (
   <>
-    <p className="font-medium">You shared the document</p>
+    <p className="font-medium">Payment reminder on WhatsApp</p>
     <p className="mt-1.5 text-muted-foreground">
-      Saves that you told the party about this bill on WhatsApp (same summary as number, dates,
-      totals, and balance). Real WhatsApp send is not live yet — you get a preview for now. Needs a
-      phone on the party or consignee. At most once per day.
+      Sends a reminder with outstanding balance and attaches the invoice PDF. Only available when
+      this invoice is unpaid or partially paid. Needs a phone on the party or consignee. At most
+      once per day.
     </p>
   </>
 );
@@ -58,10 +58,9 @@ const BALANCE_EMAIL_HELP = (
   <>
     <p className="font-medium">Follow up on money they owe you</p>
     <p className="mt-1.5 text-muted-foreground">
-      <strong>Sales invoice:</strong> email the customer about payment still due.{" "}
-      <strong>Purchase return:</strong> email the vendor about credit or refund still owed to you.
-      Same figures as total, paid, and balance on this page. Party email, then consignee. At most
-      once per day.
+      <strong>Sales invoice:</strong> email the customer about payment still due, with invoice PDF
+      attached. <strong>Purchase return:</strong> email the vendor about credit or refund still owed
+      to you, with document PDF attached. Same figures as total, paid, and balance on this page.
     </p>
   </>
 );
@@ -138,7 +137,10 @@ export function InvoiceHeaderActions({
   const isSupplierBill = invoiceTypeSupportsSupplierPayment(invoice.invoiceType);
   const showRecordRefund =
     invoiceTypeSupportsSaleReturnRefund(invoice.invoiceType) && onOpenRefund != null;
-  const showWhatsAppLog = invoiceTypeSupportsDocumentShareLog(invoice.invoiceType);
+  const showWhatsAppSend =
+    invoice.status !== "CANCELLED" &&
+    balanceDueValue > 0 &&
+    invoiceTypeSupportsDocumentShareLog(invoice.invoiceType);
   const showBalanceEmail =
     invoice.status !== "CANCELLED" &&
     balanceDueValue > 0 &&
@@ -230,9 +232,9 @@ export function InvoiceHeaderActions({
         </>
       )}
 
-      {invoice.status === "FINAL" && canCommunication && (showWhatsAppLog || showBalanceEmail) && (
+      {invoice.status === "FINAL" && canCommunication && (showWhatsAppSend || showBalanceEmail) && (
         <>
-          {showWhatsAppLog && (
+          {showWhatsAppSend && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex flex-col">
@@ -243,8 +245,8 @@ export function InvoiceHeaderActions({
                     disabled={isMarkSentPending || sentToday}
                     aria-label={
                       sentToday
-                        ? "WhatsApp share already logged today"
-                        : "Log that you shared this document on WhatsApp"
+                        ? "Payment reminder already sent on WhatsApp today"
+                        : "Send payment reminder on WhatsApp"
                     }
                   >
                     {isMarkSentPending ? (
@@ -252,10 +254,10 @@ export function InvoiceHeaderActions({
                     ) : (
                       <MessageCircle className="mr-2 h-3.5 w-3.5" />
                     )}
-                    WhatsApp log
+                    WhatsApp
                   </Button>
                   {sentToday && (
-                    <span className="mt-1 text-[11px] text-muted-foreground">Logged today</span>
+                    <span className="mt-1 text-[11px] text-muted-foreground">Sent today</span>
                   )}
                 </div>
               </TooltipTrigger>
@@ -313,7 +315,7 @@ export function InvoiceHeaderActions({
             variant="outline"
             size="sm"
             onClick={onOpenPdf}
-            title="If the document is a PDF, downloads and opens a preview. For HTML invoices, opens print — choose Save as PDF."
+            title="If the document is a PDF, downloads and opens a preview. For HTML invoices, opens print. Choose Save as PDF."
             aria-label="Download or save invoice as PDF"
           >
             <Download className="h-3.5 w-3.5" />
@@ -323,7 +325,7 @@ export function InvoiceHeaderActions({
       )}
 
       {!pdfUrl && pdfError && invoice.status === "FINAL" && canPdf && (
-        <Button variant="outline" size="sm" disabled title="PDF generation failed — try refreshing">
+        <Button variant="outline" size="sm" disabled title="PDF generation failed. Try refreshing">
           <Download className="h-3.5 w-3.5" />
           PDF
         </Button>

@@ -40,7 +40,7 @@ interface TopBarProps {
   onMenuClick?: () => void;
   onSidebarToggle?: () => void;
   sidebarCollapsed?: boolean;
-  /** When true, sidebar is not visible as a rail — show business name in the top bar. */
+  /** When true, sidebar is not visible as a rail. show business name in the top bar. */
   isMobile?: boolean;
 }
 
@@ -127,7 +127,7 @@ export default function TopBar({
   useEffect(() => {
     const ua = typeof window !== "undefined" ? window.navigator.userAgent : "";
     const platform = typeof window !== "undefined" ? window.navigator.platform : "";
-    /** Prefer `userAgent` — `platform` is deprecated and unreliable on some mobile browsers. */
+    /** Prefer `userAgent`. `platform` is deprecated and unreliable on some mobile browsers. */
     const appleLike = /Mac OS|iPhone|iPad|iPod/i.test(ua) || /Mac|iPhone|iPad|iPod/i.test(platform);
     setModifierKeyLabel(appleLike ? "⌘" : "Ctrl");
   }, []);

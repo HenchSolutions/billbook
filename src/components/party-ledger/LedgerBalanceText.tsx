@@ -20,7 +20,7 @@ interface LedgerBalanceTextProps {
   layout?: "inline" | "stacked";
   /**
    * `word`: Debit / Credit / Balanced (summary cards).
-   * `abbrev`: Dr / Cr / Bal. — passbook-style for dense tables.
+   * `abbrev`: Dr / Cr / Bal.. passbook-style for dense tables.
    */
   tagStyle?: "word" | "abbrev";
 }

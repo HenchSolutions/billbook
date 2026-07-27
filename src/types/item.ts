@@ -18,7 +18,7 @@ export function getItemCategoryDisplay(item: Item): string {
   if (item.categoryName) return item.categoryName;
   if (typeof item.category === "string") return item.category;
   if (item.category && typeof item.category === "object") return item.category.name;
-  return "—";
+  return "-";
 }
 
 function formatTaxRate(r: string | null | undefined): string {
@@ -28,7 +28,7 @@ function formatTaxRate(r: string | null | undefined): string {
 }
 
 export function getItemTaxDisplay(item: Item): string {
-  if (item.isTaxable === false) return "—";
+  if (item.isTaxable === false) return "-";
   if (item.taxType === "OTHER" && item.otherTaxName) {
     return `${item.otherTaxName} ${formatTaxRate(item.otherTaxRate)}%`;
   }
@@ -48,7 +48,7 @@ export function getItemTaxDisplay(item: Item): string {
   if (cgst > 0 && sgst > 0)
     return `${formatTaxRate(item.cgstRate)}% + ${formatTaxRate(item.sgstRate)}%`;
   if (hasIntra) return `GST ${formatTaxRate(item.cgstRate || item.sgstRate)}%`;
-  return "—";
+  return "-";
 }
 
 export interface Category {

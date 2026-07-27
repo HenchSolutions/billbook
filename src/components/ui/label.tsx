@@ -31,7 +31,7 @@ const Label = React.forwardRef<React.ElementRef<typeof LabelPrimitive.Root>, Lab
 );
 Label.displayName = LabelPrimitive.Root.displayName;
 
-/** Validation / server error below a field — use with inputs that have aria-invalid. */
+/** Validation / server error below a field. use with inputs that have aria-invalid. */
 export function FieldError({ id, className, ...props }: React.ComponentPropsWithoutRef<"p">) {
   return (
     <p

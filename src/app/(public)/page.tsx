@@ -11,7 +11,7 @@ interface LandingPageProps {
 }
 
 const pageDescription =
-  "Create GST invoices, manage customers and vendors, track receipts and stock, export report CSVs and GST / Tax HTML — BillBook for small businesses in India.";
+  "Create GST invoices, manage customers and vendors, track receipts and stock, export report CSVs and GST / Tax HTML. BillBook for small businesses in India.";
 
 export const metadata: Metadata = homePageMetadata(pageDescription);
 

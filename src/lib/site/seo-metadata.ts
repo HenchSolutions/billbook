@@ -71,7 +71,7 @@ export function publicPageMetadata(opts: {
  * Keeps titles consistent and avoids indexing redirect endpoints.
  */
 export function authRedirectPageMetadata(pageTitle: string): Metadata {
-  const description = `${pageTitle} — ${siteConfig.name}. You will be redirected to complete this action.`;
+  const description = `${pageTitle} | ${siteConfig.name}. You will be redirected to complete this action.`;
   return {
     title: { absolute: `${pageTitle} | ${siteConfig.name}` },
     description,

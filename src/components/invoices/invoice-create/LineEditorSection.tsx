@@ -172,7 +172,7 @@ export function LineEditorSection({
     </span>
   ) : purchaseFamilyForm ? (
     <span className="truncate text-left text-muted-foreground">
-      Optional batch — prefill from stock
+      Optional batch: prefill from stock
     </span>
   ) : (
     <span className="text-muted-foreground">{copy.batchPlaceholder}</span>
@@ -268,7 +268,7 @@ export function LineEditorSection({
                     const totals = getLineAmounts(line);
                     const overCap = selected && isReturnQuantityOverCap(line);
                     const capHint = getReturnQuantityCap(line);
-                    const displayName = line.itemName.trim() || line.item?.name?.trim() || "—";
+                    const displayName = line.itemName.trim() || line.item?.name?.trim() || "-";
                     const hsnSac = line.hsnCode.trim()
                       ? line.hsnCode
                       : line.sacCode.trim()
@@ -277,7 +277,7 @@ export function LineEditorSection({
                           ? line.item.hsnCode
                           : line.item?.sacCode?.trim()
                             ? line.item.sacCode
-                            : "—";
+                            : "-";
                     return (
                       <tr
                         key={line.id}
@@ -301,14 +301,14 @@ export function LineEditorSection({
                         <td className="px-3 py-2.5 text-xs">
                           {lineEntry
                             ? formatISODateDisplay(getEntryDateIso(lineEntry)) || "No date"
-                            : "—"}
+                            : "-"}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           {line.remainingReturnableQty?.trim()
                             ? line.remainingReturnableQty
                             : line.soldQuantity?.trim()
                               ? line.soldQuantity
-                              : "—"}
+                              : "-"}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           {formatCurrency(line.unitPrice)}
@@ -336,7 +336,7 @@ export function LineEditorSection({
                         <td className="px-3 py-2.5 pr-4 text-right font-medium tabular-nums text-foreground">
                           {selected && toNum(line.quantity) > 0
                             ? formatCurrency(totals.total)
-                            : "—"}
+                            : "-"}
                         </td>
                       </tr>
                     );
@@ -384,7 +384,7 @@ export function LineEditorSection({
                 <div>
                   <Label className={draftLabelClass}>Unit</Label>
                   <Input
-                    value={draftLine.item?.unit?.trim() ? draftLine.item.unit : "—"}
+                    value={draftLine.item?.unit?.trim() ? draftLine.item.unit : "-"}
                     disabled
                     className="h-8 cursor-default bg-muted/40 text-sm tabular-nums"
                     title="Unit of measure from item master"
@@ -506,7 +506,7 @@ export function LineEditorSection({
                   <Input
                     value={draftLine.hsnCode}
                     onChange={(e) => updateLine(draftLine.id, { hsnCode: e.target.value })}
-                    placeholder="—"
+                    placeholder="-"
                     className="h-8 text-sm tabular-nums"
                   />
                 </div>
@@ -515,7 +515,7 @@ export function LineEditorSection({
                   <Input
                     value={draftLine.sacCode}
                     onChange={(e) => updateLine(draftLine.id, { sacCode: e.target.value })}
-                    placeholder="—"
+                    placeholder="-"
                     className="h-8 text-sm tabular-nums"
                   />
                 </div>
@@ -885,7 +885,7 @@ export function LineEditorSection({
                       )}
                     >
                       <td className="px-3 py-2.5 pl-4">
-                        <div>{line.itemName.trim() || line.item?.name?.trim() || "—"}</div>
+                        <div>{line.itemName.trim() || line.item?.name?.trim() || "-"}</div>
                         {lineIssue && (
                           <div className="mt-1 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">
                             {lineIssue.message}
@@ -902,7 +902,7 @@ export function LineEditorSection({
                                 ? line.item.hsnCode
                                 : line.item?.sacCode?.trim()
                                   ? line.item.sacCode
-                                  : "—"}
+                                  : "-"}
                         </td>
                       ) : null}
                       <td className="px-3 py-2.5">
@@ -923,7 +923,7 @@ export function LineEditorSection({
                       ) : null}
                       {isPurchaseCostLine && !isPurchaseInvoiceUi ? (
                         <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
-                          {line.sellingPrice?.trim() ? formatCurrency(line.sellingPrice) : "—"}
+                          {line.sellingPrice?.trim() ? formatCurrency(line.sellingPrice) : "-"}
                         </td>
                       ) : null}
                       {isPurchaseInvoiceUi ? (
@@ -996,7 +996,7 @@ export function LineEditorSection({
                         {formatCurrency(addedLinesTotals.taxable)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-right text-xs text-muted-foreground">
-                        —
+                        -
                       </td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
                         {formatCurrency(addedLinesTotals.tax)}

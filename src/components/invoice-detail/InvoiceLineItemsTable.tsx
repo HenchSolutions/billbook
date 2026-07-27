@@ -23,7 +23,7 @@ function formatGstSlab(item: InvoiceItem): string {
     return `${cgst || sgst}%`;
   }
   if (igst > 0) return `IGST ${igst}%`;
-  return "—";
+  return "-";
 }
 
 export function InvoiceLineItemsTable({
@@ -89,7 +89,7 @@ export function InvoiceLineItemsTable({
                       <td className="px-4 py-3">
                         <div className="font-medium">{displayName}</div>
                       </td>
-                      <td className="px-3 py-3 tabular-nums text-muted-foreground">{hsn || "—"}</td>
+                      <td className="px-3 py-3 tabular-nums text-muted-foreground">{hsn || "-"}</td>
                       <td className="px-3 py-3 text-muted-foreground">
                         {purchaseDate ? (
                           <div>
@@ -101,7 +101,7 @@ export function InvoiceLineItemsTable({
                             ) : null}
                           </div>
                         ) : (
-                          "—"
+                          "-"
                         )}
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums">
@@ -114,7 +114,7 @@ export function InvoiceLineItemsTable({
                         <td className="px-3 py-3 text-right tabular-nums text-foreground">
                           {item.sellingPrice != null && String(item.sellingPrice).trim() !== ""
                             ? formatCurrency(item.sellingPrice)
-                            : "—"}
+                            : "-"}
                         </td>
                       ) : null}
                       {isPurchaseBill ? (
@@ -127,7 +127,7 @@ export function InvoiceLineItemsTable({
                           ? `${item.discountPercent}%`
                           : item.discountAmount && item.discountAmount !== "0"
                             ? formatCurrency(item.discountAmount)
-                            : "—"}
+                            : "-"}
                       </td>
                       <td className="px-4 py-3 text-right font-semibold tabular-nums">
                         {formatCurrency(item.lineTotal)}

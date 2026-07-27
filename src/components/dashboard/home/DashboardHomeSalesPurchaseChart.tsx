@@ -27,7 +27,7 @@ function chartPeriodBadgeLabel(periodMode: DashboardPeriodMode, dashboard: Dashb
   return "Custom range";
 }
 
-const PLACEHOLDER = [{ month: "—", sales: 0, purchase: 0 }];
+const PLACEHOLDER = [{ month: "-", sales: 0, purchase: 0 }];
 
 type ChartRow = { month: string; sales: number; purchase: number };
 
@@ -51,7 +51,7 @@ function SalesPurchaseTooltip({
   if (!active || !payload?.length) return null;
   const raw = payload[0]?.payload;
   const row = raw && typeof raw === "object" ? (raw as ChartRow) : undefined;
-  if (!row || row.month === "—") return null;
+  if (!row || row.month === "-") return null;
 
   const sales = Number(row.sales) || 0;
   const purchase = Number(row.purchase) || 0;
@@ -94,7 +94,7 @@ function SalesPurchaseTooltip({
           </div>
         ) : purchaseEstimated ? (
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Purchase for this month is not included yet — only sales are shown in the chart.
+            Purchase for this month is not included yet. Only sales are shown in the chart.
           </p>
         ) : null}
         {showPurchaseSeries ? (

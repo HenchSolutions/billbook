@@ -213,7 +213,7 @@ export function ReceiptAllocationEditor({
   };
 
   const fmtOpening = (v: number | null) =>
-    v != null && Number.isFinite(v) ? formatCurrency(String(v)) : "—";
+    v != null && Number.isFinite(v) ? formatCurrency(String(v)) : "-";
 
   const openingTotalDisplay = fmtOpening(openingLedger.total);
   const openingPaidDisplay = fmtOpening(openingLedger.paid);
@@ -466,16 +466,16 @@ export function ReceiptAllocationEditor({
                           </Link>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 align-middle text-muted-foreground">
-                          {r.invoiceDate ? formatDate(r.invoiceDate) : "—"}
+                          {r.invoiceDate ? formatDate(r.invoiceDate) : "-"}
                         </td>
                         <td className="px-4 py-3 align-middle capitalize text-muted-foreground">
-                          {(r.invoiceType ?? "—").replace(/_/g, " ")}
+                          {(r.invoiceType ?? "-").replace(/_/g, " ")}
                         </td>
                         <td className="px-4 py-3 text-right align-middle tabular-nums">
-                          {r.totalAmount === "—" ? "—" : formatCurrency(r.totalAmount)}
+                          {r.totalAmount === "-" ? "-" : formatCurrency(r.totalAmount)}
                         </td>
                         <td className="px-4 py-3 text-right align-middle tabular-nums text-muted-foreground">
-                          {r.paidAmount === "—" ? "—" : formatCurrency(r.paidAmount)}
+                          {r.paidAmount === "-" ? "-" : formatCurrency(r.paidAmount)}
                         </td>
                         <td className="px-4 py-3 text-right align-middle font-medium tabular-nums">
                           {formatCurrency(r.dueAmount)}

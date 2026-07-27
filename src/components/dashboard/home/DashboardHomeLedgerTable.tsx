@@ -132,7 +132,7 @@ function PaginatedActivityTable({
                       {formatCurrency(row.amount)}
                     </td>
                     <td className="px-4 py-3 text-right text-muted-foreground">
-                      {row.mode?.trim() ? row.mode : "—"}
+                      {row.mode?.trim() ? row.mode : "-"}
                     </td>
                   </tr>
                 );

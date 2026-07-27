@@ -46,7 +46,7 @@ export default function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      {/* InvoiceDetailsCards — md:grid-cols-2 */}
+      {/* InvoiceDetailsCards. md:grid-cols-2 */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
         <div className="flex min-h-[220px] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <div className="border-b px-6 pb-3 pt-4">
