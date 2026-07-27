@@ -63,7 +63,7 @@ const ITEMIZED_ROWS = [
 ];
 
 const CAPTIONS = [
-  "Same Monthly Summary and Itemized tabs as the in-app GST / Tax page — pick any date range.",
+  "Same Monthly Summary and Itemized tabs as the in-app GST / Tax page. Pick any date range.",
   "Download a single HTML pack for the range (labeled “Export for Filing” in the product) for your records.",
   "CGST, SGST, and IGST roll up separately so reconciliation stays straightforward.",
 ];
@@ -222,7 +222,7 @@ export function ComplianceTab() {
           {[
             {
               title: "Period-aware",
-              desc: "Totals follow the dates you select — same picker as inside BillBook.",
+              desc: "Totals follow the dates you select, same picker as inside BillBook.",
               Icon: FileSpreadsheet,
             },
             {
@@ -250,7 +250,7 @@ export function ComplianceTab() {
 
         <div className="flex items-center justify-between border-t bg-muted/20 px-6 py-3">
           <p className="text-xs text-muted-foreground">
-            Illustration mirrors the live GST / Tax screen — not government filing software.
+            Illustration mirrors the live GST / Tax screen, not government filing software.
           </p>
           <span className="text-xs font-medium text-primary">Open Tax / GST after sign-in →</span>
         </div>

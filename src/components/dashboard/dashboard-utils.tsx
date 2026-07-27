@@ -4,11 +4,11 @@ import { cn } from "@/lib/core/utils";
 /** Inline-size container so metric values can use `cqi` for fluid font sizing inside cards. */
 export const fluidMetricShellClass = "min-w-0 max-w-full [container-type:inline-size]";
 
-/** Performance snapshot KPI figure — scales down in narrow cells when amounts are long. */
+/** Performance snapshot KPI figure. scales down in narrow cells when amounts are long. */
 export const fluidSnapshotValueClass =
   "min-w-0 max-w-full font-semibold tabular-nums leading-none tracking-tight text-[clamp(0.6875rem,calc(0.38rem+6.25cqi),1.75rem)]";
 
-/** Top-row dashboard KPIs — InApp uses h3.fw-bold for the main figure; slightly higher floor for legibility. */
+/** Top-row dashboard KPIs. InApp uses h3.fw-bold for the main figure; slightly higher floor for legibility. */
 export const fluidDashboardKpiValueClass =
   "min-w-0 max-w-full font-bold tabular-nums leading-tight tracking-tight text-[clamp(1.125rem,calc(0.5rem+5.25cqi),1.875rem)]";
 
@@ -16,7 +16,7 @@ export const fluidDashboardKpiValueClass =
 export const fluidSectionStatClass =
   "min-w-0 max-w-full font-semibold tabular-nums leading-tight text-[clamp(1rem,calc(0.5rem+4.25cqi),1.5rem)]";
 
-/** Inline totals in dashboard ranking rows — avoids overflow without clipping digits when possible. */
+/** Inline totals in dashboard ranking rows. avoids overflow without clipping digits when possible. */
 export const fluidRowAmountClass =
   "min-w-0 max-w-full text-end font-semibold tabular-nums text-[clamp(0.65rem,calc(0.28rem+3.8cqi),0.875rem)]";
 

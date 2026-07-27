@@ -131,20 +131,21 @@ export default function InvoiceDetail() {
 
   const handleMarkSent = async () => {
     if (!invoiceId || !invoice || !invoiceTypeSupportsDocumentShareLog(invoice.invoiceType)) return;
+    if (invoice.status === "CANCELLED" || getInvoiceBalanceDue(invoice) <= 0) return;
     if (markSentMutation.isPending || sentToday) return;
     try {
       const res = await markSentMutation.mutateAsync({});
       showSuccessToast(markSentFeedbackMessage(res));
     } catch (err) {
-      if (err instanceof ApiClientError && err.status === 503) {
-        showErrorToast(err, "Service busy — try again");
-        return;
-      }
       if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {
-        showErrorToast(err, "Can't log to WhatsApp");
+        showErrorToast(err, "Can't send on WhatsApp");
         return;
       }
-      showErrorToast(err, "Couldn't log to WhatsApp");
+      if (err instanceof ApiClientError && err.status === 503) {
+        showErrorToast(err, "WhatsApp unavailable. check server configuration");
+        return;
+      }
+      showErrorToast(err, "Couldn't send on WhatsApp");
     }
   };
 
@@ -163,7 +164,7 @@ export default function InvoiceDetail() {
       showSuccessToast(markReminderFeedbackMessage(res));
     } catch (err) {
       if (err instanceof ApiClientError && err.status === 503) {
-        showErrorToast(err, "Email unavailable — check mail settings");
+        showErrorToast(err, "Email unavailable. check mail settings");
         return;
       }
       if (err instanceof ApiClientError && (err.status === 409 || err.status === 400)) {

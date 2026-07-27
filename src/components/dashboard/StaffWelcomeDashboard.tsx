@@ -181,7 +181,7 @@ export default function StaffWelcomeDashboard() {
                 <DialogTitle>{player.title}</DialogTitle>
                 <DialogDescription>
                   {playerMedia?.kind === "external"
-                    ? "We could not embed this link here—use Open in new tab to watch in your browser."
+                    ? "We could not embed this link here. Use Open in new tab to watch in your browser."
                     : "Playing in this window. Prefer the host site? Use Open in new tab below."}
                 </DialogDescription>
               </DialogHeader>

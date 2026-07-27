@@ -28,7 +28,7 @@ export function DashboardHomeReceivablesPayables({
   const canVendors = can(PAGE.vendors);
 
   const formatOptionalCurrency = (value: string | number | null | undefined) =>
-    value != null && value !== "" ? formatCurrency(value) : "—";
+    value != null && value !== "" ? formatCurrency(value) : "-";
   const receivables = dashboardToNumber(dashboard.totalReceivables);
   const overdueRec = dashboard.overdueReceivables;
   const payables = dashboard.totalPayables;

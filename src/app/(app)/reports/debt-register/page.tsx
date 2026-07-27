@@ -159,15 +159,15 @@ export default function DebtRegisterPage() {
         line.invoiceNumber,
         formatDate(line.invoiceDate),
         formatCurrency(line.totalAmount),
-        ret > MONEY_EPS ? formatCurrency(String(ret.toFixed(2))) : "—",
+        ret > MONEY_EPS ? formatCurrency(String(ret.toFixed(2))) : "-",
         formatCurrency(String(net.toFixed(2))),
         formatCurrency(line.paidAmount),
         formatCurrency(line.dueAmount),
         String(days),
-        b0 > MONEY_EPS ? formatCurrency(String(b0.toFixed(2))) : "—",
-        b1 > MONEY_EPS ? formatCurrency(String(b1.toFixed(2))) : "—",
-        b2 > MONEY_EPS ? formatCurrency(String(b2.toFixed(2))) : "—",
-        b3 > MONEY_EPS ? formatCurrency(String(b3.toFixed(2))) : "—",
+        b0 > MONEY_EPS ? formatCurrency(String(b0.toFixed(2))) : "-",
+        b1 > MONEY_EPS ? formatCurrency(String(b1.toFixed(2))) : "-",
+        b2 > MONEY_EPS ? formatCurrency(String(b2.toFixed(2))) : "-",
+        b3 > MONEY_EPS ? formatCurrency(String(b3.toFixed(2))) : "-",
       ];
     });
     const subtitleParts = [`As of ${formatISODateDisplay(data.asOf)}`];
@@ -414,7 +414,7 @@ export default function DebtRegisterPage() {
                         <td className={rr.tdMuted}>{formatDate(line.invoiceDate)}</td>
                         <td className={rr.tdRight}>{formatCurrency(line.totalAmount)}</td>
                         <td className={rr.tdRightMuted}>
-                          {ret > MONEY_EPS ? formatCurrency(String(ret.toFixed(2))) : "—"}
+                          {ret > MONEY_EPS ? formatCurrency(String(ret.toFixed(2))) : "-"}
                         </td>
                         <td className={rr.tdRight}>{formatCurrency(String(net.toFixed(2)))}</td>
                         <td className={rr.tdRightMuted}>{formatCurrency(line.paidAmount)}</td>
@@ -423,16 +423,16 @@ export default function DebtRegisterPage() {
                         </td>
                         <td className={rr.tdRightMuted}>{days}</td>
                         <td className={rr.tdRightMuted}>
-                          {b0 > MONEY_EPS ? formatCurrency(String(b0.toFixed(2))) : "—"}
+                          {b0 > MONEY_EPS ? formatCurrency(String(b0.toFixed(2))) : "-"}
                         </td>
                         <td className={rr.tdRightMuted}>
-                          {b1 > MONEY_EPS ? formatCurrency(String(b1.toFixed(2))) : "—"}
+                          {b1 > MONEY_EPS ? formatCurrency(String(b1.toFixed(2))) : "-"}
                         </td>
                         <td className={rr.tdRightMuted}>
-                          {b2 > MONEY_EPS ? formatCurrency(String(b2.toFixed(2))) : "—"}
+                          {b2 > MONEY_EPS ? formatCurrency(String(b2.toFixed(2))) : "-"}
                         </td>
                         <td className={rr.tdRightMuted}>
-                          {b3 > MONEY_EPS ? formatCurrency(String(b3.toFixed(2))) : "—"}
+                          {b3 > MONEY_EPS ? formatCurrency(String(b3.toFixed(2))) : "-"}
                         </td>
                       </tr>
                     );
@@ -452,7 +452,7 @@ export default function DebtRegisterPage() {
                       {formatCurrency(String(totals.total.toFixed(2)))}
                     </td>
                     <td className={cn(rr.tdRightMuted, "font-semibold")}>
-                      {totals.ret > MONEY_EPS ? formatCurrency(String(totals.ret.toFixed(2))) : "—"}
+                      {totals.ret > MONEY_EPS ? formatCurrency(String(totals.ret.toFixed(2))) : "-"}
                     </td>
                     <td className={cn(rr.tdRight, "font-bold text-foreground")}>
                       {formatCurrency(String(totals.net.toFixed(2)))}
@@ -465,16 +465,16 @@ export default function DebtRegisterPage() {
                     </td>
                     <td className={rr.tdRightMuted} />
                     <td className={cn(rr.tdRightMuted, "font-semibold")}>
-                      {totals.b0 > MONEY_EPS ? formatCurrency(String(totals.b0.toFixed(2))) : "—"}
+                      {totals.b0 > MONEY_EPS ? formatCurrency(String(totals.b0.toFixed(2))) : "-"}
                     </td>
                     <td className={cn(rr.tdRightMuted, "font-semibold")}>
-                      {totals.b1 > MONEY_EPS ? formatCurrency(String(totals.b1.toFixed(2))) : "—"}
+                      {totals.b1 > MONEY_EPS ? formatCurrency(String(totals.b1.toFixed(2))) : "-"}
                     </td>
                     <td className={cn(rr.tdRightMuted, "font-semibold")}>
-                      {totals.b2 > MONEY_EPS ? formatCurrency(String(totals.b2.toFixed(2))) : "—"}
+                      {totals.b2 > MONEY_EPS ? formatCurrency(String(totals.b2.toFixed(2))) : "-"}
                     </td>
                     <td className={cn(rr.tdRightMuted, "font-semibold")}>
-                      {totals.b3 > MONEY_EPS ? formatCurrency(String(totals.b3.toFixed(2))) : "—"}
+                      {totals.b3 > MONEY_EPS ? formatCurrency(String(totals.b3.toFixed(2))) : "-"}
                     </td>
                   </tr>
                 </tfoot>

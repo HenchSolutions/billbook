@@ -333,7 +333,7 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
                         </div>
                       </div>
 
-                      {/* Actions — stop click propagating to the radio wrapper */}
+                      {/* Actions. stop click propagating to the radio wrapper */}
                       {canEdit ? (
                         <div
                           className="flex shrink-0 items-center gap-1.5"

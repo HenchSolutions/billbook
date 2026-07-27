@@ -129,7 +129,7 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
                     ) : p.source === "OUTBOUND_REFUND" ? (
                       <span className="financial-id">{p.outboundPaymentNumber}</span>
                     ) : (
-                      (p.referenceNumber ?? "—")
+                      (p.referenceNumber ?? "-")
                     )}
                   </td>
                   <td className="data-table-td text-right">
@@ -169,7 +169,7 @@ export function InvoicePaymentsTable({ payments }: InvoicePaymentsTableProps) {
                         </Button>
                       )}
                       {p.source === "LEGACY_PAYMENT" && (
-                        <span className="self-center text-xs text-muted-foreground">—</span>
+                        <span className="self-center text-xs text-muted-foreground">-</span>
                       )}
                     </div>
                   </td>

@@ -54,7 +54,7 @@ const OUTSTANDING_ROWS = [
 ];
 
 const CAPTIONS = [
-  "Period KPIs for customer receipts, sales & purchase invoices, and payouts — same hub as Reports.",
+  "Period KPIs for customer receipts, sales & purchase invoices, and payouts, same hub as Reports.",
   "Outstanding receivables and payables use live party balances, independent of the date filter.",
   "Invoice aging, credit note register, and each report’s CSV download match what you get in the app.",
 ];
@@ -169,7 +169,7 @@ export function ReportsTab() {
           </table>
         </div>
         <div className="flex items-center justify-between border-t bg-muted/20 px-6 py-3">
-          <p className="text-xs text-muted-foreground">Party outstanding — top 3 shown</p>
+          <p className="text-xs text-muted-foreground">Party outstanding (top 3 shown)</p>
           <span className="text-xs text-primary">View full report →</span>
         </div>
       </div>

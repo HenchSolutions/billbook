@@ -62,7 +62,7 @@ interface PartyAndDatesCardsProps {
     documentNumber?: string;
     numberLabel?: string;
   };
-  /** Sale invoice only — saved bank account for PDF payment block */
+  /** Sale invoice only. saved bank account for PDF payment block */
   saleBankAccountSelect?: {
     value: string;
     onValueChange: (value: string) => void;
@@ -262,7 +262,7 @@ export function PartyAndDatesCards({
                   <Skeleton className="h-6 w-36 rounded-md" />
                 ) : (
                   <span className="text-base font-semibold tabular-nums tracking-tight text-foreground">
-                    {invoiceDocumentBanner.documentNumber ?? "—"}
+                    {invoiceDocumentBanner.documentNumber ?? "-"}
                   </span>
                 )}
               </div>

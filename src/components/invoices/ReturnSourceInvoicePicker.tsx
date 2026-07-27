@@ -218,10 +218,10 @@ function ReturnSourceTable({
                   {inv.invoiceNumber}
                 </Link>
               </td>
-              <td className="px-3 py-3 text-muted-foreground">{inv.partyName ?? "—"}</td>
+              <td className="px-3 py-3 text-muted-foreground">{inv.partyName ?? "-"}</td>
               {showVendorBill ? (
                 <td className="hidden px-3 py-3 text-xs text-muted-foreground lg:table-cell">
-                  <span className="financial-id">{inv.originalBillNumber?.trim() || "—"}</span>
+                  <span className="financial-id">{inv.originalBillNumber?.trim() || "-"}</span>
                 </td>
               ) : null}
               <td className="hidden px-3 py-3 tabular-nums text-muted-foreground sm:table-cell">

@@ -59,7 +59,7 @@ export function InvoiceAuditHistory({ logs }: InvoiceAuditHistoryProps) {
               : getAuditChangeHighlights(log.changes, buildAuditHighlightParams(log, invoiceCtx));
             const date = formatDate(log.createdAt);
             const timeRaw = formatTime(log.createdAt);
-            const time = timeRaw === "—" ? "" : timeRaw;
+            const time = timeRaw === "-" ? "" : timeRaw;
 
             return (
               <li key={log.id} className="py-3 first:pt-0 last:pb-0">

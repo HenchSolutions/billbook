@@ -111,7 +111,7 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                   <LinkedInvoiceLink {...sourceInvoiceProps} onClick={(e) => e.stopPropagation()} />
                 </td>
                 <td className="data-table-td hidden max-w-[200px] truncate text-muted-foreground lg:table-cell">
-                  {cn.reason ?? "—"}
+                  {cn.reason ?? "-"}
                 </td>
                 <td className="data-table-td data-table-col-numeric font-medium">
                   {formatCurrency(cn.amount)}
@@ -123,10 +123,10 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                         {formatCurrency(String(unalloc))}
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </td>
                 <td className="data-table-td data-table-col-numeric px-2 sm:px-3">
@@ -144,7 +144,7 @@ export function CreditNotesTable({ creditNotes, onView }: CreditNotesTableProps)
                         size="sm"
                         className="h-8 shrink-0 text-muted-foreground"
                         disabled
-                        title="Fully allocated — open the credit note from the number above to review"
+                        title="Fully allocated. Open the credit note from the number above to review"
                       >
                         Allocate
                       </Button>

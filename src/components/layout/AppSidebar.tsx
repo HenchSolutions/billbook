@@ -18,7 +18,7 @@ import {
 } from "@/lib/navigation/app-nav-catalog";
 import { TeamRolesSidebarBlock } from "@/components/layout/TeamRolesSidebarBlock";
 
-/** Static invoice lane links — derived once from the nav catalog. */
+/** Static invoice lane links. derived once from the nav catalog. */
 const INVOICE_SUB_NAV_ITEMS = getInvoiceSubNavItems();
 
 type SectionTitle = SidebarNavSectionModel["title"];

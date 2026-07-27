@@ -17,7 +17,7 @@ function outboundPartyDisplayName(
   partyNamesById?: ReadonlyMap<number, string>,
 ): string {
   if (p.category === "EXPENSE") {
-    return p.payeeName?.trim() || "—";
+    return p.payeeName?.trim() || "-";
   }
   const id = p.partyId;
   if (id != null) {
@@ -26,7 +26,7 @@ function outboundPartyDisplayName(
   }
   const raw = p.partyName?.trim();
   if (raw) return raw;
-  return id != null ? "Unknown party" : "—";
+  return id != null ? "Unknown party" : "-";
 }
 
 interface OutboundPaymentsTableProps {

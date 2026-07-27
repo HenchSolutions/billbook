@@ -14,7 +14,7 @@ export const reportDashboard = {
     "Receipt register, posted (final-only) sales & purchase invoices, and payment register totals for the date range above.",
   sectionBalances: "Money owed",
   sectionBalancesDescription:
-    "Debt register and Payables register use each party’s current balance — independent of the date range above.",
+    "Debt register and Payables register use each party’s current balance, independent of the date range above.",
   kpiReceipts: "Receipt register",
   kpiInvoices: "Posted invoices",
   kpiInvoicesSalesCta: "Sales register",
@@ -43,14 +43,14 @@ export const reportReceiptRegister = {
 
 export const reportItemRegister = {
   title: "Item register",
-  description: "Current stock summarized by item — quantity, values, and status.",
+  description: "Current stock summarized by item: quantity, values, and status.",
   loadError: "Failed to load stock by item",
 } as const;
 
 export const reportInvoiceRegister = {
   title: "Sales register",
   description:
-    "Posted (final) sales invoices and sales returns in the selected period — drafts appear here after you finalize them.",
+    "Posted (final) sales invoices and sales returns in the selected period. Drafts appear here after you finalize them.",
   loadError: "Failed to load sales register",
   csvFilename: "sales-register.csv",
   pdfFilename: "sales-register.pdf",
@@ -60,7 +60,7 @@ export const reportInvoiceRegister = {
 export const reportPurchaseRegister = {
   title: "Purchase register",
   description:
-    "Posted (final) purchase invoices and purchase returns in the selected period — drafts appear here after you finalize them.",
+    "Posted (final) purchase invoices and purchase returns in the selected period. Drafts appear here after you finalize them.",
   loadError: "Failed to load purchase register",
   csvFilename: "purchase-register.csv",
   pdfFilename: "purchase-register.pdf",
@@ -70,7 +70,7 @@ export const reportPurchaseRegister = {
 export const reportPayoutRegister = {
   title: "Payment register",
   description:
-    "Money you paid out in the selected period — suppliers, parties, refunds on returns, and expenses.",
+    "Money you paid out in the selected period: suppliers, parties, refunds on returns, and expenses.",
   loadError: "Failed to load payment register",
   csvFilename: "payout-register.csv",
   pdfFilename: "payout-register.pdf",
@@ -80,7 +80,7 @@ export const reportPayoutRegister = {
 export const reportDebtRegister = {
   title: "Debt register",
   description:
-    "Outstanding sales invoices as of a date — totals, paid vs balance, days open, and ageing buckets (0–30, 31–60, 61–90, 90+ days).",
+    "Outstanding sales invoices as of a date: totals, paid vs balance, days open, and ageing buckets (0–30, 31–60, 61–90, 90+ days).",
   loadError: "Failed to load debt register",
   csvFilename: "debt-register.csv",
   pdfFilename: "debt-register.pdf",
@@ -92,7 +92,7 @@ export const reportDebtRegister = {
 
 export const reportPayablesRegister = {
   title: "Payables register",
-  description: "Outstanding amounts you owe each party — their current payable balance.",
+  description: "Outstanding amounts you owe each party (their current payable balance).",
   loadError: "Failed to load payables register",
   csvFilename: "payables-register.csv",
   pdfFilename: "payables-register.pdf",

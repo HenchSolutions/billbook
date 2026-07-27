@@ -103,13 +103,13 @@ export function buildQueryString(
  * Format a date string (ISO date or datetime) to human-readable format (e.g., "16 Feb 2026").
  */
 export function formatDate(dateString: string | undefined | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "—";
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
   } catch {
-    return "—";
+    return "-";
   }
 }
 
@@ -117,13 +117,13 @@ export function formatDate(dateString: string | undefined | null): string {
  * Format a datetime string to human-readable time (e.g., "03:42 PM").
  */
 export function formatTime(dateString: string | undefined | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "—";
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
   } catch {
-    return "—";
+    return "-";
   }
 }
 
@@ -131,19 +131,19 @@ export function formatTime(dateString: string | undefined | null): string {
  * Format a date string to month year format (e.g., "Feb 2026").
  */
 export function formatMonthYear(dateString: string | undefined | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "—";
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
   } catch {
-    return "—";
+    return "-";
   }
 }
 
 /** Numeric calendar date for headers: DD/MM/YYYY (fixed separators, business-friendly). */
 export function formatDateNumericINFromDate(d: Date): string {
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "-";
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();
@@ -152,16 +152,16 @@ export function formatDateNumericINFromDate(d: Date): string {
 
 /** Compact numeric date for dense tables (e.g. DD/MM/YY). */
 export function formatDateCompact(dateString: string | undefined | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "—";
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",
     });
   } catch {
-    return "—";
+    return "-";
   }
 }

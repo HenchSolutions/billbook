@@ -16,7 +16,7 @@ export function LandingCtaBanner() {
           Start billing smarter today.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          Create your first invoice in under 2 minutes. No credit card, no complicated setup — just
+          Create your first invoice in under 2 minutes. No credit card, no complicated setup, just
           clean, GST-ready billing from day one.
         </p>
 

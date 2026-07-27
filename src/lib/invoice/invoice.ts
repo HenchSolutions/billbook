@@ -136,9 +136,8 @@ export function invoiceTypeSupportsBalanceReminderEmail(type: InvoiceType): bool
 }
 
 /**
- * POST mark-sent (WhatsApp log): documents **we issue** to the party (invoice, credit/return to customer,
- * return to vendor). Omit **purchase bills** — that’s the vendor’s bill to us; we’re the payer, not sharing
- * “our invoice” in the same sense.
+ * POST mark-sent (WhatsApp reminder): documents **we issue** to the party when balance is outstanding
+ * (invoice, credit/return to customer, return to vendor). Omit **purchase bills**.
  */
 export function invoiceTypeSupportsDocumentShareLog(type: InvoiceType): boolean {
   return type === "SALE_INVOICE" || type === "SALE_RETURN" || type === "PURCHASE_RETURN";
@@ -195,7 +194,7 @@ const INVOICE_TYPE_CREATE_COPY: Record<InvoiceType, InvoiceTypeCreateCopy> = {
   },
   PURCHASE_INVOICE: {
     pageDescription:
-      "Record what you received from the vendor. Add any item from the bill — you can add stock for it later if needed.",
+      "Record what you received from the vendor. Add any item from the bill. You can add stock for it later if needed.",
     partyCardTitle: "Vendor & delivery",
     detailsCardTitle: "Invoice details",
     partyLabel: "Vendor",

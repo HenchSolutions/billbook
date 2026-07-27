@@ -63,10 +63,10 @@ export default function CreditNoteRegisterPage() {
     const body = rows.map((cnRow) => [
       cnRow.creditNoteNumber,
       cnRow.status,
-      cnRow.partyName ?? "—",
-      cnRow.invoiceNumber ?? (cnRow.invoiceId ? `#${cnRow.invoiceId}` : "—"),
+      cnRow.partyName ?? "-",
+      cnRow.invoiceNumber ?? (cnRow.invoiceId ? `#${cnRow.invoiceId}` : "-"),
       formatCurrency(cnRow.totalAmount),
-      cnRow.affectsInventory === undefined ? "—" : cnRow.affectsInventory ? "Yes" : "No",
+      cnRow.affectsInventory === undefined ? "-" : cnRow.affectsInventory ? "Yes" : "No",
       formatDate(cnRow.createdAt),
     ]);
     return {
@@ -147,7 +147,7 @@ export default function CreditNoteRegisterPage() {
                       <td className={rr.td}>
                         <StatusBadge status={cnRow.status} />
                       </td>
-                      <td className={rr.td}>{cnRow.partyName ?? "—"}</td>
+                      <td className={rr.td}>{cnRow.partyName ?? "-"}</td>
                       <td className={rr.td}>
                         {cnRow.invoiceId ? (
                           <LinkedInvoiceLink
@@ -156,7 +156,7 @@ export default function CreditNoteRegisterPage() {
                             className={rr.link}
                           />
                         ) : (
-                          "—"
+                          "-"
                         )}
                       </td>
                       <td className={cn(rr.tdRight, "font-medium")}>
@@ -168,7 +168,7 @@ export default function CreditNoteRegisterPage() {
                             <TooltipTrigger asChild>
                               <span className="cursor-default">
                                 {cnRow.affectsInventory === undefined
-                                  ? "—"
+                                  ? "-"
                                   : cnRow.affectsInventory
                                     ? "Yes *"
                                     : "No"}
@@ -176,7 +176,7 @@ export default function CreditNoteRegisterPage() {
                             </TooltipTrigger>
                             {cnRow.affectsInventory && (
                               <TooltipContent side="top" className="max-w-[220px] text-xs">
-                                Coming soon — inventory adjustment is not yet automated.
+                                Coming soon. inventory adjustment is not yet automated.
                               </TooltipContent>
                             )}
                           </Tooltip>

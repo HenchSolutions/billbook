@@ -52,7 +52,7 @@ interface BusinessProfileFormProps {
   onLogoUpload?: (file: File) => Promise<string | null>;
   /** Upload signature file; returns URL to store. Backend receives only this link on profile save. */
   onSignatureUpload?: (file: File) => Promise<string | null>;
-  /** When true, profile is view-only (STAFF — GET allowed, PUT blocked by API). */
+  /** When true, profile is view-only (STAFF. GET allowed, PUT blocked by API). */
   readOnly?: boolean;
   /** Saved bank accounts (CRUD) under Bank details. */
   canViewBankAccounts?: boolean;

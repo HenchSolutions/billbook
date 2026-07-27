@@ -14,7 +14,7 @@ export function resolvedCreditNotePartyId(cn: CreditNoteSummary): number | null 
 
 /** Party column / summary: `party.partyName` only; em dash when missing. */
 export function creditNotePartyNameDisplay(cn: CreditNoteSummary): string {
-  return cn.party?.partyName?.trim() || "—";
+  return cn.party?.partyName?.trim() || "-";
 }
 
 /** Props for LinkedInvoiceLink: prefer `sourceInvoiceNumber`, then `invoiceNumber`. */

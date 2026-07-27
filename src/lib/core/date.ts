@@ -70,7 +70,7 @@ export function formatAppDateOnlyFromYmd(isoYmd: string): string {
 
 /** Any parseable ISO timestamp → date only, same style as {@link formatAppDateOnlyFromYmd}. */
 export function formatAppDateFromInstant(iso: string | null | undefined): string {
-  if (iso == null || String(iso).trim() === "") return "—";
+  if (iso == null || String(iso).trim() === "") return "-";
   const t = Date.parse(iso);
   if (!Number.isFinite(t)) return String(iso);
   return new Date(t).toLocaleDateString(APP_DISPLAY_LOCALE, appDisplayDateOnlyOptions);

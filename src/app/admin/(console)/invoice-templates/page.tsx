@@ -84,10 +84,10 @@ function QualityBadge({ score }: { score: number | undefined | null }) {
   const isGreen = score >= 80;
   const isYellow = score >= 60 && score < 80;
   const tooltip = isGreen
-    ? `Score ${score}/100 — meets the publish threshold (≥ 80).`
+    ? `Score ${score}/100. meets the publish threshold (≥ 80).`
     : isYellow
-      ? `Score ${score}/100 — below publish threshold of 80. Re-optimize to improve.`
-      : `Score ${score}/100 — significant quality issues. Re-optimize before publishing.`;
+      ? `Score ${score}/100. below publish threshold of 80. Re-optimize to improve.`
+      : `Score ${score}/100. significant quality issues. Re-optimize before publishing.`;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -186,7 +186,7 @@ function AiResultPanel({
         <div className="flex items-center gap-2">
           <BrainCircuit className="h-4 w-4 text-primary" />
           <p className="text-sm font-semibold text-foreground">
-            AI Analysis Complete — v{result.version} created
+            AI analysis complete: v{result.version} created
           </p>
         </div>
         <button
@@ -231,7 +231,7 @@ function AiResultPanel({
       {warnings.length > 0 && (
         <details className="mt-2 text-xs">
           <summary className="cursor-pointer select-none text-amber-700">
-            {warnings.length} warning{warnings.length > 1 ? "s" : ""} — click to review
+            {warnings.length} warning{warnings.length > 1 ? "s" : ""}. click to review
           </summary>
           <ul className="mt-1.5 space-y-1 pl-1">
             {warnings.map((w, i) => (
@@ -301,7 +301,7 @@ function VersionDiagnostics({ version }: { version: TemplateVersion }) {
         {isDefaultFallback && (
           <p className="flex items-start gap-1.5 text-amber-700 [overflow-wrap:anywhere]">
             <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0" />
-            Platform default template was applied — the uploaded HTML did not contain a recognizable
+            Platform default template was applied. the uploaded HTML did not contain a recognizable
             invoice structure.
           </p>
         )}
@@ -357,7 +357,7 @@ function publishBlockReason(version: TemplateVersion): string | null {
     return `Fix ${errors.length} validation error${errors.length > 1 ? "s" : ""} before publishing`;
   const score = version.qualityScore ?? 0;
   if (score < UI_PUBLISH_QUALITY_THRESHOLD)
-    return `Quality score ${score}/100 — minimum ${UI_PUBLISH_QUALITY_THRESHOLD} required`;
+    return `Quality score ${score}/100. minimum ${UI_PUBLISH_QUALITY_THRESHOLD} required`;
   return null;
 }
 
@@ -655,7 +655,7 @@ export default function AdminInvoiceTemplatesPage() {
       }
       showSuccessToast(`"${target.name}" archived.`);
     } catch (e) {
-      showErrorToast(e, "Cannot archive — template is still assigned. Use Unlink first.");
+      showErrorToast(e, "Cannot archive: template is still assigned. Use Unlink first.");
     }
   };
 
@@ -1245,7 +1245,7 @@ export default function AdminInvoiceTemplatesPage() {
                                   </div>
                                 ) : (
                                   <p className="rounded-md border border-border/60 p-6 text-center text-sm text-muted-foreground">
-                                    Preview unavailable — click Load preview to retry.
+                                    Preview unavailable. click Load preview to retry.
                                   </p>
                                 )}
 
@@ -1341,7 +1341,7 @@ export default function AdminInvoiceTemplatesPage() {
               <AlertDialogTitle>Archive "{templateToDelete?.name}"?</AlertDialogTitle>
               <AlertDialogDescription>
                 This removes the template from the active library. If it is currently assigned to a
-                platform default or organization, use <strong>Unlink</strong> first — otherwise
+                platform default or organization, use <strong>Unlink</strong> first. otherwise
                 archiving will be blocked.
               </AlertDialogDescription>
             </AlertDialogHeader>

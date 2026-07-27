@@ -48,35 +48,35 @@ export function LandingFaq() {
               {[
                 {
                   q: "Is this built for small teams?",
-                  a: "Yes — it's designed for owners and small teams who need reliable invoicing and reporting without complex setup.",
+                  a: "Yes, it's designed for owners and small teams who need reliable invoicing and reporting without complex setup.",
                 },
                 {
                   q: "Can I create GST invoices and see tax totals?",
-                  a: "Yes — invoices and reports are structured to keep taxable value and GST totals clear for review and reconciliation.",
+                  a: "Yes, invoices and reports are structured to keep taxable value and GST totals clear for review and reconciliation.",
                 },
                 {
                   q: "Can I manage parties (customers) and products in one place?",
-                  a: "Yes — keep parties, GSTIN/contact details, products, and tax slabs organized so invoicing stays consistent.",
+                  a: "Yes, keep parties, GSTIN/contact details, products, and tax slabs organized so invoicing stays consistent.",
                 },
                 {
                   q: "Do you support credit notes and adjustments?",
-                  a: "Yes — issue credit notes and keep your records aligned when invoices need corrections or returns.",
+                  a: "Yes, issue credit notes and keep your records aligned when invoices need corrections or returns.",
                 },
                 {
                   q: "Can multiple team members use the same business account?",
-                  a: "Yes — you can collaborate as a team and keep workflows consistent across users.",
+                  a: "Yes, you can collaborate as a team and keep workflows consistent across users.",
                 },
                 {
                   q: "Can I export data for my accountant?",
-                  a: "Yes — download report CSVs and GST / Tax HTML exports, and keep invoice documents ready to share for reconciliation.",
+                  a: "Yes, download report CSVs and GST / Tax HTML exports, and keep invoice documents ready to share for reconciliation.",
                 },
                 {
-                  q: "Does BillBook directly send WhatsApp messages?",
-                  a: "Not yet. Today you can log WhatsApp document sharing activity and use balance reminder email workflows from invoice screens.",
+                  q: "Does BillBook send WhatsApp messages?",
+                  a: "Yes, from a finalized invoice you can send the invoice summary and document to the party's WhatsApp number (once per day). Balance reminders can also be emailed from the same screen.",
                 },
                 {
                   q: "Does it support audit logs?",
-                  a: "Yes — audit logs help track changes in key areas so you can review activity and reduce ambiguity.",
+                  a: "Yes, audit logs help track changes in key areas so you can review activity and reduce ambiguity.",
                 },
                 {
                   q: "Is my data secure and private?",
@@ -84,11 +84,11 @@ export function LandingFaq() {
                 },
                 {
                   q: "Can I download my data anytime?",
-                  a: "Yes — exports are designed for portability, reconciliation, and keeping your own records.",
+                  a: "Yes, exports are designed for portability, reconciliation, and keeping your own records.",
                 },
                 {
                   q: "Will it work on mobile?",
-                  a: "Yes — the UI is responsive so you can review invoices and reports comfortably on smaller screens.",
+                  a: "Yes, the UI is responsive so you can review invoices and reports comfortably on smaller screens.",
                 },
                 {
                   q: "How do I get started?",

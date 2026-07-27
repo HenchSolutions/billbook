@@ -60,11 +60,7 @@ export function normalizeCommunicationsSummary(
   };
 }
 
-const DELIVERY_OUTCOMES = new Set([
-  "sent",
-  "already_recorded_today",
-  "skipped_integration_pending",
-]);
+const DELIVERY_OUTCOMES = new Set(["sent", "already_recorded_today", "failed"]);
 
 export function parseInvoiceMarkCommunicationResponse(
   data: unknown,
@@ -101,17 +97,19 @@ export function markReminderFeedbackMessage(res: InvoiceMarkCommunicationRespons
   }
 }
 
-/** User-facing success copy after mark-sent (WhatsApp stub). */
+/** User-facing success copy after mark-sent (WhatsApp). */
 export function markSentFeedbackMessage(res: InvoiceMarkCommunicationResponse): string {
   const msg = typeof res.delivery.message === "string" ? res.delivery.message.trim() : "";
   if (msg) return msg;
-  const preview =
-    typeof res.delivery.messagePreview === "string" ? res.delivery.messagePreview.trim() : "";
-  if (res.delivery.outcome === "skipped_integration_pending") {
-    return preview ? `WhatsApp pending — ${preview}` : "WhatsApp pending — we logged it.";
+
+  switch (res.delivery.outcome) {
+    case "sent":
+      return "Payment reminder sent on WhatsApp";
+    case "already_recorded_today":
+      return "Payment reminder already sent on WhatsApp today";
+    case "failed":
+      return "Could not send payment reminder on WhatsApp";
+    default:
+      return "Payment reminder sent on WhatsApp";
   }
-  if (res.delivery.outcome === "already_recorded_today") {
-    return "Already logged today";
-  }
-  return "Logged for WhatsApp";
 }

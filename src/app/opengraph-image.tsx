@@ -57,7 +57,7 @@ export default function OgImage() {
       </div>
 
       <div style={{ fontSize: "26px", color: "#94a3b8", maxWidth: "800px" }}>
-        GST-ready invoicing, report CSVs, Tax / GST export &amp; audit trails — one workspace.
+        GST-ready invoicing, report CSVs, Tax / GST export &amp; audit trails in one workspace.
       </div>
 
       <div style={{ display: "flex", gap: "16px", marginTop: "40px" }}>

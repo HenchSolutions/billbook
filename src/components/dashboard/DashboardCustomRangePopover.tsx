@@ -20,7 +20,7 @@ interface DashboardCustomRangePopoverProps {
   customRange: DashboardCustomRangeFields;
   /** Highlights trigger when custom period is active */
   isCustomPeriod: boolean;
-  /** Called when the popover opens — typically switch dashboard to custom scope */
+  /** Called when the popover opens. typically switch dashboard to custom scope */
   onActivateCustom: () => void;
   /** Applied when the popover opens (e.g. prefill FY start → today if dates are empty) */
   seedOnOpen?: () => void;

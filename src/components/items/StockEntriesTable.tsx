@@ -38,7 +38,7 @@ function getSupplierDisplay(entry: StockEntry): {
   label: string;
   isInactive: boolean;
 } {
-  if (entry.supplierId == null) return { label: "—", isInactive: false };
+  if (entry.supplierId == null) return { label: "-", isInactive: false };
   if (entry.supplierName) {
     return { label: entry.supplierName, isInactive: entry.supplierIsActive === false };
   }
@@ -156,7 +156,7 @@ export function StockEntriesTable({
                   </td>
                   <td className={cn(stockTableTdClass, "whitespace-nowrap text-left")}>
                     {isService ? (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     ) : (
                       <StockEntrySourceBadge entrySource={entry.entrySource} />
                     )}
@@ -173,12 +173,12 @@ export function StockEntriesTable({
                       "whitespace-nowrap text-left text-muted-foreground",
                     )}
                   >
-                    {isService ? "—" : formatDateCompact(entry.purchaseDate)}
+                    {isService ? "-" : formatDateCompact(entry.purchaseDate)}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground md:table-cell")}
                   >
-                    {isService ? "—" : formatStockQuantity(purchased)}
+                    {isService ? "-" : formatStockQuantity(purchased)}
                   </td>
                   <td
                     className={cn(
@@ -187,27 +187,27 @@ export function StockEntriesTable({
                       isService ? "text-muted-foreground" : adjustedTextClass,
                     )}
                   >
-                    {isService ? "—" : formatStockAdjustmentDelta(adjusted)}
+                    {isService ? "-" : formatStockAdjustmentDelta(adjusted)}
                   </td>
                   <td
                     className={cn(stockTableTdRight, "hidden text-muted-foreground md:table-cell")}
                   >
-                    {isService ? "—" : formatStockQuantity(sold)}
+                    {isService ? "-" : formatStockQuantity(sold)}
                   </td>
                   <td className={cn(stockTableTdRight, "font-semibold")}>
-                    {isService ? "—" : formatStockQuantity(actualStr)}
+                    {isService ? "-" : formatStockQuantity(actualStr)}
                   </td>
                   <td className={stockTableTdRight}>
                     {entry.sellingPrice != null && entry.sellingPrice !== ""
                       ? formatCurrency(entry.sellingPrice)
-                      : "—"}
+                      : "-"}
                   </td>
                   <td className={cn(stockTableTdRight, "hidden sm:table-cell")}>
                     {isService
-                      ? "—"
+                      ? "-"
                       : entry.purchasePrice != null && entry.purchasePrice !== ""
                         ? formatCurrency(entry.purchasePrice)
-                        : "—"}
+                        : "-"}
                   </td>
                   <td className={cn(stockTableTdClass, "w-[132px] text-left")}>
                     <div className="inline-flex min-h-8 items-center gap-1 whitespace-nowrap">

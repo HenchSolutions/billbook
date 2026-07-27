@@ -114,7 +114,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  // Authenticated business user (OWNER/STAFF) — trial UI does not apply to ADMIN (handled above).
+  // Authenticated business user (OWNER/STAFF). trial UI does not apply to ADMIN (handled above).
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">

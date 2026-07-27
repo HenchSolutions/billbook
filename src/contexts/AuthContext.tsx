@@ -51,7 +51,7 @@ interface AuthContextValue extends AuthState {
   adminLogin: (data: AdminLoginRequest) => Promise<void>;
   refreshSession: () => Promise<void>;
   logout: () => Promise<void>;
-  /** When set, scoped access is blocked (e.g. inactive role group) — show full-screen message. */
+  /** When set, scoped access is blocked (e.g. inactive role group). show full-screen message. */
   accessBlockedMessage: string | null;
   clearAccessBlocked: () => void;
 }
@@ -279,7 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleAuthSuccess = useCallback(
     async (auth: AuthResponse) => {
-      /** Keys are not scoped by tenant — wipe cache so the next user never reads the previous account's data. */
+      /** Keys are not scoped by tenant. wipe cache so the next user never reads the previous account's data. */
       queryClient.clear();
       setAccessToken(auth.tokens.accessToken);
       setRefreshToken(auth.tokens.refreshToken);
@@ -411,7 +411,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post("/auth/logout");
     } catch {
-      // Ignore logout errors — clear locally regardless
+      // Ignore logout errors. clear locally regardless
     } finally {
       clearSession();
       queryClient.clear();

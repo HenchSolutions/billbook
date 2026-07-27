@@ -85,7 +85,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                         <StatusBadge status={inv.status} />
                       </div>
                       <div className="mt-0.5 truncate text-sm text-muted-foreground">
-                        {inv.partyName ?? "—"}
+                        {inv.partyName ?? "-"}
                       </div>
                       {showVendorBillColumn && inv.originalBillNumber?.trim() ? (
                         <div className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -132,10 +132,10 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                     {inv.invoiceNumber}
                   </span>
                 </td>
-                <td className="data-table-td hidden sm:table-cell">{inv.partyName ?? "—"}</td>
+                <td className="data-table-td hidden sm:table-cell">{inv.partyName ?? "-"}</td>
                 {showVendorBillColumn && (
                   <td className="data-table-td hidden max-w-[10rem] truncate text-muted-foreground lg:table-cell">
-                    {inv.originalBillNumber?.trim() || "—"}
+                    {inv.originalBillNumber?.trim() || "-"}
                   </td>
                 )}
                 {showRefInvoiceColumn && (
@@ -170,7 +170,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                     isCancelled && "text-muted-foreground",
                   )}
                 >
-                  {isCancelled ? "—" : isFullyPaid ? "Paid" : formatCurrency(balanceDue)}
+                  {isCancelled ? "-" : isFullyPaid ? "Paid" : formatCurrency(balanceDue)}
                 </td>
                 <td className="data-table-td hidden text-center sm:table-cell">
                   <StatusBadge status={inv.status} />

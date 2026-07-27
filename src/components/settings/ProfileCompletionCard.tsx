@@ -125,12 +125,12 @@ export function ProfileCompletionCard({ profileCompletion, business }: ProfileCo
       missing: regComplete ? [] : missingOrHint(registrationMissing, "Review name and country"),
     },
     {
-      label: "Address — Street · City · State · Pincode (Area optional)",
+      label: "Address: Street · City · State · Pincode (Area optional)",
       complete: addrComplete,
       missing: addrComplete ? [] : missingOrHint(addressMissing, "Review address"),
     },
     {
-      label: "Bank — at least one saved account with all required fields",
+      label: "Bank: at least one saved account with all required fields",
       complete: bankComplete,
       missing: bankComplete ? [] : missingOrHint(bankMissing, "Add a bank account in Bank details"),
     },

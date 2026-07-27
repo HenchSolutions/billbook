@@ -30,11 +30,11 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function contactDisplay(b: AdminBusinessListItem): string {
   const c = b.contactNo?.trim();
-  return c || "—";
+  return c || "-";
 }
 
 function ValidityCell({ validityEnd }: { validityEnd: string | null }) {
-  if (!validityEnd) return <span className="text-muted-foreground">—</span>;
+  if (!validityEnd) return <span className="text-muted-foreground">-</span>;
   const end = Date.parse(validityEnd);
   if (!Number.isFinite(end)) return <span>{validityEnd}</span>;
   const now = Date.now();
@@ -185,7 +185,7 @@ export default function AdminBusinessesPage() {
                           </code>
                         </td>
                         <td className="max-w-[180px] truncate px-4 py-3.5 text-muted-foreground">
-                          {b.ownerName?.trim() || "—"}
+                          {b.ownerName?.trim() || "-"}
                         </td>
                         <td className="max-w-[160px] truncate px-4 py-3.5 text-muted-foreground">
                           {contactDisplay(b)}

@@ -2072,7 +2072,7 @@ export function useInvoiceCreateState(
   const handleItemCreated = useCallback((createdItem: { name: string }) => {
     setStockSearchText(createdItem.name);
     setStockSearchOpen(true);
-    showSuccessToast("Item added — add stock to sell it");
+    showSuccessToast("Item added. Add stock to sell it");
   }, []);
 
   return {

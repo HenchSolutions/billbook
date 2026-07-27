@@ -22,10 +22,10 @@ import { dashboardToNumber, resolveDashboardMarginDisplay } from "@/lib/business
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const MARGIN_HINT =
-  "Gross margin from finalized sale and purchase invoices (and expenses as returned by the API) for the selected scope — this month, all time, or a custom date range.";
+  "Gross margin from finalized sale and purchase invoices (and expenses as returned by the API) for the selected scope: this month, all time, or a custom date range.";
 
 const PROFIT_HINT =
-  "Profit for the selected scope per server rules; uses finalized invoices — open Reports for registers and exports.";
+  "Profit for the selected scope per server rules; uses finalized invoices. Open Reports for registers and exports.";
 
 type KpiTone =
   | "today-sales"
@@ -202,7 +202,7 @@ export function DashboardHomeKpis({ dashboard, periodMode }: DashboardHomeKpisPr
   const marginStr = resolveDashboardMarginDisplay(dashboard);
   const profitRaw = dashboard.monthProfit;
   const profitNum = profitRaw != null && profitRaw !== "" ? dashboardToNumber(profitRaw) : null;
-  const profitStr = profitRaw != null && profitRaw !== "" ? formatCurrency(profitRaw) : "—";
+  const profitStr = profitRaw != null && profitRaw !== "" ? formatCurrency(profitRaw) : "-";
 
   let profitTone: KpiTone = "profit-neutral";
   let profitKind: MetricKind = "profit-neutral";
@@ -216,9 +216,9 @@ export function DashboardHomeKpis({ dashboard, periodMode }: DashboardHomeKpisPr
     }
   }
 
-  const todayStr = today != null && today !== "" ? formatCurrency(today) : "—";
-  const marginToneResolved: KpiTone = marginStr === "—" ? "profit-neutral" : "margin";
-  const marginKind: MetricKind = marginStr === "—" ? "empty" : "margin";
+  const todayStr = today != null && today !== "" ? formatCurrency(today) : "-";
+  const marginToneResolved: KpiTone = marginStr === "-" ? "profit-neutral" : "margin";
+  const marginKind: MetricKind = marginStr === "-" ? "empty" : "margin";
 
   const salesLabel = isOverall ? "Total sales" : isCustom ? "Period sales" : "Month sales";
   const purchaseLabel = isOverall
@@ -232,8 +232,8 @@ export function DashboardHomeKpis({ dashboard, periodMode }: DashboardHomeKpisPr
   const purchaseTone: KpiTone = hasPurchase ? "purchase" : "default";
   const purchaseKind: MetricKind = hasPurchase ? "purchase" : "empty";
 
-  const todayTone: KpiTone = todayStr === "—" ? "default" : "today-sales";
-  const todayKind: MetricKind = todayStr === "—" ? "empty" : "today-sales";
+  const todayTone: KpiTone = todayStr === "-" ? "default" : "today-sales";
+  const todayKind: MetricKind = todayStr === "-" ? "empty" : "today-sales";
 
   return (
     <section>
@@ -247,7 +247,7 @@ export function DashboardHomeKpis({ dashboard, periodMode }: DashboardHomeKpisPr
         />
         <Kpi
           label={purchaseLabel}
-          value={hasPurchase ? formatCurrency(monthPurchase) : "—"}
+          value={hasPurchase ? formatCurrency(monthPurchase) : "-"}
           tone={purchaseTone}
           metricKind={purchaseKind}
         />

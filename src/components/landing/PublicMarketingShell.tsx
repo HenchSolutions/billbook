@@ -8,7 +8,7 @@ interface PublicMarketingShellProps {
 }
 
 /**
- * Shared chrome for marketing subpages (legal, contact, help) — matches the
+ * Shared chrome for marketing subpages (legal, contact, help). matches the
  * landing look without duplicating the home hero.
  */
 export function PublicMarketingShell({ children }: PublicMarketingShellProps) {

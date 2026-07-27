@@ -241,7 +241,7 @@ export default function PayablesRegisterPage() {
                       colSpan={2}
                       className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground"
                     >
-                      Total — {rowCount} {rowCount === 1 ? "party" : "parties"}
+                      Total: {rowCount} {rowCount === 1 ? "party" : "parties"}
                     </td>
                     <td
                       className={cn(

@@ -1,7 +1,7 @@
 import type { OutboundPaymentCategory } from "@/types/outbound-payment";
 
 export const OUTBOUND_CATEGORY_LABELS: Record<OutboundPaymentCategory, string> = {
-  SALE_RETURN_REFUND: "Refund — sale return",
+  SALE_RETURN_REFUND: "Refund: sale return",
   PARTY_PAYMENT: "Pay supplier",
   EXPENSE: "Expense / other",
 };

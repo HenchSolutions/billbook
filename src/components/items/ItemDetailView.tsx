@@ -142,7 +142,7 @@ export function ItemDetailView({ id }: { id: number }) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Unit
                 </p>
-                <p className="mt-2 font-medium text-foreground">{item.unit || "—"}</p>
+                <p className="mt-2 font-medium text-foreground">{item.unit || "-"}</p>
               </CardContent>
             </Card>
             <Card>
@@ -151,7 +151,7 @@ export function ItemDetailView({ id }: { id: number }) {
                   HSN / SAC
                 </p>
                 <p className="financial-id mt-2 text-sm font-medium text-foreground">
-                  {item.hsnCode || item.sacCode || "—"}
+                  {item.hsnCode || item.sacCode || "-"}
                 </p>
               </CardContent>
             </Card>
@@ -242,7 +242,7 @@ export function ItemDetailView({ id }: { id: number }) {
                                 title={m.notes?.trim() || undefined}
                               >
                                 <span className="line-clamp-2 break-words">
-                                  {m.notes?.trim() ? m.notes : "—"}
+                                  {m.notes?.trim() ? m.notes : "-"}
                                 </span>
                               </td>
                             </tr>

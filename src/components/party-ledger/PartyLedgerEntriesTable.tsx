@@ -44,7 +44,7 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
                   entry.debitAmount && "font-medium text-red-600",
                 )}
               >
-                {entry.debitAmount ? formatCurrency(entry.debitAmount) : "—"}
+                {entry.debitAmount ? formatCurrency(entry.debitAmount) : "-"}
               </td>
               <td
                 className={cn(
@@ -53,7 +53,7 @@ export function PartyLedgerEntriesTable({ entries, variant }: PartyLedgerEntries
                   entry.creditAmount && "font-medium text-emerald-600",
                 )}
               >
-                {entry.creditAmount ? formatCurrency(entry.creditAmount) : "—"}
+                {entry.creditAmount ? formatCurrency(entry.creditAmount) : "-"}
               </td>
               <td className="data-table-td data-table-col-numeric">
                 <LedgerBalanceText

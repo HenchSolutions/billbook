@@ -84,7 +84,7 @@ export function InvoiceSummaryCards({
               <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {partyHeading}
               </p>
-              <p className="font-semibold">{invoice.partyName ?? "—"}</p>
+              <p className="font-semibold">{invoice.partyName ?? "-"}</p>
               {invoice.partyPhone ? (
                 <p className="mt-1.5 text-sm tabular-nums text-muted-foreground">
                   {invoice.partyPhone}
@@ -128,7 +128,7 @@ export function InvoiceSummaryCards({
                     showOverdueOnDates && "text-destructive",
                   )}
                 >
-                  {invoice.dueDate ? formatDate(invoice.dueDate) : "—"}
+                  {invoice.dueDate ? formatDate(invoice.dueDate) : "-"}
                 </span>
                 {showOverdueOnDates && invoice.overdueDays && invoice.overdueDays > 0 && (
                   <span className="ml-1 text-xs text-destructive">
@@ -171,7 +171,7 @@ export function InvoiceSummaryCards({
                 )}
               >
                 {isCancelled
-                  ? "Not owed — cancelled"
+                  ? "Not owed (cancelled)"
                   : isFullyPaid
                     ? "Paid in full"
                     : formatCurrency(balanceDue)}

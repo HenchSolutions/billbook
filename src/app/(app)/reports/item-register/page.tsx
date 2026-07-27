@@ -103,7 +103,7 @@ export default function ItemRegisterPage() {
         <div>
           <h2 className="text-base font-semibold">Stock by item</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            One row per item — total quantity and value.
+            One row per item. total quantity and value.
           </p>
         </div>
         <SearchInput

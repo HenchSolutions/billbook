@@ -26,7 +26,7 @@ interface StockSearchPopoverProps {
   onSearchChange: (value: string) => void;
   /** Button label when not using `inputTrigger` (stock picker / catalog button mode). */
   triggerLabel?: React.ReactNode;
-  /** Purchase catalog: text field as trigger — typing filters; popover lists matches (no duplicate search inside). */
+  /** Purchase catalog: text field as trigger. typing filters; popover lists matches (no duplicate search inside). */
   inputTrigger?: boolean;
   /** Narrower trigger (e.g. purchase line layout). */
   triggerClassName?: string;

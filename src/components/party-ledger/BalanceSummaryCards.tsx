@@ -51,7 +51,7 @@ export function BalanceSummaryCards({
       <p className="text-[11px] leading-snug text-muted-foreground">
         These amounts are calculated from this party’s invoices, receipts, credits, and opening
         balance. If you entered an opening balance when creating the party, it is already part of
-        receivable or advance—do not add it again separately.
+        receivable or advance. Do not add it again separately.
       </p>
     </div>
   );

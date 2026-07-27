@@ -9,7 +9,7 @@ type TrialExpiredOverlayProps = {
 
 /**
  * Blocks the main app when the business validity end is in the past (client clock).
- * Mutations may still return TRIAL_EXPIRED — handle those with toasts as well.
+ * Mutations may still return TRIAL_EXPIRED. handle those with toasts as well.
  */
 export function TrialExpiredOverlay({ validityEnd }: TrialExpiredOverlayProps) {
   if (!isValidityPeriodEnded(validityEnd)) return null;

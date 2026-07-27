@@ -131,9 +131,8 @@ export interface InvoiceMarkCommunicationResponse {
   };
   delivery: {
     channel: InvoiceCommunicationChannel | string;
-    outcome: "sent" | "already_recorded_today" | "skipped_integration_pending";
+    outcome: "sent" | "already_recorded_today" | "failed";
     to?: string;
-    messagePreview?: string;
     message?: string;
   };
 }

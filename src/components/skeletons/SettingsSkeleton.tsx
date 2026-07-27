@@ -4,9 +4,9 @@ type SettingsSkeletonVariant = "settings" | "profile" | "compact";
 
 interface SettingsSkeletonProps {
   /**
-   * `settings` — Business settings (org card + personal block).
-   * `profile` — My profile with header actions (wider form stack).
-   * `compact` — Single tall panel (legacy fallback).
+   * `settings`. Business settings (org card + personal block).
+   * `profile`. My profile with header actions (wider form stack).
+   * `compact`. Single tall panel (legacy fallback).
    */
   variant?: SettingsSkeletonVariant;
 }

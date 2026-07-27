@@ -172,7 +172,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
                   disabled={readOnly}
                   rows={4}
                   className="min-h-[7.5rem] resize-y"
-                  placeholder="Optional — what this role is for"
+                  placeholder="Optional: what this role is for"
                 />
               </div>
               <div className="lg:col-start-1 lg:row-start-2">
@@ -237,7 +237,7 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
             <AlertDialogTitle>Delete this role group?</AlertDialogTitle>
             <AlertDialogDescription>
               This cannot be undone. If anyone is still assigned to this group, move them to another
-              role first—then you can delete it.
+              role first. Then you can delete it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

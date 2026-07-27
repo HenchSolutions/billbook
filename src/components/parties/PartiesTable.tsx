@@ -98,12 +98,12 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                     </Badge>
                   )}
                 </td>
-                <td className="data-table-td text-muted-foreground">{party.phone || "—"}</td>
+                <td className="data-table-td text-muted-foreground">{party.phone || "-"}</td>
                 <td className="data-table-td hidden font-mono text-xs text-muted-foreground md:table-cell">
-                  {party.gstin || "—"}
+                  {party.gstin || "-"}
                 </td>
                 <td className="data-table-td hidden text-muted-foreground md:table-cell">
-                  {party.state || "—"}
+                  {party.state || "-"}
                 </td>
                 <td className="data-table-td data-table-col-numeric">
                   {loading ? (
@@ -111,7 +111,7 @@ export function PartiesTable({ parties, onEdit, onLedger, showLedger = true }: P
                   ) : value ? (
                     <LedgerBalanceText value={value} size="sm" align="end" tagStyle="abbrev" />
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </td>
                 <td className="data-table-td">

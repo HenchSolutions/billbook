@@ -110,7 +110,7 @@ export default function PartyLedgerPage() {
   return (
     <div className="page-container animate-fade-in">
       <PageHeader
-        title={`${partyLabelTitle} account — ${party.name}`}
+        title={`${partyLabelTitle} account: ${party.name}`}
         backHref={backTo}
         backLabel={backLabel}
       />
@@ -137,7 +137,7 @@ export default function PartyLedgerPage() {
           </Link>
           . Leave it unallocated until you use{" "}
           <span className="font-medium text-foreground">Allocate to invoices</span>, like any other
-          receipt. You will not see a separate cash line for that opening amount—only the opening
+          receipt. You will not see a separate cash line for that opening amount. Only the opening
           entry in the list below.
         </p>
       )}

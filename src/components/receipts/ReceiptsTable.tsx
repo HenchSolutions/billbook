@@ -63,7 +63,7 @@ export function ReceiptsTable({
                       </Link>
                     </td>
                     <td className="data-table-td max-w-[180px] truncate px-4 text-muted-foreground">
-                      {r.partyName ?? "—"}
+                      {r.partyName ?? "-"}
                     </td>
                     <td className="data-table-td px-4 text-muted-foreground">
                       {formatDate(r.receivedAt || r.createdAt)}
@@ -87,7 +87,7 @@ export function ReceiptsTable({
                           {formatCurrency(String(openingTag))}
                         </span>
                       ) : (
-                        "—"
+                        "-"
                       )}
                     </td>
                     <td className="data-table-td data-table-col-numeric px-4">
@@ -96,7 +96,7 @@ export function ReceiptsTable({
                           {formatCurrency(String(unalloc))}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </td>
                     <td className="data-table-td px-4 text-center">

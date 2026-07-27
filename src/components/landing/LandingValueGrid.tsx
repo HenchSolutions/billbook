@@ -7,7 +7,7 @@ export function LandingValueGrid() {
       <div className="marketing-container py-14">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground">
-            More than billing — operational clarity
+            More than billing: operational clarity
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             Practical features that make day-to-day work smoother for owners and teams.
@@ -46,7 +46,7 @@ export function LandingValueGrid() {
             {
               title: "Communication logs",
               icon: MessageCircle,
-              desc: "Track WhatsApp share logs and balance reminder emails on invoices.",
+              desc: "Send invoices on WhatsApp and balance reminder emails from invoice screens.",
             },
             {
               title: "Secure by default",

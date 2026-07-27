@@ -149,7 +149,7 @@ export default function PurchaseRegisterPage() {
         formatDate(inv.invoiceDate),
         inv.invoiceNumber,
         invoiceTypeRegisterLabel(inv.invoiceType),
-        inv.partyName ?? "—",
+        inv.partyName ?? "-",
         formatCurrency(String(money.total)),
         formatCurrency(String(money.paid)),
         formatCurrency(String(money.balance)),
@@ -317,7 +317,7 @@ export default function PurchaseRegisterPage() {
                 {rows.length === 0 ? (
                   <ReportRegisterEmptyRow
                     colSpan={8}
-                    message="No posted purchase documents in this range. Adjust filters or dates — drafts stay in workflow until finalized."
+                    message="No posted purchase documents in this range. Adjust filters or dates. drafts stay in workflow until finalized."
                   />
                 ) : (
                   rows.map((inv) => {
@@ -339,7 +339,7 @@ export default function PurchaseRegisterPage() {
                           </Link>
                         </td>
                         <td className={rr.tdMuted}>{invoiceTypeRegisterLabel(inv.invoiceType)}</td>
-                        <td className={rr.td}>{inv.partyName ?? "—"}</td>
+                        <td className={rr.td}>{inv.partyName ?? "-"}</td>
                         <td
                           className={cn(
                             rr.tdRight,

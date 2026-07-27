@@ -71,7 +71,7 @@ export default function PaymentDialog({ open, onOpenChange, invoiceId, balanceDu
     },
   });
 
-  // Only reset when the dialog opens — not when balanceDue changes after submit (invalidation
+  // Only reset when the dialog opens. not when balanceDue changes after submit (invalidation
   // refetches invoice and would otherwise clear the success screen and show the form again).
   useEffect(() => {
     const justOpened = open && !wasOpenRef.current;
@@ -130,7 +130,7 @@ export default function PaymentDialog({ open, onOpenChange, invoiceId, balanceDu
             </DialogHeader>
             <div className="space-y-3 text-sm">
               <p>
-                <span className="font-medium">{successReceipt.receipt.receiptNumber}</span> — total{" "}
+                <span className="font-medium">{successReceipt.receipt.receiptNumber}</span>, total{" "}
                 {formatCurrency(successReceipt.receipt.totalAmount)}
               </p>
               <p className="text-muted-foreground">
@@ -143,8 +143,8 @@ export default function PaymentDialog({ open, onOpenChange, invoiceId, balanceDu
                 <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-950">
                   <p className="font-medium">Party advance on this receipt</p>
                   <p className="mt-1 tabular-nums">
-                    {formatCurrency(successReceipt.receipt.unallocatedAmount)} unallocated —
-                    allocate to other invoices from the receipt.
+                    {formatCurrency(successReceipt.receipt.unallocatedAmount)} unallocated. allocate
+                    to other invoices from the receipt.
                   </p>
                   <Button className="mt-3" variant="secondary" size="sm" asChild>
                     <Link href={`/receipts/${successReceipt.receipt.id}`}>Open receipt</Link>

@@ -69,13 +69,13 @@ export function ItemsTable({ items, onEdit, onViewLedger }: ItemsTableProps) {
                 </span>
               </td>
               <td className="data-table-td align-middle text-muted-foreground">
-                {item.unit || "—"}
+                {item.unit || "-"}
               </td>
               <td className="data-table-td hidden align-middle text-muted-foreground md:table-cell">
                 <span className="text-xs">{getItemTaxDisplay(item)}</span>
               </td>
               <td className="data-table-td hidden align-middle text-xs text-muted-foreground lg:table-cell">
-                <span className="financial-id">{item.hsnCode || item.sacCode || "—"}</span>
+                <span className="financial-id">{item.hsnCode || item.sacCode || "-"}</span>
               </td>
               <td className="data-table-td text-right align-middle">
                 <div
