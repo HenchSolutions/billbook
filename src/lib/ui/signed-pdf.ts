@@ -32,8 +32,8 @@ function filenameStem(cdOrFallback: string, fallback: string): string {
 }
 
 /**
- * HTML invoices: opens the browser print dialog (Save as PDF) via a hidden iframe.
- * Binary PDF: triggers a direct download.
+ * HTML invoices: convert to A4 PDF and download (no browser print dialog /
+ * headers). Binary PDF: download as-is (normalized to A4 when possible).
  */
 export async function downloadFileFromUrlAndOpenPdfPreview(
   url: string,

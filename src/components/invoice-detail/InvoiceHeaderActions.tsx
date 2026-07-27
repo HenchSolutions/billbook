@@ -315,8 +315,8 @@ export function InvoiceHeaderActions({
             variant="outline"
             size="sm"
             onClick={onOpenPdf}
-            title="If the document is a PDF, downloads and opens a preview. For HTML invoices, opens print. Choose Save as PDF."
-            aria-label="Download or save invoice as PDF"
+            title="Download invoice as PDF"
+            aria-label="Download invoice as PDF"
           >
             <Download className="h-3.5 w-3.5" />
             PDF
