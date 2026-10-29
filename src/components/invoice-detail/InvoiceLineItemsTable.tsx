@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate, formatQuantity } from "@/lib/core/utils";
 import type { InvoiceItem, InvoiceType } from "@/types/invoice";
+import { InvoiceDetailSection } from "./InvoiceDetailSection";
 
 interface InvoiceLineItemsTableProps {
   items: InvoiceItem[];
@@ -36,15 +36,12 @@ export function InvoiceLineItemsTable({
   const showSellingPriceColumn = invoiceType === "PURCHASE_INVOICE";
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-foreground">Items</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {items.length === 0 ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">No items.</p>
-        ) : (
-          <div className="data-table-container">
+    <InvoiceDetailSection className="mb-5" title="Items" bodyClassName="px-0 py-0">
+      {items.length === 0 ? (
+        <p className="px-5 py-6 text-center text-sm text-muted-foreground">No items.</p>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
@@ -136,23 +133,16 @@ export function InvoiceLineItemsTable({
                   );
                 })}
               </tbody>
-              <tfoot>
-                <tr className="border-t bg-muted/40 font-semibold text-foreground">
-                  <td
-                    colSpan={isPurchaseBill ? 8 : 6}
-                    className="whitespace-nowrap px-4 py-3 pl-4 text-left"
-                  >
-                    Total
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
-                    {formatCurrency(totalLineAmount)}
-                  </td>
-                </tr>
-              </tfoot>
             </table>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className="flex items-center justify-between border-t border-border/60 px-5 py-3">
+            <span className="text-sm text-muted-foreground">Total</span>
+            <span className="text-sm font-semibold tabular-nums text-foreground">
+              {formatCurrency(totalLineAmount)}
+            </span>
+          </div>
+        </>
+      )}
+    </InvoiceDetailSection>
   );
 }

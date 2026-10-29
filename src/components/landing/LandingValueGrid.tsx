@@ -19,7 +19,7 @@ export function LandingValueGrid() {
             { value: "₹0", label: "Free to start" },
             { value: "< 2 min", label: "First invoice" },
             { value: "8+", label: "Report registers" },
-            { value: "100%", label: "Audit-tracked" },
+            { value: "4", label: "Invoice types" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -51,7 +51,7 @@ export function LandingValueGrid() {
             {
               title: "Secure by default",
               icon: ShieldCheck,
-              desc: "Clear access boundaries and safer workflows.",
+              desc: "Role-based access for your team, hashed passwords and OTP email verification.",
             },
             {
               title: "Transparent records",

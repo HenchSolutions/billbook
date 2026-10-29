@@ -209,7 +209,11 @@ export default function ReceiptRegisterPage() {
   const limit = DEFAULT_REPORT_LIMIT;
   const [allocDialogReceiptId, setAllocDialogReceiptId] = useState<number | null>(null);
 
-  const { data, isPending, error } = useReceiptRegister(validStartDate, validEndDate, limit);
+  const { data, isPending, error, refetch, isRefetching } = useReceiptRegister(
+    validStartDate,
+    validEndDate,
+    limit,
+  );
   const { data: allocDetail, isPending: allocPending } = useReceipt(
     allocDialogReceiptId ?? undefined,
   );
@@ -309,7 +313,12 @@ export default function ReceiptRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportReceiptRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportReceiptRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterSearchCard>
         <ReportRegisterSearchLayout

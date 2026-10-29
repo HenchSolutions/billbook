@@ -4,3 +4,4 @@ export { InvoiceDetailsCards } from "./InvoiceDetailsCards";
 export { InvoiceLineItemsTable } from "./InvoiceLineItemsTable";
 export { InvoicePaymentsTable } from "./InvoicePaymentsTable";
 export { InvoiceAuditHistory } from "./InvoiceAuditHistory";
+export { InvoiceDetailSection } from "./InvoiceDetailSection";

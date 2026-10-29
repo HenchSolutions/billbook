@@ -82,7 +82,7 @@ export default function InvoiceRegisterPage() {
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const limit = DEFAULT_REPORT_LIMIT;
 
-  const { data, isPending, error } = useInvoiceRegister(
+  const { data, isPending, error, refetch, isRefetching } = useInvoiceRegister(
     validStartDate,
     validEndDate,
     limit,
@@ -172,7 +172,12 @@ export default function InvoiceRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportInvoiceRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportInvoiceRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterSearchCard>
         <ReportRegisterSearchLayout

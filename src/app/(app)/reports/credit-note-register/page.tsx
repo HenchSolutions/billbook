@@ -35,7 +35,11 @@ export default function CreditNoteRegisterPage() {
   } = useRegisterDateRange();
 
   const limit = DEFAULT_REPORT_LIMIT;
-  const { data, isPending, error } = useCreditNoteRegister(validStartDate, validEndDate, limit);
+  const { data, isPending, error, refetch, isRefetching } = useCreditNoteRegister(
+    validStartDate,
+    validEndDate,
+    limit,
+  );
 
   const rows = useMemo(() => data?.creditNotes ?? [], [data?.creditNotes]);
   const rowCount = rows.length;
@@ -85,7 +89,12 @@ export default function CreditNoteRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportCreditNoteRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportCreditNoteRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterFilterCard className="py-2.5">
         <DateRangePicker

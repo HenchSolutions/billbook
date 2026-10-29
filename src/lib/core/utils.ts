@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { parseISODateString } from "@/lib/core/date";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,7 +45,10 @@ export function humanizeApiEnum(value: string | null | undefined): string {
 export function formatNumber(value: string | number): string {
   const num = typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value;
   if (isNaN(num)) return "0.00";
-  return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**
@@ -57,7 +61,10 @@ export function formatQuantity(value: string | number): string {
   if (Number.isInteger(num)) {
     return num.toLocaleString("en-IN", { maximumFractionDigits: 0 });
   }
-  return num.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  return num.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**
@@ -74,6 +81,8 @@ export function formatStockQuantity(value: string | number): string {
  * Handles comma-separated strings from the API.
  */
 export function formatCurrency(value: string | number): string {
+  const num = typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value;
+  if (!isNaN(num) && num < 0) return `-₹${formatNumber(Math.abs(num))}`;
   return `₹${formatNumber(value)}`;
 }
 
@@ -101,13 +110,20 @@ export function buildQueryString(
 
 /**
  * Format a date string (ISO date or datetime) to human-readable format (e.g., "16 Feb 2026").
+ * Bare `YYYY-MM-DD` calendar dates are parsed as local dates (not UTC) so the displayed day never
+ * shifts across timezones; full ISO timestamps are parsed normally.
  */
 export function formatDate(dateString: string | undefined | null): string {
   if (!dateString) return "-";
   try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "-";
-    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    const isCalendarDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+    const date = isCalendarDateOnly ? parseISODateString(dateString) : new Date(dateString);
+    if (!date || isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return "-";
   }
@@ -121,7 +137,10 @@ export function formatTime(dateString: string | undefined | null): string {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
-    return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   } catch {
     return "-";
   }
@@ -135,7 +154,10 @@ export function formatMonthYear(dateString: string | undefined | null): string {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
-    return date.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+    return date.toLocaleDateString("en-IN", {
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return "-";
   }

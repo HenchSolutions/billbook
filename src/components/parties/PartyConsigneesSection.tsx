@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
+import { MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,18 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import {
   useCreatePartyConsignee,
   useDeletePartyConsignee,
@@ -221,7 +213,10 @@ function ConsigneeEditorDialog({
 
   const onSubmit = async (data: ConsigneeFormData) => {
     if (!data.consigneeName.trim()) {
-      setError("consigneeName", { type: "manual", message: "Contact name is required" });
+      setError("consigneeName", {
+        type: "manual",
+        message: "Contact name is required",
+      });
       return;
     }
     if (!data.address.trim()) {
@@ -232,7 +227,10 @@ function ConsigneeEditorDialog({
     const body = buildConsigneePayload(data);
     try {
       if (isEdit && consignee) {
-        await updateMutation.mutateAsync({ consigneeId: consignee.id, data: body });
+        await updateMutation.mutateAsync({
+          consigneeId: consignee.id,
+          data: body,
+        });
         showSuccessToast(L.toastUpdated);
       } else {
         await createMutation.mutateAsync(body);
@@ -254,7 +252,10 @@ function ConsigneeEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
+        preventClose={isSubmitting || pending}
+      >
         <DialogHeader>
           <DialogTitle>{isEdit ? L.editDialogTitle : L.addDialogTitle}</DialogTitle>
         </DialogHeader>
@@ -337,13 +338,22 @@ function ConsigneeEditorDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting || pending}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || pending}>
-              {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <LoadingButton
+              type="submit"
+              loading={pending}
+              loadingLabel={isEdit ? "Saving..." : "Adding..."}
+              disabled={isSubmitting}
+            >
               {isEdit ? "Save" : "Add"}
-            </Button>
+            </LoadingButton>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -477,32 +487,22 @@ export function PartyConsigneesSection({
         partyType={partyType}
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{L.deleteTitle}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleteTarget
-                ? L.deleteDescription(deleteTarget.label || deleteTarget.consigneeName)
-                : null}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                const id = deleteTarget?.id;
-                if (id != null) void confirmDelete(id);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onConfirm={() => {
+          const id = deleteTarget?.id;
+          if (id != null) void confirmDelete(id);
+        }}
+        title={L.deleteTitle}
+        description={
+          deleteTarget ? L.deleteDescription(deleteTarget.label || deleteTarget.consigneeName) : ""
+        }
+        confirmText="Remove"
+        variant="destructive"
+        confirming={deleteMutation.isPending}
+        confirmingText="Removing..."
+      />
     </div>
   );
 }

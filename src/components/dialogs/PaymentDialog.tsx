@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -21,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
 import { useRecordPayment } from "@/hooks/use-invoices";
 import { PAYMENT_METHOD_OPTIONS } from "@/constants";
 import type { PaymentMethod } from "@/types/invoice";
@@ -122,7 +122,7 @@ export default function PaymentDialog({ open, onOpenChange, invoiceId, balanceDu
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" preventClose={isSubmitting || mutation.isPending}>
         {successReceipt ? (
           <>
             <DialogHeader>
@@ -200,13 +200,22 @@ export default function PaymentDialog({ open, onOpenChange, invoiceId, balanceDu
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleClose(false)}
+                  disabled={isSubmitting || mutation.isPending}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting || mutation.isPending}>
-                  {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <LoadingButton
+                  type="submit"
+                  loading={mutation.isPending}
+                  loadingLabel="Recording..."
+                  disabled={isSubmitting}
+                >
                   Record Payment
-                </Button>
+                </LoadingButton>
               </DialogFooter>
             </form>
           </>

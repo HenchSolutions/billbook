@@ -22,7 +22,10 @@ export default function CreditNotes() {
   const router = useRouter();
   const { page, setPage } = usePagination();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, isPending, error } = useCreditNotes({ page, pageSize: PAGE_SIZE });
+  const { data, isPending, error, refetch, isRefetching } = useCreditNotes({
+    page,
+    pageSize: PAGE_SIZE,
+  });
   const { canCreateInvoice, businessProfile } = useCanCreateInvoice();
   const allowNewCreditNote = canCreateInvoice === true;
 
@@ -59,7 +62,12 @@ export default function CreditNotes() {
         </div>
       ) : null}
 
-      <ErrorBanner error={error} fallbackMessage="Failed to load credit notes" />
+      <ErrorBanner
+        error={error}
+        fallbackMessage="Failed to load credit notes"
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       {isPending ? (
         <TableSkeleton rows={3} />

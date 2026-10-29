@@ -1,5 +1,4 @@
 import { History } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   buildAuditHighlightParams,
   getAuditActivityTitle,
@@ -8,6 +7,7 @@ import {
 } from "@/lib/data/audit-log";
 import { formatDate, formatTime } from "@/lib/core/utils";
 import type { AuditLog } from "@/types/audit-log";
+import { InvoiceDetailSection } from "./InvoiceDetailSection";
 
 interface InvoiceAuditHistoryProps {
   logs: AuditLog[];
@@ -42,51 +42,52 @@ export function InvoiceAuditHistory({ logs }: InvoiceAuditHistoryProps) {
   const entries = deduplicateLogs(logs);
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <History className="h-4 w-4" />
+    <InvoiceDetailSection
+      className="mb-5"
+      title={
+        <span className="inline-flex items-center gap-2">
+          <History className="h-4 w-4 text-muted-foreground" />
           Activity
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pb-4">
-        <ol className="space-y-0 divide-y divide-border">
-          {entries.map((log) => {
-            const invoiceCtx = resolveInvoiceAuditDisplayContext(logs, log);
-            const title = getAuditActivityTitle(log, invoiceCtx);
-            const highlight = log.collapsedCount
-              ? ""
-              : getAuditChangeHighlights(log.changes, buildAuditHighlightParams(log, invoiceCtx));
-            const date = formatDate(log.createdAt);
-            const timeRaw = formatTime(log.createdAt);
-            const time = timeRaw === "-" ? "" : timeRaw;
+        </span>
+      }
+      bodyClassName="px-0 py-0"
+    >
+      <ol className="divide-y divide-border/50">
+        {entries.map((log) => {
+          const invoiceCtx = resolveInvoiceAuditDisplayContext(logs, log);
+          const title = getAuditActivityTitle(log, invoiceCtx);
+          const highlight = log.collapsedCount
+            ? ""
+            : getAuditChangeHighlights(log.changes, buildAuditHighlightParams(log, invoiceCtx));
+          const date = formatDate(log.createdAt);
+          const timeRaw = formatTime(log.createdAt);
+          const time = timeRaw === "-" ? "" : timeRaw;
 
-            return (
-              <li key={log.id} className="py-3 first:pt-0 last:pb-0">
-                <div className="min-w-0 space-y-0.5">
-                  <p className="text-sm leading-snug text-foreground">{title}</p>
+          return (
+            <li key={log.id} className="px-5 py-3.5">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm leading-snug text-foreground">{title}</p>
 
-                  {log.collapsedCount && log.collapsedCount > 1 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{log.collapsedCount - 1} more edit{log.collapsedCount - 1 !== 1 ? "s" : ""}{" "}
-                      on this day
-                    </p>
-                  )}
-
-                  {!log.collapsedCount && highlight && (
-                    <p className="whitespace-pre-line text-xs text-muted-foreground">{highlight}</p>
-                  )}
-
-                  <p className="text-xs text-muted-foreground/70">
-                    {date}
-                    {time && <span className="ml-1">{time}</span>}
+                {log.collapsedCount && log.collapsedCount > 1 ? (
+                  <p className="text-xs text-muted-foreground">
+                    +{log.collapsedCount - 1} more edit
+                    {log.collapsedCount - 1 !== 1 ? "s" : ""} on this day
                   </p>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-      </CardContent>
-    </Card>
+                ) : null}
+
+                {!log.collapsedCount && highlight ? (
+                  <p className="whitespace-pre-line text-xs text-muted-foreground">{highlight}</p>
+                ) : null}
+
+                <p className="text-xs text-muted-foreground/70">
+                  {date}
+                  {time ? <span className="ml-1">{time}</span> : null}
+                </p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </InvoiceDetailSection>
   );
 }

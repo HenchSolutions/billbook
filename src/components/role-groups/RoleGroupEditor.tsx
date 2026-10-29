@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import { PermissionCatalogTree } from "@/components/role-groups/PermissionCatalogTree";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -20,15 +22,6 @@ import {
 } from "@/hooks/use-role-groups";
 import { usePermissions } from "@/hooks/use-permissions";
 import { showErrorToast, showSuccessToast } from "@/lib/ui/toast-helpers";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { buildPageAccessCatalog, PAGE } from "@/constants/page-access";
 
 interface RoleGroupEditorProps {
@@ -210,10 +203,13 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
         {canManage ? (
           <div className="flex flex-col gap-4 border-t border-border/60 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <LoadingButton
+                type="submit"
+                loading={saving}
+                loadingLabel={isCreate ? "Creating..." : "Saving..."}
+              >
                 {isCreate ? "Create role group" : "Save changes"}
-              </Button>
+              </LoadingButton>
               <Button type="button" variant="outline" asChild>
                 <Link href="/settings/role-groups">Cancel</Link>
               </Button>
@@ -231,28 +227,17 @@ export function RoleGroupEditor({ roleGroupId }: RoleGroupEditorProps) {
         )}
       </form>
 
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this role group?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This cannot be undone. If anyone is still assigned to this group, move them to another
-              role first. Then you can delete it.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={() => void onDelete()}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={() => void onDelete()}
+        title="Delete this role group?"
+        description="This cannot be undone. If anyone is still assigned to this group, move them to another role first. Then you can delete it."
+        confirmText="Delete"
+        variant="destructive"
+        confirming={deleteMutation.isPending}
+        confirmingText="Deleting..."
+      />
     </div>
   );
 }

@@ -371,6 +371,8 @@ export default function CreditNoteDetailPage() {
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={() => void confirmDelete()}
+        confirming={deleteMutation.isPending}
+        confirmingText="Deleting..."
         title="Delete credit note"
         description="This removes the customer credit and archives the credit note. You can only delete when it isn’t applied to any sale invoices."
         confirmText="Delete"

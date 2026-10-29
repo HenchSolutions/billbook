@@ -451,14 +451,20 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
                             e.preventDefault();
                             e.stopPropagation();
                             if (readOnly) return;
-                            setTemplatePreviewModal({ title: optionLabel, html: previewHtml });
+                            setTemplatePreviewModal({
+                              title: optionLabel,
+                              html: previewHtml,
+                            });
                           }}
                           onKeyDown={(e) => {
                             if (readOnly) return;
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
                               e.stopPropagation();
-                              setTemplatePreviewModal({ title: optionLabel, html: previewHtml });
+                              setTemplatePreviewModal({
+                                title: optionLabel,
+                                html: previewHtml,
+                              });
                             }
                           }}
                           aria-label={`Open ${optionLabel} preview`}
@@ -806,7 +812,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
           Only the business <strong>owner</strong> can change document numbering.
         </p>
       ) : (
-        <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-background/95 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="sticky bottom-20 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-background/95 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80 md:bottom-3">
           <Button
             type="button"
             variant="outline"
@@ -838,7 +844,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
       open={templatePreviewModal != null}
       onOpenChange={(open) => !open && setTemplatePreviewModal(null)}
     >
-      <DialogContent className="max-w-[min(96vw,1100px)]">
+      <DialogContent className="w-[min(calc(100vw-2rem),1100px)] max-w-[min(calc(100vw-2rem),1100px)]">
         <DialogHeader>
           <DialogTitle>{templatePreviewModal?.title ?? "Template preview"}</DialogTitle>
         </DialogHeader>
@@ -847,7 +853,7 @@ export function DocumentNumberingCard({ embedded = false }: DocumentNumberingCar
             <iframe
               title={`${templatePreviewModal.title} large preview`}
               srcDoc={templatePreviewModal.html}
-              className="h-[78vh] min-h-[540px] w-full"
+              className="h-[min(70dvh,78vh)] min-h-64 w-full sm:min-h-[540px]"
             />
           </div>
         ) : null}

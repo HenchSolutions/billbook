@@ -56,12 +56,15 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
   } = useInvoicesListFilters();
 
   const partyType = isSalesFamily(invoiceType) ? "CUSTOMER" : "SUPPLIER";
-  const { data: partiesData } = useParties({ type: partyType, includeInactive: false });
+  const { data: partiesData } = useParties({
+    type: partyType,
+    includeInactive: false,
+  });
   const { canCreateInvoice, businessProfile } = useCanCreateInvoice();
   const parties = (partiesData?.parties ?? []).filter((p) => p.isActive);
   const allowCreate = canCreateInvoice === true;
 
-  const { data, isPending, error } = useInvoices({
+  const { data, isPending, error, refetch, isRefetching } = useInvoices({
     page,
     pageSize,
     status: statusFilter,
@@ -128,7 +131,7 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
       ) : null}
 
       <Tabs value={statusFilter} onValueChange={handleStatusChange} className="mb-4">
-        <TabsList className="h-9">
+        <TabsList className="h-9 max-w-full">
           <TabsTrigger value="ALL">All</TabsTrigger>
           <TabsTrigger value="DRAFT">Draft</TabsTrigger>
           <TabsTrigger value="FINAL">Finalised</TabsTrigger>
@@ -195,16 +198,36 @@ export function InvoicesByTypePage({ invoiceType, title, createLabel }: Invoices
         clearDisabled={!hasActiveSearchFilters && !search && !partyId && !startDate && !endDate}
       />
 
-      <ErrorBanner error={error} fallbackMessage="Failed to load invoices" />
+      <ErrorBanner
+        error={error}
+        fallbackMessage="Failed to load invoices"
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       {isPending ? (
         <TableSkeleton rows={5} />
       ) : invoices.length === 0 ? (
         <EmptyState
           icon={<FileText className="h-5 w-5" />}
-          title={`No ${title.toLowerCase()} found`}
+          title={
+            hasActiveSearchFilters || statusFilter !== "ALL"
+              ? `No matching ${title.toLowerCase()}`
+              : `No ${title.toLowerCase()} found`
+          }
           action={
-            !debouncedSearch && allowCreate ? (
+            hasActiveSearchFilters || statusFilter !== "ALL" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearSearchFilters();
+                  handleStatusChange("ALL");
+                }}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            ) : !debouncedSearch && allowCreate ? (
               <Button size="sm" asChild>
                 <Link href={`/invoices/new?type=${invoiceType}`}>
                   <Plus className="mr-2 h-4 w-4" />

@@ -25,7 +25,10 @@ export default function ReceivablesAgingPage() {
   const [bucketFilter, setBucketFilter] = useState<ReceivablesAgingBucket | "ALL">("ALL");
 
   const asOfValid = parseISODateString(asOf) !== undefined;
-  const { data, isPending, error } = useReceivablesAging(asOfValid ? asOf : "", limit);
+  const { data, isPending, error, refetch, isRefetching } = useReceivablesAging(
+    asOfValid ? asOf : "",
+    limit,
+  );
 
   const clientTableExport = useMemo((): ClientReportTableExport | null => {
     if (!data) return null;
@@ -69,7 +72,12 @@ export default function ReceivablesAgingPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportInvoiceAging.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportInvoiceAging.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterFilterCard className="py-2.5">
         <div className="flex flex-wrap items-center gap-2">

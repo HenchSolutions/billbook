@@ -17,14 +17,14 @@ export function LandingHeroSection() {
       <div className="marketing-container relative grid items-center gap-10 py-14 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-6">
           <Badge variant="secondary" className="mb-4 motion-safe:animate-fade-in">
-            Built for B2B workflows
+            GST billing for Indian businesses
           </Badge>
           <h1 className="animation-delay-200 text-balance text-4xl font-semibold tracking-tight text-foreground motion-safe:animate-fade-in sm:text-5xl">
-            Make billing feel <span className="gradient-text">effortless</span>.
+            GST invoicing, <span className="gradient-text">without the spreadsheets</span>.
           </h1>
           <p className="animation-delay-400 mt-4 text-pretty text-base text-muted-foreground motion-safe:animate-fade-in sm:text-lg">
-            Create invoices, manage customers and vendors, track credit notes, receipts, and stock.
-            Then open Reports and GST / Tax for the same CSV and HTML exports you get in the app.
+            Create GST invoices, keep customer and vendor balances, record receipts and stock, and
+            hand your accountant ready-made reports.
           </p>
 
           <div className="animation-delay-400 mt-8 flex flex-col gap-3 motion-safe:animate-fade-in sm:flex-row">
@@ -52,7 +52,7 @@ export function LandingHeroSection() {
           </p>
 
           <div className="animation-delay-400 mt-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground motion-safe:animate-fade-in">
-            <span className="mr-1">Loved for:</span>
+            <span className="mr-1">Includes:</span>
             <Badge variant="secondary">Fast invoicing</Badge>
             <Badge variant="secondary">CSV + GST HTML exports</Badge>
             <Badge variant="secondary">Audit logs</Badge>
@@ -61,16 +61,20 @@ export function LandingHeroSection() {
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div>
-              <p className="text-sm font-semibold text-foreground">Clean audit trails</p>
-              <p className="text-xs text-muted-foreground">Track changes with accountability.</p>
+              <p className="text-sm font-semibold text-foreground">Audit trail</p>
+              <p className="text-xs text-muted-foreground">See who changed what, and when.</p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Fast operations</p>
-              <p className="text-xs text-muted-foreground">Less clicking, more shipping.</p>
+              <p className="text-sm font-semibold text-foreground">Faster billing</p>
+              <p className="text-xs text-muted-foreground">
+                Pick a party, add items, GST is filled in.
+              </p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Export-ready</p>
-              <p className="text-xs text-muted-foreground">Reports you can share confidently.</p>
+              <p className="text-sm font-semibold text-foreground">Accountant-ready</p>
+              <p className="text-xs text-muted-foreground">
+                Download report CSVs and a GST / Tax pack.
+              </p>
             </div>
           </div>
         </div>
@@ -110,7 +114,7 @@ export function LandingHeroSection() {
                       </div>
                       <div className="text-right">
                         <p className="text-muted-foreground">Date</p>
-                        <p className="mt-1 font-medium text-foreground">17 Feb 2026</p>
+                        <p className="mt-1 font-medium text-foreground">Today</p>
                         <p className="text-muted-foreground">Due</p>
                       </div>
                     </div>

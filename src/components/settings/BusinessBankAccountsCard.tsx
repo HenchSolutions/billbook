@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Landmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import {
   Dialog,
   DialogContent,
@@ -13,16 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -94,7 +86,9 @@ export interface SavedBankAccountsSectionProps {
 }
 
 export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccountsSectionProps) {
-  const { data, isPending, error } = useBusinessBankAccounts({ enabled: canView });
+  const { data, isPending, error } = useBusinessBankAccounts({
+    enabled: canView,
+  });
   const createMut = useCreateBusinessBankAccount();
   const updateMut = useUpdateBusinessBankAccount();
   const deleteMut = useDeleteBusinessBankAccount();
@@ -120,7 +114,10 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
     }
     if (autoPrimaryAttemptedIdRef.current === onlyAccount.id) return;
     autoPrimaryAttemptedIdRef.current = onlyAccount.id;
-    void updateMut.mutateAsync({ bankAccountId: onlyAccount.id, body: { isDefault: true } });
+    void updateMut.mutateAsync({
+      bankAccountId: onlyAccount.id,
+      body: { isDefault: true },
+    });
   }, [accounts, canEdit, updateMut]);
 
   const openCreate = useCallback(() => {
@@ -172,7 +169,10 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
       };
 
       if (editing) {
-        await updateMut.mutateAsync({ bankAccountId: editing.id, body: payload });
+        await updateMut.mutateAsync({
+          bankAccountId: editing.id,
+          body: payload,
+        });
         showSuccessToast("Bank account updated");
       } else {
         await createMut.mutateAsync(payload);
@@ -198,7 +198,10 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
   const setDefault = async (acc: BusinessBankAccount) => {
     if (acc.isDefault) return;
     try {
-      await updateMut.mutateAsync({ bankAccountId: acc.id, body: { isDefault: true } });
+      await updateMut.mutateAsync({
+        bankAccountId: acc.id,
+        body: { isDefault: true },
+      });
       showSuccessToast("Primary account updated");
     } catch (e) {
       showErrorToast(e instanceof Error ? e.message : null, "Couldn't set primary account");
@@ -372,7 +375,10 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
 
       {/* ── Add / Edit dialog ──────────────────────────────────── */}
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="flex max-h-[min(90dvh,680px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogContent
+          className="flex max-h-[min(90dvh,680px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg"
+          preventClose={createMut.isPending || updateMut.isPending}
+        >
           {/* sticky header */}
           <DialogHeader className="shrink-0 border-b border-border/80 px-6 py-4 text-left">
             <DialogTitle>{editing ? "Edit bank account" : "Add bank account"}</DialogTitle>
@@ -507,41 +513,38 @@ export function SavedBankAccountsSection({ canView, canEdit }: SavedBankAccounts
 
           {/* sticky footer */}
           <DialogFooter className="shrink-0 gap-2 border-t border-border/80 bg-muted/20 px-6 py-4 sm:justify-end">
-            <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
-              Cancel
-            </Button>
             <Button
-              type="submit"
-              form="bank-account-form"
+              type="button"
+              variant="outline"
+              onClick={() => handleDialogOpenChange(false)}
               disabled={createMut.isPending || updateMut.isPending}
             >
-              {editing ? "Save changes" : "Add account"}
+              Cancel
             </Button>
+            <LoadingButton
+              type="submit"
+              form="bank-account-form"
+              loading={createMut.isPending || updateMut.isPending}
+              loadingLabel={editing ? "Saving..." : "Adding..."}
+            >
+              {editing ? "Save changes" : "Add account"}
+            </LoadingButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Delete confirmation ────────────────────────────────── */}
-      <AlertDialog open={deleteTarget != null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove this bank account?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Invoices that reference it may show outdated payment details until updated.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={cn("bg-destructive text-destructive-foreground hover:bg-destructive/90")}
-              onClick={() => void handleDelete()}
-              disabled={deleteMut.isPending}
-            >
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={deleteTarget != null}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+        title="Remove this bank account?"
+        description="Invoices that reference it may show outdated payment details until updated."
+        confirmText="Remove"
+        variant="destructive"
+        confirming={deleteMut.isPending}
+        confirmingText="Removing..."
+      />
     </>
   );
 }

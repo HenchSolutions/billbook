@@ -11,11 +11,13 @@ import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSectio
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
+import TablePagination from "@/components/TablePagination";
 import PartyDialog from "@/components/dialogs/PartyDialog";
 import { PartiesTable } from "@/components/parties/PartySections";
 import { Switch } from "@/components/ui/switch";
 import { useParties } from "@/hooks/use-parties";
 import { useAppliedFilters } from "@/hooks/use-applied-filters";
+import { usePagination } from "@/hooks/use-pagination";
 import type { Party } from "@/types/party";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
@@ -36,19 +38,29 @@ export default function Vendors() {
   const [formOpen, setFormOpen] = useState(false);
   const [selectedParty, setSelectedParty] = useState<Party | undefined>();
   const formSectionRef = useRef<HTMLDivElement | null>(null);
+  const { page, setPage, resetPage } = usePagination();
+  const pageSize = 20;
 
-  const { data, isPending, error } = useParties({
+  const { data, isPending, error, refetch, isRefetching } = useParties({
     type: PARTY_TYPE,
     includeInactive: searchApplied.includeInactive,
     search: searchApplied.search || undefined,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
   });
 
   const parties = data?.parties ?? [];
+  const totalParties = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalParties / pageSize));
   const isEditing = !!selectedParty;
+  const partyFiltersActive = !!searchApplied.search || !searchApplied.includeInactive;
 
   useEffect(() => {
     if (formOpen) {
-      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }, [formOpen]);
 
@@ -135,22 +147,44 @@ export default function Vendors() {
           </div>
         </div>
         <PageSearchActions
-          onSearch={applySearch}
-          onClear={resetSearch}
+          onSearch={() => {
+            applySearch();
+            resetPage();
+          }}
+          onClear={() => {
+            resetSearch();
+            resetPage();
+          }}
           clearDisabled={!searchApplied.search && searchApplied.includeInactive}
         />
       </PageSearchCard>
 
-      <ErrorBanner error={error} fallbackMessage="Failed to load vendors" />
+      <ErrorBanner
+        error={error}
+        fallbackMessage="Failed to load vendors"
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       {isPending ? (
         <TableSkeleton rows={3} />
       ) : parties.length === 0 ? (
         <EmptyState
           icon={<Truck className="h-5 w-5" />}
-          title="No vendors found"
+          title={partyFiltersActive ? "No matching vendors" : "No vendors found"}
           action={
-            !formOpen ? (
+            partyFiltersActive ? (
+              <button
+                type="button"
+                onClick={() => {
+                  resetSearch();
+                  resetPage();
+                }}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            ) : !formOpen ? (
               <Button size="sm" onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Vendor
@@ -159,12 +193,21 @@ export default function Vendors() {
           }
         />
       ) : (
-        <PartiesTable
-          parties={parties}
-          onEdit={openEdit}
-          onLedger={(partyId) => router.push(`/vendors/${partyId}/ledger`)}
-          showLedger={canVendorLedger}
-        />
+        <>
+          <PartiesTable
+            parties={parties}
+            onEdit={openEdit}
+            onLedger={(partyId) => router.push(`/vendors/${partyId}/ledger`)}
+            showLedger={canVendorLedger}
+          />
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            total={totalParties}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </div>
   );

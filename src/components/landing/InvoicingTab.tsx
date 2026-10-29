@@ -36,7 +36,7 @@ const TABLE_ROWS = [
   {
     id: "INV-2041",
     party: "Suriya Traders",
-    date: "7 Mar 2026",
+    date: "Today",
     amount: "₹42,860",
     due: "₹42,860",
     status: "PENDING",
@@ -45,7 +45,7 @@ const TABLE_ROWS = [
   {
     id: "INV-2040",
     party: "Noor Retail",
-    date: "5 Mar 2026",
+    date: "2 days ago",
     amount: "₹18,500",
     due: "₹0",
     status: "PAID",
@@ -54,7 +54,7 @@ const TABLE_ROWS = [
   {
     id: "INV-2039",
     party: "Metro Mart",
-    date: "1 Mar 2026",
+    date: "5 days ago",
     amount: "₹31,200",
     due: "₹31,200",
     status: "OVERDUE",
@@ -63,7 +63,7 @@ const TABLE_ROWS = [
   {
     id: "INV-2038",
     party: "Quick Supplies",
-    date: "27 Feb 2026",
+    date: "1 week ago",
     amount: "₹9,750",
     due: "₹0",
     status: "PAID",
@@ -72,7 +72,7 @@ const TABLE_ROWS = [
   {
     id: "INV-2037",
     party: "Arjun & Co.",
-    date: "24 Feb 2026",
+    date: "2 weeks ago",
     amount: "₹56,400",
     due: "₹20,000",
     status: "PENDING",

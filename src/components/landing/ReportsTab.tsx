@@ -5,7 +5,7 @@ const KPI_ITEMS = [
   {
     label: "Gross Sales",
     value: "₹24,60,000",
-    sub: "Q1 2026",
+    sub: "Last quarter",
     Icon: TrendingUp,
     color: "text-foreground",
   },
@@ -70,7 +70,7 @@ export function ReportsTab() {
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden rounded-lg border bg-background px-3 py-1.5 text-xs text-muted-foreground sm:block">
-              Jan 2026 – Mar 2026
+              Last quarter
             </span>
             <span className="rounded-full border bg-background px-4 py-1.5 text-xs font-medium">
               CSV
@@ -96,7 +96,7 @@ export function ReportsTab() {
         <div className="border-b px-6 py-6">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm font-semibold">Monthly Sales Trend</p>
-            <p className="text-xs text-muted-foreground">Jan – Mar 2026</p>
+            <p className="text-xs text-muted-foreground">Last 3 months</p>
           </div>
           <div className="flex h-36 items-end gap-3">
             {[

@@ -80,7 +80,7 @@ export function LandingFaq() {
                 },
                 {
                   q: "Is my data secure and private?",
-                  a: "We focus on secure-by-default workflows and clear access boundaries so day-to-day operations stay controlled.",
+                  a: "Passwords are stored hashed, sign-up is verified by an email OTP, team members only see what their role allows, requests are rate-limited, and changes are recorded in audit logs.",
                 },
                 {
                   q: "Can I download my data anytime?",

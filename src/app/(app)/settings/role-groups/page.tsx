@@ -2,10 +2,13 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ChevronRight, KeyRound, Loader2, Plus, Shield } from "lucide-react";
+import { ChevronRight, KeyRound, Plus, Shield } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import EmptyState from "@/components/EmptyState";
+import ErrorBanner from "@/components/ErrorBanner";
+import TableSkeleton from "@/components/skeletons/TableSkeleton";
 import { useRoleGroupsList } from "@/hooks/use-role-groups";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PAGE } from "@/constants/page-access";
@@ -17,7 +20,7 @@ export default function RoleGroupsListPage() {
   const canSee = can(PAGE.role_groups) || can(PAGE.role_groups_manage);
   const canManage = can(PAGE.role_groups_manage);
 
-  const { data: groups, isPending, error } = useRoleGroupsList(canSee);
+  const { data: groups, isPending, error, refetch, isRefetching } = useRoleGroupsList(canSee);
 
   const sortedGroups = useMemo(() => {
     if (!groups?.length) return [];
@@ -50,35 +53,31 @@ export default function RoleGroupsListPage() {
       />
 
       <div className="mx-auto w-full max-w-4xl space-y-8">
-        {error && (
-          <p className="text-sm text-destructive" role="alert">
-            {error instanceof Error ? error.message : "Failed to load role groups"}
-          </p>
-        )}
+        <ErrorBanner
+          error={error}
+          fallbackMessage="Failed to load role groups"
+          onRetry={() => void refetch()}
+          retrying={isRefetching}
+        />
 
         {isPending ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
+          <TableSkeleton rows={4} variant="parties" />
         ) : !sortedGroups.length ? (
-          <div className="rounded-lg border border-dashed border-border/60 bg-muted/15 px-6 py-14 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Shield className="h-7 w-7" aria-hidden />
-            </div>
-            <h2 className="mt-5 text-lg font-semibold tracking-tight">No role groups yet</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Create a group to bundle permissions, then assign it when you invite someone from
-              Team.
-            </p>
-            {canManage && (
-              <Button asChild className="mt-6">
-                <Link href="/settings/role-groups/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create role group
-                </Link>
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            icon={<Shield className="h-6 w-6" />}
+            title="No role groups yet"
+            description="Create a group to bundle permissions, then assign it when you invite someone from Team."
+            action={
+              canManage ? (
+                <Button asChild>
+                  <Link href="/settings/role-groups/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create role group
+                  </Link>
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="space-y-5">
             <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border/60 pb-4">
@@ -87,8 +86,8 @@ export default function RoleGroupsListPage() {
                   All groups
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {sortedGroups.length} group{sortedGroups.length === 1 ? "" : "s"} · {activeCount}{" "}
-                  active
+                  {sortedGroups.length} group
+                  {sortedGroups.length === 1 ? "" : "s"} · {activeCount} active
                 </p>
               </div>
             </div>

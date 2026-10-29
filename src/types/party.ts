@@ -162,6 +162,8 @@ export interface PartyAdvanceReceiptResult {
 
 export interface PartyListResponse {
   parties: Party[];
-  /** Number of items in the current page (not total; no total for full result set when using limit/offset) */
+  /** Number of items in the current page. */
   count: number;
+  /** Total number of parties matching filters (for pagination). */
+  total: number;
 }

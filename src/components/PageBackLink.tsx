@@ -11,15 +11,26 @@ export function PageBackLink({
   href,
   children,
   className,
+  onBeforeNavigate,
 }: {
   href: string;
   children: ReactNode;
   /** Extra classes on the outer wrapper (default `mb-4`). */
   className?: string;
+  /** Return `false` to block this click (e.g. unsaved changes) — caller then owns navigating on confirm. */
+  onBeforeNavigate?: () => boolean;
 }) {
   return (
     <div className={cn("mb-4", className)}>
-      <Link href={href} className={pageBackLinkClassName}>
+      <Link
+        href={href}
+        className={pageBackLinkClassName}
+        onClick={(e) => {
+          if (onBeforeNavigate && onBeforeNavigate() === false) {
+            e.preventDefault();
+          }
+        }}
+      >
         <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
         {children}
       </Link>

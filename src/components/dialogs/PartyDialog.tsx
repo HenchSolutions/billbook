@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -14,18 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, TriangleAlert, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useCreateParty, useUpdateParty } from "@/hooks/use-parties";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Party } from "@/types/party";
 import {
@@ -493,19 +485,21 @@ export default function PartyDialog({
       </div>
 
       <div className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isSaving}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={isSaving}>
-          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSaving
-            ? isEdit
-              ? "Saving..."
-              : `Creating ${partyLabelTitle}...`
-            : isEdit
-              ? "Save"
-              : `Create ${partyLabelTitle}`}
-        </Button>
+        <LoadingButton
+          type="submit"
+          loading={isSaving}
+          loadingLabel={isEdit ? "Saving..." : `Creating ${partyLabelTitle}...`}
+        >
+          {isEdit ? "Save" : `Create ${partyLabelTitle}`}
+        </LoadingButton>
       </div>
     </form>
   );
@@ -531,7 +525,7 @@ export default function PartyDialog({
     </Card>
   ) : (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl" preventClose={isSaving}>
         <DialogHeader>
           <DialogTitle>{formTitle}</DialogTitle>
         </DialogHeader>
@@ -543,32 +537,16 @@ export default function PartyDialog({
   return (
     <>
       {content}
-      <AlertDialog
+      <ConfirmDialog
         open={deactivateConfirmOpen}
-        onOpenChange={(open) => setDeactivateConfirmOpen(open)}
-      >
-        <AlertDialogContent className="max-w-md overflow-hidden p-0">
-          <AlertDialogHeader className="border-b bg-destructive/5 px-5 py-4">
-            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-destructive/15 text-destructive">
-              <TriangleAlert className="h-4 w-4" />
-            </div>
-            <AlertDialogTitle className="text-base">Deactivate this {partyLabel}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will mark the {partyLabel} as inactive and hide it by default in {partyLabel}{" "}
-              lists and selections.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="border-t px-5 py-4">
-            <AlertDialogCancel>Keep Active</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDeactivate}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Yes, Deactivate
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={setDeactivateConfirmOpen}
+        onConfirm={handleConfirmDeactivate}
+        title={`Deactivate this ${partyLabel}?`}
+        description={`This will mark the ${partyLabel} as inactive and hide it by default in ${partyLabel} lists and selections.`}
+        confirmText="Yes, Deactivate"
+        cancelText="Keep Active"
+        variant="destructive"
+      />
     </>
   );
 }

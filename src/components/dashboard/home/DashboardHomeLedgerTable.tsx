@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatCurrency, formatDateCompact } from "@/lib/core/utils";
+import { formatCurrency, formatDate } from "@/lib/core/utils";
 import type { DashboardData, DashboardRecentLedgerRow } from "@/types/dashboard";
 import {
   buildRecentActivityRows,
@@ -124,7 +124,7 @@ function PaginatedActivityTable({
                     className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/30"
                   >
                     <td className="whitespace-nowrap px-4 py-3 tabular-nums text-muted-foreground">
-                      {formatDateCompact(row.occurredAt)}
+                      {formatDate(row.occurredAt)}
                     </td>
                     <td className="px-4 py-3 font-medium">{ledgerTypeLabel(row.entryType)}</td>
                     <td className="max-w-[200px] truncate px-4 py-3">{row.partyName}</td>

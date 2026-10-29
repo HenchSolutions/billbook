@@ -7,6 +7,8 @@ interface PageHeaderProps {
   /** Renders above the title row, left-aligned (same position as `PageBackLink` on detail pages). */
   backHref?: string;
   backLabel?: string;
+  /** Return `false` to block the back click (e.g. unsaved changes) — caller then owns navigating on confirm. */
+  onBeforeBackNavigate?: () => boolean;
 }
 
 const PageHeader = memo(function PageHeader({
@@ -14,17 +16,25 @@ const PageHeader = memo(function PageHeader({
   action,
   backHref,
   backLabel,
+  onBeforeBackNavigate,
 }: PageHeaderProps) {
   const back =
-    backHref && backLabel ? <PageBackLink href={backHref}>{backLabel}</PageBackLink> : null;
+    backHref && backLabel ? (
+      <PageBackLink href={backHref} onBeforeNavigate={onBeforeBackNavigate}>
+        {backLabel}
+      </PageBackLink>
+    ) : null;
 
   if (action) {
     return (
       <>
         {back}
         <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="page-header mb-0">
-            <h1 className="page-title bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+          <div className="page-header mb-0 min-w-0">
+            <h1
+              className="page-title truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text"
+              title={title}
+            >
               {title}
             </h1>
           </div>
@@ -37,8 +47,11 @@ const PageHeader = memo(function PageHeader({
   return (
     <>
       {back}
-      <div className="page-header">
-        <h1 className="page-title bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+      <div className="page-header min-w-0">
+        <h1
+          className="page-title truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text"
+          title={title}
+        >
           {title}
         </h1>
       </div>

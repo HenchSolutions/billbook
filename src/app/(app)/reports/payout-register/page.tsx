@@ -49,7 +49,11 @@ export default function PayoutRegisterPage() {
   } = useRegisterDateRange();
 
   const limit = DEFAULT_REPORT_LIMIT;
-  const { data, isPending, error } = usePayoutRegister(validStartDate, validEndDate, limit);
+  const { data, isPending, error, refetch, isRefetching } = usePayoutRegister(
+    validStartDate,
+    validEndDate,
+    limit,
+  );
 
   const rows = useMemo(() => data?.payouts ?? [], [data?.payouts]);
   const rowCount = rows.length;
@@ -99,7 +103,12 @@ export default function PayoutRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportPayoutRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportPayoutRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterFilterCard className="py-2.5">
         <DateRangePicker

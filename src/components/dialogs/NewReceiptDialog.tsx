@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -23,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
 import PartyDialog from "@/components/dialogs/PartyDialog";
 import { PartyAutocomplete } from "@/components/invoices/PartyAutocomplete";
 import { useCreateReceipt } from "@/hooks/use-receipts";
@@ -107,7 +107,6 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
   const onSubmit = async (data: FormData) => {
     if (!party) {
       setPartyError(true);
-      showErrorToast("Select a party to continue.");
       return;
     }
     setPartyError(false);
@@ -136,6 +135,7 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent
           className="sm:max-w-md"
+          preventClose={createReceipt.isPending}
           onPointerDownOutside={(e) => {
             if (isEventFromNestedPortal(e.target)) e.preventDefault();
           }}
@@ -212,13 +212,21 @@ export function NewReceiptDialog({ open, onOpenChange }: NewReceiptDialogProps) 
               <Textarea rows={2} placeholder="Optional" {...register("notes")} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleClose(false)}
+                disabled={createReceipt.isPending}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={createReceipt.isPending}>
-                {createReceipt.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <LoadingButton
+                type="submit"
+                loading={createReceipt.isPending}
+                loadingLabel="Creating..."
+              >
                 Create receipt
-              </Button>
+              </LoadingButton>
             </DialogFooter>
           </form>
         </DialogContent>

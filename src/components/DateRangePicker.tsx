@@ -108,7 +108,7 @@ export default function DateRangePicker({
   if (isInline) {
     return (
       <div className={cn("w-full min-w-0", className)}>
-        <div className="flex h-9 w-full items-center gap-2">
+        <div className="flex h-auto w-full flex-col gap-2 sm:h-9 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <span className={inlineLabelCls}>From</span>
             <div className="flex min-w-0 flex-1">
@@ -122,7 +122,7 @@ export default function DateRangePicker({
               )}
             </div>
           </div>
-          <span className="shrink-0 text-sm text-muted-foreground" aria-hidden>
+          <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline" aria-hidden>
             –
           </span>
           <div className="flex min-w-0 flex-1 items-center gap-2">
