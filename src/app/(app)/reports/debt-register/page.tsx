@@ -107,7 +107,10 @@ export default function DebtRegisterPage() {
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const limit = DEFAULT_REPORT_LIMIT;
 
-  const { data, isPending, error } = useReceivablesAging(validEndDate, limit);
+  const { data, isPending, error, refetch, isRefetching } = useReceivablesAging(
+    validEndDate,
+    limit,
+  );
 
   const exportQuery = useMemo(() => ({ asOf: validEndDate, limit }), [validEndDate, limit]);
 
@@ -224,7 +227,12 @@ export default function DebtRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportDebtRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportDebtRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterSearchCard>
         <ReportRegisterSearchLayout

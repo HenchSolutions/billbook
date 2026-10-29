@@ -186,7 +186,7 @@ export function DashboardHomeSalesPurchaseChart({
               tick={{ fontSize: 11 }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
               width={52}
               domain={[0, "auto"]}
             />

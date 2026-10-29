@@ -72,8 +72,8 @@ export function OutboundPaymentsTable({
           </p>
         </div>
         <DataTableRoot density="default" className="overflow-x-auto border-0 shadow-none">
-          <table className="data-table min-w-[720px]">
-            <thead className="data-table-head-sticky">
+          <table className="data-table w-full min-w-[280px] sm:min-w-[720px]">
+            <thead className="data-table-head-sticky hidden sm:table-header-group">
               <tr>
                 <th className="data-table-th px-4">Voucher</th>
                 <th className="data-table-th px-4">Type</th>
@@ -84,70 +84,111 @@ export function OutboundPaymentsTable({
                 <th className="data-table-th data-table-col-numeric px-4">PDF</th>
               </tr>
             </thead>
-            <tbody className="[&_tr:nth-child(even)]:bg-muted/15">
-              {payments.map((p) => (
-                <tr key={p.id} className="data-table-row last:border-0">
-                  <td className="data-table-td px-4 font-medium text-foreground">
-                    <span className="financial-id">{p.paymentNumber}</span>
-                  </td>
-                  <td className="data-table-td px-4">
-                    <Badge variant="outline" className="whitespace-nowrap shadow-sm">
-                      {OUTBOUND_CATEGORY_LABELS[p.category] ?? p.category}
-                    </Badge>
-                  </td>
-                  <td className="data-table-td px-4 text-muted-foreground">
-                    {formatDate(p.createdAt)}
-                  </td>
-                  <td className="data-table-td max-w-[200px] px-4">
-                    <span className="truncate">{outboundPartyDisplayName(p, partyNamesById)}</span>
-                    {p.invoiceId != null && p.category === "SALE_RETURN_REFUND" && (
-                      <div className="mt-0.5 text-xs">
-                        <Link
-                          href={`/invoices/${p.invoiceId}`}
-                          className="text-primary hover:underline"
-                        >
-                          Sales return
-                        </Link>
+            <tbody className="sm:[&_tr:nth-child(even)]:bg-muted/15">
+              {payments.map((p) => {
+                const pdfButton = (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1 rounded-md shadow-sm"
+                    onClick={() =>
+                      void openSignedPdfFromApiPath(`/payments/outbound/${p.id}/pdf`, {
+                        unavailable: "Voucher PDF not available (configure storage).",
+                        failed: "Failed to open voucher PDF",
+                      })
+                    }
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    PDF
+                  </Button>
+                );
+                const linkedDocLabel =
+                  p.invoiceId != null && p.category === "SALE_RETURN_REFUND"
+                    ? "Sales return"
+                    : p.invoiceId != null && p.category === "PARTY_PAYMENT"
+                      ? "Purchase bill"
+                      : null;
+                return (
+                  <tr key={p.id} className="data-table-row last:border-0">
+                    <td className="block px-4 py-3 sm:hidden" colSpan={7}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="financial-id font-medium text-foreground">
+                              {p.paymentNumber}
+                            </span>
+                            <Badge variant="outline" className="whitespace-nowrap shadow-sm">
+                              {OUTBOUND_CATEGORY_LABELS[p.category] ?? p.category}
+                            </Badge>
+                          </div>
+                          <div
+                            className="mt-0.5 truncate text-sm text-muted-foreground"
+                            title={outboundPartyDisplayName(p, partyNamesById)}
+                          >
+                            {outboundPartyDisplayName(p, partyNamesById)}
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                            <span>{formatDate(p.createdAt)}</span>
+                            <span>{PAYMENT_METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}</span>
+                            {linkedDocLabel && (
+                              <Link
+                                href={`/invoices/${p.invoiceId}`}
+                                className="text-primary hover:underline"
+                              >
+                                {linkedDocLabel}
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="font-semibold tabular-nums">
+                            {formatCurrency(p.amount)}
+                          </div>
+                          <div className="mt-1.5">{pdfButton}</div>
+                        </div>
                       </div>
-                    )}
-                    {p.invoiceId != null && p.category === "PARTY_PAYMENT" && (
-                      <div className="mt-0.5 text-xs">
-                        <Link
-                          href={`/invoices/${p.invoiceId}`}
-                          className="text-primary hover:underline"
-                        >
-                          Purchase bill
-                        </Link>
-                      </div>
-                    )}
-                  </td>
-                  <td className="data-table-td px-4">
-                    <Badge variant="outline" className="font-normal shadow-sm">
-                      {PAYMENT_METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
-                    </Badge>
-                  </td>
-                  <td className="data-table-td data-table-col-numeric px-4 font-semibold text-rose-700">
-                    {formatCurrency(p.amount)}
-                  </td>
-                  <td className="data-table-td data-table-col-numeric px-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1 rounded-md shadow-sm"
-                      onClick={() =>
-                        void openSignedPdfFromApiPath(`/payments/outbound/${p.id}/pdf`, {
-                          unavailable: "Voucher PDF not available (configure storage).",
-                          failed: "Failed to open voucher PDF",
-                        })
-                      }
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      PDF
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="data-table-td hidden px-4 font-medium text-foreground sm:table-cell">
+                      <span className="financial-id">{p.paymentNumber}</span>
+                    </td>
+                    <td className="data-table-td hidden px-4 sm:table-cell">
+                      <Badge variant="outline" className="whitespace-nowrap shadow-sm">
+                        {OUTBOUND_CATEGORY_LABELS[p.category] ?? p.category}
+                      </Badge>
+                    </td>
+                    <td className="data-table-td hidden px-4 text-muted-foreground sm:table-cell">
+                      {formatDate(p.createdAt)}
+                    </td>
+                    <td className="data-table-td hidden max-w-[200px] px-4 sm:table-cell">
+                      <span className="truncate">
+                        {outboundPartyDisplayName(p, partyNamesById)}
+                      </span>
+                      {linkedDocLabel && (
+                        <div className="mt-0.5 text-xs">
+                          <Link
+                            href={`/invoices/${p.invoiceId}`}
+                            className="text-primary hover:underline"
+                          >
+                            {linkedDocLabel}
+                          </Link>
+                        </div>
+                      )}
+                    </td>
+                    <td className="data-table-td hidden px-4 sm:table-cell">
+                      <Badge variant="outline" className="font-normal shadow-sm">
+                        {PAYMENT_METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
+                      </Badge>
+                    </td>
+                    <td className="data-table-td data-table-col-numeric hidden px-4 font-semibold sm:table-cell">
+                      {formatCurrency(p.amount)}
+                    </td>
+                    <td className="data-table-td data-table-col-numeric hidden px-4 sm:table-cell">
+                      {pdfButton}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </DataTableRoot>

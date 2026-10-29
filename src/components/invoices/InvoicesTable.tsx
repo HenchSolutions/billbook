@@ -13,47 +13,63 @@ interface InvoicesTableProps {
   invoiceType: InvoiceType;
 }
 
+const pad = "px-4 sm:px-5";
+
 export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
   const router = useRouter();
   const showVendorBillColumn =
     invoiceType === "PURCHASE_INVOICE" || invoiceType === "PURCHASE_RETURN";
   const showRefInvoiceColumn = invoiceType === "SALE_RETURN" || invoiceType === "PURCHASE_RETURN";
-  const mobileColSpan = 7 + (showVendorBillColumn ? 1 : 0) + (showRefInvoiceColumn ? 1 : 0);
+  const extraColCount = (showVendorBillColumn ? 1 : 0) + (showRefInvoiceColumn ? 1 : 0);
+  const mobileColSpan = 7 + extraColCount;
+
+  // Even column share across the row (all desktop columns always visible together).
+  const idW = extraColCount === 0 ? "w-[14%]" : extraColCount === 1 ? "w-[12%]" : "w-[11%]";
+  const partyW = extraColCount === 0 ? "w-[20%]" : extraColCount === 1 ? "w-[14%]" : "w-[12%]";
+  const midW = extraColCount === 0 ? "w-[12%]" : extraColCount === 1 ? "w-[11%]" : "w-[10%]";
+  const moneyW = extraColCount === 0 ? "w-[14%]" : extraColCount === 1 ? "w-[13%]" : "w-[12%]";
+  const statusW = extraColCount === 0 ? "w-[14%]" : extraColCount === 1 ? "w-[13%]" : "w-[13%]";
+  const extraW = extraColCount === 2 ? "w-[10%]" : "w-[12%]";
 
   return (
     <DataTableRoot density="default" className="-mx-1 px-1 sm:mx-0 sm:px-0">
-      <table className="data-table min-w-[300px]" role="table" aria-label="Invoices list">
+      <table
+        className="data-table w-full table-fixed"
+        style={{ width: "100%", minWidth: "880px" }}
+        role="table"
+        aria-label="Invoices list"
+      >
         <thead className="data-table-head-sticky hidden sm:table-header-group">
           <tr>
-            <th scope="col" className="data-table-th px-4 sm:px-6">
+            <th scope="col" className={cn("data-table-th", pad, idW)}>
               Invoice #
             </th>
-            <th scope="col" className="data-table-th">
+            <th scope="col" className={cn("data-table-th", pad, partyW)}>
               Party
             </th>
-            {showVendorBillColumn && (
-              <th scope="col" className="data-table-th hidden lg:table-cell">
+            {showVendorBillColumn ? (
+              <th scope="col" className={cn("data-table-th", pad, extraW)}>
                 Vendor bill
               </th>
-            )}
-            {showRefInvoiceColumn && (
-              <th scope="col" className="data-table-th hidden lg:table-cell">
+            ) : null}
+            {showRefInvoiceColumn ? (
+              <th scope="col" className={cn("data-table-th", pad, extraW)}>
                 Linked Invoice
               </th>
-            )}
-            <th scope="col" className="data-table-th hidden sm:table-cell">
+            ) : null}
+            <th scope="col" className={cn("data-table-th", pad, midW)}>
               Date
             </th>
-            <th scope="col" className="data-table-th hidden md:table-cell">
+            <th scope="col" className={cn("data-table-th", pad, midW)}>
               Due Date
             </th>
-            <th scope="col" className="data-table-th data-table-col-numeric">
+            <th scope="col" className={cn("data-table-th", pad, moneyW)}>
               Amount
             </th>
-            <th scope="col" className="data-table-th data-table-col-numeric hidden md:table-cell">
+            <th scope="col" className={cn("data-table-th", pad, moneyW)}>
               Balance Due
             </th>
-            <th scope="col" className="data-table-th text-center">
+            <th scope="col" className={cn("data-table-th", pad, statusW)}>
               Status
             </th>
           </tr>
@@ -75,7 +91,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                   isCancelled && "opacity-90",
                 )}
               >
-                <td className="block px-4 py-3 sm:hidden" colSpan={mobileColSpan}>
+                <td className={cn("block py-3 sm:hidden", pad)} colSpan={mobileColSpan}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -127,19 +143,31 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                   </div>
                 </td>
 
-                <td className="data-table-td hidden px-4 sm:table-cell sm:px-6">
-                  <span className="financial-id font-medium text-primary group-hover:underline">
+                <td className={cn("data-table-td hidden sm:table-cell", pad)}>
+                  <span className="financial-id block truncate font-medium text-primary group-hover:underline">
                     {inv.invoiceNumber}
                   </span>
                 </td>
-                <td className="data-table-td hidden sm:table-cell">{inv.partyName ?? "-"}</td>
-                {showVendorBillColumn && (
-                  <td className="data-table-td hidden max-w-[10rem] truncate text-muted-foreground lg:table-cell">
+                <td className={cn("data-table-td hidden truncate sm:table-cell", pad)}>
+                  <span title={inv.partyName ?? undefined}>{inv.partyName ?? "-"}</span>
+                </td>
+                {showVendorBillColumn ? (
+                  <td
+                    className={cn(
+                      "data-table-td hidden truncate text-muted-foreground sm:table-cell",
+                      pad,
+                    )}
+                  >
                     {inv.originalBillNumber?.trim() || "-"}
                   </td>
-                )}
-                {showRefInvoiceColumn && (
-                  <td className="data-table-td hidden max-w-[10rem] truncate text-muted-foreground lg:table-cell">
+                ) : null}
+                {showRefInvoiceColumn ? (
+                  <td
+                    className={cn(
+                      "data-table-td hidden truncate text-muted-foreground sm:table-cell",
+                      pad,
+                    )}
+                  >
                     <LinkedInvoiceLink
                       invoiceId={inv.sourceInvoiceId}
                       invoiceNumber={inv.sourceInvoiceNumber}
@@ -147,24 +175,37 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                )}
-                <td className="data-table-td hidden text-muted-foreground sm:table-cell">
+                ) : null}
+                <td
+                  className={cn(
+                    "data-table-td hidden truncate text-muted-foreground sm:table-cell",
+                    pad,
+                  )}
+                >
                   {formatDate(inv.invoiceDate)}
                 </td>
-                <td className="data-table-td hidden text-muted-foreground md:table-cell">
-                  <div className="flex flex-col">
-                    <span>{formatDate(inv.dueDate)}</span>
+                <td className={cn("data-table-td hidden text-muted-foreground sm:table-cell", pad)}>
+                  <div className="flex flex-col truncate">
+                    <span className="truncate">{formatDate(inv.dueDate)}</span>
                     {showOverdueChrome && inv.overdueDays !== undefined && inv.overdueDays > 0 && (
-                      <span className="text-xs text-destructive">Overdue {inv.overdueDays}d</span>
+                      <span className="truncate text-xs text-destructive">
+                        Overdue {inv.overdueDays}d
+                      </span>
                     )}
                   </div>
                 </td>
-                <td className="data-table-td data-table-col-numeric hidden font-medium sm:table-cell">
+                <td
+                  className={cn(
+                    "data-table-td hidden truncate font-medium tabular-nums sm:table-cell",
+                    pad,
+                  )}
+                >
                   {formatCurrency(inv.totalAmount ?? "0")}
                 </td>
                 <td
                   className={cn(
-                    "data-table-td data-table-col-numeric hidden font-medium md:table-cell",
+                    "data-table-td hidden truncate font-medium tabular-nums sm:table-cell",
+                    pad,
                     isFullyPaid && "text-status-paid",
                     showOverdueChrome && "text-destructive",
                     isCancelled && "text-muted-foreground",
@@ -172,7 +213,7 @@ export function InvoicesTable({ invoices, invoiceType }: InvoicesTableProps) {
                 >
                   {isCancelled ? "-" : isFullyPaid ? "Paid" : formatCurrency(balanceDue)}
                 </td>
-                <td className="data-table-td hidden text-center sm:table-cell">
+                <td className={cn("data-table-td hidden sm:table-cell", pad)}>
                   <StatusBadge status={inv.status} />
                 </td>
               </tr>

@@ -94,6 +94,8 @@ export default function PartyLedgerPage() {
               ? "Failed to load party details. Check your connection and try again."
               : "The customer or vendor you're looking for does not exist."
           }
+          onRetry={isLoadError ? () => void partyQuery.refetch() : undefined}
+          retrying={partyQuery.isRefetching}
         />
       </div>
     );
@@ -118,6 +120,11 @@ export default function PartyLedgerPage() {
       <ErrorBanner
         error={ledgerQuery.error ?? balanceQuery.error}
         fallbackMessage="Failed to load account activity"
+        onRetry={() => {
+          void ledgerQuery.refetch();
+          void balanceQuery.refetch();
+        }}
+        retrying={ledgerQuery.isRefetching || balanceQuery.isRefetching}
       />
 
       <BalanceSummaryCards

@@ -7,6 +7,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import AppSidebar from "@/components/layout/AppSidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import TopBar from "@/components/layout/TopBar";
+import TopLoadingBar from "@/components/layout/TopLoadingBar";
 import { TrialBanner } from "@/components/trial/TrialBanner";
 import { TrialExpiredOverlay } from "@/components/trial/TrialExpiredOverlay";
 import { useAuth } from "@/contexts/AuthContext";
@@ -125,6 +126,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="fixed inset-0 flex w-full overflow-hidden bg-background">
+      <TopLoadingBar />
       {isMobile && (
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetContent

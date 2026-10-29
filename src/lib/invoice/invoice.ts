@@ -261,10 +261,16 @@ export interface InvoiceBillSummary {
   grandTotal: number;
 }
 
-function invoiceHeaderDiscount(invoice: InvoiceDetail): number {
+/**
+ * Invoice-level discount in ₹. `subTotal` on the header is already net of it (tax is charged on that
+ * net value), so with lines present it is exactly Σ line totals − subTotal; without lines fall back
+ * to the stored percent/amount.
+ */
+function invoiceHeaderDiscount(invoice: InvoiceDetail, linesTaxable: number): number {
+  const taxable = parseAmount(invoice.subTotal);
+  if (invoice.items.length > 0) return Math.max(0, linesTaxable - taxable);
   const da = (invoice.discountAmount ?? "").trim();
   const dp = (invoice.discountPercent ?? "").trim();
-  const taxable = parseAmount(invoice.subTotal);
   if (da !== "" && parseAmount(da) > 0) return Math.max(0, parseAmount(da));
   if (dp !== "" && parseAmount(dp) > 0) {
     return (taxable * Math.min(100, Math.max(0, parseAmount(dp)))) / 100;
@@ -273,20 +279,23 @@ function invoiceHeaderDiscount(invoice: InvoiceDetail): number {
 }
 
 /**
- * Derive display totals from the invoice header + lines. Uses `subTotal` as taxable amount (sum of
- * line taxable bases). Does not split tax by CGST/SGST/IGST — use `taxTotal` only.
+ * Derive display totals from the invoice header + lines. `subTotal` is the net taxable amount (after
+ * item and invoice discounts) and tax is charged on it, so total = taxable + tax + round-off. Does
+ * not split tax by CGST/SGST/IGST — use `taxTotal` only.
  */
 export function getInvoiceBillSummary(invoice: InvoiceDetail): InvoiceBillSummary {
   let grossAmount = 0;
+  let linesTaxable = 0;
   for (const item of invoice.items) {
     grossAmount += parseAmount(item.quantity) * parseAmount(item.unitPrice);
+    linesTaxable += parseAmount(item.lineTotal);
   }
   const taxableTotal = parseAmount(invoice.subTotal);
-  const lineDiscountTotal = invoice.items.length > 0 ? Math.max(0, grossAmount - taxableTotal) : 0;
+  const invoiceDiscount = invoiceHeaderDiscount(invoice, linesTaxable);
+  const lineDiscountTotal = invoice.items.length > 0 ? Math.max(0, grossAmount - linesTaxable) : 0;
 
   const taxTotal = parseAmount(invoice.totalTax);
-  const invoiceDiscount = invoiceHeaderDiscount(invoice);
-  const subtotalBeforeRoundOff = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
+  const subtotalBeforeRoundOff = Math.max(0, taxableTotal + taxTotal);
   const roundOff = parseAmount(invoice.roundOffAmount);
   const grandTotal = parseAmount(invoice.totalAmount);
   const taxPercentEffective = taxableTotal > 0.000_5 ? (taxTotal / taxableTotal) * 100 : 0;

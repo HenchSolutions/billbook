@@ -102,7 +102,7 @@ export function OutboundDocumentPickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(90vh,640px)] max-w-3xl flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+      <DialogContent className="flex max-h-[min(90vh,640px)] w-[min(calc(100vw-2rem),48rem)] max-w-3xl flex-col gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b border-border px-6 py-4">
           <DialogTitle>{title}</DialogTitle>
           {partyNameHint?.trim() ? (

@@ -1,6 +1,8 @@
-import { Loader2 } from "lucide-react";
+import { Receipt } from "lucide-react";
 import type { LedgerEntry } from "@/lib/party/party-ledger";
 import { PartyLedgerEntriesTable } from "@/components/party-ledger/PartyLedgerEntriesTable";
+import EmptyState from "@/components/EmptyState";
+import TableSkeleton from "@/components/skeletons/TableSkeleton";
 
 interface LedgerEntriesTableProps {
   isPending: boolean;
@@ -9,18 +11,16 @@ interface LedgerEntriesTableProps {
 
 export function LedgerEntriesTable({ isPending, entries }: LedgerEntriesTableProps) {
   if (isPending) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading transactions…
-      </div>
-    );
+    return <TableSkeleton rows={5} variant="invoices" />;
   }
 
   if (!entries?.length) {
     return (
-      <p className="rounded-md border bg-muted/10 p-4 text-sm text-muted-foreground">
-        No transactions yet.
-      </p>
+      <EmptyState
+        icon={<Receipt className="h-6 w-6" />}
+        title="No transactions yet"
+        description="Invoices, receipts and payments for this account will show up here."
+      />
     );
   }
 

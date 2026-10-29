@@ -18,12 +18,14 @@ import { PageSearchActions, PageSearchCard } from "@/components/PageSearchSectio
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/PageHeader";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
+import TablePagination from "@/components/TablePagination";
 import ItemDetailSkeleton from "@/components/skeletons/ItemDetailSkeleton";
 import ItemDialog from "@/components/dialogs/ItemDialog";
 import { ItemsTable } from "@/components/items/ItemsTable";
 import { ItemDetailView } from "@/components/items/ItemDetailView";
 import { useItems, useCategories } from "@/hooks/use-items";
 import { useAppliedFilters } from "@/hooks/use-applied-filters";
+import { usePagination } from "@/hooks/use-pagination";
 import type { Item } from "@/types/item";
 import { Switch } from "@/components/ui/switch";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -51,26 +53,38 @@ export default function ItemsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | undefined>();
   const formSectionRef = useRef<HTMLDivElement | null>(null);
+  const { page, setPage, resetPage } = usePagination();
+  const pageSize = 20;
 
   const {
     data: itemsData,
     isPending: itemsPending,
     error: itemsError,
+    refetch: refetchItems,
+    isRefetching: itemsRefetching,
   } = useItems({
     search: searchApplied.search || undefined,
     categoryId: searchApplied.categoryId,
-    limit: 100,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
     includeInactive: searchApplied.includeInactive,
   });
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
   const filteredItems = itemsData?.items ?? [];
+  const totalItemsCount = itemsData?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItemsCount / pageSize));
+  const itemFiltersActive =
+    !!searchApplied.search || searchApplied.categoryId != null || !searchApplied.includeInactive;
   const isEditing = !!selectedItem;
 
   useEffect(() => {
     if (formOpen) {
-      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }, [formOpen]);
 
@@ -188,26 +202,44 @@ export default function ItemsPage() {
           </div>
         </div>
         <PageSearchActions
-          onSearch={applySearch}
-          onClear={resetSearch}
-          clearDisabled={
-            !searchApplied.search &&
-            searchApplied.categoryId == null &&
-            searchApplied.includeInactive
-          }
+          onSearch={() => {
+            applySearch();
+            resetPage();
+          }}
+          onClear={() => {
+            resetSearch();
+            resetPage();
+          }}
+          clearDisabled={!itemFiltersActive}
         />
       </PageSearchCard>
 
-      <ErrorBanner error={itemsError} fallbackMessage="Failed to load items" />
+      <ErrorBanner
+        error={itemsError}
+        fallbackMessage="Failed to load items"
+        onRetry={() => void refetchItems()}
+        retrying={itemsRefetching}
+      />
 
       {itemsPending ? (
         <TableSkeleton rows={4} />
       ) : filteredItems.length === 0 ? (
         <EmptyState
           icon={<Package className="h-5 w-5" />}
-          title="No items found"
+          title={itemFiltersActive ? "No matching items" : "No items found"}
           action={
-            canCreateItem && !formOpen ? (
+            itemFiltersActive ? (
+              <button
+                type="button"
+                onClick={() => {
+                  resetSearch();
+                  resetPage();
+                }}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            ) : canCreateItem && !formOpen ? (
               <Button size="sm" onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Item
@@ -216,13 +248,24 @@ export default function ItemsPage() {
           }
         />
       ) : (
-        <ItemsTable
-          items={filteredItems}
-          onEdit={openEdit}
-          {...(canStockLedger
-            ? { onViewLedger: (id: number) => router.push(`/items/${id}#stock-ledger`) }
-            : {})}
-        />
+        <>
+          <ItemsTable
+            items={filteredItems}
+            onEdit={openEdit}
+            {...(canStockLedger
+              ? {
+                  onViewLedger: (id: number) => router.push(`/items/${id}#stock-ledger`),
+                }
+              : {})}
+          />
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            total={totalItemsCount}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </div>
   );

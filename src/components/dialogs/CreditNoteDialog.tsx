@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -21,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
 import { useCreateCreditNote, useCreditNotes } from "@/hooks/use-credit-notes";
 import { useInvoices, useInvoice } from "@/hooks/use-invoices";
 import type { CreditNoteSummary } from "@/types/credit-note";
@@ -114,6 +114,7 @@ export default function CreditNoteDialog({
     handleSubmit,
     reset,
     setValue,
+    setError,
     watch,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<FormData>({
@@ -188,7 +189,9 @@ export default function CreditNoteDialog({
       setValue("amount", capped, { shouldDirty: false });
       lastPrefilledInvoiceId.current = watchedInvoiceId;
     } else if (invoiceDetail.invoiceType === "SALE_INVOICE") {
-      setValue("amount", maxNewAmount > 0 ? maxNewAmount.toFixed(2) : "", { shouldDirty: false });
+      setValue("amount", maxNewAmount > 0 ? maxNewAmount.toFixed(2) : "", {
+        shouldDirty: false,
+      });
       lastPrefilledInvoiceId.current = watchedInvoiceId;
     }
   }, [open, watchedInvoiceId, invoiceDetail, setValue, maxNewAmount, creditNotesListPending]);
@@ -196,7 +199,9 @@ export default function CreditNoteDialog({
   const onSubmit = async (data: FormData) => {
     const amt = parseFloat(data.amount) || 0;
     if (selectedInvoice && amt > maxNewAmount + 0.01) {
-      showErrorToast(`Maximum amount is ${formatCurrency(String(maxNewAmount))}.`);
+      setError("amount", {
+        message: `Maximum amount is ${formatCurrency(String(maxNewAmount))}`,
+      });
       return;
     }
 
@@ -221,7 +226,7 @@ export default function CreditNoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" preventClose={isSubmitting || mutation.isPending}>
         <DialogHeader>
           <DialogTitle>{isLocked ? "Credit note" : "New credit note"}</DialogTitle>
         </DialogHeader>
@@ -333,22 +338,27 @@ export default function CreditNoteDialog({
           ) : null}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting || mutation.isPending}
+            >
               Cancel
             </Button>
-            <Button
+            <LoadingButton
               type="submit"
+              loading={mutation.isPending}
+              loadingLabel="Creating..."
               disabled={
                 isSubmitting ||
-                mutation.isPending ||
                 watch("invoiceId") <= 0 ||
                 (!isLocked && invoices.length === 0) ||
                 (isLocked && (!invoiceDetail || invoiceDetail.id !== lockedInvoiceId))
               }
             >
-              {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create credit note
-            </Button>
+            </LoadingButton>
           </DialogFooter>
         </form>
       </DialogContent>

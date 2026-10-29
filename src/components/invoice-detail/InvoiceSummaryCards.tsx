@@ -37,7 +37,7 @@ export function InvoiceSummaryCards({
   const partyHeading = invoice.partyType === "SUPPLIER" ? "Supplier" : "Bill to";
 
   return (
-    <Card className="mb-6 overflow-hidden">
+    <Card className="mb-5 overflow-hidden rounded-xl border-border/70 shadow-none">
       <CardContent className="p-0">
         <div
           className={cn(

@@ -9,7 +9,7 @@ export function LandingPromoBar() {
           New
         </span>
         <span className="text-sm font-medium text-foreground">
-          GST-ready billing, report CSVs, Tax / HTML export &amp; audit trails in one workspace.
+          GST invoices, reports and audit logs in one place.
         </span>
       </div>
     </div>

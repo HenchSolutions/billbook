@@ -82,7 +82,7 @@ export default function PurchaseRegisterPage() {
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const limit = DEFAULT_REPORT_LIMIT;
 
-  const { data, isPending, error } = useInvoiceRegister(
+  const { data, isPending, error, refetch, isRefetching } = useInvoiceRegister(
     validStartDate,
     validEndDate,
     limit,
@@ -172,7 +172,12 @@ export default function PurchaseRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportPurchaseRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportPurchaseRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterSearchCard>
         <ReportRegisterSearchLayout

@@ -18,10 +18,10 @@ export default function SettingsPage() {
             >
               <Building2 className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2
                 id="org-settings-heading"
-                className="flex items-center gap-2 text-lg font-semibold tracking-tight"
+                className="flex flex-wrap items-center gap-2 text-lg font-semibold tracking-tight"
               >
                 Organization
                 <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
@@ -32,7 +32,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="rounded-lg border border-border/60 bg-card shadow-sm ring-1 ring-black/5">
-            <div className="p-6 sm:p-8">
+            <div className="p-4 sm:p-8">
               <DocumentNumberingCard embedded />
             </div>
           </div>

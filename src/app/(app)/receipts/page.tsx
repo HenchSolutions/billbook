@@ -18,7 +18,10 @@ export default function ReceiptsPage() {
   const [newReceiptOpen, setNewReceiptOpen] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const { data, isPending, error } = useReceipts({ page, pageSize });
+  const { data, isPending, error, refetch, isRefetching } = useReceipts({
+    page,
+    pageSize,
+  });
 
   useEffect(() => {
     if (searchParams.get("openNewReceipt") === "1") {
@@ -45,7 +48,12 @@ export default function ReceiptsPage() {
 
       <NewReceiptDialog open={newReceiptOpen} onOpenChange={setNewReceiptOpen} />
 
-      <ErrorBanner error={error} fallbackMessage="Failed to load receipts" />
+      <ErrorBanner
+        error={error}
+        fallbackMessage="Failed to load receipts"
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       {isPending ? (
         <TableSkeleton rows={8} />

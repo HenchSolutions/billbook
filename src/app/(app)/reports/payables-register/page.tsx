@@ -56,7 +56,7 @@ export default function PayablesRegisterPage() {
   const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
 
-  const { data, isPending, error } = usePayablesRegister(limit);
+  const { data, isPending, error, refetch, isRefetching } = usePayablesRegister(limit);
   const exportQuery = useMemo(() => ({ limit }), [limit]);
 
   const rows = useMemo(() => {
@@ -109,7 +109,12 @@ export default function PayablesRegisterPage() {
         backLabel="Back to reports"
       />
 
-      <ErrorBanner error={error} fallbackMessage={reportPayablesRegister.loadError} />
+      <ErrorBanner
+        error={error}
+        fallbackMessage={reportPayablesRegister.loadError}
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       <ReportRegisterSearchCard>
         <ReportRegisterSearchLayout

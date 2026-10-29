@@ -41,7 +41,10 @@ export default function OutboundPaymentsPage() {
     apply: applySearch,
     reset: resetSearch,
     patchDraft,
-  } = useAppliedFilters<{ category: OutboundPaymentCategory | "ALL"; partyIdStr: string }>({
+  } = useAppliedFilters<{
+    category: OutboundPaymentCategory | "ALL";
+    partyIdStr: string;
+  }>({
     category: "ALL",
     partyIdStr: "all",
   });
@@ -49,14 +52,17 @@ export default function OutboundPaymentsPage() {
   const appliedPartyId =
     searchApplied.partyIdStr === "all" ? undefined : parseInt(searchApplied.partyIdStr, 10);
 
-  const { data, isPending, error } = useOutboundPayments({
+  const { data, isPending, error, refetch, isRefetching } = useOutboundPayments({
     page,
     pageSize,
     category: searchApplied.category,
     partyId: Number.isFinite(appliedPartyId) ? appliedPartyId : undefined,
   });
 
-  const { data: partiesData } = useParties({ includeInactive: true, limit: 200 });
+  const { data: partiesData } = useParties({
+    includeInactive: true,
+    limit: 200,
+  });
   const parties = useMemo(
     () => (partiesData?.parties ?? []).filter((p) => p.isActive),
     [partiesData?.parties],
@@ -102,7 +108,12 @@ export default function OutboundPaymentsPage() {
         }
       />
 
-      <ErrorBanner error={error} fallbackMessage="Failed to load payments" />
+      <ErrorBanner
+        error={error}
+        fallbackMessage="Failed to load payments"
+        onRetry={() => void refetch()}
+        retrying={isRefetching}
+      />
 
       {!isPending && payments.length > 0 && (
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -214,11 +225,21 @@ export default function OutboundPaymentsPage() {
       ) : payments.length === 0 ? (
         <EmptyState
           icon={<ArrowDownLeft className="h-8 w-8" />}
-          title="No payments yet"
+          title={filtersActive ? "No matching payments" : "No payments yet"}
           action={
-            <Button asChild>
-              <Link href="/payments/outbound/new">Record payment</Link>
-            </Button>
+            filtersActive ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            ) : (
+              <Button asChild>
+                <Link href="/payments/outbound/new">Record payment</Link>
+              </Button>
+            )
           }
         />
       ) : (

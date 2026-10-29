@@ -19,20 +19,21 @@ export function paiseToMoney(pa: number): number {
   return pa / 100;
 }
 
-/** Same base as bill summary (taxable + tax − invoice discount), in paise. */
+/** Same base as bill summary (net taxable after the invoice discount + GST on it), in paise. */
 export function computeBasePaiseFromAddedLines(
   lineDrafts: InvoiceLineDraft[],
   discountAmountStr: string,
   discountPercentStr: string,
 ): number {
   const lineBreakup = lineDrafts.map((l) => getLineAmounts(l));
-  const taxableTotal = lineBreakup.reduce((s, x) => s + x.taxable, 0);
-  const invoiceDiscount = discountAmountStr.trim()
-    ? Math.max(0, toNum(discountAmountStr))
-    : (taxableTotal * Math.max(0, toNum(discountPercentStr))) / 100;
-  const taxTotal = lineBreakup.reduce((s, x) => s + x.tax, 0);
-  const baseTotal = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
-  return moneyToPaise(baseTotal);
+  const linesTaxable = lineBreakup.reduce((s, x) => s + x.taxable, 0);
+  const linesTax = lineBreakup.reduce((s, x) => s + x.tax, 0);
+  const rawDiscount =
+    (linesTaxable * Math.min(100, Math.max(0, toNum(discountPercentStr)))) / 100 +
+    Math.max(0, toNum(discountAmountStr));
+  const taxableTotal = linesTaxable - Math.min(linesTaxable, rawDiscount);
+  const taxTotal = linesTaxable > 0 ? (linesTax * taxableTotal) / linesTaxable : 0;
+  return moneyToPaise(Math.max(0, taxableTotal + taxTotal));
 }
 
 /**

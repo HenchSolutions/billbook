@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getInvoiceBillSummary, getInvoiceTypeCreateCopy } from "@/lib/invoice/invoice";
 import { formatInvoicePartyAddressLines } from "@/lib/party/party-address-display";
 import { cn, formatCurrency, formatDate, formatSignedCurrency, formatTime } from "@/lib/core/utils";
@@ -10,6 +9,7 @@ import type { InvoiceDetail } from "@/types/invoice";
 import { useInvoice } from "@/hooks/use-invoices";
 import { useBusinessBankAccounts } from "@/hooks/use-bank-accounts";
 import { maskBankAccountNumber } from "@/lib/business/bank-account-validation";
+import { InvoiceDetailSection } from "./InvoiceDetailSection";
 
 interface InvoiceDetailsCardsProps {
   invoice: InvoiceDetail;
@@ -32,6 +32,10 @@ function DetailRow({
       <div className="min-w-0 text-right font-medium text-foreground">{children}</div>
     </div>
   );
+}
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return <p className="mb-1.5 text-xs font-medium text-muted-foreground">{children}</p>;
 }
 
 export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
@@ -66,176 +70,128 @@ export function InvoiceDetailsCards({ invoice }: InvoiceDetailsCardsProps) {
       : null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
-      <Card className="flex h-full flex-col overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground">
-            Notes &amp; details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col space-y-4 text-sm">
-          {isReturnWithSource ? (
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Linked document
-              </p>
-              <div className="rounded-md border bg-muted/15 px-3 py-2.5">
-                <Link
-                  href={`/invoices/${sourceId}`}
-                  className="text-sm font-medium text-primary hover:underline"
-                  title="Original invoice"
-                >
-                  {sourceInvoiceNumber
-                    ? sourceInvoiceNumber
-                    : sourceInvoicePending
-                      ? "Loading…"
-                      : "Original invoice"}
-                </Link>
-              </div>
-            </div>
-          ) : null}
+    <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
+      <InvoiceDetailSection title="Notes & details" bodyClassName="flex flex-col gap-4 text-sm">
+        {isReturnWithSource ? (
+          <div>
+            <FieldLabel>Linked document</FieldLabel>
+            <Link
+              href={`/invoices/${sourceId}`}
+              className="text-sm font-medium text-primary hover:underline"
+              title="Original invoice"
+            >
+              {sourceInvoiceNumber
+                ? sourceInvoiceNumber
+                : sourceInvoicePending
+                  ? "Loading…"
+                  : "Original invoice"}
+            </Link>
+          </div>
+        ) : null}
 
-          {invoice.invoiceType === "PURCHASE_INVOICE" &&
-          invoice.sellingPriceMarginPercent != null &&
-          String(invoice.sellingPriceMarginPercent).trim() !== "" ? (
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Purchase pricing
+        {invoice.invoiceType === "PURCHASE_INVOICE" &&
+        invoice.sellingPriceMarginPercent != null &&
+        String(invoice.sellingPriceMarginPercent).trim() !== "" ? (
+          <div>
+            <FieldLabel>Purchase pricing</FieldLabel>
+            <DetailRow label="Selling margin (effective)">
+              <span className="tabular-nums">
+                {String(invoice.sellingPriceMarginPercent).trim()}%
+              </span>
+            </DetailRow>
+          </div>
+        ) : null}
+
+        {invoice.invoiceType === "SALE_INVOICE" ? (
+          <div>
+            <FieldLabel>Bank on printed invoice</FieldLabel>
+            {invoice.businessBankAccountId == null ? (
+              <p className="text-sm text-muted-foreground">
+                No bank account linked on this invoice
               </p>
-              <div className="rounded-md border bg-muted/15 px-3 py-2.5">
-                <DetailRow label="Selling margin (effective)">
-                  <span className="tabular-nums">
-                    {String(invoice.sellingPriceMarginPercent).trim()}%
+            ) : linkedBankAccount ? (
+              <div className="space-y-2">
+                <DetailRow label="Bank">
+                  <span className="truncate">
+                    {linkedBankAccount.label?.trim()
+                      ? `${linkedBankAccount.label.trim()} · ${linkedBankAccount.bankName}`
+                      : linkedBankAccount.bankName}
                   </span>
                 </DetailRow>
-              </div>
-            </div>
-          ) : null}
-
-          {invoice.invoiceType === "SALE_INVOICE" ? (
-            <div className="space-y-2 border-t border-border/60 pt-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Bank on printed invoice
-              </p>
-              <div className="rounded-md border bg-muted/15 px-3 py-2.5 text-sm">
-                {invoice.businessBankAccountId == null ? (
-                  <span className="text-muted-foreground">
-                    No bank account linked on this invoice
+                <DetailRow label="Account no.">
+                  <span className="font-mono text-sm">
+                    {maskBankAccountNumber(linkedBankAccount.bankAccountNumber)}
                   </span>
-                ) : linkedBankAccount ? (
-                  <div className="space-y-2">
-                    <DetailRow label="Bank">
-                      <span className="truncate">
-                        {linkedBankAccount.label?.trim()
-                          ? `${linkedBankAccount.label.trim()} · ${linkedBankAccount.bankName}`
-                          : linkedBankAccount.bankName}
-                      </span>
-                    </DetailRow>
-                    <DetailRow label="Account no.">
-                      <span className="font-mono text-sm">
-                        {maskBankAccountNumber(linkedBankAccount.bankAccountNumber)}
-                      </span>
-                    </DetailRow>
-                    <DetailRow label="IFSC">
-                      <span className="font-mono text-sm">{linkedBankAccount.ifscCode}</span>
-                    </DetailRow>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">
-                    Selected account ID {invoice.businessBankAccountId}
-                  </span>
-                )}
+                </DetailRow>
+                <DetailRow label="IFSC">
+                  <span className="font-mono text-sm">{linkedBankAccount.ifscCode}</span>
+                </DetailRow>
               </div>
-            </div>
-          ) : null}
-
-          {invoice.notes ? (
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Notes
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Selected account ID {invoice.businessBankAccountId}
               </p>
-              <div className="rounded-md border border-dashed bg-muted/10 px-3 py-2.5 text-sm leading-relaxed text-muted-foreground">
-                {invoice.notes}
-              </div>
-            </div>
-          ) : null}
+            )}
+          </div>
+        ) : null}
 
-          {partyAddressText ? (
-            <div className={cn("space-y-2", invoice.notes ? "border-t pt-4" : "")}>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {addressLabel}
-              </p>
-              <div className="whitespace-pre-line rounded-md border bg-muted/15 px-3 py-2.5 text-sm leading-relaxed text-foreground">
-                {partyAddressText}
-              </div>
-            </div>
-          ) : null}
+        {invoice.notes ? (
+          <div>
+            <FieldLabel>Notes</FieldLabel>
+            <p className="text-sm leading-relaxed text-foreground">{invoice.notes}</p>
+          </div>
+        ) : null}
 
-          <div
-            className={cn("space-y-2", invoice.notes || partyAddressText ? "border-t pt-4" : "")}
-          >
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Record
+        {partyAddressText ? (
+          <div>
+            <FieldLabel>{addressLabel}</FieldLabel>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+              {partyAddressText}
             </p>
-            <div className="space-y-2 rounded-md border bg-muted/15 p-3">
-              <DetailRow label="Created">
-                <span className="text-xs tabular-nums sm:text-sm">
-                  {formatDate(invoice.createdAt)} · {formatTime(invoice.createdAt)}
-                </span>
-              </DetailRow>
-              <DetailRow label="Updated">
-                <span className="text-xs tabular-nums sm:text-sm">
-                  {formatDate(invoice.updatedAt)} · {formatTime(invoice.updatedAt)}
-                </span>
-              </DetailRow>
-            </div>
           </div>
-        </CardContent>
-      </Card>
+        ) : null}
 
-      <Card className="flex h-full flex-col overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground">{summaryTitle}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col space-y-2 text-sm">
-          <div className="flex flex-1 flex-col space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">Gross amount</span>
-              <span className="tabular-nums">{formatCurrency(bill.grossAmount)}</span>
-            </div>
-            {showLineDiscount && (
-              <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                <span>Item discount</span>
-                <span className="tabular-nums">−{formatCurrency(bill.lineDiscountTotal)}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2">
-              <span className="font-medium text-foreground">Taxable amount</span>
-              <span className="font-medium tabular-nums">{formatCurrency(bill.taxableTotal)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">{taxLabel}</span>
-              <span className="shrink-0 tabular-nums">{formatCurrency(bill.taxTotal)}</span>
-            </div>
-            {showInvoiceDiscount && (
-              <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                <span>Invoice discount</span>
-                <span className="tabular-nums">−{formatCurrency(bill.invoiceDiscount)}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2 text-muted-foreground">
-              <span>Subtotal (before round-off)</span>
-              <span className="tabular-nums">{formatCurrency(bill.subtotalBeforeRoundOff)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2 rounded-md border bg-muted/20 px-2 py-1.5">
-              <span className="text-muted-foreground">Round off / discount</span>
-              <span className="font-medium tabular-nums text-foreground">
-                {formatSignedCurrency(bill.roundOff)}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="space-y-2 border-t border-border/60 pt-4">
+          <DetailRow label="Created">
+            <span className="text-xs tabular-nums sm:text-sm">
+              {formatDate(invoice.createdAt)} · {formatTime(invoice.createdAt)}
+            </span>
+          </DetailRow>
+          <DetailRow label="Updated">
+            <span className="text-xs tabular-nums sm:text-sm">
+              {formatDate(invoice.updatedAt)} · {formatTime(invoice.updatedAt)}
+            </span>
+          </DetailRow>
+        </div>
+      </InvoiceDetailSection>
+
+      <InvoiceDetailSection title={summaryTitle} bodyClassName="flex flex-col gap-2.5 text-sm">
+        <DetailRow label="Gross amount">
+          <span className="tabular-nums">{formatCurrency(bill.grossAmount)}</span>
+        </DetailRow>
+        {showLineDiscount ? (
+          <DetailRow label="Item discount" className="text-muted-foreground">
+            <span className="tabular-nums">−{formatCurrency(bill.lineDiscountTotal)}</span>
+          </DetailRow>
+        ) : null}
+        {showInvoiceDiscount ? (
+          <DetailRow label="Invoice discount" className="text-muted-foreground">
+            <span className="tabular-nums">−{formatCurrency(bill.invoiceDiscount)}</span>
+          </DetailRow>
+        ) : null}
+        <DetailRow label="Taxable amount" className="border-t border-border/60 pt-2.5">
+          <span className="tabular-nums">{formatCurrency(bill.taxableTotal)}</span>
+        </DetailRow>
+        <DetailRow label={taxLabel}>
+          <span className="tabular-nums">{formatCurrency(bill.taxTotal)}</span>
+        </DetailRow>
+        <DetailRow label="Subtotal (before round-off)">
+          <span className="tabular-nums">{formatCurrency(bill.subtotalBeforeRoundOff)}</span>
+        </DetailRow>
+        <DetailRow label="Round off / discount" className="border-t border-border/60 pt-2.5">
+          <span className="tabular-nums">{formatSignedCurrency(bill.roundOff)}</span>
+        </DetailRow>
+      </InvoiceDetailSection>
     </div>
   );
 }

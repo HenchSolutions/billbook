@@ -34,21 +34,21 @@ const KPI_ITEMS = [
 
 const MONTHLY_ROWS = [
   {
-    month: "Jan 2026",
+    month: "Jan",
     taxable: "₹6,42,000",
     tax: "₹1,15,560",
     cgstSgst: "₹92,400",
     igst: "₹23,160",
   },
   {
-    month: "Feb 2026",
+    month: "Feb",
     taxable: "₹7,18,500",
     tax: "₹1,29,330",
     cgstSgst: "₹1,03,464",
     igst: "₹25,866",
   },
   {
-    month: "Mar 2026",
+    month: "Mar",
     taxable: "₹8,05,200",
     tax: "₹1,45,236",
     cgstSgst: "₹1,16,189",
@@ -81,7 +81,7 @@ export function ComplianceTab() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-lg border bg-background px-3 py-1.5 text-xs text-muted-foreground">
-              1 Jan 2026 – 31 Mar 2026
+              Last quarter
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
               <Download className="h-3.5 w-3.5" />

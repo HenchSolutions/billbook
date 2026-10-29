@@ -55,7 +55,7 @@ export function StockOverviewCards({
       </Card>
 
       <Card
-        className={`rounded-lg border ${lowStockCount > 0 ? "border-amber-500/50 bg-amber-500/5" : "bg-background/70"}`}
+        className={`rounded-lg border ${lowStockCount > 0 ? "border-status-pending/50 bg-status-pending/5" : "bg-background/70"}`}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -83,7 +83,7 @@ export function StockOverviewCards({
               )}
             </div>
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${lowStockCount > 0 ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground"}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${lowStockCount > 0 ? "bg-status-pending/20 text-status-pending" : "bg-muted text-muted-foreground"}`}
             >
               <AlertTriangle className="h-5 w-5" />
             </div>

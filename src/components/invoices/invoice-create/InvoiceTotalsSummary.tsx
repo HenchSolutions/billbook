@@ -65,7 +65,7 @@ export function InvoiceTotalsSummary({
     grandTotal,
   } = summary;
 
-  const subtotalBeforeRoundOff = Math.max(0, taxableTotal + taxTotal - invoiceDiscount);
+  const subtotalBeforeRoundOff = Math.max(0, taxableTotal + taxTotal);
   const showLineDiscount = lineDiscountTotal > 0.000_5;
   const showInvoiceDiscount = invoiceDiscount > 0.000_5;
   const showRoundOffLine = Math.abs(roundOff) > 0.000_5;
@@ -112,6 +112,12 @@ export function InvoiceTotalsSummary({
                       <span className="tabular-nums">−{formatCurrency(lineDiscountTotal)}</span>
                     </div>
                   )}
+                  {showInvoiceDiscount && (
+                    <div className="flex items-center justify-between gap-2 text-muted-foreground">
+                      <span>Invoice discount</span>
+                      <span className="tabular-nums">−{formatCurrency(invoiceDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2">
                     <span className="font-medium text-foreground">Taxable amount</span>
                     <span className="font-medium tabular-nums">{formatCurrency(taxableTotal)}</span>
@@ -120,12 +126,6 @@ export function InvoiceTotalsSummary({
                     <span className="text-muted-foreground">{taxLabel}</span>
                     <span className="shrink-0 tabular-nums">{formatCurrency(taxTotal)}</span>
                   </div>
-                  {showInvoiceDiscount && (
-                    <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                      <span>Invoice discount</span>
-                      <span className="tabular-nums">−{formatCurrency(invoiceDiscount)}</span>
-                    </div>
-                  )}
                   <div className="flex items-center justify-between gap-2 border-t border-dashed pt-2 text-muted-foreground">
                     <span>Subtotal (before round-off)</span>
                     <span className="tabular-nums">{formatCurrency(subtotalBeforeRoundOff)}</span>

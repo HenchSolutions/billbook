@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ErrorBanner from "@/components/ErrorBanner";
 import PageHeader from "@/components/PageHeader";
 import SearchInput from "@/components/SearchInput";
 import { useDebounce } from "@/hooks/use-debounce";
+import { usePagination } from "@/hooks/use-pagination";
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
+import TablePagination from "@/components/TablePagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { StockOverviewCards } from "@/components/items/StockOverviewCards";
@@ -50,11 +52,19 @@ export default function Stock() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
+  const { page, setPage, resetPage } = usePagination();
+  const entriesPageSize = 20;
+
+  useEffect(() => {
+    resetPage();
+  }, [debouncedSearch, resetPage]);
 
   const {
     data: itemsData,
     isPending: itemsPending,
     error: itemsError,
+    refetch: refetchItems,
+    isRefetching: itemsRefetching,
   } = useItems({
     limit: 500,
     includeInactive: true,
@@ -63,6 +73,8 @@ export default function Stock() {
     data: stockData,
     isPending: stockPending,
     error: stockError,
+    refetch: refetchStock,
+    isRefetching: stockRefetching,
   } = useStockList({
     limit: 200,
     search: debouncedSearch || undefined,
@@ -73,7 +85,15 @@ export default function Stock() {
     data: stockEntriesData,
     isPending: entriesPending,
     error: entriesError,
-  } = useStockEntries({ limit: 200, search: debouncedSearch || undefined });
+    refetch: refetchEntries,
+    isRefetching: entriesRefetching,
+  } = useStockEntries({
+    limit: entriesPageSize,
+    offset: (page - 1) * entriesPageSize,
+    search: debouncedSearch || undefined,
+  });
+  const totalStockEntries = stockEntriesData?.total ?? 0;
+  const totalEntriesPages = Math.max(1, Math.ceil(totalStockEntries / entriesPageSize));
   const createStockEntry = useCreateStockEntry();
   const updateStockEntry = useUpdateStockEntry();
 
@@ -271,7 +291,12 @@ export default function Stock() {
             )}
           </div>
 
-          <ErrorBanner error={stockError} fallbackMessage="Failed to load stock" />
+          <ErrorBanner
+            error={stockError}
+            fallbackMessage="Failed to load stock"
+            onRetry={() => void refetchStock()}
+            retrying={stockRefetching}
+          />
           {/* Keep search and toolbar mounted so focus is not lost when list refetches */}
           <>
             {canSeeAlerts && unreadAlerts.length > 0 && (
@@ -294,18 +319,32 @@ export default function Stock() {
                   className="min-w-[180px]"
                 />
               </div>
-              <ErrorBanner error={entriesError} fallbackMessage="Failed to load stock entries" />
+              <ErrorBanner
+                error={entriesError}
+                fallbackMessage="Failed to load stock entries"
+                onRetry={() => void refetchEntries()}
+                retrying={entriesRefetching}
+              />
               {entriesPending ? (
                 <TableSkeleton rows={5} />
               ) : (
-                <StockEntriesTable
-                  entries={stockEntries}
-                  items={items}
-                  lowStockItemIds={lowStockItemIds}
-                  onAdjust={canAdjustStock ? openAdjustStock : undefined}
-                  onEditEntry={canManageStock ? openEditStockEntry : undefined}
-                  showStockLedger={canStockLedger}
-                />
+                <>
+                  <StockEntriesTable
+                    entries={stockEntries}
+                    items={items}
+                    lowStockItemIds={lowStockItemIds}
+                    onAdjust={canAdjustStock ? openAdjustStock : undefined}
+                    onEditEntry={canManageStock ? openEditStockEntry : undefined}
+                    showStockLedger={canStockLedger}
+                  />
+                  <TablePagination
+                    page={page}
+                    pageSize={entriesPageSize}
+                    total={totalStockEntries}
+                    totalPages={totalEntriesPages}
+                    onPageChange={setPage}
+                  />
+                </>
               )}
             </div>
           </>
@@ -324,7 +363,12 @@ export default function Stock() {
             Enter item details, then click &quot;Add row&quot; to save that stock entry and open a
             fresh row. Added entries are shown in the session grid below.
           </p>
-          <ErrorBanner error={itemsError} fallbackMessage="Failed to load items" />
+          <ErrorBanner
+            error={itemsError}
+            fallbackMessage="Failed to load items"
+            onRetry={() => void refetchItems()}
+            retrying={itemsRefetching}
+          />
           {itemsPending ? (
             <TableSkeleton rows={3} />
           ) : (

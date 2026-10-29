@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
+import EmptyState from "@/components/EmptyState";
 import {
   Dialog,
   DialogContent,
@@ -470,17 +471,15 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
     }
     if (!users || users.length === 0) {
       return (
-        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-6 py-12 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Users className="h-7 w-7" aria-hidden />
-          </div>
-          <h4 className="mt-4 text-base font-semibold tracking-tight">No team members yet</h4>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            {canInvite
+        <EmptyState
+          icon={<Users className="h-6 w-6" />}
+          title="No team members yet"
+          description={
+            canInvite
               ? "Use the form above to invite someone. They’ll sign in with your organization code and the role group you pick."
-              : "When your owner invites staff, they will appear here."}
-          </p>
-        </div>
+              : "When your owner invites staff, they will appear here."
+          }
+        />
       );
     }
 
@@ -544,7 +543,10 @@ export function BusinessUsersCard({ embedded = false }: BusinessUsersCardProps) 
                     onDeactivate={setDeactivateTarget}
                     onReactivate={(member) => {
                       setReactivateTarget(member);
-                      reactivateForm.reset({ password: "", confirmPassword: "" });
+                      reactivateForm.reset({
+                        password: "",
+                        confirmPassword: "",
+                      });
                     }}
                     roleGroups={roleGroups}
                     canManage={canManage}

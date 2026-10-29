@@ -33,8 +33,8 @@ export function ReceiptsTable({
     <Card>
       <CardContent className="p-0">
         <DataTableRoot density="default" className="overflow-x-auto border-0 shadow-none">
-          <table className="data-table">
-            <thead className="data-table-head-sticky">
+          <table className="data-table min-w-[280px]">
+            <thead className="data-table-head-sticky hidden sm:table-header-group">
               <tr>
                 <th className="data-table-th px-4">Receipt</th>
                 <th className="data-table-th px-4">Party</th>
@@ -52,9 +52,75 @@ export function ReceiptsTable({
                 const openingTag = receiptOpeningSettlementNum(r);
                 const canAllocate = unalloc > 0.001;
                 const methodBadge = receiptPaymentMethodBadgeProps(r.paymentMethod);
+                const allocateButton = canAllocate ? (
+                  <Button variant="default" size="sm" className="h-8" asChild>
+                    <Link href={`/receipts/${r.id}#allocate`}>Allocate</Link>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-muted-foreground"
+                    disabled
+                    title="Nothing left to allocate"
+                  >
+                    Allocate
+                  </Button>
+                );
                 return (
                   <tr key={r.id} className="data-table-row last:border-0">
-                    <td className="data-table-td px-4">
+                    <td className="block px-4 py-3 sm:hidden" colSpan={8}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/receipts/${r.id}`}
+                              className="financial-id font-medium text-primary hover:underline"
+                            >
+                              {r.receiptNumber}
+                            </Link>
+                            <Badge
+                              variant="outline"
+                              className={methodBadge.className}
+                              title={methodBadge.title}
+                            >
+                              {PAYMENT_METHOD_LABEL[r.paymentMethod] ??
+                                r.paymentMethod.replace(/_/g, " ")}
+                            </Badge>
+                          </div>
+                          <div
+                            className="mt-0.5 truncate text-sm text-muted-foreground"
+                            title={r.partyName ?? undefined}
+                          >
+                            {r.partyName ?? "-"}
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {formatDate(r.receivedAt || r.createdAt)}
+                          </div>
+                          {(openingTag > 0.001 || unalloc > 0.001) && (
+                            <div className="mt-1 flex flex-wrap gap-x-3 text-xs">
+                              {openingTag > 0.001 && (
+                                <span className="text-foreground">
+                                  Opening tag {formatCurrency(String(openingTag))}
+                                </span>
+                              )}
+                              {unalloc > 0.001 && (
+                                <span className="text-status-pending">
+                                  Unallocated {formatCurrency(String(unalloc))}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="font-semibold tabular-nums">
+                            {formatCurrency(r.totalAmount)}
+                          </div>
+                          <div className="mt-1.5">{allocateButton}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="data-table-td hidden px-4 sm:table-cell">
                       <Link
                         href={`/receipts/${r.id}`}
                         className="financial-id font-medium text-primary hover:underline"
@@ -62,13 +128,13 @@ export function ReceiptsTable({
                         {r.receiptNumber}
                       </Link>
                     </td>
-                    <td className="data-table-td max-w-[180px] truncate px-4 text-muted-foreground">
+                    <td className="data-table-td hidden max-w-[180px] truncate px-4 text-muted-foreground sm:table-cell">
                       {r.partyName ?? "-"}
                     </td>
-                    <td className="data-table-td px-4 text-muted-foreground">
+                    <td className="data-table-td hidden px-4 text-muted-foreground sm:table-cell">
                       {formatDate(r.receivedAt || r.createdAt)}
                     </td>
-                    <td className="data-table-td px-4">
+                    <td className="data-table-td hidden px-4 sm:table-cell">
                       <Badge
                         variant="outline"
                         className={methodBadge.className}
@@ -78,10 +144,10 @@ export function ReceiptsTable({
                           r.paymentMethod.replace(/_/g, " ")}
                       </Badge>
                     </td>
-                    <td className="data-table-td data-table-col-numeric px-4 font-medium">
+                    <td className="data-table-td data-table-col-numeric hidden px-4 font-medium sm:table-cell">
                       {formatCurrency(r.totalAmount)}
                     </td>
-                    <td className="data-table-td data-table-col-numeric px-4 text-muted-foreground">
+                    <td className="data-table-td data-table-col-numeric hidden px-4 text-muted-foreground sm:table-cell">
                       {openingTag > 0.001 ? (
                         <span className="font-medium text-foreground">
                           {formatCurrency(String(openingTag))}
@@ -90,31 +156,17 @@ export function ReceiptsTable({
                         "-"
                       )}
                     </td>
-                    <td className="data-table-td data-table-col-numeric px-4">
+                    <td className="data-table-td data-table-col-numeric hidden px-4 sm:table-cell">
                       {unalloc > 0.001 ? (
-                        <span className="font-medium text-amber-700">
+                        <span className="font-medium text-status-pending">
                           {formatCurrency(String(unalloc))}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </td>
-                    <td className="data-table-td px-4 text-center">
-                      {canAllocate ? (
-                        <Button variant="default" size="sm" className="h-8" asChild>
-                          <Link href={`/receipts/${r.id}#allocate`}>Allocate</Link>
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-muted-foreground"
-                          disabled
-                          title="Nothing left to allocate"
-                        >
-                          Allocate
-                        </Button>
-                      )}
+                    <td className="data-table-td hidden px-4 text-center sm:table-cell">
+                      {allocateButton}
                     </td>
                   </tr>
                 );
